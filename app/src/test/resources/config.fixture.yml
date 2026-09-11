@@ -1,0 +1,63 @@
+title: "Homelab"
+subtitle: 'La Plateforme'
+logo: "logo.png"
+icon: "flask"
+
+header: false
+footer: false
+defaults:
+  layout: list
+
+theme: auto
+colors:
+  light:
+    highlight-primary: "#3367d6"
+    background: "#f5f5f5"
+  dark:
+    highlight-primary: "#ff1a1a"
+    background: "#050505"
+
+message:
+    url: https://home.appolon.dev/message
+    mapping:
+      title: 'title'
+      content: 'value'
+    refreshInterval: 10000
+
+links:
+  - name: "TrueNAS"
+    icon: "fas fa-server"
+    url: "https://home.appolon.dev/truenas"
+    target: "_blank"
+  - name: "Portfolio"
+    icon: "fas fa-id-card"
+    url: "https://appolon.dev/"
+
+services:
+  - name: "Photos, Videos and Music"
+    icon: "fas fa-play"
+    items:
+      - name: "Jellyfin"
+        logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/svg/jellyfin.svg"
+        subtitle: "Media Server"
+        tag: "media"
+        keywords: "jellyfin media movies tv shows"
+        url: "https://home.appolon.dev/jellyfin"
+        target: "_blank"
+
+      - name: "Kavita"
+        logo: "assets/icons/kavita.svg"
+        subtitle: "Reading Server"
+        keywords: "kavita reading reader manga books opds"
+        url: "https://home.appolon.dev/kavita"
+
+  - name: "Infrastructure"
+    icon: "fas fa-server"
+    items:
+      - name: "Vaultwarden"
+        logo: "https://raw.githubusercontent.com/walkxcode/dashboard-icons/main/svg/vaultwarden-light.svg"
+        subtitle: "Password Manager"
+        tag: "admin"
+        keywords: "vaultwarden bitwarden password vault"
+        url: "https://home.appolon.dev/vault"
+        target: "_blank"
