@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "dev.appolon.homelab"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "dev.appolon.homelab"
@@ -75,4 +75,9 @@ dependencies {
     implementation(libs.coil.svg)
 
     testImplementation(libs.junit)
+
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

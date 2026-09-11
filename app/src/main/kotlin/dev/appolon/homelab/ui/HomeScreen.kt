@@ -55,7 +55,7 @@ import dev.appolon.homelab.ui.components.ServiceRow
 fun HomeScreen(vm: HomeViewModel = viewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val scrollBehavior = remember { TopAppBarDefaults.enterAlwaysScrollBehavior() }
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -155,7 +155,7 @@ private fun HomeTopBar(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-private fun ServiceList(
+internal fun ServiceList(
     state: HomeUiState,
     contentPadding: PaddingValues,
     onRefresh: () -> Unit,

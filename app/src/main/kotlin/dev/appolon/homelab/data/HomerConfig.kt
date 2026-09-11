@@ -59,7 +59,7 @@ data class MessageMapping(
 
 /** Lenient Homer YAML decoding: unknown keys (colors, theme, layout…) are ignored. */
 object HomerConfigParser {
-    private val yaml = Yaml(configuration = YamlConfiguration(ignoreUnknownKeys = true))
+    private val yaml = Yaml(configuration = YamlConfiguration(strictMode = false))
 
     fun parse(text: String): HomerConfig = yaml.decodeFromString(HomerConfig.serializer(), text)
 }
