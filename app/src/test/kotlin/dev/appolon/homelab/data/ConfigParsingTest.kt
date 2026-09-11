@@ -63,6 +63,30 @@ class ConfigParsingTest {
     }
 
     @Test
+    fun `parses colors section with dashed keys`() {
+        val colors = HomerConfigParser.parse(fixture()).colors!!
+        assertEquals("#3367d6", colors.light.highlightPrimary)
+        assertEquals("#f5f5f5", colors.light.background)
+        assertEquals("#050505", colors.dark.background)
+        assertEquals("#0d0d0d", colors.dark.cardBackground)
+        assertEquals("#ff1a1a", colors.dark.highlightPrimary)
+        assertEquals("#e8e8e8", colors.dark.textTitle)
+        assertEquals("#b0b0b0", colors.dark.textSubtitle)
+    }
+
+    @Test
+    fun `missing colors section yields null`() {
+        val yaml = """
+            services:
+              - items:
+                  - name: "Solo"
+                    url: "https://example.com"
+        """.trimIndent()
+        val config = HomerConfigParser.parse(yaml)
+        assertNull(config.colors)
+    }
+
+    @Test
     fun `minimal config uses defaults`() {
         val yaml = """
             services:

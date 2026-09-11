@@ -10,6 +10,10 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import dev.appolon.homelab.data.HomerThemeColors
+
+/** Which palette drives the app. */
+enum class ThemeSource { HOMER, SYSTEM }
 
 private val DarkScheme = darkColorScheme(
     primary = Color(0xFFFF5A50),
@@ -43,16 +47,23 @@ private val LightScheme = lightColorScheme(
 
 @Composable
 fun HomelabTheme(
+    themeSource: ThemeSource,
+    homerColors: HomerThemeColors?,
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
+        themeSource == ThemeSource.HOMER && homerColors != null ->
+            homerColorScheme(if (darkTheme) homerColors.dark else homerColors.light, darkTheme)
+                ?: fallback(darkTheme)
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> DarkScheme
-        else -> LightScheme
+        else -> fallback(darkTheme)
     }
     MaterialTheme(colorScheme = colorScheme, content = content)
 }
+
+@Composable
+private fun fallback(darkTheme: Boolean) = if (darkTheme) DarkScheme else LightScheme

@@ -20,7 +20,6 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -51,34 +50,46 @@ fun GroupHeader(name: String) {
     Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth()) {
         Text(
             text = name.uppercase(),
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 6.dp),
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp),
         )
     }
 }
 
 @Composable
 fun ServiceRow(item: ServiceItem, onClick: () -> Unit) {
-    ListItem(
-        headlineContent = { Text(item.name) },
-        supportingContent = item.subtitle?.let { subtitle -> { Text(subtitle) } },
-        leadingContent = { ServiceLogo(item) },
-        modifier = if (item.url.isNotBlank()) {
-            Modifier.clickable(onClick = onClick)
-        } else {
-            Modifier
-        },
-    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(
+                if (item.url.isNotBlank()) Modifier.clickable(onClick = onClick) else Modifier,
+            )
+            .padding(start = 16.dp, end = 16.dp, top = 7.dp, bottom = 7.dp),
+    ) {
+        ServiceLogo(item)
+        Spacer(Modifier.width(14.dp))
+        Column(Modifier.weight(1f)) {
+            Text(item.name, style = MaterialTheme.typography.bodyLarge)
+            item.subtitle?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
 }
 
 @Composable
 private fun ServiceLogo(item: ServiceItem) {
     val url = IconUrlResolver.resolve(item.logo)
     val monogram = remember(item.name) { item.name.take(1).uppercase() }
-    val shape = RoundedCornerShape(12.dp)
+    val shape = RoundedCornerShape(10.dp)
     val modifier = Modifier
-        .size(48.dp)
+        .size(40.dp)
         .clip(shape)
         .background(MaterialTheme.colorScheme.surfaceContainerHighest)
 
@@ -115,15 +126,15 @@ private fun Monogram(letter: String, modifier: Modifier = Modifier) {
 @Composable
 fun MessageBanner(info: MessageInfo, onDismiss: () -> Unit) {
     Surface(
-        shape = MaterialTheme.shapes.large,
+        shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 12.dp),
+            .padding(start = 12.dp, end = 12.dp, top = 10.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
+            modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 0.dp),
         ) {
             Icon(
                 imageVector = Icons.Outlined.Info,

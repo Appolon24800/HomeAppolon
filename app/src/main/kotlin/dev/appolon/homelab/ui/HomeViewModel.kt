@@ -7,6 +7,7 @@ import dev.appolon.homelab.data.ConfigRepository
 import dev.appolon.homelab.data.HomeUiState
 import dev.appolon.homelab.data.MessageInfo
 import dev.appolon.homelab.data.MessagePoller
+import dev.appolon.homelab.ui.theme.ThemeSource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,19 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private var inForeground = false
 
     init {
+        viewModelScope.launch {
+            val saved = repo.loadThemeSource()
+            _state.update {
+                it.copy(themeSource = if (saved == "system") ThemeSource.SYSTEM else ThemeSource.HOMER)
+            }
+        }
         load()
+    }
+
+    fun toggleTheme() {
+        val next = if (_state.value.themeSource == ThemeSource.HOMER) ThemeSource.SYSTEM else ThemeSource.HOMER
+        _state.update { it.copy(themeSource = next) }
+        viewModelScope.launch { repo.saveThemeSource(if (next == ThemeSource.SYSTEM) "system" else "homer") }
     }
 
     /** Initial load and pull-to-refresh. `showSpinner` drives the refresh indicator. */

@@ -1,7 +1,8 @@
 package dev.appolon.homelab.ui
 
-import androidx.compose.foundation.layout.Box
+import android.app.Activity
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,10 +15,11 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -30,10 +32,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -49,11 +51,38 @@ import dev.appolon.homelab.ui.components.NoResults
 import dev.appolon.homelab.ui.components.OfflineIndicator
 import dev.appolon.homelab.ui.components.SearchTopBar
 import dev.appolon.homelab.ui.components.ServiceRow
+import dev.appolon.homelab.ui.theme.HomelabTheme
+import dev.appolon.homelab.ui.theme.ThemeSource
+import dev.appolon.homelab.ui.theme.contrastOn
+import dev.appolon.homelab.ui.theme.homerHeaderTextColor
+import dev.appolon.homelab.ui.theme.parseHexColor
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(vm: HomeViewModel = viewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    // Status-bar icon contrast: the Homer top bar is a coloured (red/blue)
+    // header, so light icons are needed regardless of system dark mode.
+    val homerBarActive = state.themeSource == ThemeSource.HOMER && state.config?.colors != null
+    DisposableEffect(homerBarActive) {
+        val window = (context as? Activity)?.window
+        if (window != null) {
+            WindowCompat.getInsetsController(window, window.decorView)
+                .isAppearanceLightStatusBars = !homerBarActive
+        }
+        onDispose {}
+    }
+
+    HomelabTheme(themeSource = state.themeSource, homerColors = state.config?.colors) {
+        HomeScreenBody(state = state, vm = vm, homerBarActive = homerBarActive)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@Composable
+private fun HomeScreenBody(state: HomeUiState, vm: HomeViewModel, homerBarActive: Boolean) {
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
@@ -82,9 +111,11 @@ fun HomeScreen(vm: HomeViewModel = viewModel()) {
             } else {
                 HomeTopBar(
                     state = state,
+                    homerBarActive = homerBarActive,
                     scrollBehavior = scrollBehavior,
                     onSearch = { vm.setSearching(true) },
                     onLink = { Urls.open(context, it) },
+                    onToggleTheme = vm::toggleTheme,
                 )
             }
         },
@@ -108,23 +139,39 @@ fun HomeScreen(vm: HomeViewModel = viewModel()) {
 @Composable
 private fun HomeTopBar(
     state: HomeUiState,
+    homerBarActive: Boolean,
     scrollBehavior: TopAppBarScrollBehavior,
     onSearch: () -> Unit,
     onLink: (String) -> Unit,
+    onToggleTheme: () -> Unit,
 ) {
-    LargeTopAppBar(
+    val homerColors = if (homerBarActive) state.config?.colors else null
+    val barColors: TopAppBarColors = if (homerColors != null) {
+        val active = if (isSystemInDarkTheme()) homerColors.dark else homerColors.light
+        val header = homerHeaderTextColor(active)
+        val primary = parseHexColor(active.highlightPrimary) ?: MaterialTheme.colorScheme.primary
+        TopAppBarDefaults.topAppBarColors(
+            containerColor = primary,
+            titleContentColor = header,
+            navigationIconContentColor = header,
+            actionIconContentColor = header,
+        )
+    } else {
+        TopAppBarDefaults.topAppBarColors()
+    }
+
+    TopAppBar(
         title = {
             Column {
                 Text(
                     text = state.config?.title ?: "Homelab",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleLarge,
                 )
                 state.config?.subtitle?.let {
                     Text(
                         text = it,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = barColors.titleContentColor.copy(alpha = 0.8f),
                     )
                 }
             }
@@ -138,6 +185,18 @@ private fun HomeTopBar(
                 Icon(Icons.Filled.MoreVert, contentDescription = "Links")
             }
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            if (state.themeSource == ThemeSource.HOMER) "Use phone theme"
+                            else "Use Homer theme"
+                        )
+                    },
+                    onClick = {
+                        menuOpen = false
+                        onToggleTheme()
+                    },
+                )
                 state.config?.links.orEmpty().forEach { link ->
                     DropdownMenuItem(
                         text = { Text(link.name) },
@@ -149,6 +208,7 @@ private fun HomeTopBar(
                 }
             }
         },
+        colors = barColors,
         scrollBehavior = scrollBehavior,
     )
 }
@@ -172,7 +232,7 @@ internal fun ServiceList(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 24.dp),
+            contentPadding = PaddingValues(bottom = 12.dp),
         ) {
             if (state.query.isEmpty()) {
                 val info = state.message

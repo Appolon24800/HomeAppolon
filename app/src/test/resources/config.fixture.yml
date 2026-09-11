@@ -12,10 +12,30 @@ theme: auto
 colors:
   light:
     highlight-primary: "#3367d6"
+    highlight-secondary: "#4285f4"
+    highlight-hover: "#5a95f5"
     background: "#f5f5f5"
+    card-background: "#ffffff"
+    text: "#363636"
+    text-header: "#ffffff"
+    text-title: "#303030"
+    text-subtitle: "#424242"
+    card-shadow: "rgba(0, 0, 0, 0.1)"
+    link: "#3273dc"
+    link-hover: "#363636"
   dark:
     highlight-primary: "#ff1a1a"
+    highlight-secondary: "#ff1a1a"
+    highlight-hover: "#ff4d4d"
     background: "#050505"
+    card-background: "#0d0d0d"
+    text: "#d9d9d9"
+    text-header: "#f0f0f0"
+    text-title: "#e8e8e8"
+    text-subtitle: "#b0b0b0"
+    card-shadow: "rgba(0, 0, 0, 0.8)"
+    link: "#e74c3c"
+    link-hover: "#ff9966"
 
 message:
     url: https://home.appolon.dev/message

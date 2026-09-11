@@ -11,6 +11,7 @@ import dev.appolon.homelab.data.HomeUiState
 import dev.appolon.homelab.data.HomerConfigParser
 import dev.appolon.homelab.ui.ServiceList
 import dev.appolon.homelab.ui.theme.HomelabTheme
+import dev.appolon.homelab.ui.theme.ThemeSource
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,7 +65,7 @@ class SearchUiTest {
         var query by mutableStateOf("m")
 
         composeRule.setContent {
-            HomelabTheme {
+            HomelabTheme(themeSource = ThemeSource.HOMER, homerColors = config.colors) {
                 ServiceList(
                     state = HomeUiState(config = config, query = query),
                     contentPadding = PaddingValues(),

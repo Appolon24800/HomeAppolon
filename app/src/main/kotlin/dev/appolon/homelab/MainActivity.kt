@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dev.appolon.homelab.ui.HomeScreen
-import dev.appolon.homelab.ui.theme.HomelabTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -15,9 +14,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            HomelabTheme {
-                HomeScreen()
-            }
+            HomeScreen()
         }
     }
 }

@@ -30,6 +30,15 @@ class ConfigRepository(
     private val client: OkHttpClient = Network.client,
 ) {
     private val cacheKey = stringPreferencesKey("config_yaml")
+    private val themeKey = stringPreferencesKey("theme_source")
+
+    /** Persisted theme choice: "homer" (YAML colours) or "system" (Material You). */
+    suspend fun loadThemeSource(): String? =
+        context.dataStore.data.first()[themeKey]
+
+    suspend fun saveThemeSource(value: String) {
+        context.dataStore.edit { prefs -> prefs[themeKey] = value }
+    }
 
     /** Last successfully fetched YAML, parsed; null when nothing is cached. */
     suspend fun loadCached(): HomerConfig? = withContext(Dispatchers.IO) {
