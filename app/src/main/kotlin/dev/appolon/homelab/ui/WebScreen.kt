@@ -1,11 +1,14 @@
 package dev.appolon.homelab.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.view.WindowManager
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
@@ -18,7 +21,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -39,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,11 +55,8 @@ import dev.appolon.homelab.data.WebTarget
 
 /**
  * A WebView that refuses to be a text editor until the user actually touches
- * it. Pages like Jellyfin auto-focus a login field on load; without this the
- * IME flashes open, the page lays itself out for the IME-sized viewport, and
- * then never recomputes when the keyboard closes — leaving the site rendered
- * in the top half of the screen. With the touch gate, the keyboard only ever
- * appears for real user taps.
+ * it, so a page's programmatic input.focus() on load cannot pop the IME
+ * (which resizes the view and can desync the renderer's layout viewport).
  */
 private class TouchGatedWebView(context: Context) : WebView(context) {
     private var userTouched = false
@@ -68,6 +68,19 @@ private class TouchGatedWebView(context: Context) : WebView(context) {
 
     override fun onCheckIsTextEditor(): Boolean = userTouched && super.onCheckIsTextEditor()
 }
+
+/**
+ * vh vs innerHeight: when they disagree the renderer's layout viewport has
+ * collapsed (percentage/vh/absolute layouts then render as a thin slice at
+ * the top of the view).
+ */
+private const val VIEWPORT_PROBE =
+    "(function(){var d=document.createElement('div');" +
+        "d.style.cssText='position:absolute;height:100vh;visibility:hidden';" +
+        "document.body.appendChild(d);var h=d.getBoundingClientRect().height;d.remove();" +
+        "return h+'|'+window.innerHeight;})()"
+
+private val mainHandler = Handler(Looper.getMainLooper())
 
 /**
  * Full-screen in-app browser for a service page. System back walks the page
@@ -83,7 +96,17 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
     var failed by remember { mutableStateOf(false) }
     var reloadTick by remember { mutableStateOf(0) }
 
-    val webView = remember {
+    // The emulator's WebView has a renderer bug where the layout viewport
+    // collapses to zero when resizes race a page load (vh/percent layouts
+    // then break — visible as the site rendering in a top slice). Detected
+    // via VIEWPORT_PROBE after the load settles; healed by swapping in a
+    // fresh WebView instance once. Capped at one attempt: stability beats a
+    // perfect page, and the overflow menu has "Open in browser" as the
+    // escape hatch.
+    var webViewKey by remember { mutableIntStateOf(0) }
+    var healAttempts by remember { mutableIntStateOf(0) }
+
+    val webView = remember(webViewKey) {
         TouchGatedWebView(context).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
@@ -104,13 +127,40 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
                         "$chrome Mobile Safari/537.36"
             }
             webViewClient = object : WebViewClient() {
-                override fun onPageStarted(view: WebView, url: String, favicon: android.graphics.Bitmap?) {
+                override fun onPageStarted(
+                    view: WebView,
+                    url: String,
+                    favicon: android.graphics.Bitmap?,
+                ) {
                     failed = false
                 }
 
                 override fun onPageFinished(view: WebView, url: String) {
                     canGoBack = view.canGoBack()
                     pageTitle = view.title
+                    if (healAttempts >= 1) return
+                    var settles = 0
+                    fun probe() {
+                        runCatching {
+                            if (progress < 100 && settles < 5) {
+                                settles++
+                                mainHandler.postDelayed({ runCatching { probe() } }, 1_200)
+                                return@runCatching
+                            }
+                            view.evaluateJavascript(VIEWPORT_PROBE) { result ->
+                                runCatching {
+                                    val parts = result?.trim('"')?.split("|") ?: emptyList()
+                                    val vh = parts.getOrNull(0)?.toFloatOrNull() ?: 0f
+                                    val ih = parts.getOrNull(1)?.toFloatOrNull() ?: 0f
+                                    if (ih <= 0f || vh >= ih * 0.5f) return@runCatching
+                                    if (healAttempts >= 1) return@runCatching
+                                    healAttempts++
+                                    webViewKey++
+                                }
+                            }
+                        }
+                    }
+                    mainHandler.postDelayed({ runCatching { probe() } }, 1_200)
                 }
 
                 override fun onReceivedError(
@@ -139,7 +189,11 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
         }
     }
 
-    DisposableEffect(target.url) {
+    DisposableEffect(webView) {
+        progress = 100
+        pageTitle = null
+        canGoBack = false
+        failed = false
         // Load only once the view has real dimensions: loading into an
         // unmeasured WebView makes overview mode compute its scale against a
         // fallback size, leaving the page permanently zoomed out.
@@ -154,15 +208,15 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
         val listener = View.OnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
             if (v === webView) loadIfReady()
         }
-        loadIfReady() // view may already be laid out (target change)
+        loadIfReady() // view may already be laid out
         webView.addOnLayoutChangeListener(listener)
 
         val window = (context as? android.app.Activity)?.window
         window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         onDispose {
             webView.removeOnLayoutChangeListener(listener)
+            mainHandler.post { runCatching { webView.destroy() } }
             window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            webView.destroy()
         }
     }
 
@@ -247,15 +301,27 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
                 }
             }
         } else {
+            // A plain container we swap WebView instances into manually:
+            // recomposition-driven re-creation races Compose's view teardown
+            // ("child already has a parent"), this is synchronous and safe.
             AndroidView(
-                factory = { webView },
+                factory = { FrameLayout(context) },
+                update = { container ->
+                    val current = webView
+                    if (container.getChildAt(0) !== current) {
+                        container.removeAllViews()
+                        container.addView(
+                            current,
+                            FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                            ),
+                        )
+                    }
+                },
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
-                    // Drive IME handling through Compose: the WebView resizes
-                    // (and, crucially, re-expands) with layout passes instead of
-                    // stale window resizes from adjustResize.
-                    .imePadding(),
+                    .padding(padding),
             )
         }
     }

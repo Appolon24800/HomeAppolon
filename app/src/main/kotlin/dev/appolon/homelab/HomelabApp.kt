@@ -14,6 +14,9 @@ class HomelabApp : Application() {
     override fun onCreate() {
         super.onCreate()
         val isDebuggable = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+        if (isDebuggable) {
+            android.webkit.WebView.setWebContentsDebuggingEnabled(true)
+        }
         imageLoader = ImageLoader.Builder(this)
             .components {
                 add(SvgDecoder.Factory())
