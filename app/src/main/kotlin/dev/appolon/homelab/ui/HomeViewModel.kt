@@ -93,13 +93,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
             val stored = repo.loadPocketIdBaseUrl()
             val url = (stored ?: PocketId.WELL_KNOWN_BASE_URL).trimEnd('/')
             val label = repo.loadPocketIdAccount() ?: ""
-            _state.update {
-                it.copy(
-                    accountUrl = url,
-                    pocketIdSignedIn = PocketId.hasSession(url),
-                    pocketIdAccount = label,
-                )
-            }
+            _state.update { it.copy(accountUrl = url, pocketIdAccount = label) }
+            refreshPocketIdStatus()
         }
     }
 
@@ -107,26 +102,57 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         _state.update { it.copy(accountUrl = null) }
     }
 
-    /** User edited the PocketID base URL; persist and re-check the session. */
-    fun setPocketIdBaseUrl(url: String) {
-        val cleaned = url.trim().trimEnd('/')
-        viewModelScope.launch { repo.savePocketIdBaseUrl(cleaned) }
-        _state.update {
-            it.copy(
-                accountUrl = cleaned,
-                pocketIdSignedIn = PocketId.hasSession(cleaned),
-            )
-        }
-    }
-
-    /** Poll-style refresh; cheap cookie read, safe from the main thread. */
+    /** Cookie check + live identity fetch; safe to call repeatedly. */
     fun refreshPocketIdStatus() {
         val s = _state.value
         val url = s.accountUrl ?: return
-        val signedIn = PocketId.hasSession(url)
-        if (signedIn != s.pocketIdSignedIn) {
-            _state.update { it.copy(pocketIdSignedIn = signedIn) }
+        viewModelScope.launch {
+            val user = PocketId.fetchUser(url)
+            _state.update {
+                it.copy(
+                    pocketIdSignedIn = user != null,
+                    pocketIdUser = user?.displayName ?: user?.username,
+                )
+            }
         }
+    }
+
+    /** One-time access code login: exchanges the code and bridges the session. */
+    fun signInWithOneTimeCode(code: String) {
+        val s = _state.value
+        val url = s.accountUrl ?: return
+        viewModelScope.launch {
+            _state.update { it.copy(pocketIdBusy = true, pocketIdError = null) }
+            runCatching { PocketId.signInWithOneTimeCode(url, code) }
+                .onSuccess { user ->
+                    _state.update {
+                        it.copy(
+                            pocketIdSignedIn = true,
+                            pocketIdUser = user.displayName ?: user.username,
+                            pocketIdAccount = user.displayName ?: user.username,
+                            pocketIdBusy = false,
+                        )
+                    }
+                    repo.savePocketIdAccount(user.displayName ?: user.username)
+                }
+                .onFailure { e ->
+                    _state.update {
+                        it.copy(
+                            pocketIdBusy = false,
+                            pocketIdError = e.message ?: "Sign-in failed",
+                        )
+                    }
+                }
+        }
+    }
+
+    /** User edited the PocketID base URL; persist and re-check the session. */
+    fun setPocketIdBaseUrl(url: String) {
+        val cleaned = url.trim().trimEnd('/')
+        if (cleaned.isBlank()) return
+        viewModelScope.launch { repo.savePocketIdBaseUrl(cleaned) }
+        _state.update { it.copy(accountUrl = cleaned) }
+        refreshPocketIdStatus()
     }
 
     fun openPocketIdSignIn() {
@@ -140,13 +166,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         val url = s.accountUrl ?: PocketId.WELL_KNOWN_BASE_URL
         PocketId.clearSession(url) {
             viewModelScope.launch { repo.savePocketIdAccount(null) }
-            _state.update { it.copy(pocketIdSignedIn = false, pocketIdAccount = "") }
+            _state.update { it.copy(pocketIdSignedIn = false, pocketIdUser = null, pocketIdAccount = "") }
         }
-    }
-
-    fun savePocketIdAccountLabel(name: String) {
-        _state.update { it.copy(pocketIdAccount = name) }
-        viewModelScope.launch { repo.savePocketIdAccount(name.ifBlank { null }) }
     }
 
     fun setSearching(searching: Boolean) {

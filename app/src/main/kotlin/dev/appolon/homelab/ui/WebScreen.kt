@@ -109,6 +109,16 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
             settings.loadWithOverviewMode = true
             settings.builtInZoomControls = true
             settings.displayZoomControls = false
+            // Allow passkey ceremonies for app-associated RP IDs (PocketID).
+            if (androidx.webkit.WebViewFeature.isFeatureSupported(
+                    androidx.webkit.WebViewFeature.WEB_AUTHENTICATION,
+                )
+            ) {
+                androidx.webkit.WebSettingsCompat.setWebAuthenticationSupport(
+                    settings,
+                    androidx.webkit.WebSettingsCompat.WEB_AUTHENTICATION_SUPPORT_FOR_APP,
+                )
+            }
             // Some WebView providers (e.g. this emulator's) default to a desktop
             // UA, which makes UA-sniffing sites serve their desktop layout.
             // Rewrite to a Chrome-on-Android UA only when the default isn't mobile.

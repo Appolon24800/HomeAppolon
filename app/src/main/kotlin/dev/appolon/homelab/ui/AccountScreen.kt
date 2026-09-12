@@ -1,5 +1,6 @@
 package dev.appolon.homelab.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,12 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,17 +39,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dev.appolon.homelab.data.PocketId
 import kotlinx.coroutines.delay
-
 /**
- * Native PocketID account management. Signing in opens the PocketID UI in the
- * in-app WebView; because the WebView cookie jar is app-global, the session
- * then answers every service's OIDC redirect automatically. The status here
- * polls the cookie jar, and a completed sign-in auto-closes the login page.
+ * Native PocketID account management.
+ *
+ * Sign-in uses PocketID's one-time access codes: generate a code in the
+ * PocketID UI (Users > one-time access, or "Alternative sign-in methods" on
+ * the login page), type it here, and the app exchanges it for a session that
+ * is bridged into the WebView cookie jar — every service's OIDC redirect then
+ * authenticates automatically. The status polls the live session, and the
+ * shown name is the real PocketID identity.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,19 +61,17 @@ fun AccountScreen(vm: HomeViewModel) {
 
     // The account screen is an overlay over the dashboard: system back
     // returns there instead of leaving the app.
-    androidx.activity.compose.BackHandler(onBack = vm::closeAccount)
+    BackHandler(onBack = vm::closeAccount)
 
-    // Live status + auto-close of the sign-in page once the session exists.
+    // Live session polling while the screen is visible.
     LaunchedEffect(baseUrl) {
         while (true) {
             vm.refreshPocketIdStatus()
-            val t = state.webTarget
-            if (t?.pocketIdSignIn == true && PocketId.hasSession(baseUrl)) {
-                vm.closeWeb()
-            }
-            delay(1_000)
+            delay(4_000)
         }
     }
+
+    var code by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -130,57 +133,81 @@ fun AccountScreen(vm: HomeViewModel) {
                     Spacer(Modifier.width(12.dp))
                     Column {
                         Text(
-                            if (state.pocketIdSignedIn) "Signed in" else "Not signed in",
+                            when {
+                                state.pocketIdSignedIn && !state.pocketIdUser.isNullOrBlank() ->
+                                    "Signed in as ${state.pocketIdUser}"
+                                state.pocketIdSignedIn -> "Signed in"
+                                else -> "Not signed in"
+                            },
                             style = MaterialTheme.typography.titleMedium,
                         )
-                        if (state.pocketIdSignedIn && state.pocketIdAccount.isNotBlank()) {
-                            Text(
-                                state.pocketIdAccount,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        } else {
-                            Text(
-                                "Services log in automatically through this session",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                        Text(
+                            if (state.pocketIdSignedIn) {
+                                "Services log in automatically through this session"
+                            } else {
+                                "Sign in once — services then log in automatically"
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }
 
             if (state.pocketIdSignedIn) {
-                Button(onClick = vm::openPocketIdSignIn, modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = {
+                    vm.signOutPocketId()
+                    code = ""
+                }, modifier = Modifier.fillMaxWidth()) {
                     Text("Switch account")
                 }
                 OutlinedButton(onClick = vm::signOutPocketId, modifier = Modifier.fillMaxWidth()) {
                     Text("Sign out")
                 }
             } else {
-                Button(onClick = vm::openPocketIdSignIn, modifier = Modifier.fillMaxWidth()) {
-                    Text("Sign in")
+                OutlinedTextField(
+                    value = code,
+                    onValueChange = { code = it },
+                    label = { Text("One-time access code") },
+                    supportingText = {
+                        Text(
+                            "In PocketID: Alternative sign-in methods > one-time code, " +
+                                "or ask an admin (Users > one-time access)"
+                        )
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
+                    singleLine = true,
+                    isError = state.pocketIdError != null,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                state.pocketIdError?.let {
+                    Text(
+                        it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                Button(
+                    onClick = {
+                        vm.signInWithOneTimeCode(code)
+                        code = ""
+                    },
+                    enabled = !state.pocketIdBusy && code.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    if (state.pocketIdBusy) {
+                        CircularProgressIndicator(modifier = Modifier.size(18.dp))
+                    } else {
+                        Text("Sign in")
+                    }
+                }
+                TextButton(
+                    onClick = vm::openPocketIdSignIn,
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                ) {
+                    Text("Use the web login page instead")
                 }
             }
-
-            val browserContext = androidx.compose.ui.platform.LocalContext.current
-            TextButton(
-                onClick = {
-                    Urls.open(browserContext, baseUrl)
-                },
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            ) {
-                Text("Open PocketID in browser instead")
-            }
-
-            OutlinedTextField(
-                value = state.pocketIdAccount,
-                onValueChange = vm::savePocketIdAccountLabel,
-                label = { Text("Account label (optional)") },
-                supportingText = { Text("A name to recognise this account in the app") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
 
             var urlDraft by remember(baseUrl) { mutableStateOf(baseUrl) }
             OutlinedTextField(

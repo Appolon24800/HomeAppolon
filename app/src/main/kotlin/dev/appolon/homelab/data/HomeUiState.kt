@@ -28,5 +28,9 @@ data class HomeUiState(
     /** Non-null while the PocketID account screen is shown. */
     val accountUrl: String? = null,
     val pocketIdSignedIn: Boolean = false,
+    /** Real display name from the PocketID API when a session is live. */
+    val pocketIdUser: String? = null,
     val pocketIdAccount: String = "",
+    val pocketIdBusy: Boolean = false,
+    val pocketIdError: String? = null,
 )

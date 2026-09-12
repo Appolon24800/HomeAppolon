@@ -1,0 +1,11 @@
+[{
+  "relation": ["delegate_permission/common.get_login_creds"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "dev.appolon.homelab",
+    "sha256_cert_fingerprints": [
+      "86:6F:9E:90:72:F7:DB:29:82:49:85:70:02:A3:44:73:67:70:73:C0:BB:2F:9F:FC:5F:D7:35:B4:0A:61:D9:AF",
+      "3C:3A:B8:2A:BB:F2:C0:2A:01:F1:33:56:DA:94:D8:6B:5A:98:0B:1B:DA:5F:5B:15:94:7F:EB:F5:AB:E4:13:B2"
+    ]
+  }
+}]
