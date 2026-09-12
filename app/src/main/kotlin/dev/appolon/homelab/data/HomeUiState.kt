@@ -2,6 +2,12 @@ package dev.appolon.homelab.data
 
 import dev.appolon.homelab.ui.theme.ThemeSource
 
+/** A page opened inside the app's WebView. */
+data class WebTarget(
+    val url: String,
+    val initialTitle: String? = null,
+)
+
 /** Immutable snapshot of everything the home screen renders. */
 data class HomeUiState(
     val config: HomerConfig? = null,
@@ -15,4 +21,6 @@ data class HomeUiState(
     val offline: Boolean = false,
     /** Which palette drives the app; persisted across launches. */
     val themeSource: ThemeSource = ThemeSource.HOMER,
+    /** Non-null while a service page is open in the in-app WebView. */
+    val webTarget: WebTarget? = null,
 )

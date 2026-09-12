@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import dev.appolon.homelab.data.ConfigRepository
 import dev.appolon.homelab.data.HomeUiState
+import dev.appolon.homelab.data.WebTarget
 import dev.appolon.homelab.data.MessageInfo
 import dev.appolon.homelab.data.MessagePoller
 import dev.appolon.homelab.ui.theme.ThemeSource
@@ -73,6 +74,15 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     fun onQueryChange(query: String) {
         _state.update { it.copy(query = query) }
+    }
+
+    /** Opens a page in the in-app WebView overlay. */
+    fun openWeb(url: String, title: String?) {
+        _state.update { it.copy(webTarget = WebTarget(url, title)) }
+    }
+
+    fun closeWeb() {
+        _state.update { it.copy(webTarget = null) }
     }
 
     fun setSearching(searching: Boolean) {

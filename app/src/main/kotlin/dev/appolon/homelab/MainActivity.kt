@@ -13,8 +13,9 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val externalUrl = intent?.dataString
         setContent {
-            HomeScreen()
+            HomeScreen(externalUrl = externalUrl)
         }
     }
 }

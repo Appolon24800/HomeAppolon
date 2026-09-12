@@ -1,6 +1,7 @@
 package dev.appolon.homelab.ui
 
 import android.app.Activity
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,9 +61,17 @@ import dev.appolon.homelab.ui.theme.parseHexColor
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun HomeScreen(vm: HomeViewModel = viewModel()) {
+fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    // Deep links (home.appolon.dev/...) open straight into the WebView.
+    LaunchedEffect(externalUrl) {
+        val root = dev.appolon.homelab.data.Homer.BASE_URL.trimEnd('/')
+        if (!externalUrl.isNullOrBlank() && externalUrl.trimEnd('/') != root) {
+            vm.openWeb(externalUrl, null)
+        }
+    }
 
     // Status-bar icon contrast: the Homer top bar is a coloured (red/blue)
     // header, so light icons are needed regardless of system dark mode.
@@ -76,7 +86,14 @@ fun HomeScreen(vm: HomeViewModel = viewModel()) {
     }
 
     HomelabTheme(themeSource = state.themeSource, homerColors = state.config?.colors) {
-        HomeScreenBody(state = state, vm = vm, homerBarActive = homerBarActive)
+        // The list stays composed underneath so its scroll position survives
+        // round-trips into a service page.
+        Box(Modifier.fillMaxSize()) {
+            HomeScreenBody(state = state, vm = vm, homerBarActive = homerBarActive)
+            state.webTarget?.let { target ->
+                WebScreen(target = target, onClose = vm::closeWeb)
+            }
+        }
     }
 }
 
@@ -114,7 +131,7 @@ private fun HomeScreenBody(state: HomeUiState, vm: HomeViewModel, homerBarActive
                     homerBarActive = homerBarActive,
                     scrollBehavior = scrollBehavior,
                     onSearch = { vm.setSearching(true) },
-                    onLink = { Urls.open(context, it) },
+                    onLink = { url, name -> vm.openWeb(url, name) },
                     onToggleTheme = vm::toggleTheme,
                 )
             }
@@ -128,7 +145,7 @@ private fun HomeScreenBody(state: HomeUiState, vm: HomeViewModel, homerBarActive
                 state = state,
                 contentPadding = padding,
                 onRefresh = { vm.load(showSpinner = true) },
-                onServiceClick = { Urls.open(context, it) },
+                onServiceClick = { url, name -> vm.openWeb(url, name) },
                 onDismissMessage = vm::dismissMessage,
             )
         }
@@ -142,7 +159,7 @@ private fun HomeTopBar(
     homerBarActive: Boolean,
     scrollBehavior: TopAppBarScrollBehavior,
     onSearch: () -> Unit,
-    onLink: (String) -> Unit,
+    onLink: (String, String?) -> Unit,
     onToggleTheme: () -> Unit,
 ) {
     val homerColors = if (homerBarActive) state.config?.colors else null
@@ -202,7 +219,7 @@ private fun HomeTopBar(
                         text = { Text(link.name) },
                         onClick = {
                             menuOpen = false
-                            onLink(link.url)
+                            onLink(link.url, link.name)
                         },
                     )
                 }
@@ -219,7 +236,7 @@ internal fun ServiceList(
     state: HomeUiState,
     contentPadding: PaddingValues,
     onRefresh: () -> Unit,
-    onServiceClick: (String) -> Unit,
+    onServiceClick: (String, String?) -> Unit,
     onDismissMessage: () -> Unit,
 ) {
     val config = state.config ?: return
@@ -247,7 +264,7 @@ internal fun ServiceList(
             sections.forEach { (group, items) ->
                 stickyHeader(key = "header_${group.name}") { GroupHeader(group.name) }
                 items(items, key = { "${group.name}::${it.name}" }) { item ->
-                    ServiceRow(item) { onServiceClick(item.url) }
+                    ServiceRow(item) { onServiceClick(item.url, item.name) }
                 }
             }
             if (sections.isEmpty() && state.query.isNotBlank()) {
