@@ -31,6 +31,16 @@ class ConfigRepository(
 ) {
     private val cacheKey = stringPreferencesKey("config_yaml")
     private val themeKey = stringPreferencesKey("theme_source")
+    private val pocketIdAccountKey = stringPreferencesKey("pocketid_account")
+    private val pocketIdBaseUrlKey = stringPreferencesKey("pocketid_base_url")
+
+    /** User-editable PocketID base URL; null until changed in the UI. */
+    suspend fun loadPocketIdBaseUrl(): String? =
+        context.dataStore.data.first()[pocketIdBaseUrlKey]
+
+    suspend fun savePocketIdBaseUrl(value: String) {
+        context.dataStore.edit { prefs -> prefs[pocketIdBaseUrlKey] = value.trim().trimEnd('/') }
+    }
 
     /** Persisted theme choice: "homer" (YAML colours) or "system" (Material You). */
     suspend fun loadThemeSource(): String? =
@@ -38,6 +48,17 @@ class ConfigRepository(
 
     suspend fun saveThemeSource(value: String) {
         context.dataStore.edit { prefs -> prefs[themeKey] = value }
+    }
+
+    /** User-set label for the currently signed-in PocketID account. */
+    suspend fun loadPocketIdAccount(): String? =
+        context.dataStore.data.first()[pocketIdAccountKey]
+
+    suspend fun savePocketIdAccount(value: String?) {
+        context.dataStore.edit { prefs ->
+            if (value.isNullOrBlank()) prefs.remove(pocketIdAccountKey)
+            else prefs[pocketIdAccountKey] = value
+        }
     }
 
     /** Last successfully fetched YAML, parsed; null when nothing is cached. */

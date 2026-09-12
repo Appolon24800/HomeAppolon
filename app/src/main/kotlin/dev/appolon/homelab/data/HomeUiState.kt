@@ -6,6 +6,8 @@ import dev.appolon.homelab.ui.theme.ThemeSource
 data class WebTarget(
     val url: String,
     val initialTitle: String? = null,
+    /** Auto-close the page once a PocketID session cookie appears. */
+    val pocketIdSignIn: Boolean = false,
 )
 
 /** Immutable snapshot of everything the home screen renders. */
@@ -23,4 +25,8 @@ data class HomeUiState(
     val themeSource: ThemeSource = ThemeSource.HOMER,
     /** Non-null while a service page is open in the in-app WebView. */
     val webTarget: WebTarget? = null,
+    /** Non-null while the PocketID account screen is shown. */
+    val accountUrl: String? = null,
+    val pocketIdSignedIn: Boolean = false,
+    val pocketIdAccount: String = "",
 )

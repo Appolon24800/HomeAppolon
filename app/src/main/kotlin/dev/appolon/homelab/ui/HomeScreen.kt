@@ -45,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.data.HomeUiState
 import dev.appolon.homelab.data.Search
+import dev.appolon.homelab.ui.AccountScreen
 import dev.appolon.homelab.ui.components.ErrorState
 import dev.appolon.homelab.ui.components.GroupHeader
 import dev.appolon.homelab.ui.components.LoadingState
@@ -86,10 +87,13 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
     }
 
     HomelabTheme(themeSource = state.themeSource, homerColors = state.config?.colors) {
-        // The list stays composed underneath so its scroll position survives
-        // round-trips into a service page.
+        // Overlays stack: dashboard < account screen < in-app browser. The
+        // list stays composed underneath so its scroll position survives.
         Box(Modifier.fillMaxSize()) {
             HomeScreenBody(state = state, vm = vm, homerBarActive = homerBarActive)
+            if (state.accountUrl != null) {
+                AccountScreen(vm)
+            }
             state.webTarget?.let { target ->
                 WebScreen(target = target, onClose = vm::closeWeb)
             }
@@ -133,6 +137,7 @@ private fun HomeScreenBody(state: HomeUiState, vm: HomeViewModel, homerBarActive
                     onSearch = { vm.setSearching(true) },
                     onLink = { url, name -> vm.openWeb(url, name) },
                     onToggleTheme = vm::toggleTheme,
+                    onOpenAccount = vm::openAccount,
                 )
             }
         },
@@ -161,6 +166,7 @@ private fun HomeTopBar(
     onSearch: () -> Unit,
     onLink: (String, String?) -> Unit,
     onToggleTheme: () -> Unit,
+    onOpenAccount: () -> Unit,
 ) {
     val homerColors = if (homerBarActive) state.config?.colors else null
     val barColors: TopAppBarColors = if (homerColors != null) {
@@ -202,6 +208,13 @@ private fun HomeTopBar(
                 Icon(Icons.Filled.MoreVert, contentDescription = "Links")
             }
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                DropdownMenuItem(
+                    text = { Text("PocketID account") },
+                    onClick = {
+                        menuOpen = false
+                        onOpenAccount()
+                    },
+                )
                 DropdownMenuItem(
                     text = {
                         Text(

@@ -8,6 +8,7 @@ import dev.appolon.homelab.data.HomeUiState
 import dev.appolon.homelab.data.WebTarget
 import dev.appolon.homelab.data.MessageInfo
 import dev.appolon.homelab.data.MessagePoller
+import dev.appolon.homelab.data.PocketId
 import dev.appolon.homelab.ui.theme.ThemeSource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -83,6 +84,69 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     fun closeWeb() {
         _state.update { it.copy(webTarget = null) }
+    }
+
+    // ---- PocketID account management -------------------------------------
+
+    fun openAccount() {
+        viewModelScope.launch {
+            val stored = repo.loadPocketIdBaseUrl()
+            val url = (stored ?: PocketId.WELL_KNOWN_BASE_URL).trimEnd('/')
+            val label = repo.loadPocketIdAccount() ?: ""
+            _state.update {
+                it.copy(
+                    accountUrl = url,
+                    pocketIdSignedIn = PocketId.hasSession(url),
+                    pocketIdAccount = label,
+                )
+            }
+        }
+    }
+
+    fun closeAccount() {
+        _state.update { it.copy(accountUrl = null) }
+    }
+
+    /** User edited the PocketID base URL; persist and re-check the session. */
+    fun setPocketIdBaseUrl(url: String) {
+        val cleaned = url.trim().trimEnd('/')
+        viewModelScope.launch { repo.savePocketIdBaseUrl(cleaned) }
+        _state.update {
+            it.copy(
+                accountUrl = cleaned,
+                pocketIdSignedIn = PocketId.hasSession(cleaned),
+            )
+        }
+    }
+
+    /** Poll-style refresh; cheap cookie read, safe from the main thread. */
+    fun refreshPocketIdStatus() {
+        val s = _state.value
+        val url = s.accountUrl ?: return
+        val signedIn = PocketId.hasSession(url)
+        if (signedIn != s.pocketIdSignedIn) {
+            _state.update { it.copy(pocketIdSignedIn = signedIn) }
+        }
+    }
+
+    fun openPocketIdSignIn() {
+        val s = _state.value
+        val url = s.accountUrl ?: PocketId.WELL_KNOWN_BASE_URL
+        _state.update { it.copy(webTarget = WebTarget(url, "PocketID", pocketIdSignIn = true)) }
+    }
+
+    fun signOutPocketId() {
+        val s = _state.value
+        val url = s.accountUrl ?: PocketId.WELL_KNOWN_BASE_URL
+        PocketId.clearSession(url) {
+            viewModelScope.launch { repo.savePocketIdAccount(null) }
+            _state.update { it.copy(pocketIdSignedIn = false, pocketIdAccount = "") }
+        }
+    }
+
+    fun savePocketIdAccountLabel(name: String) {
+        _state.update { it.copy(pocketIdAccount = name) }
+        viewModelScope.launch { repo.savePocketIdAccount(name.ifBlank { null }) }
     }
 
     fun setSearching(searching: Boolean) {

@@ -17,26 +17,20 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -232,59 +226,47 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
     // returning to the dashboard.
     BackHandler { if (canGoBack) webView.goBack() else onClose() }
 
-    Scaffold(
-        topBar = {
-            Column {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = pageTitle ?: target.initialTitle ?: target.url,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onClose) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close page")
-                        }
-                    },
-                    actions = {
-                        var menuOpen by remember { mutableStateOf(false) }
-                        IconButton(onClick = { menuOpen = true }) {
-                            Icon(Icons.Filled.MoreVert, contentDescription = "Page menu")
-                        }
-                        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                            DropdownMenuItem(
-                                text = { Text("Reload") },
-                                leadingIcon = { Icon(Icons.Filled.Refresh, contentDescription = null) },
-                                onClick = { menuOpen = false; reloadTick++ },
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Open in browser") },
-                                onClick = {
-                                    menuOpen = false
-                                    Urls.open(context, webView.url ?: target.url)
-                                },
-                            )
-                        }
-                    },
-                )
-                if (progress < 100) {
-                    LinearProgressIndicator(
-                        progress = { progress / 100f },
-                        modifier = Modifier.fillMaxWidth(),
+    // Fullscreen page: no top bar, just a hairline progress indicator while
+    // loading and the error state when the main frame fails.
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+    ) {
+        // A plain container we swap WebView instances into manually:
+        // recomposition-driven re-creation races Compose's view teardown
+        // ("child already has a parent"), this is synchronous and safe.
+        AndroidView(
+            factory = { FrameLayout(context) },
+            update = { container ->
+                val current = webView
+                if (container.getChildAt(0) !== current) {
+                    container.removeAllViews()
+                    container.addView(
+                        current,
+                        FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                        ),
                     )
                 }
-            }
-        },
-        containerColor = MaterialTheme.colorScheme.background,
-    ) { padding ->
+            },
+            modifier = Modifier.fillMaxSize(),
+        )
+        if (progress < 100 && !failed) {
+            LinearProgressIndicator(
+                progress = { progress / 100f },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter),
+            )
+        }
         if (failed) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
+                    .background(MaterialTheme.colorScheme.background),
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
@@ -300,29 +282,6 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
                     ) { Text("Retry") }
                 }
             }
-        } else {
-            // A plain container we swap WebView instances into manually:
-            // recomposition-driven re-creation races Compose's view teardown
-            // ("child already has a parent"), this is synchronous and safe.
-            AndroidView(
-                factory = { FrameLayout(context) },
-                update = { container ->
-                    val current = webView
-                    if (container.getChildAt(0) !== current) {
-                        container.removeAllViews()
-                        container.addView(
-                            current,
-                            FrameLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                            ),
-                        )
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-            )
         }
     }
 }
