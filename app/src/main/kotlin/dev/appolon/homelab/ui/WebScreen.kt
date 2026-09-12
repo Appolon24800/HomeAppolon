@@ -1,8 +1,10 @@
 package dev.appolon.homelab.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.view.MotionEvent
 import android.view.WindowManager
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -47,6 +50,25 @@ import androidx.compose.ui.viewinterop.AndroidView
 import dev.appolon.homelab.data.WebTarget
 
 /**
+ * A WebView that refuses to be a text editor until the user actually touches
+ * it. Pages like Jellyfin auto-focus a login field on load; without this the
+ * IME flashes open, the page lays itself out for the IME-sized viewport, and
+ * then never recomputes when the keyboard closes — leaving the site rendered
+ * in the top half of the screen. With the touch gate, the keyboard only ever
+ * appears for real user taps.
+ */
+private class TouchGatedWebView(context: Context) : WebView(context) {
+    private var userTouched = false
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        userTouched = true
+        return super.onTouchEvent(event)
+    }
+
+    override fun onCheckIsTextEditor(): Boolean = userTouched && super.onCheckIsTextEditor()
+}
+
+/**
  * Full-screen in-app browser for a service page. System back walks the page
  * history first, then leaves; the top-bar arrow leaves immediately.
  */
@@ -61,7 +83,7 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
     var reloadTick by remember { mutableStateOf(0) }
 
     val webView = remember {
-        WebView(context).apply {
+        TouchGatedWebView(context).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.databaseEnabled = true
@@ -211,7 +233,11 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
                 factory = { webView },
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
+                    .padding(padding)
+                    // Drive IME handling through Compose: the WebView resizes
+                    // (and, crucially, re-expands) with layout passes instead of
+                    // stale window resizes from adjustResize.
+                    .imePadding(),
             )
         }
     }
