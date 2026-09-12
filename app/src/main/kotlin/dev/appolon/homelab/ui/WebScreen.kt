@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.view.MotionEvent
+import android.view.View
 import android.view.WindowManager
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
@@ -139,10 +140,27 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
     }
 
     DisposableEffect(target.url) {
-        webView.loadUrl(target.url)
+        // Load only once the view has real dimensions: loading into an
+        // unmeasured WebView makes overview mode compute its scale against a
+        // fallback size, leaving the page permanently zoomed out.
+        var loaded = false
+        fun loadIfReady() {
+            if (!loaded && webView.width > 0 && webView.height > 0) {
+                loaded = true
+                webView.loadUrl(target.url)
+            }
+        }
+
+        val listener = View.OnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+            if (v === webView) loadIfReady()
+        }
+        loadIfReady() // view may already be laid out (target change)
+        webView.addOnLayoutChangeListener(listener)
+
         val window = (context as? android.app.Activity)?.window
         window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         onDispose {
+            webView.removeOnLayoutChangeListener(listener)
             window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             webView.destroy()
         }
