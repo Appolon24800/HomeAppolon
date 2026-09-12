@@ -65,6 +65,21 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.databaseEnabled = true
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
+            settings.builtInZoomControls = true
+            settings.displayZoomControls = false
+            // Some WebView providers (e.g. this emulator's) default to a desktop
+            // UA, which makes UA-sniffing sites serve their desktop layout.
+            // Rewrite to a Chrome-on-Android UA only when the default isn't mobile.
+            if (!settings.userAgentString.orEmpty().contains("Mobile")) {
+                val chrome = Regex("Chrome/[\\d.]+")
+                    .find(settings.userAgentString.orEmpty())?.value ?: "Chrome/141.0.0.0"
+                settings.userAgentString =
+                    "Mozilla/5.0 (Linux; Android ${android.os.Build.VERSION.RELEASE}; " +
+                        "${android.os.Build.MODEL}) AppleWebKit/537.36 (KHTML, like Gecko) " +
+                        "$chrome Mobile Safari/537.36"
+            }
             webViewClient = object : WebViewClient() {
                 override fun onPageStarted(view: WebView, url: String, favicon: android.graphics.Bitmap?) {
                     failed = false
