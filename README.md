@@ -16,6 +16,42 @@ YAML, look & feel is native Android.
 - Edge-to-edge with punch-hole cutout handling, dynamic color, dark mode
 - Offline fallback to the last saved config
 
+## Install with Obtainium
+
+Add this repository URL in Obtainium:
+
+```text
+https://github.com/Appolon24800/HomeAppolon
+```
+
+The [latest release](https://github.com/Appolon24800/HomeAppolon/releases/latest)
+contains a signed APK. Obtainium checks GitHub releases for updates. All releases
+use the same signing key, so updates can install over an existing release build.
+A debug build uses a different key and must be uninstalled first.
+
+## Automatic releases
+
+Every push to `main` runs unit tests, builds a signed release APK, and publishes
+a GitHub release with the APK and its SHA-256 checksum. You can also run
+`Build and release APK` manually from the repository's Actions tab on `main`.
+Failed tests or builds do not publish a release.
+
+Release versions use `1.0.<workflow run number>`. Android's version code uses
+the workflow run number plus one, starting above the original version code of 1.
+Rerunning a workflow keeps its version. Keep this workflow's run counter when
+changing the release setup, or choose a higher version-code baseline.
+
+The workflow needs these repository Actions secrets:
+
+- `ANDROID_KEYSTORE_BASE64`, the base64-encoded contents of `keystore/homelab.jks`.
+- `ANDROID_KEYSTORE_PASSWORD`, the keystore password.
+- `ANDROID_KEY_ALIAS`, the release key's alias.
+- `ANDROID_KEY_PASSWORD`, the release key's password.
+
+Keep a private backup of the signing key. Do not commit it or replace it when
+publishing updates. The repository's `well-known/assetlinks.json` also references
+the existing key for passkey authentication.
+
 ## Build
 
 Requirements: JDK 17+, Android SDK (path in `local.properties` or
@@ -23,10 +59,23 @@ Requirements: JDK 17+, Android SDK (path in `local.properties` or
 
 ```sh
 ./gradlew assembleDebug          # app/build/outputs/apk/debug/app-debug.apk
-./gradlew assembleRelease        # signed with keystore/homelab.jks (store/key
-                                 # password "homelab", not committed)
+./gradlew assembleRelease        # requires the private release signing key
 ./gradlew testDebugUnitTest      # unit tests
 ```
+
+For local release builds, put the signing key at `keystore/homelab.jks` and
+create `keystore/signing.properties` with the following entries:
+
+```properties
+ANDROID_KEYSTORE_PASSWORD=your-keystore-password
+ANDROID_KEY_ALIAS=your-key-alias
+ANDROID_KEY_PASSWORD=your-key-password
+```
+
+The entire `keystore/` directory is ignored by Git. Environment variables with
+these names override local properties. `ANDROID_KEYSTORE_FILE` can override
+the key's path. CI sets `appVersionCode` and `appVersionName` through Gradle
+properties; local builds default to version code 1 and version name `1.0`.
 
 ## Install & run on the emulator
 

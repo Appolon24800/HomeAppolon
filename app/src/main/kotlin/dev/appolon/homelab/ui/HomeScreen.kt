@@ -1,9 +1,17 @@
 package dev.appolon.homelab.ui
 
 import android.app.Activity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Column
+
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,6 +42,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -44,8 +54,11 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.data.HomeUiState
+import dev.appolon.homelab.data.PocketId
+import dev.appolon.homelab.data.WebTarget
 import dev.appolon.homelab.data.Search
-import dev.appolon.homelab.ui.AccountScreen
+import dev.appolon.homelab.ui.components.AccountAvatar
+import dev.appolon.homelab.ui.components.AccountAvatarTinted
 import dev.appolon.homelab.ui.components.ErrorState
 import dev.appolon.homelab.ui.components.GroupHeader
 import dev.appolon.homelab.ui.components.LoadingState
@@ -86,16 +99,68 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
         onDispose {}
     }
 
+    // Overlay transitions: forward in, back out — consistent durations.
+    val enterMillis = 300
+    val exitMillis = 240
+
     HomelabTheme(themeSource = state.themeSource, homerColors = state.config?.colors) {
-        // Overlays stack: dashboard < account screen < in-app browser. The
-        // list stays composed underneath so its scroll position survives.
+        // Overlays stack: dashboard < account sheet < sign-in < in-app browser.
+        // The list stays composed underneath so its scroll position survives.
+        // Full-screen overlays animate: pages slide horizontally (forward in
+        // from the right, back out to the right), the sign-in sheet slides up.
         Box(Modifier.fillMaxSize()) {
             HomeScreenBody(state = state, vm = vm, homerBarActive = homerBarActive)
-            if (state.accountUrl != null) {
-                AccountScreen(vm)
+            if (state.accountSheetOpen) {
+                AccountSheet(state = state, vm = vm)
             }
-            state.webTarget?.let { target ->
-                WebScreen(target = target, onClose = vm::closeWeb)
+
+            var lastLogin by remember { mutableStateOf(false) }
+            androidx.compose.runtime.SideEffect {
+                if (state.loginOpen) lastLogin = true
+            }
+            AnimatedVisibility(
+                visible = state.loginOpen,
+                enter = slideInVertically(tween(enterMillis)) { it } + fadeIn(tween(enterMillis)),
+                exit = slideOutVertically(tween(exitMillis)) { it } + fadeOut(tween(exitMillis)),
+            ) {
+                if (lastLogin) LoginScreen(vm = vm)
+            }
+
+            // Remember the last target so the exit animation still has a page
+            // to slide out once closeWeb() nulls the state.
+            var lastWebTarget by remember { mutableStateOf<WebTarget?>(null) }
+            androidx.compose.runtime.SideEffect {
+                state.webTarget?.let { lastWebTarget = it }
+            }
+            AnimatedVisibility(
+                visible = state.webTarget != null,
+                enter = slideInHorizontally(tween(enterMillis)) { it } + fadeIn(tween(enterMillis)),
+                exit = slideOutHorizontally(tween(exitMillis)) { it } + fadeOut(tween(exitMillis)),
+            ) {
+                lastWebTarget?.let { target ->
+                    // Web fallback login: once a session cookie lands in the
+                    // jar, adopt it as the active account and close the page.
+                    if (target.webLogin) {
+                        LaunchedEffect(target) {
+                            while (true) {
+                                if (PocketId.hasSession(state.accountUrl.ifBlank { PocketId.WELL_KNOWN_BASE_URL })) {
+                                    vm.adoptWebLoginSession()
+                                    kotlinx.coroutines.delay(800)
+                                    vm.closeWeb()
+                                    break
+                                }
+                                kotlinx.coroutines.delay(1_000)
+                            }
+                        }
+                    }
+                    WebScreen(
+                        target = target,
+                        onClose = vm::closeWeb,
+                        authBaseUrl = state.accountUrl.ifBlank {
+                            PocketId.WELL_KNOWN_BASE_URL
+                        },
+                    )
+                }
             }
         }
     }
@@ -137,7 +202,7 @@ private fun HomeScreenBody(state: HomeUiState, vm: HomeViewModel, homerBarActive
                     onSearch = { vm.setSearching(true) },
                     onLink = { url, name -> vm.openWeb(url, name) },
                     onToggleTheme = vm::toggleTheme,
-                    onOpenAccount = vm::openAccount,
+                    onOpenAccount = vm::openAccountSheet,
                 )
             }
         },
@@ -169,52 +234,62 @@ private fun HomeTopBar(
     onOpenAccount: () -> Unit,
 ) {
     val homerColors = if (homerBarActive) state.config?.colors else null
-    val barColors: TopAppBarColors = if (homerColors != null) {
-        val active = if (isSystemInDarkTheme()) homerColors.dark else homerColors.light
-        val header = homerHeaderTextColor(active)
-        val primary = parseHexColor(active.highlightPrimary) ?: MaterialTheme.colorScheme.primary
+    val accountLabel = state.activeAccount?.label
+        ?: state.accountUser?.let { it.displayName ?: it.username }
+    val avatarUrl = state.activeAccount?.let { PocketId.accountAvatarUrl(state.accountUrl, it.id) }
+        ?: state.accountUser?.let { PocketId.accountAvatarUrl(state.accountUrl, it.id) }
+    val darkTheme = isSystemInDarkTheme()
+    // Parse the Homer palette once per theme flip; only plain functions run
+    // inside remember (TopAppBarDefaults.topAppBarColors is composable).
+    val defaultBarColors = TopAppBarDefaults.topAppBarColors()
+    val fallbackPrimary = MaterialTheme.colorScheme.primary
+    val homerBarPair = remember(homerColors, darkTheme) {
+        homerColors?.let {
+            val active = if (darkTheme) it.dark else it.light
+            homerHeaderTextColor(active) to parseHexColor(active.highlightPrimary)
+        }
+    }
+    val barColors: TopAppBarColors = if (homerBarPair != null) {
+        val (header, primary) = homerBarPair
         TopAppBarDefaults.topAppBarColors(
-            containerColor = primary,
+            containerColor = primary ?: fallbackPrimary,
             titleContentColor = header,
             navigationIconContentColor = header,
             actionIconContentColor = header,
         )
     } else {
-        TopAppBarDefaults.topAppBarColors()
+        defaultBarColors
     }
 
     TopAppBar(
         title = {
-            Column {
-                Text(
-                    text = state.config?.title ?: "Homelab",
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                state.config?.subtitle?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = barColors.titleContentColor.copy(alpha = 0.8f),
-                    )
-                }
-            }
+            Text(
+                text = stringResource(dev.appolon.homelab.R.string.app_name),
+                style = MaterialTheme.typography.titleLarge,
+            )
         },
         actions = {
             IconButton(onClick = onSearch) {
                 Icon(Icons.Filled.Search, contentDescription = "Search")
+            }
+            IconButton(onClick = onOpenAccount) {
+                if (homerColors != null) {
+                    val header = homerHeaderTextColor(if (darkTheme) homerColors.dark else homerColors.light)
+                    AccountAvatarTinted(
+                        label = accountLabel,
+                        foreground = header,
+                        avatarUrl = avatarUrl,
+                        size = 32.dp,
+                    )
+                } else {
+                    AccountAvatar(label = accountLabel, avatarUrl = avatarUrl, size = 32.dp)
+                }
             }
             var menuOpen by remember { mutableStateOf(false) }
             IconButton(onClick = { menuOpen = true }) {
                 Icon(Icons.Filled.MoreVert, contentDescription = "Links")
             }
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                DropdownMenuItem(
-                    text = { Text("PocketID account") },
-                    onClick = {
-                        menuOpen = false
-                        onOpenAccount()
-                    },
-                )
                 DropdownMenuItem(
                     text = {
                         Text(
@@ -253,6 +328,9 @@ internal fun ServiceList(
     onDismissMessage: () -> Unit,
 ) {
     val config = state.config ?: return
+    // Filtered outside LazyColumn: its content block has no composable scope,
+    // and this way one recomposition computes sections once.
+    val sections = remember(config, state.query) { Search.filterGroups(config.services, state.query) }
     PullToRefreshBox(
         isRefreshing = state.refreshing,
         onRefresh = onRefresh,
@@ -273,10 +351,16 @@ internal fun ServiceList(
                     item(key = "offline") { OfflineIndicator() }
                 }
             }
-            val sections = Search.filterGroups(config.services, state.query)
             sections.forEach { (group, items) ->
-                stickyHeader(key = "header_${group.name}") { GroupHeader(group.name) }
-                items(items, key = { "${group.name}::${it.name}" }) { item ->
+                stickyHeader(
+                    key = "header_${group.name}",
+                    contentType = "group_header",
+                ) { GroupHeader(group.name) }
+                items(
+                    items,
+                    key = { "${group.name}::${it.name}" },
+                    contentType = { "service" },
+                ) { item ->
                     ServiceRow(item) { onServiceClick(item.url, item.name) }
                 }
             }

@@ -1,8 +1,20 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
 }
+
+val localSigningProperties = Properties().apply {
+    val propertiesFile = rootProject.file("keystore/signing.properties")
+    if (propertiesFile.isFile) {
+        propertiesFile.inputStream().use { load(it) }
+    }
+}
+
+fun signingValue(name: String): String? =
+    providers.environmentVariable(name).orNull ?: localSigningProperties.getProperty(name)
 
 android {
     namespace = "dev.appolon.homelab"
@@ -12,16 +24,16 @@ android {
         applicationId = "dev.appolon.homelab"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = providers.gradleProperty("appVersionCode").orElse("1").get().toInt()
+        versionName = providers.gradleProperty("appVersionName").orElse("1.0").get()
     }
 
     signingConfigs {
         create("release") {
-            storeFile = rootProject.file("keystore/homelab.jks")
-            storePassword = "homelab"
-            keyAlias = "homelab"
-            keyPassword = "homelab"
+            storeFile = rootProject.file(signingValue("ANDROID_KEYSTORE_FILE") ?: "keystore/homelab.jks")
+            storePassword = signingValue("ANDROID_KEYSTORE_PASSWORD")
+            keyAlias = signingValue("ANDROID_KEY_ALIAS")
+            keyPassword = signingValue("ANDROID_KEY_PASSWORD")
         }
     }
 
@@ -65,7 +77,8 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling.preview)
 
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.browser)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
 
     implementation(libs.okhttp)
     implementation(libs.kaml)
@@ -74,6 +87,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.svg)
+    implementation(libs.zxing.core)
 
     testImplementation(libs.junit)
 

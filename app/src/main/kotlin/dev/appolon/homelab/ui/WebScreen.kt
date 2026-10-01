@@ -18,6 +18,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import dev.appolon.homelab.data.WebTarget
@@ -82,7 +82,11 @@ private val mainHandler = Handler(Looper.getMainLooper())
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WebScreen(target: WebTarget, onClose: () -> Unit) {
+fun WebScreen(
+    target: WebTarget,
+    onClose: () -> Unit,
+    authBaseUrl: String = dev.appolon.homelab.data.PocketId.WELL_KNOWN_BASE_URL,
+) {
     val context = LocalContext.current
     var progress by remember { mutableStateOf(100) }
     var pageTitle by remember { mutableStateOf<String?>(null) }
@@ -109,14 +113,28 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
             settings.loadWithOverviewMode = true
             settings.builtInZoomControls = true
             settings.displayZoomControls = false
-            // Allow passkey ceremonies for app-associated RP IDs (PocketID).
+            // Browser-style passkeys: any site (PocketID, Vaultwarden, …) can
+            // run WebAuthn through Credential Manager, without per-domain
+            // Digital Asset Links. FOR_APP would limit ceremonies to domains
+            // linked via assetlinks.json, which broke Vaultwarden.
             if (androidx.webkit.WebViewFeature.isFeatureSupported(
                     androidx.webkit.WebViewFeature.WEB_AUTHENTICATION,
                 )
             ) {
                 androidx.webkit.WebSettingsCompat.setWebAuthenticationSupport(
                     settings,
-                    androidx.webkit.WebSettingsCompat.WEB_AUTHENTICATION_SUPPORT_FOR_APP,
+                    androidx.webkit.WebSettingsCompat.WEB_AUTHENTICATION_SUPPORT_FOR_BROWSER,
+                )
+            }
+            // Follow the system dark theme: without this, pages like Sonarr
+            // render light-only even when the device is in dark mode.
+            if (androidx.webkit.WebViewFeature.isFeatureSupported(
+                    androidx.webkit.WebViewFeature.ALGORITHMIC_DARKENING,
+                )
+            ) {
+                androidx.webkit.WebSettingsCompat.setAlgorithmicDarkeningAllowed(
+                    settings,
+                    true,
                 )
             }
             // Some WebView providers (e.g. this emulator's) default to a desktop
@@ -131,6 +149,26 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
                         "$chrome Mobile Safari/537.36"
             }
             webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(
+                    view: WebView,
+                    request: WebResourceRequest,
+                ): Boolean {
+                    // PocketID's error page buttons link to
+                    // `document.referrer || '/'`; inside a WebView the referrer
+                    // is empty, so "Go back" would navigate to the auth host's
+                    // root and strand the user on the login site. With history
+                    // available, treat that root hit as a back navigation.
+                    val dest = request.url
+                    val authRoot = Uri.parse(authBaseUrl)
+                    val isAuthRoot = dest.host == authRoot.host &&
+                        (dest.path == null || dest.path == "/")
+                    if (isAuthRoot && view.canGoBack()) {
+                        view.goBack()
+                        return true
+                    }
+                    return false
+                }
+
                 override fun onPageStarted(
                     view: WebView,
                     url: String,
@@ -190,6 +228,18 @@ fun WebScreen(target: WebTarget, onClose: () -> Unit) {
             }
             // OIDC-style logins hop domains; they need cross-site cookies.
             CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
+        }
+    }
+
+    // Algorithmic darkening applies at render time. The activity handles uiMode
+    // itself, so a mid-session theme flip would otherwise leave the current
+    // page in the old colour scheme — reload to re-render it.
+    val darkTheme = isSystemInDarkTheme()
+    var renderedDark by remember(webViewKey) { mutableStateOf(darkTheme) }
+    LaunchedEffect(darkTheme) {
+        if (darkTheme != renderedDark) {
+            renderedDark = darkTheme
+            if (webView.url != null) webView.reload()
         }
     }
 

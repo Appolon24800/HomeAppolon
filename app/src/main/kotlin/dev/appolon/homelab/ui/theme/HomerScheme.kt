@@ -52,10 +52,25 @@ fun homerColorScheme(c: HomerColors, dark: Boolean): ColorScheme? {
     }
     val textHeader = parseHexColor(c.textHeader) ?: contrastOn(primary)
 
-    // Elevated-container ramp between the page background and the card colour.
-    val containerLow = lerp(background, card, 0.6f)
-    val containerHigh = lerp(card, textTitle, if (dark) 0.06f else 0.10f)
-    val containerHighest = lerp(card, textTitle, if (dark) 0.12f else 0.18f)
+    // Elevated-container ramp. Homer dark palettes usually ship only the red
+    // highlights, so the naive bg↔card lerp collapses to near-black (#090909)
+    // — indistinguishable from the scrim behind a bottom sheet. Lift dark
+    // containers toward white in fixed steps so elevation always reads.
+    val containerLow = if (dark) {
+        lerp(background, Color.White, 0.055f)
+    } else {
+        lerp(background, card, 0.6f)
+    }
+    val containerHigh = if (dark) {
+        lerp(card, Color.White, 0.10f)
+    } else {
+        lerp(card, textTitle, 0.10f)
+    }
+    val containerHighest = if (dark) {
+        lerp(card, Color.White, 0.16f)
+    } else {
+        lerp(card, textTitle, 0.18f)
+    }
 
     val base = if (dark) darkColorScheme() else lightColorScheme()
     return base.copy(

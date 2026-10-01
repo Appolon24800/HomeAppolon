@@ -12,6 +12,7 @@ object Homer {
 }
 
 @Serializable
+@androidx.compose.runtime.Immutable
 data class HomerConfig(
     val title: String? = null,
     val subtitle: String? = null,
@@ -22,6 +23,7 @@ data class HomerConfig(
 )
 
 @Serializable
+@androidx.compose.runtime.Immutable
 data class ServiceGroup(
     val name: String = "",
     val icon: String? = null,

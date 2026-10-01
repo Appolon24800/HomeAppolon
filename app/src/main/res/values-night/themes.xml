@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark parent so WebView's algorithmic darkening sees the app as
+         dark-themed when the system is in night mode (isLightTheme=false). -->
+    <style name="Theme.Homelab" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+</resources>

@@ -29,7 +29,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,7 +42,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.AsyncImage
 import dev.appolon.homelab.HomelabApp
 import dev.appolon.homelab.data.IconUrlResolver
 import dev.appolon.homelab.data.MessageInfo
@@ -87,24 +90,33 @@ fun ServiceRow(item: ServiceItem, onClick: () -> Unit) {
 private fun ServiceLogo(item: ServiceItem) {
     val url = IconUrlResolver.resolve(item.logo)
     val monogram = remember(item.name) { item.name.take(1).uppercase() }
-    val shape = RoundedCornerShape(10.dp)
+    // No background behind loaded logos: dashboard icons carry their own
+    // shapes and look best floating; only the monogram fallback gets a tile.
     val modifier = Modifier
         .size(40.dp)
-        .clip(shape)
-        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+        .clip(RoundedCornerShape(10.dp))
 
     if (url == null) {
         Monogram(monogram, modifier)
         return
     }
-    SubcomposeAsyncImage(
+    // Plain AsyncImage (no SubcomposeAsyncImage: its per-row subcomposition
+    // janks lazy scrolling). Service logos are transparent SVGs, so the
+    // monogram cannot simply sit underneath — it must leave composition once
+    // the logo arrives, or the letter/tile shines through the logo.
+    var imageState by remember(url) {
+        mutableStateOf<coil3.compose.AsyncImagePainter.State?>(null)
+    }
+    if (imageState !is coil3.compose.AsyncImagePainter.State.Success) {
+        Monogram(monogram, modifier)
+    }
+    AsyncImage(
         model = url,
         contentDescription = item.name,
         imageLoader = HomelabApp.imageLoader,
         contentScale = ContentScale.Fit,
+        onState = { imageState = it },
         modifier = modifier,
-        loading = { Monogram(monogram, Modifier.fillMaxSize()) },
-        error = { Monogram(monogram, Modifier.fillMaxSize()) },
     )
 }
 
@@ -260,4 +272,16 @@ fun LoadingState() {
     ) {
         CircularProgressIndicator()
     }
+}
+
+/** Consistent inline error text used by the account and sign-in screens. */
+@Composable
+fun ErrorText(message: String?, modifier: Modifier = Modifier) {
+    if (message == null) return
+    Text(
+        text = message,
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = modifier,
+    )
 }
