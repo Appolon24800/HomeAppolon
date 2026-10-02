@@ -10,6 +10,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -54,6 +56,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.data.HomeUiState
+import dev.appolon.homelab.data.Favorites
+import dev.appolon.homelab.data.ServiceItem
 import dev.appolon.homelab.data.PocketId
 import dev.appolon.homelab.data.WebTarget
 import dev.appolon.homelab.data.Search
@@ -67,6 +71,7 @@ import dev.appolon.homelab.ui.components.NoResults
 import dev.appolon.homelab.ui.components.OfflineIndicator
 import dev.appolon.homelab.ui.components.SearchTopBar
 import dev.appolon.homelab.ui.components.ServiceRow
+import dev.appolon.homelab.ui.components.homeTopBarInsets
 import dev.appolon.homelab.ui.theme.HomelabTheme
 import dev.appolon.homelab.ui.theme.ThemeSource
 import dev.appolon.homelab.ui.theme.contrastOn
@@ -217,6 +222,7 @@ private fun HomeScreenBody(state: HomeUiState, vm: HomeViewModel, homerBarActive
                 onRefresh = { vm.load(showSpinner = true) },
                 onServiceClick = { url, name -> vm.openWeb(url, name) },
                 onDismissMessage = vm::dismissMessage,
+                onToggleFavorite = vm::toggleFavorite,
             )
         }
     }
@@ -261,61 +267,68 @@ private fun HomeTopBar(
         defaultBarColors
     }
 
-    TopAppBar(
-        title = {
-            Text(
-                text = stringResource(dev.appolon.homelab.R.string.app_name),
-                style = MaterialTheme.typography.titleLarge,
-            )
-        },
-        actions = {
-            IconButton(onClick = onSearch) {
-                Icon(Icons.Filled.Search, contentDescription = "Search")
-            }
-            IconButton(onClick = onOpenAccount) {
-                if (homerColors != null) {
-                    val header = homerHeaderTextColor(if (darkTheme) homerColors.dark else homerColors.light)
-                    AccountAvatarTinted(
-                        label = accountLabel,
-                        foreground = header,
-                        avatarUrl = avatarUrl,
-                        size = 32.dp,
-                    )
-                } else {
-                    AccountAvatar(label = accountLabel, avatarUrl = avatarUrl, size = 32.dp)
-                }
-            }
-            var menuOpen by remember { mutableStateOf(false) }
-            IconButton(onClick = { menuOpen = true }) {
-                Icon(Icons.Filled.MoreVert, contentDescription = "Links")
-            }
-            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            if (state.themeSource == ThemeSource.HOMER) "Use phone theme"
-                            else "Use Homer theme"
-                        )
-                    },
-                    onClick = {
-                        menuOpen = false
-                        onToggleTheme()
-                    },
+    val title = stringResource(dev.appolon.homelab.R.string.app_name)
+    BoxWithConstraints {
+        val insets = homeTopBarInsets(maxWidth, title)
+        TopAppBar(
+            title = {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
-                state.config?.links.orEmpty().forEach { link ->
+            },
+            actions = {
+                IconButton(onClick = onSearch) {
+                    Icon(Icons.Filled.Search, contentDescription = "Search")
+                }
+                IconButton(onClick = onOpenAccount) {
+                    if (homerColors != null) {
+                        val header = homerHeaderTextColor(if (darkTheme) homerColors.dark else homerColors.light)
+                        AccountAvatarTinted(
+                            label = accountLabel,
+                            foreground = header,
+                            avatarUrl = avatarUrl,
+                            size = 32.dp,
+                        )
+                    } else {
+                        AccountAvatar(label = accountLabel, avatarUrl = avatarUrl, size = 32.dp)
+                    }
+                }
+                var menuOpen by remember { mutableStateOf(false) }
+                IconButton(onClick = { menuOpen = true }) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = "Links")
+                }
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
-                        text = { Text(link.name) },
+                        text = {
+                            Text(
+                                if (state.themeSource == ThemeSource.HOMER) "Use phone theme"
+                                else "Use Homer theme"
+                            )
+                        },
                         onClick = {
                             menuOpen = false
-                            onLink(link.url, link.name)
+                            onToggleTheme()
                         },
                     )
+                    state.config?.links.orEmpty().forEach { link ->
+                        DropdownMenuItem(
+                            text = { Text(link.name) },
+                            onClick = {
+                                menuOpen = false
+                                onLink(link.url, link.name)
+                            },
+                        )
+                    }
                 }
-            }
-        },
-        colors = barColors,
-        scrollBehavior = scrollBehavior,
-    )
+            },
+            colors = barColors,
+            scrollBehavior = scrollBehavior,
+            windowInsets = insets,
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -326,11 +339,15 @@ internal fun ServiceList(
     onRefresh: () -> Unit,
     onServiceClick: (String, String?) -> Unit,
     onDismissMessage: () -> Unit,
+    onToggleFavorite: (ServiceItem) -> Unit = {},
 ) {
     val config = state.config ?: return
     // Filtered outside LazyColumn: its content block has no composable scope,
     // and this way one recomposition computes sections once.
     val sections = remember(config, state.query) { Search.filterGroups(config.services, state.query) }
+    val favorites = remember(config, state.favorites, state.query) {
+        Favorites.items(config.services, state.favorites, state.query)
+    }
     PullToRefreshBox(
         isRefreshing = state.refreshing,
         onRefresh = onRefresh,
@@ -351,6 +368,19 @@ internal fun ServiceList(
                     item(key = "offline") { OfflineIndicator() }
                 }
             }
+            if (favorites.isNotEmpty()) {
+                stickyHeader(key = "favorites_header", contentType = "group_header") {
+                    GroupHeader("Favorites")
+                }
+                items(favorites, key = { "favorite::${Favorites.id(it)}" }, contentType = { "service" }) { item ->
+                    ServiceRow(
+                        item = item,
+                        favorite = true,
+                        onToggleFavorite = { onToggleFavorite(item) },
+                        onClick = { onServiceClick(item.url, item.name) },
+                    )
+                }
+            }
             sections.forEach { (group, items) ->
                 stickyHeader(
                     key = "header_${group.name}",
@@ -361,7 +391,12 @@ internal fun ServiceList(
                     key = { "${group.name}::${it.name}" },
                     contentType = { "service" },
                 ) { item ->
-                    ServiceRow(item) { onServiceClick(item.url, item.name) }
+                    ServiceRow(
+                        item = item,
+                        favorite = Favorites.id(item) in state.favorites,
+                        onToggleFavorite = { onToggleFavorite(item) },
+                        onClick = { onServiceClick(item.url, item.name) },
+                    )
                 }
             }
             if (sections.isEmpty() && state.query.isNotBlank()) {

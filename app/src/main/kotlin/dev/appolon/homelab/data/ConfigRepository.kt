@@ -3,6 +3,7 @@ package dev.appolon.homelab.data
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -32,6 +33,17 @@ class ConfigRepository(
     private val cacheKey = stringPreferencesKey("config_yaml")
     private val themeKey = stringPreferencesKey("theme_source")
     private val pocketIdBaseUrlKey = stringPreferencesKey("pocketid_base_url")
+    private val favoritesKey = stringSetPreferencesKey("favorite_services")
+
+    suspend fun loadFavorites(): Set<String> =
+        context.dataStore.data.first()[favoritesKey].orEmpty().toSet()
+
+    suspend fun toggleFavorite(id: String): Set<String> {
+        val saved = context.dataStore.edit { prefs ->
+            prefs[favoritesKey] = Favorites.toggle(prefs[favoritesKey].orEmpty(), id)
+        }
+        return saved[favoritesKey].orEmpty().toSet()
+    }
 
     /** User-editable PocketID base URL; null until changed in the UI. */
     suspend fun loadPocketIdBaseUrl(): String? =

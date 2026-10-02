@@ -11,6 +11,7 @@ YAML, look & feel is native Android.
 - Runtime YAML config: edit Homer's `config.yml`, relaunch the app, done
 - Instant paint from the cached config, refreshed in the background
 - Pull-to-refresh, sticky group headers, search over names/subtitles/keywords
+- Tap a service's star to pin it in Favorites. Pins persist on this device.
 - Info banner polled from the `/message` endpoint while foregrounded
 - Chrome Custom Tabs for opening services (shares browser logins)
 - Edge-to-edge with punch-hole cutout handling, dynamic color, dark mode

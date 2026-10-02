@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -39,8 +40,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.appolon.homelab.HomelabApp
@@ -61,7 +66,12 @@ fun GroupHeader(name: String) {
 }
 
 @Composable
-fun ServiceRow(item: ServiceItem, onClick: () -> Unit) {
+fun ServiceRow(
+    item: ServiceItem,
+    favorite: Boolean = false,
+    onToggleFavorite: (() -> Unit)? = null,
+    onClick: () -> Unit,
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -69,7 +79,7 @@ fun ServiceRow(item: ServiceItem, onClick: () -> Unit) {
             .then(
                 if (item.url.isNotBlank()) Modifier.clickable(onClick = onClick) else Modifier,
             )
-            .padding(start = 16.dp, end = 16.dp, top = 7.dp, bottom = 7.dp),
+            .padding(start = 16.dp, end = 4.dp, top = 7.dp, bottom = 7.dp),
     ) {
         ServiceLogo(item)
         Spacer(Modifier.width(14.dp))
@@ -80,6 +90,20 @@ fun ServiceRow(item: ServiceItem, onClick: () -> Unit) {
                     it,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        if (onToggleFavorite != null && item.url.isNotBlank()) {
+            IconButton(
+                onClick = onToggleFavorite,
+                modifier = Modifier.semantics { selected = favorite },
+            ) {
+                Icon(
+                    painter = if (favorite) rememberVectorPainter(Icons.Filled.Star)
+                        else painterResource(dev.appolon.homelab.R.drawable.ic_star_outline),
+                    contentDescription = if (favorite) "Unpin ${item.name}" else "Pin ${item.name}",
+                    tint = if (favorite) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

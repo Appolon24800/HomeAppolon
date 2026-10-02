@@ -17,6 +17,7 @@ data class HomeUiState(
     val refreshing: Boolean = false,
     val searching: Boolean = false,
     val query: String = "",
+    val favorites: Set<String> = emptySet(),
     val message: MessageInfo? = null,
     val messageDismissed: Boolean = false,
     /** True when the fresh fetch failed but a cached config is being shown. */

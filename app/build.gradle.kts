@@ -24,6 +24,7 @@ android {
         applicationId = "dev.appolon.homelab"
         minSdk = 29
         targetSdk = 36
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         versionCode = providers.gradleProperty("appVersionCode").orElse("1").get().toInt()
         versionName = providers.gradleProperty("appVersionName").orElse("1.0").get()
     }

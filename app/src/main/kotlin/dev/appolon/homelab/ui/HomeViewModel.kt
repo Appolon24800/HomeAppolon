@@ -7,6 +7,8 @@ import dev.appolon.homelab.HomelabApp
 import dev.appolon.homelab.data.AccountState
 import dev.appolon.homelab.data.AccountStore
 import dev.appolon.homelab.data.ConfigRepository
+import dev.appolon.homelab.data.Favorites
+import dev.appolon.homelab.data.ServiceItem
 import dev.appolon.homelab.data.HomeUiState
 import dev.appolon.homelab.data.PocketIdAccount
 import dev.appolon.homelab.data.WebTarget
@@ -21,6 +23,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -33,8 +37,15 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     private var pollJob: Job? = null
     private var inForeground = false
+    private val favoritesMutex = Mutex()
 
     init {
+        viewModelScope.launch {
+            favoritesMutex.withLock {
+                val favorites = repo.loadFavorites()
+                _state.update { it.copy(favorites = favorites) }
+            }
+        }
         viewModelScope.launch {
             val saved = repo.loadThemeSource()
             _state.update {
@@ -160,6 +171,15 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     fun onQueryChange(query: String) {
         _state.update { it.copy(query = query) }
+    }
+
+    fun toggleFavorite(item: ServiceItem) {
+        viewModelScope.launch {
+            favoritesMutex.withLock {
+                val favorites = repo.toggleFavorite(Favorites.id(item))
+                _state.update { it.copy(favorites = favorites) }
+            }
+        }
     }
 
     /** Opens a page in the in-app WebView overlay. */

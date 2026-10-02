@@ -70,7 +70,7 @@ class SearchUiTest {
                     state = HomeUiState(config = config, query = query),
                     contentPadding = PaddingValues(),
                     onRefresh = {},
-                    onServiceClick = {},
+                    onServiceClick = { _, _ -> },
                     onDismissMessage = {},
                 )
             }
