@@ -12,9 +12,14 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
-
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -31,7 +36,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -41,7 +45,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -175,7 +178,6 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
 @Composable
 private fun HomeScreenBody(state: HomeUiState, vm: HomeViewModel, homerBarActive: Boolean) {
     val context = LocalContext.current
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -191,7 +193,6 @@ private fun HomeScreenBody(state: HomeUiState, vm: HomeViewModel, homerBarActive
     }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             if (state.searching) {
                 SearchTopBar(
@@ -203,7 +204,6 @@ private fun HomeScreenBody(state: HomeUiState, vm: HomeViewModel, homerBarActive
                 HomeTopBar(
                     state = state,
                     homerBarActive = homerBarActive,
-                    scrollBehavior = scrollBehavior,
                     onSearch = { vm.setSearching(true) },
                     onLink = { url, name -> vm.openWeb(url, name) },
                     onToggleTheme = vm::toggleTheme,
@@ -221,7 +221,6 @@ private fun HomeScreenBody(state: HomeUiState, vm: HomeViewModel, homerBarActive
                 contentPadding = padding,
                 onRefresh = { vm.load(showSpinner = true) },
                 onServiceClick = { url, name -> vm.openWeb(url, name) },
-                onDismissMessage = vm::dismissMessage,
                 onToggleFavorite = vm::toggleFavorite,
             )
         }
@@ -230,14 +229,14 @@ private fun HomeScreenBody(state: HomeUiState, vm: HomeViewModel, homerBarActive
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeTopBar(
+internal fun HomeTopBar(
     state: HomeUiState,
     homerBarActive: Boolean,
-    scrollBehavior: TopAppBarScrollBehavior,
     onSearch: () -> Unit,
     onLink: (String, String?) -> Unit,
     onToggleTheme: () -> Unit,
     onOpenAccount: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val homerColors = if (homerBarActive) state.config?.colors else null
     val accountLabel = state.activeAccount?.label
@@ -268,7 +267,7 @@ private fun HomeTopBar(
     }
 
     val title = stringResource(dev.appolon.homelab.R.string.app_name)
-    BoxWithConstraints {
+    BoxWithConstraints(modifier) {
         val insets = homeTopBarInsets(maxWidth, title)
         TopAppBar(
             title = {
@@ -325,7 +324,6 @@ private fun HomeTopBar(
                 }
             },
             colors = barColors,
-            scrollBehavior = scrollBehavior,
             windowInsets = insets,
         )
     }
@@ -338,8 +336,8 @@ internal fun ServiceList(
     contentPadding: PaddingValues,
     onRefresh: () -> Unit,
     onServiceClick: (String, String?) -> Unit,
-    onDismissMessage: () -> Unit,
     onToggleFavorite: (ServiceItem) -> Unit = {},
+    topSafeInsets: WindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top),
 ) {
     val config = state.config ?: return
     // Filtered outside LazyColumn: its content block has no composable scope,
@@ -353,20 +351,19 @@ internal fun ServiceList(
         onRefresh = onRefresh,
         modifier = Modifier
             .fillMaxSize()
-            .padding(contentPadding),
+            .padding(contentPadding)
+            .consumeWindowInsets(contentPadding)
+            .windowInsetsPadding(topSafeInsets),
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 12.dp),
         ) {
-            if (state.query.isEmpty()) {
-                val info = state.message
-                if (info != null && !state.messageDismissed) {
-                    item(key = "message") { MessageBanner(info, onDismissMessage) }
-                }
-                if (state.offline) {
-                    item(key = "offline") { OfflineIndicator() }
-                }
+            state.message?.let { info ->
+                item(key = "message") { MessageBanner(info) }
+            }
+            if (state.query.isEmpty() && state.offline) {
+                item(key = "offline") { OfflineIndicator() }
             }
             if (favorites.isNotEmpty()) {
                 stickyHeader(key = "favorites_header", contentType = "group_header") {

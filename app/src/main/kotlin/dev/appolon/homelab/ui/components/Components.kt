@@ -160,7 +160,7 @@ private fun Monogram(letter: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun MessageBanner(info: MessageInfo, onDismiss: () -> Unit) {
+fun MessageBanner(info: MessageInfo) {
     Surface(
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -170,7 +170,7 @@ fun MessageBanner(info: MessageInfo, onDismiss: () -> Unit) {
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 0.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
         ) {
             Icon(
                 imageVector = Icons.Outlined.Info,
@@ -189,9 +189,6 @@ fun MessageBanner(info: MessageInfo, onDismiss: () -> Unit) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-            }
-            IconButton(onClick = onDismiss) {
-                Icon(Icons.Filled.Close, contentDescription = "Dismiss message")
             }
         }
     }

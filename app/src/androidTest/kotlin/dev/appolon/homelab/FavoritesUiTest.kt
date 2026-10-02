@@ -43,7 +43,6 @@ class FavoritesUiTest {
                     contentPadding = PaddingValues(),
                     onRefresh = {},
                     onServiceClick = { _, _ -> opened++ },
-                    onDismissMessage = {},
                     onToggleFavorite = { service ->
                         state = state.copy(favorites = Favorites.toggle(state.favorites, Favorites.id(service)))
                     },

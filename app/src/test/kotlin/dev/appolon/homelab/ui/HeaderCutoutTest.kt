@@ -4,6 +4,17 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class HeaderCutoutTest {
+    @Test fun roundedCornersHaveMinimumHeaderPadding() {
+        assertEquals(12, roundedCornerTopPadding(radius = 0, horizontalPadding = 16, minimum = 12))
+        assertEquals(12, roundedCornerTopPadding(radius = 8, horizontalPadding = 16, minimum = 12))
+        assertEquals(12, roundedCornerTopPadding(radius = 40, horizontalPadding = 16, minimum = 12))
+    }
+
+    @Test fun largerCornersGetPaddingFromCircleGeometry() {
+        assertEquals(17, roundedCornerTopPadding(radius = 56, horizontalPadding = 16, minimum = 12))
+        assertEquals(32, roundedCornerTopPadding(radius = 32, horizontalPadding = 0, minimum = 12))
+    }
+
     private fun padding(
         cutout: HeaderCutout?,
         titleWidth: Int = 145,

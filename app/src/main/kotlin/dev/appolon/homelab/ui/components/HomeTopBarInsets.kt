@@ -1,5 +1,8 @@
 package dev.appolon.homelab.ui.components
 
+import android.os.Build
+import android.view.RoundedCorner
+
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
@@ -20,8 +23,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.ui.HeaderCutout
 import dev.appolon.homelab.ui.headerCutoutTopPadding
+import dev.appolon.homelab.ui.roundedCornerTopPadding
 
-/** Reserve top space only when the cutout would cover header content. */
+/** Keep header content below rounded corners without reserving a full cutout row. */
 @Composable
 internal fun homeTopBarInsets(width: Dp, title: String): WindowInsets {
     val density = LocalDensity.current
@@ -59,7 +63,17 @@ internal fun homeTopBarInsets(width: Dp, title: String): WindowInsets {
     }
     // If platform bounds are not available yet, keep the cutout inset until they arrive.
     val safeTop = if (cutoutTop > 0 && cutouts.isEmpty()) cutoutTop else top
+    val cornerRadius = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val insets = view.rootWindowInsets
+        maxOf(
+            insets?.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT)?.radius ?: 0,
+            insets?.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT)?.radius ?: 0,
+        )
+    } else 0
+    val cornerTop = with(density) {
+        roundedCornerTopPadding(cornerRadius, 16.dp.roundToPx(), minimum = 12.dp.roundToPx())
+    }
     return horizontal
         .union(WindowInsets.statusBars.only(WindowInsetsSides.Top))
-        .union(WindowInsets(top = safeTop))
+        .union(WindowInsets(top = maxOf(safeTop, cornerTop)))
 }

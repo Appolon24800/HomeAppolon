@@ -469,10 +469,6 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         _state.update { it.copy(searching = searching, query = if (searching) it.query else "") }
     }
 
-    fun dismissMessage() {
-        _state.update { it.copy(messageDismissed = true) }
-    }
-
     fun onForeground() {
         inForeground = true
         startPolling()
@@ -492,7 +488,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                 val info = poller.fetch(messageConfig)
                 if (info != null) {
                     _state.update { s ->
-                        if (s.message == info) s else s.copy(message = info, messageDismissed = false)
+                        if (s.message == info) s else s.copy(message = info)
                     }
                 }
                 delay(messageConfig.refreshInterval.toLong())

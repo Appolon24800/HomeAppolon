@@ -71,7 +71,6 @@ class SearchUiTest {
                     contentPadding = PaddingValues(),
                     onRefresh = {},
                     onServiceClick = { _, _ -> },
-                    onDismissMessage = {},
                 )
             }
         }

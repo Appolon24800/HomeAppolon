@@ -1,5 +1,16 @@
 package dev.appolon.homelab.ui
 
+import kotlin.math.ceil
+import kotlin.math.sqrt
+
+/** Height of a quarter-circle screen corner at the content's horizontal inset. */
+internal fun roundedCornerTopPadding(radius: Int, horizontalPadding: Int, minimum: Int): Int {
+    if (radius <= horizontalPadding) return minimum
+    val x = (radius - horizontalPadding).toDouble()
+    val cornerHeight = radius - sqrt(radius.toDouble() * radius - x * x)
+    return maxOf(minimum, ceil(cornerHeight).toInt())
+}
+
 /** Cutout bounds in window pixels. Kept independent of Android for geometry tests. */
 internal data class HeaderCutout(val left: Int, val top: Int, val right: Int, val bottom: Int)
 
