@@ -1,0 +1,29 @@
+{
+  "purpose": "Queue head for auto-launch when a provider frees up. Orchestrator keeps this fresh.",
+  "launch_spec": {
+    "providerInstanceId": "opencode",
+    "model": "openai/gpt-6.1-sol",
+    "options": [
+      {
+        "id": "variant",
+        "value": "medium"
+      }
+    ],
+    "mode": "async",
+    "role": "implementation"
+  },
+  "tasks": [
+    {
+      "title": "W3 sonarr activity screens (sol)",
+      "module": "arr-feature-sonarr",
+      "group": "activity",
+      "task": "REPO: /home/appolon/Projects/HomeAppolon (branch feature/native-arr, already checked out).\nMUST READ FIRST: docs/ARR_ARCHITECTURE.md and your app's section in docs/ARR_FEATURE_MATRIX.md.\nYou are one of several agents working in parallel in the same checkout. NEVER edit files outside your owned set. NEVER run git. NEVER add Gradle dependencies. No TODOs. Do NOT edit build.gradle.kts: your group directory is already wired into the module's source sets with all dependencies present.\nRULES: Repository pattern with EntityStore cache-first (fetchedAt TTL), refresh via Retrofit on DefaultArrClientFactory, writes enqueue offline via ActionQueue with optimistic UI plus queued indicator. Register routes with ArrRouteRegistry; contribute ArrShellContent slots. ViewModels with StateFlow; LceState everywhere. Unit tests with the committed Fake* implementations and an in-memory EntityStore fake (copy the pattern from a sibling group's tests). Accessibility: content descriptions, 48dp targets. Follow the structure of the committed sibling groups closely: same connection/feature/repository/vm/ui file layout, same naming.\nVerify with the module compile and testDebugUnitTest commands for your module. Other agents build concurrently; gradle locks will queue you.\nReport: files, public API, tests pass/fail, open questions. Max 40 lines.\nMODULE OWNED: :arr-feature-sonarr. Owned files: everything under src/activity/ only.\nYOUR AREA: Activity and blocklist from the Sonarr feature matrix.\nCommitted API: SonarrQueueApis history, blocklist, queueAction, command (models HistoryResource, BlocklistResource), FakeSonarrQueue.\nMIRROR: the committed :arr-feature-radarr src/activity group (RadarrHistoryRepository/ActivityPaging/ActivityPresenters pattern) with episode-granular rows (SxxEyy).\nSCREENS: History feed with filters (event type grabbed/imported/failed/deleted/renamed, series, date window) and paged scroll; per-event detail sheet; blocklist list with reasons, remove single, clear all with confirmation; failed-import retry links; live refresh on queue events (injectable Flow)."
+    },
+    {
+      "title": "W3 prowlarr search screens (sol)",
+      "module": "arr-feature-prowlarr",
+      "group": "search",
+      "task": "REPO: /home/appolon/Projects/HomeAppolon (branch feature/native-arr, already checked out).\nMUST READ FIRST: docs/ARR_ARCHITECTURE.md and your app's section in docs/ARR_FEATURE_MATRIX.md.\nYou are one of several agents working in parallel in the same checkout. NEVER edit files outside your owned set. NEVER run git. NEVER add Gradle dependencies. No TODOs. Do NOT edit build.gradle.kts: your group directory is already wired into the module's source sets with all dependencies present.\nRULES: Repository pattern with EntityStore cache-first (fetchedAt TTL), refresh via Retrofit on DefaultArrClientFactory, writes enqueue offline via ActionQueue with optimistic UI plus queued indicator. Register routes with ArrRouteRegistry; contribute ArrShellContent slots. ViewModels with StateFlow; LceState everywhere. Unit tests with the committed Fake* implementations and an in-memory EntityStore fake (copy the pattern from a sibling group's tests). Accessibility: content descriptions, 48dp targets. Follow the structure of the committed sibling groups closely: same connection/feature/repository/vm/ui file layout, same naming.\nVerify with the module compile and testDebugUnitTest commands for your module. Other agents build concurrently; gradle locks will queue you.\nReport: files, public API, tests pass/fail, open questions. Max 40 lines.\nMODULE OWNED: :arr-feature-prowlarr. Owned files: everything under src/search/ only.\nYOUR AREA: Search from the Prowlarr feature matrix.\nCommitted API: ProwlarrSearchApis search, newznab, history, indexerStats, customFilter, command (models ReleaseResource, HistoryResource, IndexerStatsResource), FakeProwlarrSearch; ProwlarrIndexersApis for the indexer list.\nMIRROR: the committed :arr-feature-radarr src/search group's release-row presentation (quality, seeders, age, size, indexer) adapted to Prowlarr.\nSCREENS: Multi-indexer manual search with category picker, indexer multi-select, query; results list with sort (age, size, seeders); grab to a configured download client or copy magnet; search history with stats (queries per indexer, response times, user agents); charts for per-indexer stats by period."
+    }
+  ]
+}
