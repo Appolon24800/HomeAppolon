@@ -422,7 +422,7 @@ class SeriesDetailViewModelTest {
         name = "file.mkv",
         size = 4096,
         seasonNumber = 1,
-        series = buildJsonObject { put("id", 5) },
+        series = SeriesResource(id = 5),
         quality = QualityModel(quality = Quality(id = 1, name = "HDTV-720p")),
     )
 }

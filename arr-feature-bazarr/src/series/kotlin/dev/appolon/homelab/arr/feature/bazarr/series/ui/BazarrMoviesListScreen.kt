@@ -257,9 +257,13 @@ private fun MoviePosterCard(
     onLongClick: () -> Unit,
 ) {
     val openDescription = stringResource(R.string.arr_bazarr_movies_cd_open, movie.title)
+    // Selection mode changes the tile's meaning from open to select.
+    val selectDescription = stringResource(R.string.arr_bazarr_lib_cd_select, movie.title)
     Box(
         modifier = Modifier
-            .semantics { contentDescription = openDescription }
+            .semantics {
+                contentDescription = if (selectMode) selectDescription else openDescription
+            }
             .combinedClickable(onClick = {}, onLongClick = onLongClick),
     ) {
         PosterCard(

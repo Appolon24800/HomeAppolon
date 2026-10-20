@@ -75,6 +75,19 @@ class RadarrMoviesRepositoryTest {
     }
 
     @Test
+    fun `repeated offline commands keep the same action id`() = runTest {
+        commandResult = ArrResult.err(ArrError.Network(IOException("offline")))
+        val first = repository.runCommand(MovieCommand.REFRESH_METADATA, listOf(1))
+        val second = repository.runCommand(MovieCommand.REFRESH_METADATA, listOf(1))
+        val other = repository.runCommand(MovieCommand.REFRESH_METADATA, listOf(2))
+        val firstId = ((first as ArrResult.Ok).value as WriteOutcome.Queued).actionId
+        val secondId = ((second as ArrResult.Ok).value as WriteOutcome.Queued).actionId
+        val otherId = ((other as ArrResult.Ok).value as WriteOutcome.Queued).actionId
+        assertEquals(firstId, secondId)
+        assertTrue(firstId != otherId)
+    }
+
+    @Test
     fun `refresh reconciles rows removed on the server`() = runTest {
         repository.refresh()
         fake.movies.removeAll { it.id == 1 }

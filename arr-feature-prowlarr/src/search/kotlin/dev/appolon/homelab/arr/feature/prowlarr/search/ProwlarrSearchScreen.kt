@@ -20,7 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerCategory
@@ -32,6 +34,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 enum class SearchPage { SEARCH, HISTORY, STATS }
 
@@ -48,12 +51,12 @@ fun ProwlarrSearchScreen(
 ) {
     var grabTarget by remember { mutableStateOf<ReleaseResource?>(null) }
     val sortLabels = mapOf(
-        SearchSort.AGE to stringResource(R.string.prowlarr_search_age_sort),
-        SearchSort.SIZE to stringResource(R.string.prowlarr_search_size_sort),
-        SearchSort.SEEDERS to stringResource(R.string.prowlarr_search_seeders_sort),
+        SearchSort.AGE to stringResource(ArrUiR.string.arr_common_releases_sort_age),
+        SearchSort.SIZE to stringResource(ArrUiR.string.arr_common_size),
+        SearchSort.SEEDERS to stringResource(ArrUiR.string.arr_common_releases_sort_seeders),
     )
     val title = when (page) {
-        SearchPage.SEARCH -> R.string.prowlarr_search_title
+        SearchPage.SEARCH -> ArrUiR.string.arr_common_indexers_mode_search
         SearchPage.HISTORY -> R.string.prowlarr_search_history
         SearchPage.STATS -> R.string.prowlarr_search_stats
     }
@@ -79,7 +82,7 @@ fun ProwlarrSearchScreen(
                             onClick = { onPage(destination) }, enabled = destination != page,
                         ) {
                             Text(stringResource(when (destination) {
-                                SearchPage.SEARCH -> R.string.prowlarr_search_title
+                                SearchPage.SEARCH -> ArrUiR.string.arr_common_indexers_mode_search
                                 SearchPage.HISTORY -> R.string.prowlarr_search_history
                                 SearchPage.STATS -> R.string.prowlarr_search_stats
                             }))
@@ -106,7 +109,7 @@ fun ProwlarrSearchScreen(
                 item {
                     ArrLceBox(
                         state = state.options, onRetry = { vm.loadOptions(true) },
-                        emptyTitle = stringResource(R.string.prowlarr_search_empty),
+                        emptyTitle = stringResource(ArrUiR.string.arr_common_addnew_search_empty_title),
                         emptyMessage = stringResource(R.string.prowlarr_search_empty_message),
                     ) { options -> SearchControls(state, options, vm) }
                 }
@@ -130,7 +133,7 @@ fun ProwlarrSearchScreen(
                     item {
                         ArrLceBox(
                             state = state.results, onRetry = { vm.search(true) },
-                            emptyTitle = stringResource(R.string.prowlarr_search_empty),
+                            emptyTitle = stringResource(ArrUiR.string.arr_common_addnew_search_empty_title),
                             emptyMessage = stringResource(R.string.prowlarr_search_empty_message),
                         ) { }
                     }
@@ -151,7 +154,7 @@ fun ProwlarrSearchScreen(
                 item {
                     ArrLceBox(
                         state.history, onRetry = { vm.loadHistory(force = true) },
-                        emptyTitle = stringResource(R.string.prowlarr_search_empty),
+                        emptyTitle = stringResource(ArrUiR.string.arr_common_addnew_search_empty_title),
                         emptyMessage = stringResource(R.string.prowlarr_search_empty_message),
                     ) { history ->
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -160,9 +163,9 @@ fun ProwlarrSearchScreen(
                                     R.string.prowlarr_search_history_row, event.date.orEmpty(),
                                     event.indexerId, stringResource(if (event.successful) {
                                         R.string.prowlarr_search_success
-                                    } else R.string.prowlarr_search_failure),
+                                    } else ArrUiR.string.arr_common_history_filter_failed),
                                 ))
-                                val unknown = stringResource(R.string.prowlarr_search_unknown)
+                                val unknown = stringResource(ArrUiR.string.arr_common_status_unknown)
                                 Text(stringResource(
                                     R.string.prowlarr_search_history_data,
                                     event.data?.get("query") ?: unknown,
@@ -209,7 +212,7 @@ fun ProwlarrSearchScreen(
                 item {
                     ArrLceBox(
                         state.stats, onRetry = { vm.loadStats(force = true) },
-                        emptyTitle = stringResource(R.string.prowlarr_search_empty),
+                        emptyTitle = stringResource(ArrUiR.string.arr_common_addnew_search_empty_title),
                         emptyMessage = stringResource(R.string.prowlarr_search_empty_message),
                     ) { stats -> StatsCharts(stats) }
                 }
@@ -240,7 +243,7 @@ fun ProwlarrSearchScreen(
             confirmButton = {},
             dismissButton = {
                 TextButton(onClick = { grabTarget = null }) {
-                    Text(stringResource(R.string.prowlarr_search_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -255,7 +258,10 @@ private fun SearchControls(
 ) {
     Column {
         IndexerControls(state, options, vm::toggleIndexer)
-        Text(stringResource(R.string.prowlarr_search_categories))
+        Text(
+            stringResource(R.string.prowlarr_search_categories),
+            modifier = Modifier.semantics { heading() },
+        )
         Row(Modifier.horizontalScroll(rememberScrollState())) {
             flattenCategories(options.categories).forEach { category ->
                 FilterChip(
@@ -275,7 +281,10 @@ private fun IndexerControls(
     options: SearchOptions,
     onToggle: (Int) -> Unit,
 ) {
-    Text(stringResource(R.string.prowlarr_search_indexers))
+    Text(
+        stringResource(R.string.prowlarr_search_indexers),
+        modifier = Modifier.semantics { heading() },
+    )
     Row(Modifier.horizontalScroll(rememberScrollState())) {
         options.indexers.forEach { indexer ->
             FilterChip(
@@ -303,21 +312,21 @@ private fun ReleaseRow(release: ReleaseResource, state: ProwlarrSearchState, onG
         Column(Modifier.fillMaxWidth().padding(12.dp)) {
             Text(release.title.orEmpty(), style = MaterialTheme.typography.titleSmall)
             Text(stringResource(
-                R.string.prowlarr_search_quality,
+                ArrUiR.string.arr_common_import_flow_quality_line,
                 release.qualityLabel() ?: stringResource(R.string.prowlarr_search_quality_unknown),
             ))
             Text(stringResource(
-                R.string.prowlarr_search_metadata,
+                ArrUiR.string.arr_common_calendar_entry_subtitle,
                 if (release.age > 0) {
                     stringResource(R.string.prowlarr_search_age_days, release.age)
                 } else {
                     stringResource(R.string.prowlarr_search_age_hours, release.ageHours)
                 },
                 sizeLabel(release.size),
-                release.indexer ?: stringResource(R.string.prowlarr_search_unknown),
+                release.indexer ?: stringResource(ArrUiR.string.arr_common_status_unknown),
             ))
             release.seeders?.let { seeders ->
-                Text(stringResource(R.string.prowlarr_search_peers, seeders, release.leechers ?: 0))
+                Text(stringResource(ArrUiR.string.arr_common_releases_seeders_leechers, seeders, release.leechers ?: 0))
             }
             val status = when (key) {
                 in state.queued -> R.string.prowlarr_search_queued
@@ -328,7 +337,7 @@ private fun ReleaseRow(release: ReleaseResource, state: ProwlarrSearchState, onG
             status?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.primary) }
             Row {
                 TextButton(onClick = onGrab, enabled = status == null) {
-                    Text(stringResource(R.string.prowlarr_search_grab))
+                    Text(stringResource(ArrUiR.string.arr_common_grab_sheet_action))
                 }
                 TextButton(
                     onClick = { magnet?.let { clipboard.setText(AnnotatedString(it)) } },
@@ -346,7 +355,7 @@ private fun StatsCharts(stats: IndexerStatsResource) {
     val maxResponse = indexers.maxOfOrNull { it.averageResponseTime }?.coerceAtLeast(1) ?: 1
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         indexers.forEach { indexer ->
-            val name = indexer.indexerName ?: stringResource(R.string.prowlarr_search_unknown)
+            val name = indexer.indexerName ?: stringResource(ArrUiR.string.arr_common_status_unknown)
             Text(name, style = MaterialTheme.typography.titleMedium)
             val ratio = if (indexer.numberOfQueries > 0) {
                 indexer.numberOfGrabs * 100.0 / indexer.numberOfQueries
@@ -358,25 +367,42 @@ private fun StatsCharts(stats: IndexerStatsResource) {
             val queryLabel = stringResource(
                 R.string.prowlarr_search_query_chart, name, indexer.numberOfQueries,
             )
+            val queryPercent = stringResource(
+                R.string.arr_prowlarr_cd_percent,
+                (indexer.numberOfQueries.toFloat() / maxQueries * 100).toInt(),
+            )
             Text(queryLabel)
             LinearProgressIndicator(
                 progress = { (indexer.numberOfQueries.toFloat() / maxQueries).coerceIn(0f, 1f) },
-                modifier = Modifier.fillMaxWidth().semantics { contentDescription = queryLabel },
+                modifier = Modifier.fillMaxWidth().semantics {
+                    contentDescription = queryLabel
+                    stateDescription = queryPercent
+                },
             )
             val responseLabel = stringResource(
                 R.string.prowlarr_search_response_chart, name, indexer.averageResponseTime,
+            )
+            val responsePercent = stringResource(
+                R.string.arr_prowlarr_cd_percent,
+                (indexer.averageResponseTime.toFloat() / maxResponse * 100).toInt(),
             )
             Text(responseLabel)
             LinearProgressIndicator(
                 progress = {
                     (indexer.averageResponseTime.toFloat() / maxResponse).coerceIn(0f, 1f)
                 },
-                modifier = Modifier.fillMaxWidth().semantics { contentDescription = responseLabel },
+                modifier = Modifier.fillMaxWidth().semantics {
+                    contentDescription = responseLabel
+                    stateDescription = responsePercent
+                },
                 color = MaterialTheme.colorScheme.tertiary,
             )
             HorizontalDivider()
         }
-        Text(stringResource(R.string.prowlarr_search_user_agents))
+        Text(
+            stringResource(R.string.prowlarr_search_user_agents),
+            modifier = Modifier.semantics { heading() },
+        )
         stats.userAgents.orEmpty().forEach { agent ->
             Text(stringResource(
                 R.string.prowlarr_search_agent_row, agent.userAgent.orEmpty(),

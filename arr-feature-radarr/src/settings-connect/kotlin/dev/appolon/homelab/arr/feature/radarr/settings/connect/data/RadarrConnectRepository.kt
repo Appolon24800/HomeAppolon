@@ -40,6 +40,7 @@ import dev.appolon.homelab.arr.data.EntityStore
 import dev.appolon.homelab.arr.data.QueuedAction
 import dev.appolon.homelab.arr.feature.radarr.library.data.WriteOutcome
 import dev.appolon.homelab.arr.net.ArrJson
+import dev.appolon.homelab.arr.net.arrError
 import java.io.IOException
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
@@ -185,9 +186,11 @@ class RadarrConnectRepository(
         replace(EXCLUSION_TYPE, exclusions, ImportListExclusionResource.serializer(), stamp)
         replace(NOTIFICATION_TYPE, notifications, NotificationResource.serializer(), stamp)
         replace(METADATA_TYPE, metadata, MetadataResource.serializer(), stamp)
-        refreshTags()
+        when (val result = refreshTags()) {
+            is ArrResult.Err -> return@withContext result
+            is ArrResult.Ok -> Unit
+        }
         refreshConfigs()
-        ArrResult.ok(Unit)
     }
 
     /** Refresh only when the TTL expired. */
@@ -203,7 +206,7 @@ class RadarrConnectRepository(
                 )
             }
             val fetched = when (val r = fetch { tagApi.tags() }) {
-                is ArrResult.Err -> return@withContext ArrResult.ok(cachedTags())
+                is ArrResult.Err -> return@withContext r
                 is ArrResult.Ok -> r.value
             }
             replace(TAG_TYPE, fetched.sortedBy { it.label }, TagResource.serializer(), now())
@@ -225,7 +228,7 @@ class RadarrConnectRepository(
                 existing = try {
                     tagApi.tags()
                 } catch (e: Throwable) {
-                    emptyList()
+                    return@withContext ArrResult.err(e.arrError())
                 }
                 if (existing.isNotEmpty()) {
                     replace(TAG_TYPE, existing.sortedBy { it.label }, TagResource.serializer(), now())
@@ -265,13 +268,13 @@ class RadarrConnectRepository(
             ArrResult.ok(ids.toList())
         }
 
-    private suspend fun refreshTags() {
-        val fetched = try {
-            tagApi.tags()
-        } catch (e: Throwable) {
-            return
+    private suspend fun refreshTags(): ArrResult<Unit> {
+        val fetched = when (val result = fetch { tagApi.tags() }) {
+            is ArrResult.Err -> return result
+            is ArrResult.Ok -> result.value
         }
         replace(TAG_TYPE, fetched.sortedBy { it.label }, TagResource.serializer(), now())
+        return ArrResult.ok(Unit)
     }
 
     // --------------------------------------------------------------- schemas
@@ -327,10 +330,7 @@ class RadarrConnectRepository(
             return ArrResult.ok(store.getAll(serverId, type, serializer))
         }
         val fetched: ArrResult<List<T>> = when (val r = fetch { fetcher() }) {
-            is ArrResult.Err -> {
-                val cached = store.getAll(serverId, type, serializer)
-                if (cached.isNotEmpty()) ArrResult.ok(cached) else r
-            }
+            is ArrResult.Err -> r
 
             is ArrResult.Ok -> r
         }
@@ -375,38 +375,29 @@ class RadarrConnectRepository(
     suspend fun cachedImportListConfig(): ImportListConfigResource? =
         store.get(serverId, IMPORT_LIST_CONFIG_TYPE, SINGLE_ID, ImportListConfigResource.serializer())
 
-    private suspend fun refreshConfigs() {
-        try {
-            store.put(
-                serverId,
-                INDEXER_CONFIG_TYPE,
-                SINGLE_ID,
-                indexerConfigApi.indexerConfig(),
-                IndexerConfigResource.serializer(),
-            )
-        } catch (_: Throwable) {
-            // Options cards keep the cached row; never fails the refresh.
-        }
-        try {
-            store.put(
-                serverId,
-                DOWNLOAD_CLIENT_CONFIG_TYPE,
-                SINGLE_ID,
-                downloadClientConfigApi.downloadClientConfig(),
-                DownloadClientConfigResource.serializer(),
-            )
-        } catch (_: Throwable) {
-        }
-        try {
-            store.put(
-                serverId,
-                IMPORT_LIST_CONFIG_TYPE,
-                SINGLE_ID,
-                importListConfigApi.importListConfig(),
-                ImportListConfigResource.serializer(),
-            )
-        } catch (_: Throwable) {
-        }
+    private suspend fun refreshConfigs(): ArrResult<Unit> = fetch {
+        store.put(
+            serverId,
+            INDEXER_CONFIG_TYPE,
+            SINGLE_ID,
+            indexerConfigApi.indexerConfig(),
+            IndexerConfigResource.serializer(),
+        )
+        store.put(
+            serverId,
+            DOWNLOAD_CLIENT_CONFIG_TYPE,
+            SINGLE_ID,
+            downloadClientConfigApi.downloadClientConfig(),
+            DownloadClientConfigResource.serializer(),
+        )
+        store.put(
+            serverId,
+            IMPORT_LIST_CONFIG_TYPE,
+            SINGLE_ID,
+            importListConfigApi.importListConfig(),
+            ImportListConfigResource.serializer(),
+        )
+        Unit
     }
 
     suspend fun saveIndexerConfig(
@@ -779,14 +770,7 @@ class RadarrConnectRepository(
         withContext(ioContext) {
             val fetched: ArrResult<List<ImportListMoviesResource>> =
                 when (val r = fetch { importListMoviesApi.importListMovies() }) {
-                    is ArrResult.Err -> {
-                        val cached = store.getAll(
-                            serverId,
-                            IMPORT_LIST_PREVIEW_TYPE,
-                            ImportListMoviesResource.serializer(),
-                        )
-                        if (cached.isNotEmpty()) ArrResult.ok(cached) else r
-                    }
+                    is ArrResult.Err -> r
 
                     is ArrResult.Ok -> r
                 }
@@ -1069,7 +1053,9 @@ class RadarrConnectRepository(
         } catch (e: IOException) {
             val error = ArrError.Network(e)
             val action = QueuedAction(
-                actionId = ActionId(UUID.randomUUID().toString()),
+                actionId = ActionId(UUID.nameUUIDFromBytes(
+                    "$serverId:$DELETE_METHOD:$path".toByteArray(Charsets.UTF_8),
+                ).toString()),
                 serverId = serverId,
                 appType = AppType.RADARR,
                 method = DELETE_METHOD,
@@ -1098,7 +1084,9 @@ class RadarrConnectRepository(
     ): ArrResult<WriteOutcome> {
         if (!error.isRetryable()) return ArrResult.err(error)
         val action = QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$body".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.RADARR,
             method = method,
@@ -1218,13 +1206,13 @@ class RadarrConnectRepository(
         internal const val SINGLE_ID = "1"
 
         /** One minute; settings screens also re-read on pull-to-refresh. */
-        const val CONNECT_TTL_MILLIS: Long = 60 * 1000
+        const val CONNECT_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** A day; provider definitions change only on server upgrades. */
-        const val SCHEMA_TTL_MILLIS: Long = 24 * 60 * 60 * 1000
+        const val SCHEMA_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** Five minutes, matching the other settings groups' config rows. */
-        const val TAG_TTL_MILLIS: Long = 5 * 60 * 1000
+        const val TAG_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         internal const val IMPORT_LIST_SYNC_COMMAND = "ImportListSync"
 

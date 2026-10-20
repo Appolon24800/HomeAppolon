@@ -742,7 +742,7 @@ class ProwlarrIndexersRepository(
     }
 
     private fun <T> staleOrErr(cached: List<T>, error: ArrError): ArrResult<List<T>> =
-        if (cached.isNotEmpty()) ArrResult.ok(cached) else ArrResult.err(error)
+        ArrResult.err(error)
 
     private suspend fun responseOf(call: suspend () -> Response<Unit>): ArrResult<Unit> {
         val response = try {
@@ -775,7 +775,9 @@ class ProwlarrIndexersRepository(
         description: String,
     ): ActionId {
         val action = QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.PROWLARR,
             method = method,
@@ -832,12 +834,12 @@ class ProwlarrIndexersRepository(
         const val SYNC_COMMAND = "ApplicationSync"
 
         /** Five minutes; indexers rarely change but statuses drive badges. */
-        const val INDEXER_TTL_MILLIS: Long = 5 * 60 * 1000
+        const val INDEXER_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.LIBRARY
 
         /** One hour for profiles and tags, a day for schemas and categories. */
-        const val PROFILE_TTL_MILLIS: Long = 60 * 60 * 1000
-        const val SCHEMA_TTL_MILLIS: Long = 24 * 60 * 60 * 1000
-        const val CATEGORY_TTL_MILLIS: Long = 24 * 60 * 60 * 1000
+        const val PROFILE_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
+        const val SCHEMA_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
+        const val CATEGORY_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** Builds a repository from the API bundle of a connected server. */
         operator fun invoke(

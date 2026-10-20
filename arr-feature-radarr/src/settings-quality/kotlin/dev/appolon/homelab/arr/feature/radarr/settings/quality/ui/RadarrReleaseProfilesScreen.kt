@@ -49,6 +49,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the release profiles route. */
 @Composable
@@ -110,11 +111,11 @@ fun RadarrReleaseProfilesScreen(
     val onAdd: () -> Unit = { editorDraft = ReleaseProfileDraft() }
 
     val noticeMessage = when (state.notice) {
-        ReleaseProfilesNotice.CREATED -> stringResource(R.string.arr_radarr_quality_notice_created)
-        ReleaseProfilesNotice.UPDATED -> stringResource(R.string.arr_radarr_quality_notice_saved)
-        ReleaseProfilesNotice.DELETED -> stringResource(R.string.arr_radarr_quality_notice_deleted)
+        ReleaseProfilesNotice.CREATED -> stringResource(ArrUiR.string.arr_common_quality_notice_created)
+        ReleaseProfilesNotice.UPDATED -> stringResource(ArrUiR.string.arr_common_system_notice_saved)
+        ReleaseProfilesNotice.DELETED -> stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
         ReleaseProfilesNotice.QUEUED ->
-            stringResource(R.string.arr_radarr_quality_notice_saved_queued)
+            stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
         null -> null
     }
     QualityNoticeHost(
@@ -126,20 +127,20 @@ fun RadarrReleaseProfilesScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_quality_release_title),
+        title = stringResource(ArrUiR.string.arr_common_quality_release_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onAdd) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.arr_radarr_quality_cd_add_release),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_add_release),
                 )
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_quality_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_refresh),
                 )
             }
         },
@@ -156,8 +157,8 @@ fun RadarrReleaseProfilesScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_radarr_quality_release_empty_title),
-                    emptyMessage = stringResource(R.string.arr_radarr_quality_release_empty_message),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_quality_release_empty_title),
+                    emptyMessage = stringResource(ArrUiR.string.arr_common_quality_release_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
                     LazyColumn(
@@ -170,6 +171,7 @@ fun RadarrReleaseProfilesScreen(
                         itemsIndexed(
                             data.profiles,
                             key = { _, profile -> if (profile.id > 0) profile.id else profile.hashCode() },
+                            contentType = { _, _ -> "profile" },
                         ) { _, profile ->
                             ReleaseProfileRow(
                                 profile = profile,
@@ -201,16 +203,16 @@ fun RadarrReleaseProfilesScreen(
     if (state.confirmDeleteId != null) {
         AlertDialog(
             onDismissRequest = { onRequestDelete(null) },
-            title = { Text(stringResource(R.string.arr_radarr_quality_delete_release_title)) },
-            text = { Text(stringResource(R.string.arr_radarr_quality_delete_release_message)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_quality_delete_release_title)) },
+            text = { Text(stringResource(ArrUiR.string.arr_common_quality_delete_release_message)) },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_radarr_quality_action_delete))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { onRequestDelete(null) }) {
-                    Text(stringResource(R.string.arr_radarr_quality_action_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -234,9 +236,9 @@ private fun ReleaseProfileRow(
             Text(profile.name.orEmpty(), style = MaterialTheme.typography.bodyLarge)
             Text(
                 text = if (profile.enabled) {
-                    stringResource(R.string.arr_radarr_quality_release_enabled)
+                    stringResource(ArrUiR.string.arr_common_general_cert_validation_enabled)
                 } else {
-                    stringResource(R.string.arr_radarr_quality_release_disabled)
+                    stringResource(ArrUiR.string.arr_common_general_cert_validation_disabled)
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -246,7 +248,7 @@ private fun ReleaseProfileRow(
             Icon(
                 imageVector = Icons.Filled.Edit,
                 contentDescription = stringResource(
-                    R.string.arr_radarr_quality_cd_edit_release,
+                    ArrUiR.string.arr_common_quality_cd_edit_release,
                     profile.name.orEmpty(),
                 ),
             )
@@ -255,7 +257,7 @@ private fun ReleaseProfileRow(
             Icon(
                 imageVector = Icons.Filled.Delete,
                 contentDescription = stringResource(
-                    R.string.arr_radarr_quality_cd_delete_release,
+                    ArrUiR.string.arr_common_quality_cd_delete_release,
                     profile.name.orEmpty(),
                 ),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -278,36 +280,36 @@ private fun ReleaseProfileEditorDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.arr_radarr_quality_release_editor_title)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_quality_release_editor_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 QualityTextField(
                     value = name,
-                    label = stringResource(R.string.arr_radarr_quality_release_name),
+                    label = stringResource(ArrUiR.string.arr_common_autotag_name),
                     onValue = { name = it },
                 )
                 QualityTextField(
                     value = mustContain,
-                    label = stringResource(R.string.arr_radarr_quality_release_must_contain),
-                    supporting = stringResource(R.string.arr_radarr_quality_release_terms_support),
+                    label = stringResource(ArrUiR.string.arr_common_quality_release_must_contain),
+                    supporting = stringResource(ArrUiR.string.arr_common_quality_release_terms_support),
                     onValue = { mustContain = it },
                     minLines = 2,
                 )
                 QualityTextField(
                     value = mustNotContain,
-                    label = stringResource(R.string.arr_radarr_quality_release_must_not_contain),
-                    supporting = stringResource(R.string.arr_radarr_quality_release_terms_support),
+                    label = stringResource(ArrUiR.string.arr_common_quality_release_must_not_contain),
+                    supporting = stringResource(ArrUiR.string.arr_common_quality_release_terms_support),
                     onValue = { mustNotContain = it },
                     minLines = 2,
                 )
                 QualityTextField(
                     value = indexerId,
-                    label = stringResource(R.string.arr_radarr_quality_release_indexer),
-                    supporting = stringResource(R.string.arr_radarr_quality_release_indexer_support),
+                    label = stringResource(ArrUiR.string.arr_common_quality_release_indexer),
+                    supporting = stringResource(ArrUiR.string.arr_common_quality_release_indexer_support),
                     onValue = { indexerId = it },
                 )
                 LabeledSwitch(
-                    label = stringResource(R.string.arr_radarr_quality_release_enabled_toggle),
+                    label = stringResource(ArrUiR.string.arr_common_general_cert_validation_enabled),
                     checked = enabled,
                     onCheckedChange = { enabled = it },
                 )
@@ -328,12 +330,12 @@ private fun ReleaseProfileEditorDialog(
                 },
                 enabled = name.isNotBlank(),
             ) {
-                Text(stringResource(R.string.arr_radarr_quality_action_save_row))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_radarr_quality_action_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )

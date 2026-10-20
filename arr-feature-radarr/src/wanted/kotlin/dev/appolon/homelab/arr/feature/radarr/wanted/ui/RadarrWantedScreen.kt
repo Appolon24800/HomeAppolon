@@ -79,6 +79,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The Wanted screen: missing and cutoff-unmet tabs over the same shell,
@@ -118,12 +119,12 @@ fun RadarrWantedScreen(
     }
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_wanted_title),
+        title = stringResource(ArrUiR.string.arr_common_wanted_title),
         modifier = modifier,
         actions = {
             if (state.queuedForServer > 0) {
                 val queuedDescription =
-                    stringResource(R.string.arr_radarr_wanted_cd_queued, state.queuedForServer)
+                    stringResource(ArrUiR.string.arr_common_system_pending_banner, state.queuedForServer)
                 BadgedBox(
                     badge = { Badge { Text(state.queuedForServer.coerceAtMost(99).toString()) } },
                     modifier = Modifier.semantics { contentDescription = queuedDescription },
@@ -172,9 +173,9 @@ fun RadarrWantedScreen(
                         state = lce,
                         onRetry = onRefresh,
                         emptyTitle = if (state.tab == WantedTab.MISSING) {
-                            stringResource(R.string.arr_radarr_wanted_empty_missing_title)
+                            stringResource(ArrUiR.string.arr_common_wanted_empty_missing_title)
                         } else {
-                            stringResource(R.string.arr_radarr_wanted_empty_cutoff_title)
+                            stringResource(ArrUiR.string.arr_common_wanted_empty_cutoff_title)
                         },
                         emptyMessage = if (state.tab == WantedTab.MISSING) {
                             stringResource(R.string.arr_radarr_wanted_empty_missing_message)
@@ -212,8 +213,8 @@ private fun WantedTabRow(
     TabRow(selectedTabIndex = state.tab.ordinal) {
         WantedTab.entries.forEach { tab ->
             val label = when (tab) {
-                WantedTab.MISSING -> stringResource(R.string.arr_radarr_wanted_tab_missing)
-                WantedTab.CUTOFF -> stringResource(R.string.arr_radarr_wanted_tab_cutoff)
+                WantedTab.MISSING -> stringResource(ArrUiR.string.arr_common_wanted_tab_missing)
+                WantedTab.CUTOFF -> stringResource(ArrUiR.string.arr_common_wanted_tab_cutoff)
             }
             val total = when (tab) {
                 WantedTab.MISSING -> counts.missing
@@ -252,13 +253,13 @@ private fun WantedFilterBar(
         FilterChip(
             selected = state.filterState.isActive(WantedFilters.MONITORED),
             onClick = onToggleMonitored,
-            label = { Text(stringResource(R.string.arr_radarr_wanted_filter_monitored)) },
+            label = { Text(stringResource(ArrUiR.string.arr_common_monitored)) },
         )
         Box {
             FilterChip(
                 selected = state.filterState.isActive(WantedFilters.QUALITY),
                 onClick = { qualityMenuOpen = true },
-                label = { Text(stringResource(R.string.arr_radarr_wanted_filter_quality)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_wanted_filter_quality)) },
             )
             DropdownMenu(
                 expanded = qualityMenuOpen,
@@ -268,7 +269,7 @@ private fun WantedFilterBar(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                stringResource(R.string.arr_radarr_wanted_filter_empty_options),
+                                stringResource(ArrUiR.string.arr_common_wanted_filter_empty_options),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         },
@@ -307,7 +308,7 @@ private fun WantedFilterBar(
         ) {
             AssistChip(
                 onClick = onClear,
-                label = { Text(stringResource(R.string.arr_radarr_wanted_filter_clear)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_wanted_filter_clear)) },
             )
         }
     }
@@ -341,7 +342,7 @@ private fun WantedList(
                 state = gridState,
                 modifier = Modifier.fillMaxSize(),
             ) {
-                items(movies, key = { it.id }) { movie ->
+                items(movies, key = { it.id }, contentType = { "movie" }) { movie ->
                     WantedMovieRow(
                         movie = movie,
                         state = state,
@@ -366,7 +367,7 @@ private fun WantedList(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.fillMaxSize(),
             ) {
-                items(movies, key = { it.id }) { movie ->
+                items(movies, key = { it.id }, contentType = { "movie" }) { movie ->
                     WantedMovieRow(
                         movie = movie,
                         state = state,
@@ -403,9 +404,9 @@ private fun WantedMovieRow(
 ) {
     val title = movie.title.orEmpty().ifEmpty { "#" + movie.id }
     val openDescription =
-        stringResource(R.string.arr_radarr_wanted_cd_open_movie, title)
+        stringResource(ArrUiR.string.arr_common_mm_browser_cd_open, title)
     val searchDescription =
-        stringResource(R.string.arr_radarr_wanted_cd_search_movie, title)
+        stringResource(ArrUiR.string.arr_common_wanted_cd_search_movie, title)
     val searching = movie.id in state.searchingIds
     val queued = movie.id in state.queuedIds
     Surface(
@@ -454,7 +455,7 @@ private fun WantedMovieRow(
             }
             if (queued) {
                 Text(
-                    text = stringResource(R.string.arr_radarr_wanted_badge_queued),
+                    text = stringResource(ArrUiR.string.arr_common_connect_badge_queued),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.padding(end = 8.dp),
@@ -463,9 +464,9 @@ private fun WantedMovieRow(
             Icon(
                 imageVector = Icons.Filled.Done,
                 contentDescription = if (movie.monitored) {
-                    stringResource(R.string.arr_radarr_wanted_cd_monitored)
+                    stringResource(ArrUiR.string.arr_common_monitored)
                 } else {
-                    stringResource(R.string.arr_radarr_wanted_cd_unmonitored)
+                    stringResource(ArrUiR.string.arr_common_wanted_cd_unmonitored)
                 },
                 tint = if (movie.monitored) {
                     MaterialTheme.colorScheme.primary
@@ -541,7 +542,7 @@ private fun LoadingMoreRow() {
     ) {
         CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
         Text(
-            text = stringResource(R.string.arr_radarr_wanted_loading_more),
+            text = stringResource(ArrUiR.string.arr_common_loading_more),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 12.dp),
@@ -589,16 +590,16 @@ private fun ListLoadMoreEffect(
 @Composable
 private fun wantedMessageText(message: WantedMessage): String = when (message) {
     is WantedMessage.SearchStarted -> if (message.count == 1) {
-        stringResource(R.string.arr_radarr_wanted_msg_search_started_one)
+        stringResource(ArrUiR.string.arr_common_detail_msg_search_started)
     } else {
         stringResource(R.string.arr_radarr_wanted_msg_search_started_many, message.count)
     }
 
     is WantedMessage.SearchQueued -> if (message.count == 1) {
-        stringResource(R.string.arr_radarr_wanted_msg_search_queued_one)
+        stringResource(ArrUiR.string.arr_common_wanted_msg_search_queued_one)
     } else {
         stringResource(R.string.arr_radarr_wanted_msg_search_queued_many, message.count)
     }
 
-    WantedMessage.SearchFailed -> stringResource(R.string.arr_radarr_wanted_msg_search_failed)
+    WantedMessage.SearchFailed -> stringResource(ArrUiR.string.arr_common_wanted_msg_search_failed)
 }

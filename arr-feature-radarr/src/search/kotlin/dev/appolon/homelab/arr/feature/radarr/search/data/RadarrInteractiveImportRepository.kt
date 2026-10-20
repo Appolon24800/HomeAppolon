@@ -189,7 +189,9 @@ class RadarrInteractiveImportRepository(
             failure == null -> ArrResult.ok(WriteOutcome.Synced)
 
             failure is ArrError.Offline || failure is ArrError.Network -> {
-                val actionId = ActionId(UUID.randomUUID().toString())
+                val actionId = ActionId(UUID.nameUUIDFromBytes(
+                    "$serverId:POST:$IMPORT_PATH:$body".toByteArray(Charsets.UTF_8),
+                ).toString())
                 actionQueue.enqueue(
                     QueuedAction(
                         actionId = actionId,

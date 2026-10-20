@@ -1,6 +1,7 @@
 package dev.appolon.homelab.arr.feature.radarr.activity
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.appolon.homelab.arr.api.radarr.BlocklistApi
@@ -121,7 +122,7 @@ fun RadarrActivityFeatureSlot(
                 clients = clients(serverId),
                 refreshSignals = refreshSignals,
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -133,7 +134,7 @@ fun RadarrActivityFeatureSlot(
                 clients = clients(serverId),
                 refreshSignals = refreshSignals,
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }

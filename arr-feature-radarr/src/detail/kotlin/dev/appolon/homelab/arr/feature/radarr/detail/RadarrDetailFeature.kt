@@ -20,6 +20,7 @@ import dev.appolon.homelab.arr.ui.shell.ArrShellContent
 import dev.appolon.homelab.arr.ui.shell.ArrShellNavigator
 import dev.appolon.homelab.arr.ui.shell.LocalArrShellNavigator
 import androidx.compose.ui.res.stringResource
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Navigation wiring for the Radarr movie detail feature. The main detail
@@ -111,9 +112,9 @@ fun RadarrMovieDetailDestination(
     androidx.compose.foundation.layout.Box(modifier) {
         RadarrMovieDetailScreen(
             state = state,
-            onRetry = { vm.load(false) },
+            onRetry = remember(vm) { { vm.load(false) } },
             onRefresh = vm::refresh,
-            onBack = { navigator.back() },
+            onBack = remember(navigator) { { navigator.back() } },
             onToggleMonitored = vm::toggleMonitored,
             onSaveEdit = vm::saveEdits,
             onDelete = vm::deleteMovie,
@@ -185,7 +186,7 @@ fun RadarrDetailFeatureSlot(
 private fun ForeignFeature(owner: String, modifier: Modifier = Modifier) {
     EmptyState(
         title = stringResource(
-            dev.appolon.homelab.arr.ui.R.string.arr_shell_unavailable_title,
+            ArrUiR.string.arr_shell_unavailable_title,
         ),
         message = stringResource(R.string.arr_radarr_detail_foreign_message, owner),
         modifier = modifier,
@@ -218,11 +219,11 @@ private suspend fun repositoryImageClient(
 @Composable
 private fun detailMessageText(message: DetailMessage?): String? = when (message) {
     null -> null
-    DetailMessage.EditSaved -> stringResource(R.string.arr_radarr_detail_msg_edit_saved)
+    DetailMessage.EditSaved -> stringResource(ArrUiR.string.arr_common_system_notice_saved)
     DetailMessage.EditQueued -> stringResource(R.string.arr_radarr_detail_msg_edit_queued)
     DetailMessage.RenameStarted -> stringResource(R.string.arr_radarr_detail_msg_rename_started)
     DetailMessage.RenameQueued -> stringResource(R.string.arr_radarr_detail_msg_rename_queued)
-    DetailMessage.SearchStarted -> stringResource(R.string.arr_radarr_detail_msg_search_started)
+    DetailMessage.SearchStarted -> stringResource(ArrUiR.string.arr_common_detail_msg_search_started)
     DetailMessage.SearchQueued -> stringResource(R.string.arr_radarr_detail_msg_search_queued)
     DetailMessage.DeleteQueued -> stringResource(R.string.arr_radarr_detail_msg_delete_queued)
     DetailMessage.Deleted -> null

@@ -231,9 +231,9 @@ fun SonarrCalendar(
         onViewModeChange = vm::setViewMode,
         onIncludeUnmonitoredChange = vm::setIncludeUnmonitored,
         onSelectDate = vm::selectDate,
-        onSeriesActivate = { seriesId ->
+        onSeriesActivate = remember(navigator, serverId) { { seriesId: Int ->
             navigator.open(ArrRoute.Detail(serverId, AppType.SONARR, seriesId.toString()))
-        },
+        } },
         modifier = modifier,
     )
 }

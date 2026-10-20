@@ -1,38 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Wanted (missing + cutoff unmet), episode granularity -->
-    <string name="arr_sonarr_wanted_title">Wanted</string>
-    <string name="arr_sonarr_wanted_tab_missing">Missing</string>
-    <string name="arr_sonarr_wanted_tab_cutoff">Cutoff unmet</string>
-    <string name="arr_sonarr_wanted_empty_missing_title">Nothing missing</string>
     <string name="arr_sonarr_wanted_empty_missing_message">Every monitored episode has a file.</string>
-    <string name="arr_sonarr_wanted_empty_cutoff_title">Cutoff met everywhere</string>
     <string name="arr_sonarr_wanted_empty_cutoff_message">No episode is waiting for a better quality file.</string>
     <string name="arr_sonarr_wanted_cd_search_episode">Search for %1$s %2$s</string>
     <string name="arr_sonarr_wanted_cd_search_series">Search every listed episode of %1$s</string>
     <string name="arr_sonarr_wanted_cd_search_all">Search for every episode listed</string>
-    <string name="arr_sonarr_wanted_cd_queued">%1$d changes waiting to sync</string>
-    <string name="arr_sonarr_wanted_cd_open_series">Open %1$s</string>
-    <string name="arr_sonarr_wanted_cd_monitored">Monitored</string>
-    <string name="arr_sonarr_wanted_cd_unmonitored">Not monitored</string>
     <string name="arr_sonarr_wanted_cd_season_pass">Change season monitoring in bulk</string>
-    <string name="arr_sonarr_wanted_badge_queued">Queued</string>
-    <string name="arr_sonarr_wanted_counts_cd">%1$d missing, %2$d below cutoff</string>
-    <string name="arr_sonarr_wanted_loading_more">Loading more</string>
     <string name="arr_sonarr_wanted_air_date_unknown">Air date unknown</string>
 
     <!-- Filters -->
-    <string name="arr_sonarr_wanted_filter_monitored">Monitored</string>
     <string name="arr_sonarr_wanted_filter_season">Season</string>
-    <string name="arr_sonarr_wanted_filter_clear">Clear filters</string>
     <string name="arr_sonarr_wanted_filter_season_option">Season %1$d</string>
-    <string name="arr_sonarr_wanted_filter_empty_options">Nothing to filter yet</string>
 
     <!-- Snackbar outcomes -->
-    <string name="arr_sonarr_wanted_msg_episode_search_started_one">Search started</string>
     <string name="arr_sonarr_wanted_msg_episode_search_started_many">Search started for %1$d episodes</string>
     <string name="arr_sonarr_wanted_msg_series_search_started">Search started for every listed episode of the series</string>
-    <string name="arr_sonarr_wanted_msg_search_queued_one">You\'re offline. The search will run when the connection returns.</string>
     <string name="arr_sonarr_wanted_msg_search_queued_many">You\'re offline. Searches for %1$d episodes will run when the connection returns.</string>
-    <string name="arr_sonarr_wanted_msg_search_failed">The search didn\'t go through. Try again.</string>
 </resources>

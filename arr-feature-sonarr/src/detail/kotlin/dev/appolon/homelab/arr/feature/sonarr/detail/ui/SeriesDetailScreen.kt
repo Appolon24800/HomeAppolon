@@ -77,6 +77,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.time.Instant
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The series detail screen body: banner hero, seasons grid with per-season
@@ -163,7 +164,7 @@ fun SeriesDetailContent(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.arr_sonarr_detail_cd_back),
+                            contentDescription = stringResource(ArrUiR.string.arr_common_detail_cd_back),
                         )
                     }
                 },
@@ -214,7 +215,7 @@ fun SeriesDetailContent(
                         Tab(
                             selected = content.tab == DetailTab.HISTORY,
                             onClick = { onSetTab(DetailTab.HISTORY) },
-                            text = { Text(stringResource(R.string.arr_sonarr_detail_tab_history)) },
+                            text = { Text(stringResource(ArrUiR.string.arr_common_history_title)) },
                         )
                     }
                     if (content.tab == DetailTab.SEASONS) {
@@ -329,7 +330,7 @@ private fun SeriesDetailMenu(
     }
     DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.arr_sonarr_detail_menu_refresh_metadata)) },
+            text = { Text(stringResource(ArrUiR.string.arr_common_library_cd_refresh_metadata)) },
             leadingIcon = { Icon(Icons.Filled.Refresh, contentDescription = null) },
             onClick = {
                 open = false
@@ -361,7 +362,7 @@ private fun SeriesDetailMenu(
             },
         )
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.arr_sonarr_detail_menu_import)) },
+            text = { Text(stringResource(ArrUiR.string.arr_common_import_flow_title)) },
             leadingIcon = { Icon(Icons.Filled.FolderOpen, contentDescription = null) },
             onClick = {
                 open = false
@@ -483,7 +484,7 @@ private fun SeriesHero(
 private fun QueuedBanner(count: Int) {
     Surface(color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = stringResource(R.string.arr_sonarr_queued_banner, count),
+            text = stringResource(ArrUiR.string.arr_common_system_pending_banner, count),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
@@ -577,7 +578,7 @@ private fun SeasonGrid(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
-        items(state.seasons, key = { it.seasonNumber }) { season ->
+        items(state.seasons, key = { it.seasonNumber }, contentType = { "season" }) { season ->
             SeasonCard(
                 season = season,
                 selected = false,
@@ -600,7 +601,7 @@ private fun SeasonListColumn(
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(modifier = modifier) {
-        items(state.seasons, key = { it.seasonNumber }) { season ->
+        items(state.seasons, key = { it.seasonNumber }, contentType = { "season" }) { season ->
             val selected = state.selectedSeason == season.seasonNumber
             SeasonCard(
                 season = season,
@@ -651,9 +652,9 @@ private fun SeasonCard(
                     }
                 }
                 val monitoredCd = if (season.monitored) {
-                    stringResource(R.string.arr_sonarr_detail_cd_season_monitored, label)
+                    stringResource(R.string.arr_sonarr_detail_cd_monitored, label)
                 } else {
-                    stringResource(R.string.arr_sonarr_detail_cd_season_not_monitored, label)
+                    stringResource(R.string.arr_sonarr_detail_cd_not_monitored, label)
                 }
                 IconButton(onClick = onToggleMonitored, modifier = Modifier.semantics {
                     contentDescription = monitoredCd
@@ -709,9 +710,9 @@ private fun SeasonCard(
 @Composable
 private fun seasonLabel(seasonNumber: Int): String =
     if (seasonNumber == 0) {
-        stringResource(R.string.arr_sonarr_detail_season_specials)
+        stringResource(R.string.arr_sonarr_add_season_specials)
     } else {
-        stringResource(R.string.arr_sonarr_detail_season_title, seasonNumber)
+        stringResource(R.string.arr_sonarr_wanted_filter_season_option, seasonNumber)
     }
 
 /** Episode list pane, shared by the phone stack and the tablet detail side. */
@@ -735,7 +736,7 @@ private fun EpisodeListPane(
         return
     }
     LazyColumn(modifier = modifier.fillMaxWidth()) {
-        items(episodes, key = { it.id }) { episode ->
+        items(episodes, key = { it.id }, contentType = { "episode" }) { episode ->
             EpisodeRow(
                 episode = episode,
                 state = state,
@@ -809,15 +810,15 @@ private fun EpisodeRow(
                 Icon(
                     imageVector = Icons.Filled.Search,
                     contentDescription = stringResource(
-                        R.string.arr_sonarr_detail_cd_search_episode,
+                        ArrUiR.string.arr_common_wanted_cd_search_movie,
                         title,
                     ),
                 )
             }
             val monitoredCd = if (episode.monitored) {
-                stringResource(R.string.arr_sonarr_detail_cd_episode_monitored, label)
+                stringResource(R.string.arr_sonarr_detail_cd_monitored, label)
             } else {
-                stringResource(R.string.arr_sonarr_detail_cd_episode_not_monitored, label)
+                stringResource(R.string.arr_sonarr_detail_cd_not_monitored, label)
             }
             IconButton(onClick = { onToggleMonitored(episode) }, modifier = Modifier.semantics {
                 contentDescription = monitoredCd
@@ -875,7 +876,7 @@ private fun EpisodeRow(
                 val history = state.historyFor(episode.id)
                 if (history.isNotEmpty()) {
                     Text(
-                        text = stringResource(R.string.arr_sonarr_detail_episode_history_header),
+                        text = stringResource(ArrUiR.string.arr_common_history_title),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
@@ -895,17 +896,17 @@ private fun episodeStatusLine(episode: EpisodeResource): String {
         val quality = file.quality.quality.name
             ?.let(Humanize::qualityName)
             ?: stringResource(R.string.arr_sonarr_detail_file_title)
-        return stringResource(R.string.arr_sonarr_detail_episode_file_line, quality, Humanize.bytes(file.size))
+        return stringResource(ArrUiR.string.arr_common_metadata_pair, quality, Humanize.bytes(file.size))
     }
     val airDate = ArrTime.parse(episode.airDateUtc ?: episode.airDate)
     return when {
-        airDate == null -> stringResource(R.string.arr_sonarr_detail_episode_missing)
+        airDate == null -> stringResource(ArrUiR.string.arr_common_wanted_tab_missing)
         airDate.isAfter(Instant.now()) -> stringResource(
             R.string.arr_sonarr_detail_airing_on,
             ArrTime.dateTimeShort(airDate),
         )
 
-        else -> stringResource(R.string.arr_sonarr_detail_episode_missing)
+        else -> stringResource(ArrUiR.string.arr_common_wanted_tab_missing)
     }
 }
 
@@ -935,7 +936,11 @@ private fun HistoryPane(state: SeriesDetailUiState, onRefresh: () -> Unit) {
             )
         } else {
             LazyColumn(Modifier.fillMaxSize()) {
-                items(state.history, key = { it.id }) { event -> HistoryRow(event = event) }
+                items(
+                    state.history,
+                    key = { it.id },
+                    contentType = { "event" },
+                ) { event -> HistoryRow(event = event) }
             }
         }
     }
@@ -985,16 +990,16 @@ private fun HistoryRow(event: HistoryResource) {
 
 @Composable
 private fun historyEventLabel(type: EpisodeHistoryEventType): String = when (type) {
-    EpisodeHistoryEventType.GRABBED -> stringResource(R.string.arr_sonarr_detail_history_grabbed)
+    EpisodeHistoryEventType.GRABBED -> stringResource(ArrUiR.string.arr_common_history_filter_grabbed)
     EpisodeHistoryEventType.SERIES_FOLDER_IMPORTED,
     EpisodeHistoryEventType.DOWNLOAD_FOLDER_IMPORTED,
-    -> stringResource(R.string.arr_sonarr_detail_history_imported)
+    -> stringResource(ArrUiR.string.arr_common_history_filter_imported)
 
-    EpisodeHistoryEventType.DOWNLOAD_FAILED -> stringResource(R.string.arr_sonarr_detail_history_failed)
-    EpisodeHistoryEventType.EPISODE_FILE_DELETED -> stringResource(R.string.arr_sonarr_detail_history_deleted)
+    EpisodeHistoryEventType.DOWNLOAD_FAILED -> stringResource(ArrUiR.string.arr_common_detail_event_failed)
+    EpisodeHistoryEventType.EPISODE_FILE_DELETED -> stringResource(ArrUiR.string.arr_common_detail_event_file_deleted)
     EpisodeHistoryEventType.EPISODE_FILE_RENAMED -> stringResource(R.string.arr_sonarr_detail_history_renamed)
-    EpisodeHistoryEventType.DOWNLOAD_IGNORED -> stringResource(R.string.arr_sonarr_detail_history_ignored)
-    EpisodeHistoryEventType.UNKNOWN -> stringResource(R.string.arr_sonarr_detail_history_unknown)
+    EpisodeHistoryEventType.DOWNLOAD_IGNORED -> stringResource(ArrUiR.string.arr_common_history_type_ignored)
+    EpisodeHistoryEventType.UNKNOWN -> stringResource(ArrUiR.string.arr_common_detail_event_unknown)
 }
 
 @Composable
@@ -1007,7 +1012,7 @@ internal fun detailMessageText(message: DetailMessage?): String? = when (message
     null -> null
     DetailMessage.WriteSynced -> stringResource(R.string.arr_sonarr_detail_message_synced)
     DetailMessage.WriteQueued -> stringResource(R.string.arr_sonarr_detail_message_queued)
-    DetailMessage.SearchStarted -> stringResource(R.string.arr_sonarr_detail_message_search_started)
+    DetailMessage.SearchStarted -> stringResource(ArrUiR.string.arr_common_detail_msg_search_started)
     DetailMessage.SearchQueued -> stringResource(R.string.arr_sonarr_detail_message_search_queued)
     DetailMessage.GrabSent -> stringResource(R.string.arr_sonarr_detail_message_grabbed)
     DetailMessage.GrabQueued -> stringResource(R.string.arr_sonarr_detail_message_grab_queued)
@@ -1022,7 +1027,7 @@ internal fun detailMessageText(message: DetailMessage?): String? = when (message
     DetailMessage.RenameQueued -> stringResource(R.string.arr_sonarr_detail_message_rename_queued)
     DetailMessage.DeleteSynced -> stringResource(R.string.arr_sonarr_detail_message_delete_synced)
     DetailMessage.DeleteQueued -> stringResource(R.string.arr_sonarr_detail_message_delete_queued)
-    is DetailMessage.WriteFailed -> stringResource(R.string.arr_sonarr_detail_message_failed)
+    is DetailMessage.WriteFailed -> stringResource(ArrUiR.string.arr_common_msg_write_failed)
 }
 
 /** LCE projection of the detail state. */

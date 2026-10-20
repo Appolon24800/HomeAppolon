@@ -62,6 +62,7 @@ import dev.appolon.homelab.arr.feature.radarr.addnew.vm.CollectionEditUiState
 import dev.appolon.homelab.arr.feature.radarr.addnew.vm.CollectionsUiState
 import dev.appolon.homelab.arr.ui.components.PosterCard
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The Collections tab: one row per collection with a monitoring toggle,
@@ -73,6 +74,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 @Composable
 internal fun CollectionsArea(
     state: CollectionsUiState,
+    imageLoader: ImageLoader?,
     onToggleMonitored: (CollectionResource) -> Unit,
     onOpenEditor: (CollectionResource) -> Unit,
     onEditorChange: ((CollectionEditUiState) -> CollectionEditUiState) -> Unit,
@@ -92,11 +94,12 @@ internal fun CollectionsArea(
             contentPadding = PaddingValues(vertical = 8.dp),
             modifier = Modifier.fillMaxSize(),
         ) {
-            items(collections, key = { it.id }) { collection ->
+            items(collections, key = { it.id }, contentType = { "collection" }) { collection ->
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                     CollectionRow(
                         collection = collection,
                         state = state,
+                        imageLoader = imageLoader,
                         onToggleMonitored = onToggleMonitored,
                         onOpenEditor = onOpenEditor,
                         onSearchCollection = onSearchCollection,
@@ -122,6 +125,7 @@ internal fun CollectionsArea(
 private fun CollectionRow(
     collection: CollectionResource,
     state: CollectionsUiState,
+    imageLoader: ImageLoader?,
     onToggleMonitored: (CollectionResource) -> Unit,
     onOpenEditor: (CollectionResource) -> Unit,
     onSearchCollection: (CollectionResource) -> Unit,
@@ -142,8 +146,8 @@ private fun CollectionRow(
     ) {
         PosterImage(
             url = posterUrl,
-            contentDescription = stringResource(R.string.arr_radarr_collections_cd_poster, title),
-            imageLoader = null,
+            contentDescription = stringResource(ArrUiR.string.arr_common_addnew_cd_poster, title),
+            imageLoader = imageLoader,
             width = 64.dp,
             height = 96.dp,
         )
@@ -181,7 +185,7 @@ private fun CollectionRow(
                 }
                 Text(
                     text = stringResource(
-                        R.string.arr_radarr_collections_quality,
+                        ArrUiR.string.arr_common_import_flow_quality_line,
                         state.profileLabel(collection.qualityProfileId),
                     ),
                     style = MaterialTheme.typography.bodySmall,
@@ -192,7 +196,7 @@ private fun CollectionRow(
                 AssistChip(
                     onClick = {},
                     enabled = false,
-                    label = { Text(stringResource(R.string.arr_radarr_addnew_queued_chip)) },
+                    label = { Text(stringResource(ArrUiR.string.arr_common_connect_badge_queued)) },
                     leadingIcon = {
                         Icon(
                             Icons.Filled.CloudUpload,
@@ -273,12 +277,12 @@ private fun CollectionEditSheet(
                 )
 
                 EditSwitchRow(
-                    label = stringResource(R.string.arr_radarr_collections_edit_monitored),
+                    label = stringResource(ArrUiR.string.arr_common_monitored),
                     checked = sheet.monitored,
                     onCheckedChange = { value -> onChange { it.copy(monitored = value) } },
                 )
                 EditSwitchRow(
-                    label = stringResource(R.string.arr_radarr_collections_edit_search_on_add),
+                    label = stringResource(ArrUiR.string.arr_common_lists_search_on_add),
                     checked = sheet.searchOnAdd,
                     onCheckedChange = { value -> onChange { it.copy(searchOnAdd = value) } },
                 )
@@ -295,7 +299,7 @@ private fun CollectionEditSheet(
                     enabled = !sheet.submitting,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(stringResource(R.string.arr_radarr_collections_action_save))
+                    Text(stringResource(ArrUiR.string.arr_common_save))
                 }
             }
         }
@@ -344,7 +348,7 @@ private fun QualityDropdown(
             value = selectedLabel.orEmpty(),
             onValueChange = {},
             readOnly = true,
-            label = { Text(stringResource(R.string.arr_radarr_collections_edit_quality)) },
+            label = { Text(stringResource(ArrUiR.string.arr_common_wanted_filter_quality)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable)

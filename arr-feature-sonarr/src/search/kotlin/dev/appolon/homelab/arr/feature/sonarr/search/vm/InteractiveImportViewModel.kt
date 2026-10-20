@@ -271,7 +271,7 @@ class InteractiveImportViewModel(
     private fun ManualImportResource.matchedLabelOrNull(): String? {
         val season = seasonNumber ?: return null
         val episodeNumbers = episodes.orEmpty().mapNotNull { episode ->
-            (episode["episodeNumber"] as? JsonPrimitive)?.content?.toIntOrNull()
+            episode.episodeNumber
         }
         val first = episodeNumbers.firstOrNull() ?: return null
         val label = "S" + season.toString().padStart(2, '0') +

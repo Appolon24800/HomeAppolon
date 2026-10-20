@@ -201,14 +201,16 @@ fun SonarrAddNew(
         onQueryChange = vm::onQueryChange,
         onSearch = vm::search,
         onYearPicked = vm::setYearFilter,
-        onRefresh = {
-            vm.refreshDefaults()
-            vm.search()
+        onRefresh = remember(vm) {
+            {
+                vm.refreshDefaults()
+                vm.search()
+            }
         },
         onRefreshLists = vm::refreshLists,
         onOpenAddForm = vm::openAddForm,
         onCloseAddForm = vm::closeAddForm,
-        onUpdateAddForm = { form -> vm.updateAddForm { form } },
+        onUpdateAddForm = remember(vm) { { form -> vm.updateAddForm { form } } },
         onSetMonitor = vm::setMonitorStrategy,
         onToggleSeason = vm::toggleSeason,
         onToggleTag = vm::toggleTag,
@@ -216,7 +218,7 @@ fun SonarrAddNew(
         onSyncList = vm::syncImportList,
         onOpenExclusionDraft = vm::openExclusionDraft,
         onCloseExclusionDraft = vm::closeExclusionDraft,
-        onUpdateExclusionDraft = { draft -> vm.updateExclusionDraft { draft } },
+        onUpdateExclusionDraft = remember(vm) { { draft -> vm.updateExclusionDraft { draft } } },
         onSubmitExclusion = vm::submitExclusion,
         onDeleteExclusion = vm::deleteExclusion,
         onConsumeMessage = vm::consumeMessage,

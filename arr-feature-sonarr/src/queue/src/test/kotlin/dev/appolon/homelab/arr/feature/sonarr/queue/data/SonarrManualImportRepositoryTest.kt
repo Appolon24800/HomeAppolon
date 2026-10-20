@@ -1,5 +1,7 @@
 package dev.appolon.homelab.arr.feature.sonarr.queue.data
 
+import dev.appolon.homelab.arr.api.sonarr.model.EpisodeResource
+import dev.appolon.homelab.arr.api.sonarr.model.SeriesResource
 import dev.appolon.homelab.arr.api.sonarr.FakeSonarrQueue
 import dev.appolon.homelab.arr.api.sonarr.model.ManualImportResource
 import dev.appolon.homelab.arr.core.ArrResult
@@ -73,18 +75,10 @@ class SonarrManualImportRepositoryTest {
         path = "/media/tv/show.$id.mkv",
         relativePath = "show.$id.mkv",
         downloadId = downloadId,
-        series = buildJsonObject {
-            put("id", seriesId)
-            put("title", "Matched Show")
-        },
+        series = SeriesResource(id = seriesId ?: 0, title = "Matched Show"),
         seasonNumber = 2,
         episodes = listOf(
-            buildJsonObject {
-                put("id", id + 100)
-                put("seasonNumber", 2)
-                put("episodeNumber", 5)
-                put("title", "Episode ${id + 100}")
-            },
+            EpisodeResource(id = id + 100, seasonNumber = 2, episodeNumber = 5),
         ),
     )
 

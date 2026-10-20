@@ -50,6 +50,7 @@ import dev.appolon.homelab.arr.feature.radarr.queue.vm.ManualImportViewModel
 import dev.appolon.homelab.arr.ui.components.EmptyState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Feature-slot destination for manual import. With a [downloadId] it lists
@@ -130,10 +131,10 @@ fun ManualImportScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val importedText = stringResource(
-        R.string.arr_radarr_manual_import_notice_imported,
+        ArrUiR.string.arr_common_manual_import_notice_imported,
         state.importedCount,
     )
-    val queuedText = stringResource(R.string.arr_radarr_manual_import_notice_queued)
+    val queuedText = stringResource(ArrUiR.string.arr_common_import_flow_notice_queued)
     LaunchedEffect(state.notice) {
         when (state.notice) {
             ManualImportNotice.IMPORTED -> snackbarHostState.showSnackbar(importedText)
@@ -151,7 +152,7 @@ fun ManualImportScreen(
     }
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_manual_import_title),
+        title = stringResource(ArrUiR.string.arr_common_history_details_action_manual_import),
         subtitle = serverName,
         onBack = onBack,
         modifier = modifier,
@@ -168,7 +169,7 @@ fun ManualImportScreen(
                 state.folder?.let { folder ->
                     Text(
                         text = stringResource(
-                            R.string.arr_radarr_manual_import_current_folder,
+                            ArrUiR.string.arr_common_import_flow_current_folder,
                             folder,
                         ),
                         style = MaterialTheme.typography.labelMedium,
@@ -230,21 +231,21 @@ private fun FolderBrowser(
             modifier = modifier,
         ) {
             EmptyState(
-                title = stringResource(R.string.arr_radarr_manual_import_folders_error_title),
+                title = stringResource(ArrUiR.string.arr_common_import_flow_folders_error_title),
                 message = arrErrorMessage(load.error),
                 modifier = Modifier.fillMaxWidth(),
             )
             Button(onClick = { onRetryFolders(state.folder) }) {
-                Text(stringResource(dev.appolon.homelab.arr.ui.R.string.arr_retry))
+                Text(stringResource(ArrUiR.string.arr_retry))
             }
         }
 
         ImportLoad.Ready -> LazyColumn(modifier = modifier) {
-            items(state.folders, key = { it.path }) { folder ->
+            items(state.folders, key = { it.path }, contentType = { "folder" }) { folder ->
                 val folderCd = if (folder.isParent) {
-                    stringResource(R.string.arr_radarr_manual_import_cd_parent)
+                    stringResource(ArrUiR.string.arr_common_import_flow_cd_parent)
                 } else {
-                    stringResource(R.string.arr_radarr_manual_import_cd_folder, folder.name)
+                    stringResource(ArrUiR.string.arr_common_import_flow_cd_folder, folder.name)
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -275,7 +276,7 @@ private fun FolderBrowser(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                     ) {
-                        Text(stringResource(R.string.arr_radarr_manual_import_scan_folder))
+                        Text(stringResource(ArrUiR.string.arr_common_manual_import_scan_folder))
                     }
                 }
             }
@@ -303,13 +304,13 @@ private fun ImportItems(
             modifier = modifier,
         ) {
             EmptyState(
-                title = stringResource(R.string.arr_radarr_manual_import_items_error_title),
+                title = stringResource(ArrUiR.string.arr_common_import_flow_files_error_title),
                 message = arrErrorMessage(load.error),
                 modifier = Modifier.fillMaxWidth(),
             )
             state.folder?.let { folder ->
                 Button(onClick = { onRetryItems(folder) }) {
-                    Text(stringResource(dev.appolon.homelab.arr.ui.R.string.arr_retry))
+                    Text(stringResource(ArrUiR.string.arr_retry))
                 }
             }
         }
@@ -317,16 +318,16 @@ private fun ImportItems(
         ImportLoad.Ready -> {
             if (state.items.isEmpty() && state.folder != null) {
                 EmptyState(
-                    title = stringResource(R.string.arr_radarr_manual_import_no_files_title),
-                    message = stringResource(R.string.arr_radarr_manual_import_no_files_message),
+                    title = stringResource(ArrUiR.string.arr_common_import_flow_no_files_title),
+                    message = stringResource(ArrUiR.string.arr_common_manual_import_no_files_message),
                     modifier = modifier.fillMaxWidth(),
                 )
             } else {
                 LazyColumn(modifier = modifier) {
-                    items(state.items, key = { it.id }) { item ->
+                    items(state.items, key = { it.id }, contentType = { "import-item" }) { item ->
                         val itemName = item.relativePath ?: item.name ?: item.path.orEmpty()
                         val itemCd = stringResource(
-                            R.string.arr_radarr_manual_import_cd_item,
+                            ArrUiR.string.arr_common_import_flow_cd_file,
                             itemName,
                         )
                         Row(
@@ -372,7 +373,7 @@ private fun ImportItems(
                                 item.rejections?.takeIf { it.isNotEmpty() }?.let { rejections ->
                                     Text(
                                         text = stringResource(
-                                            R.string.arr_radarr_manual_import_rejections,
+                                            ArrUiR.string.arr_common_manual_import_rejections,
                                             rejections.joinToString(" • ") { it.reason.orEmpty() },
                                         ),
                                         style = MaterialTheme.typography.labelSmall,
@@ -406,7 +407,7 @@ private fun SelectionBar(
         ) {
             Text(
                 text = stringResource(
-                    R.string.arr_radarr_manual_import_selected,
+                    ArrUiR.string.arr_common_import_flow_selected,
                     state.selected.size,
                 ),
                 style = MaterialTheme.typography.labelLarge,
@@ -414,17 +415,17 @@ private fun SelectionBar(
             )
             if (state.selected.isNotEmpty()) {
                 OutlinedButton(onClick = onClearSelection) {
-                    Text(stringResource(R.string.arr_radarr_manual_import_clear_selection))
+                    Text(stringResource(ArrUiR.string.arr_common_manual_import_clear_selection))
                 }
                 Spacer(Modifier.width(8.dp))
             } else if (state.items.isNotEmpty()) {
                 OutlinedButton(onClick = onSelectAll) {
-                    Text(stringResource(R.string.arr_radarr_manual_import_select_all))
+                    Text(stringResource(ArrUiR.string.arr_common_import_flow_select_all))
                 }
                 Spacer(Modifier.width(8.dp))
             }
             Button(onClick = onImport, enabled = state.canImport && !state.importing) {
-                Text(stringResource(R.string.arr_radarr_manual_import_action))
+                Text(stringResource(ArrUiR.string.arr_common_import_flow_approve))
             }
         }
         if (state.selectionIncomplete) {

@@ -127,7 +127,7 @@ class SonarrReleaseRepositoryTest {
     }
 
     @Test
-    fun `releases serves the cache when the refresh fails`() = runTest {
+    fun `releases reports a failed refresh and preserves the cache`() = runTest {
         fake.releases += release("g1")
         val scope = ReleaseScope.Season(5, 2)
         repository.refresh(scope)
@@ -138,7 +138,9 @@ class SonarrReleaseRepositoryTest {
         nowMillis += SonarrReleaseRepository.RELEASE_TTL_MILLIS + 1
         val result = repository.releases(scope)
 
-        assertTrue(result is ArrResult.Ok && (result as ArrResult.Ok).value.size == 1)
+        assertTrue(result is ArrResult.Err)
+        assertEquals(1, repository.cachedReleases(scope).size)
+        assertTrue(actionQueue.pending().isEmpty())
     }
 
     @Test

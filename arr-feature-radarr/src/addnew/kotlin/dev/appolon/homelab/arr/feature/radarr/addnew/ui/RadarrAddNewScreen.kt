@@ -64,6 +64,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The Add new screen: a search field with year disambiguation, Discover and
@@ -204,6 +205,7 @@ fun RadarrAddNewScreen(
 
                                 AddNewTab.COLLECTIONS -> CollectionsArea(
                                     state = collectionsState,
+                                    imageLoader = imageLoader,
                                     onToggleMonitored = onToggleCollectionMonitored,
                                     onOpenEditor = onOpenCollectionEditor,
                                     onEditorChange = onCollectionEditorChange,
@@ -270,7 +272,7 @@ private fun PendingBanner(count: Int) {
     AssistChip(
         onClick = {},
         enabled = false,
-        label = { Text(stringResource(R.string.arr_radarr_addnew_pending_banner, count)) },
+        label = { Text(stringResource(ArrUiR.string.arr_common_system_pending_banner, count)) },
         leadingIcon = {
             Icon(
                 Icons.Filled.CloudUpload,
@@ -299,7 +301,7 @@ private fun SearchResultsArea(
     ArrLceBox(
         state = lce,
         onRetry = onRetry,
-        emptyTitle = stringResource(R.string.arr_radarr_addnew_search_empty_title),
+        emptyTitle = stringResource(ArrUiR.string.arr_common_addnew_search_empty_title),
         emptyMessage = stringResource(R.string.arr_radarr_addnew_search_empty_message, state.query),
         modifier = Modifier.fillMaxSize(),
     ) { results ->
@@ -307,7 +309,7 @@ private fun SearchResultsArea(
             contentPadding = PaddingValues(vertical = 8.dp),
             modifier = Modifier.fillMaxSize(),
         ) {
-            items(results, key = { it.tmdbId }) { movie ->
+            items(results, key = { it.tmdbId }, contentType = { "search-result" }) { movie ->
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                     SearchResultRow(
                         movie = movie,
@@ -343,7 +345,7 @@ private fun SearchResultRow(
     ) {
         PosterImage(
             url = posterUrl,
-            contentDescription = stringResource(R.string.arr_radarr_addnew_cd_poster, title),
+            contentDescription = stringResource(ArrUiR.string.arr_common_addnew_cd_poster, title),
             imageLoader = imageLoader,
             width = 64.dp,
             height = 96.dp,
@@ -383,13 +385,13 @@ private fun SearchResultRow(
             existing -> AssistChip(
                 onClick = {},
                 enabled = false,
-                label = { Text(stringResource(R.string.arr_radarr_addnew_existing_chip)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_lists_preview_existing)) },
             )
 
             queued -> AssistChip(
                 onClick = {},
                 enabled = false,
-                label = { Text(stringResource(R.string.arr_radarr_addnew_queued_chip)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_connect_badge_queued)) },
                 leadingIcon = {
                     Icon(
                         Icons.Filled.CloudUpload,
@@ -444,7 +446,7 @@ private fun DiscoverArea(
                 item(span = { GridItemSpan(maxLineSpan) }, key = "header-$title") {
                     SectionHeader(title = title)
                 }
-                items(items, key = { it.tmdbId }) { item ->
+                items(items, key = { it.tmdbId }, contentType = { "discovery" }) { item ->
                     DiscoveryCard(
                         item = item,
                         existing = item.tmdbId in state.existingTmdbIds,
@@ -471,7 +473,7 @@ internal fun addNewMessageText(message: AddNewMessage): String = when (message) 
         stringResource(R.string.arr_radarr_addnew_notice_added_searching, message.title)
 
     is AddNewMessage.AddQueued ->
-        stringResource(R.string.arr_radarr_addnew_notice_add_queued, message.title)
+        stringResource(ArrUiR.string.arr_common_add_notice_queued, message.title)
 
     is AddNewMessage.AddFailed ->
         stringResource(R.string.arr_radarr_addnew_notice_add_failed, message.title)

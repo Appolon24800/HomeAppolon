@@ -1,6 +1,7 @@
 package dev.appolon.homelab.arr.feature.prowlarr.history.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -35,7 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -54,6 +57,7 @@ import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Spoken label for one event type, shared by rows and their icons. */
 @Composable
@@ -61,10 +65,10 @@ private fun eventLabel(type: HistoryEventType): String = stringResource(
     when (type) {
         HistoryEventType.INDEXER_QUERY -> R.string.arr_prowlarr_history_event_query
         HistoryEventType.INDEXER_RSS -> R.string.arr_prowlarr_history_event_rss
-        HistoryEventType.RELEASE_GRABBED -> R.string.arr_prowlarr_history_event_grab
+        HistoryEventType.RELEASE_GRABBED -> ArrUiR.string.arr_common_grab_sheet_action
         HistoryEventType.INDEXER_AUTH -> R.string.arr_prowlarr_history_event_auth
-        HistoryEventType.INDEXER_INFO -> R.string.arr_prowlarr_history_event_info
-        HistoryEventType.UNKNOWN -> R.string.arr_prowlarr_history_event_unknown
+        HistoryEventType.INDEXER_INFO -> ArrUiR.string.arr_common_general_log_level_info
+        HistoryEventType.UNKNOWN -> ArrUiR.string.arr_common_status_unknown
     },
 )
 
@@ -107,7 +111,7 @@ fun HistoryScreen(
     }
 
     ArrScaffold(
-        title = stringResource(R.string.arr_prowlarr_history_title),
+        title = stringResource(ArrUiR.string.arr_common_history_title),
         subtitle = subtitleFor(state),
         actions = {
             val clearCd = stringResource(R.string.arr_prowlarr_history_cd_clear)
@@ -167,6 +171,8 @@ fun HistoryScreen(
                     HistoryList(state, onLoadMore)
                 }
                 if (state.clearQueued) {
+                    // Polite live region: the queued-clear state changes without
+                    // focus moving, so it must announce itself.
                     AssistChip(
                         onClick = {},
                         enabled = false,
@@ -175,7 +181,8 @@ fun HistoryScreen(
                         },
                         modifier = Modifier
                             .padding(bottom = 4.dp)
-                            .align(Alignment.CenterHorizontally),
+                            .align(Alignment.CenterHorizontally)
+                            .semantics { liveRegion = LiveRegionMode.Polite },
                     )
                 }
                 SnackbarHost(hostState = snackbarHostState) { data ->
@@ -192,12 +199,12 @@ fun HistoryScreen(
             text = { Text(stringResource(R.string.arr_prowlarr_history_clear_message)) },
             confirmButton = {
                 TextButton(onClick = onClearConfirm) {
-                    Text(stringResource(R.string.arr_prowlarr_history_clear))
+                    Text(stringResource(ArrUiR.string.arr_common_import_flow_clear_selection))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onClearDismiss) {
-                    Text(stringResource(R.string.arr_prowlarr_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -242,7 +249,11 @@ private fun HistoryList(state: HistoryUiState, onLoadMore: () -> Unit) {
         LazyColumn(
             state = listState,
             contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 8.dp),
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                // One traversal group: collapsed rows and expanded details
+                // belong to the same logical list.
+                .focusGroup(),
         ) {
             items(rows, key = { it.id }) { row ->
                 HistoryEventRow(row, wide)
@@ -250,13 +261,18 @@ private fun HistoryList(state: HistoryUiState, onLoadMore: () -> Unit) {
             }
             if (state.loadingMore) {
                 item(key = "loading-more") {
+                    val loadingCd = stringResource(ArrUiR.string.arr_common_loading_more)
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
                     ) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .semantics { contentDescription = loadingCd },
+                        )
                     }
                 }
             }
@@ -287,7 +303,7 @@ private fun AppendErrorRow(error: ArrError, onRetry: () -> Unit) {
             overflow = TextOverflow.Ellipsis,
         )
         TextButton(onClick = onRetry) {
-            Text(stringResource(R.string.arr_prowlarr_history_retry))
+            Text(stringResource(ArrUiR.string.arr_common_retry))
         }
     }
 }
@@ -298,7 +314,7 @@ private fun HistoryEventRow(row: HistoryRow, wide: Boolean) {
     var expanded by remember(row.id) { mutableStateOf(false) }
     val cd = stringResource(
         if (expanded) R.string.arr_prowlarr_history_cd_collapse
-        else R.string.arr_prowlarr_history_cd_expand,
+        else ArrUiR.string.arr_common_roots_cd_open,
         row.title.ifBlank { eventLabel(row.event.eventType) },
     )
     Row(
@@ -329,7 +345,11 @@ private fun HistoryEventRow(row: HistoryRow, wide: Boolean) {
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                "${row.indexerName} · ${row.occurredAt?.let { ArrTime.relative(it) } ?: ""}",
+                stringResource(
+                    ArrUiR.string.arr_common_metadata_pair,
+                    row.indexerName,
+                    row.occurredAt?.let { ArrTime.relative(it) }.orEmpty(),
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -337,7 +357,7 @@ private fun HistoryEventRow(row: HistoryRow, wide: Boolean) {
             )
             if (!row.event.successful) {
                 Text(
-                    stringResource(R.string.arr_prowlarr_history_failed),
+                    stringResource(ArrUiR.string.arr_common_history_filter_failed),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                 )
@@ -397,8 +417,8 @@ private fun HistoryDetails(row: HistoryRow) {
         DetailLine(
             stringResource(R.string.arr_prowlarr_history_cached),
             when (row.cached) {
-                true -> stringResource(R.string.arr_prowlarr_history_cached_yes)
-                false -> stringResource(R.string.arr_prowlarr_history_cached_no)
+                true -> stringResource(ArrUiR.string.arr_common_yes)
+                false -> stringResource(ArrUiR.string.arr_common_no)
                 null -> null
             },
         )
@@ -410,8 +430,8 @@ private fun HistoryDetails(row: HistoryRow) {
             stringResource(R.string.arr_prowlarr_history_query_type),
             row.queryType,
         )
-        DetailLine(stringResource(R.string.arr_prowlarr_history_source), row.source)
-        DetailLine(stringResource(R.string.arr_prowlarr_history_host), row.host)
+        DetailLine(stringResource(ArrUiR.string.arr_common_history_details_source), row.source)
+        DetailLine(stringResource(ArrUiR.string.arr_common_general_section_host), row.host)
     }
 }
 
@@ -425,7 +445,7 @@ private fun DetailLine(label: String, value: String?) {
             modifier = Modifier.weight(1f),
         )
         Text(
-            value ?: stringResource(R.string.arr_prowlarr_history_unknown_value),
+            value ?: stringResource(ArrUiR.string.arr_common_wanted_size_none),
             style = MaterialTheme.typography.bodySmall,
         )
     }

@@ -48,8 +48,8 @@ class ProwlarrStatsRepository(
     /**
      * Cache-first read for [period]. Within the TTL the cached window returns
      * without network; past it, or for [refresh], the endpoint is queried with
-     * the period window and the cache is replaced. A fetch failure returns the
-     * stale cache when one exists, the error otherwise.
+     * the period window and the cache is replaced. A fetch failure returns an
+     * error without deleting the cached window.
      */
     suspend fun stats(
         period: StatsPeriod,
@@ -59,25 +59,24 @@ class ProwlarrStatsRepository(
         if (cached != null && !isStale(period, ttlMillis)) {
             return@withContext ArrResult.ok(cached)
         }
-        fetch(period, fallback = cached)
+        fetch(period)
     }
 
     /** Force fetch of [period] regardless of the TTL; keeps stale data on error. */
     suspend fun refresh(period: StatsPeriod): ArrResult<IndexerStatsResource> = withContext(io) {
-        fetch(period, fallback = cachedStats(period))
+        fetch(period)
     }
 
     private suspend fun fetch(
         period: StatsPeriod,
-        fallback: IndexerStatsResource?,
     ): ArrResult<IndexerStatsResource> {
         val window = period.window(Instant.ofEpochMilli(now()))
         val fetched = try {
             statsApi(window.first, window.second)
         } catch (e: HttpException) {
-            return staleOrErr(fallback, e.toArrError())
+            return ArrResult.err(e.toArrError())
         } catch (e: Throwable) {
-            return staleOrErr(fallback, e.arrError())
+            return ArrResult.err(e.arrError())
         }
         store.putAll(
             serverId, STATS_TYPE,
@@ -91,12 +90,6 @@ class ProwlarrStatsRepository(
     private suspend fun allCached(): List<CachedStats> =
         store.getAll(serverId, STATS_TYPE, CachedStats.serializer())
 
-    private fun staleOrErr(
-        cached: IndexerStatsResource?,
-        error: ArrError,
-    ): ArrResult<IndexerStatsResource> =
-        if (cached != null) ArrResult.ok(cached) else ArrResult.err(error)
-
     private fun HttpException.toArrError(): ArrError = when (code()) {
         401, 403 -> ArrError.Auth(code())
         else -> ArrError.Http(code(), message())
@@ -106,6 +99,6 @@ class ProwlarrStatsRepository(
         internal val STATS_TYPE = EntityType("prowlarr.indexerstats")
 
         /** Five minutes: counters move constantly, but not second to second. */
-        const val STATS_TTL_MILLIS: Long = 5 * 60 * 1000
+        const val STATS_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.LIBRARY
     }
 }

@@ -35,6 +35,7 @@ import dev.appolon.homelab.arr.api.sonarr.model.Language
 import dev.appolon.homelab.arr.api.sonarr.model.Quality
 import dev.appolon.homelab.arr.api.sonarr.model.ReleaseResource
 import dev.appolon.homelab.arr.feature.sonarr.R
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The reusable grab sheet: shows one release and lets the caller's user
@@ -71,7 +72,7 @@ fun SonarrGrabSheet(
                 .padding(bottom = 24.dp),
         ) {
             Text(
-                text = stringResource(R.string.arr_sonarr_grab_sheet_title),
+                text = stringResource(ArrUiR.string.arr_common_grab_sheet_title),
                 style = MaterialTheme.typography.titleMedium,
             )
             Spacer(Modifier.height(4.dp))
@@ -84,10 +85,10 @@ fun SonarrGrabSheet(
             )
             Spacer(Modifier.height(16.dp))
             OptionDropdown(
-                label = stringResource(R.string.arr_sonarr_grab_sheet_quality_label),
+                label = stringResource(ArrUiR.string.arr_common_quality),
                 chosenName = quality.name,
-                fallback = stringResource(R.string.arr_sonarr_grab_sheet_as_parsed),
-                contentDescription = stringResource(R.string.arr_sonarr_grab_sheet_cd_quality),
+                fallback = stringResource(ArrUiR.string.arr_common_grab_sheet_as_parsed),
+                contentDescription = stringResource(ArrUiR.string.arr_common_grab_sheet_cd_quality),
                 optionNames = qualities.mapNotNull { it.name },
                 onSelect = { name ->
                     quality = qualities.firstOrNull { it.name == name } ?: quality
@@ -95,10 +96,10 @@ fun SonarrGrabSheet(
             )
             Spacer(Modifier.height(12.dp))
             OptionDropdown(
-                label = stringResource(R.string.arr_sonarr_grab_sheet_language_label),
+                label = stringResource(ArrUiR.string.arr_common_language),
                 chosenName = language?.name,
-                fallback = stringResource(R.string.arr_sonarr_grab_sheet_as_parsed),
-                contentDescription = stringResource(R.string.arr_sonarr_grab_sheet_cd_language),
+                fallback = stringResource(ArrUiR.string.arr_common_grab_sheet_as_parsed),
+                contentDescription = stringResource(ArrUiR.string.arr_common_grab_sheet_cd_language),
                 optionNames = languages.mapNotNull { it.name },
                 onSelect = { name ->
                     language = languages.firstOrNull { it.name == name } ?: language
@@ -118,7 +119,7 @@ fun SonarrGrabSheet(
                     enabled = !busy,
                     modifier = Modifier.height(48.dp),
                 ) {
-                    Text(stringResource(R.string.arr_sonarr_grab_sheet_action))
+                    Text(stringResource(ArrUiR.string.arr_common_grab_sheet_action))
                 }
                 Spacer(Modifier.width(12.dp))
                 OutlinedButton(
@@ -126,7 +127,7 @@ fun SonarrGrabSheet(
                     enabled = !busy,
                     modifier = Modifier.height(48.dp),
                 ) {
-                    Text(stringResource(R.string.arr_sonarr_grab_sheet_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             }
         }

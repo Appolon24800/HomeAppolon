@@ -38,6 +38,7 @@ import dev.appolon.homelab.arr.feature.sonarr.detail.vm.SeasonPassForm
 import dev.appolon.homelab.arr.feature.sonarr.detail.vm.SeriesEditForm
 import dev.appolon.homelab.arr.feature.sonarr.library.ui.SelectableRow
 import dev.appolon.homelab.arr.ui.components.LabeledSwitch
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Series edit sheet: monitoring, series type, quality profile, path, season
@@ -67,19 +68,19 @@ fun EditSeriesSheet(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
-                text = stringResource(R.string.arr_sonarr_detail_edit_title),
+                text = stringResource(R.string.arr_sonarr_detail_menu_edit),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 8.dp),
             )
 
             LabeledSwitch(
-                label = stringResource(R.string.arr_sonarr_detail_edit_monitored),
+                label = stringResource(ArrUiR.string.arr_common_monitored),
                 checked = form.monitored,
                 onCheckedChange = { checked -> onUpdate(form.copy(monitored = checked)) },
             )
 
             Text(
-                text = stringResource(R.string.arr_sonarr_detail_edit_type),
+                text = stringResource(R.string.arr_sonarr_list_series_type),
                 modifier = Modifier.padding(top = 8.dp),
             )
             Column {
@@ -93,7 +94,7 @@ fun EditSeriesSheet(
             }
 
             Text(
-                text = stringResource(R.string.arr_sonarr_detail_edit_quality),
+                text = stringResource(ArrUiR.string.arr_common_wanted_filter_quality),
                 modifier = Modifier.padding(top = 8.dp),
             )
             Column {
@@ -109,7 +110,7 @@ fun EditSeriesSheet(
             OutlinedTextField(
                 value = form.path,
                 onValueChange = { value -> onUpdate(form.copy(path = value)) },
-                label = { Text(stringResource(R.string.arr_sonarr_detail_edit_path)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_detail_edit_path)) },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -117,7 +118,7 @@ fun EditSeriesSheet(
             )
 
             LabeledSwitch(
-                label = stringResource(R.string.arr_sonarr_detail_edit_season_folder),
+                label = stringResource(R.string.arr_sonarr_add_season_folder),
                 checked = form.seasonFolder,
                 onCheckedChange = { checked -> onUpdate(form.copy(seasonFolder = checked)) },
             )
@@ -140,7 +141,7 @@ fun EditSeriesSheet(
             )
 
             LabeledSwitch(
-                label = stringResource(R.string.arr_sonarr_detail_edit_move_files),
+                label = stringResource(ArrUiR.string.arr_common_detail_edit_move),
                 checked = form.moveFiles,
                 onCheckedChange = { checked -> onUpdate(form.copy(moveFiles = checked)) },
             )
@@ -162,10 +163,10 @@ fun EditSeriesSheet(
                     .padding(vertical = 16.dp),
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.arr_sonarr_detail_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
                 Button(onClick = onSubmit) {
-                    Text(stringResource(R.string.arr_sonarr_detail_edit_save))
+                    Text(stringResource(ArrUiR.string.arr_common_save_changes))
                 }
             }
         }
@@ -174,9 +175,9 @@ fun EditSeriesSheet(
 
 @Composable
 private fun seriesTypeOptions(): List<Pair<SeriesTypes, String>> = listOf(
-    SeriesTypes.STANDARD to stringResource(R.string.arr_sonarr_type_standard),
-    SeriesTypes.ANIME to stringResource(R.string.arr_sonarr_type_anime),
-    SeriesTypes.DAILY to stringResource(R.string.arr_sonarr_type_daily),
+    SeriesTypes.STANDARD to stringResource(R.string.arr_sonarr_add_type_standard),
+    SeriesTypes.ANIME to stringResource(R.string.arr_sonarr_add_type_anime),
+    SeriesTypes.DAILY to stringResource(R.string.arr_sonarr_add_type_daily),
 )
 
 /**
@@ -207,12 +208,12 @@ fun SeasonPassStrategySheet(
                 modifier = Modifier.padding(bottom = 8.dp),
             )
             LabeledSwitch(
-                label = stringResource(R.string.arr_sonarr_detail_season_pass_monitored),
+                label = stringResource(R.string.arr_sonarr_add_monitored),
                 checked = form.monitored,
                 onCheckedChange = { checked -> onUpdate(form.copy(monitored = checked)) },
             )
             Text(
-                text = stringResource(R.string.arr_sonarr_detail_season_pass_strategy),
+                text = stringResource(R.string.arr_sonarr_list_monitor),
                 modifier = Modifier.padding(top = 8.dp),
             )
             Column {
@@ -246,7 +247,7 @@ fun SeasonPassStrategySheet(
                     .padding(vertical = 16.dp),
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.arr_sonarr_detail_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
                 Button(onClick = onSubmit) {
                     Text(stringResource(R.string.arr_sonarr_detail_season_pass_submit))
@@ -258,18 +259,18 @@ fun SeasonPassStrategySheet(
 
 @Composable
 private fun monitorStrategyOptions(): List<Pair<MonitorTypes, String>> = listOf(
-    MonitorTypes.ALL to stringResource(R.string.arr_sonarr_strategy_all),
-    MonitorTypes.FUTURE to stringResource(R.string.arr_sonarr_strategy_future),
-    MonitorTypes.MISSING to stringResource(R.string.arr_sonarr_strategy_missing),
-    MonitorTypes.EXISTING to stringResource(R.string.arr_sonarr_strategy_existing),
-    MonitorTypes.FIRSTSEASON to stringResource(R.string.arr_sonarr_strategy_first_season),
-    MonitorTypes.LASTSEASON to stringResource(R.string.arr_sonarr_strategy_last_season),
-    MonitorTypes.LATESTSEASON to stringResource(R.string.arr_sonarr_strategy_latest_season),
-    MonitorTypes.PILOT to stringResource(R.string.arr_sonarr_strategy_pilot),
-    MonitorTypes.RECENT to stringResource(R.string.arr_sonarr_strategy_recent),
-    MonitorTypes.MONITORSPECIALS to stringResource(R.string.arr_sonarr_strategy_monitor_specials),
-    MonitorTypes.UNMONITORSPECIALS to stringResource(R.string.arr_sonarr_strategy_unmonitor_specials),
-    MonitorTypes.NONE to stringResource(R.string.arr_sonarr_strategy_none),
+    MonitorTypes.ALL to stringResource(R.string.arr_sonarr_add_strategy_all),
+    MonitorTypes.FUTURE to stringResource(R.string.arr_sonarr_add_strategy_future),
+    MonitorTypes.MISSING to stringResource(R.string.arr_sonarr_add_strategy_missing),
+    MonitorTypes.EXISTING to stringResource(R.string.arr_sonarr_add_strategy_existing),
+    MonitorTypes.FIRSTSEASON to stringResource(R.string.arr_sonarr_add_strategy_first_season),
+    MonitorTypes.LASTSEASON to stringResource(R.string.arr_sonarr_add_strategy_last_season),
+    MonitorTypes.LATESTSEASON to stringResource(R.string.arr_sonarr_add_strategy_latest_season),
+    MonitorTypes.PILOT to stringResource(R.string.arr_sonarr_add_strategy_pilot),
+    MonitorTypes.RECENT to stringResource(R.string.arr_sonarr_add_strategy_recent),
+    MonitorTypes.MONITORSPECIALS to stringResource(R.string.arr_sonarr_add_strategy_monitor_specials),
+    MonitorTypes.UNMONITORSPECIALS to stringResource(R.string.arr_sonarr_add_strategy_unmonitor_specials),
+    MonitorTypes.NONE to stringResource(R.string.arr_sonarr_add_strategy_none),
 )
 
 /**
@@ -307,7 +308,7 @@ fun EpisodeFileEditorSheet(
                 modifier = Modifier.padding(bottom = 8.dp),
             )
 
-            Text(stringResource(R.string.arr_sonarr_detail_file_quality))
+            Text(stringResource(ArrUiR.string.arr_common_quality))
             Column {
                 qualities.forEach { quality ->
                     SelectableRow(
@@ -319,7 +320,7 @@ fun EpisodeFileEditorSheet(
             }
 
             Text(
-                text = stringResource(R.string.arr_sonarr_detail_file_languages),
+                text = stringResource(ArrUiR.string.arr_common_quality_languages_title),
                 modifier = Modifier.padding(top = 8.dp),
             )
             FlowRow(
@@ -345,7 +346,7 @@ fun EpisodeFileEditorSheet(
             OutlinedTextField(
                 value = form.releaseGroup,
                 onValueChange = { value -> onUpdate(form.copy(releaseGroup = value)) },
-                label = { Text(stringResource(R.string.arr_sonarr_detail_file_release_group)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_history_details_release_group)) },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -370,10 +371,10 @@ fun EpisodeFileEditorSheet(
                     .padding(vertical = 16.dp),
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.arr_sonarr_detail_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
                 Button(onClick = onSubmit) {
-                    Text(stringResource(R.string.arr_sonarr_detail_file_save))
+                    Text(stringResource(ArrUiR.string.arr_common_save))
                 }
             }
         }
@@ -397,7 +398,7 @@ fun EpisodeFileEditorSheet(
             },
             dismissButton = {
                 TextButton(onClick = { onConfirmDeleteChange(false) }) {
-                    Text(stringResource(R.string.arr_sonarr_detail_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -436,14 +437,14 @@ fun DeleteSeriesDialog(
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(
-                    text = stringResource(R.string.arr_sonarr_detail_delete_confirm),
+                    text = stringResource(ArrUiR.string.arr_common_delete),
                     color = MaterialTheme.colorScheme.error,
                 )
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_detail_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )

@@ -212,7 +212,7 @@ private fun WantedEpisodeRow(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (queued) QueuedBadge()
                     if (busy) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        busySpinner()
                     }
                     val cd = stringResource(R.string.arr_bazarr_cd_search_download)
                     IconButton(
@@ -263,7 +263,7 @@ private fun WantedMovieRow(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (queued) QueuedBadge()
                     if (busy) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        busySpinner()
                     }
                     val cd = stringResource(R.string.arr_bazarr_cd_search_download)
                     IconButton(
@@ -284,3 +284,15 @@ private fun WantedMovieRow(
 /** Row activation opens the underlying media; icon buttons keep their targets. */
 private fun Modifier.toggleableRow(onActivate: () -> Unit): Modifier =
     this.clickable(onClick = onActivate)
+
+/** Busy-row spinner announcing its state instead of a bare progress bar. */
+@Composable
+private fun busySpinner() {
+    val busyCd = stringResource(R.string.arr_bazarr_cd_loading)
+    CircularProgressIndicator(
+        modifier = Modifier
+            .size(24.dp)
+            .semantics { contentDescription = busyCd },
+        strokeWidth = 2.dp,
+    )
+}

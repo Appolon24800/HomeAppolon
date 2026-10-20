@@ -54,6 +54,7 @@ import dev.appolon.homelab.arr.ui.components.SectionHeader
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the indexer editor route (indexerId null creates). */
 @Composable
@@ -140,18 +141,18 @@ fun SonarrIndexerEditorScreen(
 
     ConnectNoticeHost(
         noticeMessage = when (state.notice) {
-            IndexerEditorNotice.SAVED -> stringResource(R.string.arr_sonarr_connect_notice_saved)
+            IndexerEditorNotice.SAVED -> stringResource(ArrUiR.string.arr_common_connect_notice_saved)
             IndexerEditorNotice.SAVED_QUEUED ->
-                stringResource(R.string.arr_sonarr_connect_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
             IndexerEditorNotice.DELETED ->
-                stringResource(R.string.arr_sonarr_connect_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             IndexerEditorNotice.DELETED_QUEUED ->
-                stringResource(R.string.arr_sonarr_connect_notice_deleted_queued)
+                stringResource(ArrUiR.string.arr_common_backup_notice_deleted_queued)
 
             IndexerEditorNotice.TEST_PASSED ->
-                stringResource(R.string.arr_sonarr_connect_notice_test_passed)
+                stringResource(ArrUiR.string.arr_common_connect_notice_test_passed)
 
             null -> null
         },
@@ -163,8 +164,8 @@ fun SonarrIndexerEditorScreen(
 
     ArrScaffold(
         title = stringResource(
-            if (state.isNew) R.string.arr_sonarr_indexer_editor_title_new
-            else R.string.arr_sonarr_indexer_editor_title,
+            if (state.isNew) ArrUiR.string.arr_common_indexers_add
+            else ArrUiR.string.arr_common_indexer_editor_title,
         ),
         subtitle = serverName,
         onBack = onBack,
@@ -173,11 +174,11 @@ fun SonarrIndexerEditorScreen(
                 IconButton(onClick = onTest, enabled = !state.testing) {
                     Icon(
                         imageVector = Icons.Filled.Science,
-                        contentDescription = stringResource(R.string.arr_sonarr_connect_cd_test),
+                        contentDescription = stringResource(ArrUiR.string.arr_common_connect_cd_test),
                     )
                 }
                 if (!state.isNew) {
-                    val deleteCd = stringResource(R.string.arr_sonarr_connect_cd_delete)
+                    val deleteCd = stringResource(ArrUiR.string.arr_common_connect_cd_delete)
                     IconButton(
                         onClick = onDeleteRequest,
                         modifier = Modifier.semantics { contentDescription = deleteCd },
@@ -197,8 +198,8 @@ fun SonarrIndexerEditorScreen(
             ArrLceBox(
                 state = lce,
                 onRetry = onBack,
-                emptyTitle = stringResource(R.string.arr_sonarr_connect_picker_empty_title),
-                emptyMessage = stringResource(R.string.arr_sonarr_connect_picker_empty_message),
+                emptyTitle = stringResource(ArrUiR.string.arr_common_connect_picker_empty_title),
+                emptyMessage = stringResource(ArrUiR.string.arr_common_connect_picker_empty_message),
                 modifier = Modifier.fillMaxSize(),
             ) { data ->
                 when {
@@ -232,23 +233,23 @@ fun SonarrIndexerEditorScreen(
     if (state.confirmDelete) {
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_sonarr_connect_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_delete)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.arr_sonarr_connect_delete_message,
+                        ArrUiR.string.arr_common_connect_delete_message,
                         state.draft?.name.orEmpty(),
                     ),
                 )
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_sonarr_connect_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_sonarr_connect_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -267,14 +268,18 @@ private fun SchemaPicker(
     ) {
         item {
             Text(
-                stringResource(R.string.arr_sonarr_connect_picker_hint),
+                stringResource(ArrUiR.string.arr_common_connect_picker_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        items(schemas, key = { it.implementation ?: it.id.toString() }) { schema ->
+        items(
+            schemas,
+            key = { it.implementation ?: it.id.toString() },
+            contentType = { "schema" },
+        ) { schema ->
             val cd = stringResource(
-                R.string.arr_sonarr_connect_picker_cd_pick,
+                ArrUiR.string.arr_common_connect_picker_cd_pick,
                 schema.implementationName.orEmpty(),
             )
             Card(
@@ -324,29 +329,29 @@ private fun IndexerForm(
             OutlinedTextField(
                 value = draft.name,
                 onValueChange = onNameChange,
-                label = { Text(stringResource(R.string.arr_sonarr_connect_name_label)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_autotag_name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
         item {
             Column {
-                SectionHeader(title = stringResource(R.string.arr_sonarr_indexer_section_search_modes))
+                SectionHeader(title = stringResource(ArrUiR.string.arr_common_indexer_section_search_modes))
                 if (draft.supportsRss) {
                     LabeledSwitch(
-                        label = stringResource(R.string.arr_sonarr_indexers_mode_rss),
+                        label = stringResource(ArrUiR.string.arr_common_indexers_mode_rss),
                         checked = draft.enableRss,
                         onCheckedChange = { onToggleRss() },
                     )
                 }
                 LabeledSwitch(
-                    label = stringResource(R.string.arr_sonarr_indexers_mode_automatic),
+                    label = stringResource(ArrUiR.string.arr_common_indexers_mode_automatic),
                     checked = draft.enableAutomaticSearch,
                     onCheckedChange = { onToggleAutomaticSearch() },
                 )
                 if (draft.supportsSearch) {
                     LabeledSwitch(
-                        label = stringResource(R.string.arr_sonarr_indexers_mode_interactive),
+                        label = stringResource(ArrUiR.string.arr_common_indexers_mode_interactive),
                         checked = draft.enableInteractiveSearch,
                         onCheckedChange = { onToggleInteractiveSearch() },
                     )
@@ -361,7 +366,7 @@ private fun IndexerForm(
                         priorityText = next
                         next.trim().toIntOrNull()?.let(onPriorityChange)
                     },
-                    label = { Text(stringResource(R.string.arr_sonarr_connect_priority_label)) },
+                    label = { Text(stringResource(ArrUiR.string.arr_common_connect_priority_label)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -408,7 +413,7 @@ private fun IndexerForm(
                     Modifier
                 },
             ) {
-                Text(stringResource(R.string.arr_sonarr_connect_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         }
     }

@@ -31,34 +31,29 @@ data class ImportFolder(
     val isParent: Boolean = false,
 )
 
-/** The series id Sonarr matched to an import candidate; null when unmatched. */
-internal fun ManualImportResource.seriesIdOrNull(): Int? = series.intOf("id")
+/** The series id Sonarr matched to an import candidate; 0 when unmatched. */
+internal fun ManualImportResource.matchedSeriesId(): Int = series.id
 
 /** The matched series title, or null when Sonarr could not match one. */
-fun ManualImportResource.seriesTitleOrNull(): String? = series.stringOf("title")
+fun ManualImportResource.seriesTitleOrNull(): String? = series.title
 
 /** Episode ids of the matched candidate, used by the reprocess payload. */
 internal fun ManualImportResource.episodeIdsOrEmpty(): List<Int> =
-    episodes.orEmpty().mapNotNull { it.intOf("id") }
+    episodes.orEmpty().mapNotNull { it.id }
 
 /** Matched series plus at least one episode: the minimum the import endpoint needs. */
 fun ManualImportResource.isMatched(): Boolean =
-    (seriesIdOrNull() ?: 0) > 0 && episodes.orEmpty().isNotEmpty()
+    series.id > 0 && !episodes.orEmpty().isEmpty()
 
 /** "S02E05" from the candidate's season and first episode; null when unknown. */
 fun ManualImportResource.matchedEpisodeLabel(): String? {
     val season = seasonNumber ?: return null
-    val episode = episodes.orEmpty().firstOrNull()?.intOf("episodeNumber") ?: return null
+    val episode = episodes.orEmpty().firstOrNull()?.episodeNumber ?: return null
     return episodeLabelOf(season, episode)
 }
 
 private fun JsonObject.stringOf(key: String): String? =
     (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.content?.takeIf { it.isNotEmpty() }
-
-private fun JsonObject.intOf(key: String): Int? = when (val element = this[key]) {
-    is JsonPrimitive -> element.content.toIntOrNull()
-    else -> null
-}
 
 /**
  * Manual import repository over the ManualImport and FileSystem endpoints.
@@ -171,7 +166,9 @@ class SonarrManualImportRepository(
     ): ArrResult<QueueWriteOutcome> {
         if (!error.isRetryable()) return ArrResult.err(error)
         val action = QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:POST:$IMPORT_PATH:$body".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.SONARR,
             method = "POST",
@@ -194,7 +191,7 @@ class SonarrManualImportRepository(
     private fun toReprocess(item: ManualImportResource) = ManualImportReprocessResource(
         id = item.id,
         path = item.path,
-        seriesId = item.seriesIdOrNull() ?: 0,
+        seriesId = item.matchedSeriesId(),
         seasonNumber = item.seasonNumber,
         episodes = item.episodes,
         episodeIds = item.episodeIdsOrEmpty(),

@@ -263,7 +263,9 @@ class SonarrRootFolderRepository(
     ): ArrResult<WriteOutcome> {
         if (!error.isRetryable()) return ArrResult.err(error)
         val action = QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$body".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.SONARR,
             method = method,
@@ -305,7 +307,7 @@ class SonarrRootFolderRepository(
         internal val DISK_SPACE_TYPE = EntityType("sonarr.diskspace")
 
         /** One minute, matching how often Sonarr's UI polls disk space. */
-        const val ROOT_FOLDER_TTL_MILLIS: Long = 60 * 1000
+        const val ROOT_FOLDER_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         internal const val ROOT_FOLDER_PATH = "api/v3/rootfolder"
         private const val POST_METHOD = "POST"

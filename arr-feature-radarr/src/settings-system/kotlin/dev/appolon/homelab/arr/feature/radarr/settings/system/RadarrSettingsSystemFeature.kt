@@ -1,6 +1,7 @@
 package dev.appolon.homelab.arr.feature.radarr.settings.system
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.appolon.homelab.arr.core.ServerId
@@ -204,7 +205,7 @@ fun RadarrSettingsSystemFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 onOpenLink = onOpenLink,
                 modifier = modifier,
             )
@@ -216,7 +217,7 @@ fun RadarrSettingsSystemFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 onDownloadBackup = onDownloadBackup?.let { download ->
                     { backupFile -> download(serverId, backupFile) }
                 },
@@ -230,7 +231,7 @@ fun RadarrSettingsSystemFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -241,7 +242,7 @@ fun RadarrSettingsSystemFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 onOpenLink = onOpenLink,
                 modifier = modifier,
             )
@@ -253,7 +254,7 @@ fun RadarrSettingsSystemFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -264,10 +265,10 @@ fun RadarrSettingsSystemFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
-                onOpenEditor = { ruleId ->
+                onBack = remember(navigator) { { navigator.back() } },
+                onOpenEditor = remember(navigator, serverId) { { ruleId ->
                     RadarrSettingsSystemFeature.openAutoTaggingEditor(navigator, serverId, ruleId)
-                },
+                } },
                 modifier = modifier,
             )
         }
@@ -279,7 +280,7 @@ fun RadarrSettingsSystemFeatureSlot(
                 ruleId = autoTaggingEditor.getValue("ruleId").toIntOrNull(),
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }

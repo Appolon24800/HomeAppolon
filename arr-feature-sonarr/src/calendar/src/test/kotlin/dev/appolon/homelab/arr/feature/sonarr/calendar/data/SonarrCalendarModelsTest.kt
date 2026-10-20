@@ -54,7 +54,7 @@ class SonarrCalendarModelsTest {
                 ),
             ),
         )!!
-        assertEquals("/api/v3/mediacover/5/poster.jpg", local.posterPath)
+        assertEquals("/api/v3/mediacover/5/poster-500.jpg", local.posterPath)
 
         val absolute = calendarEntryOf(
             episode(

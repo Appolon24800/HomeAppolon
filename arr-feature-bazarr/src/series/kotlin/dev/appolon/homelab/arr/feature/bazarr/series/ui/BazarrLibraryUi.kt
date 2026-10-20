@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -37,8 +38,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.core.FilterSpec
 import dev.appolon.homelab.arr.core.FilterState
@@ -224,7 +228,9 @@ internal fun BazarrFilterSheet(
             Text(
                 text = stringResource(R.string.arr_bazarr_lib_filter_sheet_title),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 12.dp),
+                modifier = Modifier
+                    .padding(bottom = 12.dp)
+                    .semantics { heading() },
             )
             state.filterSpecs.forEach { spec ->
                 FilterSection(
@@ -263,7 +269,9 @@ private fun FilterSection(
             text = filterLabel(spec.id),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 8.dp),
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .semantics { heading() },
         )
         when (spec) {
             is FilterSpec.Choice -> {
@@ -319,8 +327,8 @@ private fun FilterSection(
 
 /**
  * Mass editor dialog: assigns one language profile to the bulk targets. The
- * radio rows keep a 48dp touch target through RadioButton plus the row's own
- * minimum height.
+ * whole row is one selectable 48dp target carrying the radio role, so the
+ * label and the button announce together.
  */
 @Composable
 internal fun ProfilePickerDialog(
@@ -352,11 +360,17 @@ internal fun ProfilePickerDialog(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .heightIn(min = 48.dp)
+                                    .selectable(
+                                        selected = false,
+                                        onClick = { onPick(profile.profileId) },
+                                        role = Role.RadioButton,
+                                    )
                                     .padding(vertical = 2.dp),
                             ) {
                                 RadioButton(
                                     selected = false,
-                                    onClick = { onPick(profile.profileId) },
+                                    onClick = null,
                                 )
                                 Text(
                                     text = profile.label,
@@ -430,7 +444,14 @@ internal fun ListActions(
         label = { sortLabels[it] ?: it },
         onSelect = onSortSelect,
     )
-    IconButton(onClick = onToggleSortDescending) {
+    val sortState = stringResource(
+        if (state.sortDescending) R.string.arr_bazarr_sort_state_descending
+        else R.string.arr_bazarr_sort_state_ascending,
+    )
+    IconButton(
+        onClick = onToggleSortDescending,
+        modifier = Modifier.semantics { stateDescription = sortState },
+    ) {
         Icon(
             imageVector = if (state.sortDescending) {
                 Icons.Filled.ArrowDownward

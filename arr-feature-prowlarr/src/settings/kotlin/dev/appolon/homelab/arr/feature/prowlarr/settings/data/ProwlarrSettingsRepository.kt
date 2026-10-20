@@ -194,17 +194,12 @@ class ProwlarrSettingsRepository(
             stamp,
         )
         refreshTags()
-        ArrResult.ok(Unit)
     }
 
     suspend fun refreshIfStale(ttlMillis: Long = SETTINGS_TTL_MILLIS): ArrResult<Unit> =
         if (isStale(ttlMillis)) refresh() else ArrResult.ok(Unit)
 
-    /**
-     * Re-fetches the config singletons and the localization options. A
-     * failure of one optional member (development config, UI config,
-     * localization) never fails the group; those caches simply stay.
-     */
+    /** Re-fetches config and localization, preserving cached rows when a member fails. */
     suspend fun refreshGeneral(): ArrResult<Unit> = withContext(ioContext) {
         val host = when (val r = fetch { hostConfigApi.getHostConfig() }) {
             is ArrResult.Err -> return@withContext r
@@ -218,11 +213,11 @@ class ProwlarrSettingsRepository(
                 DevelopmentConfigResource.serializer(),
             )
 
-            is ArrResult.Err -> Unit // optional member keeps its cache
+            is ArrResult.Err -> return@withContext r
         }
         when (val r = fetch { uiConfigApi.getUiConfig() }) {
             is ArrResult.Ok -> putConfigRow(UI_CONFIG_TYPE, r.value, UiConfigResource.serializer())
-            is ArrResult.Err -> Unit
+            is ArrResult.Err -> return@withContext r
         }
         when (val r = fetch { localizationApi.getLocalizationOptions() }) {
             is ArrResult.Ok -> replace(
@@ -233,7 +228,7 @@ class ProwlarrSettingsRepository(
                 now(),
             )
 
-            is ArrResult.Err -> Unit
+            is ArrResult.Err -> return@withContext r
         }
         ArrResult.ok(Unit)
     }
@@ -252,7 +247,7 @@ class ProwlarrSettingsRepository(
             is ArrResult.Ok -> r.value
         }
         val health = when (val r = fetch { healthApi.getHealth() }) {
-            is ArrResult.Err -> emptyList() // health rows stay optional
+            is ArrResult.Err -> return@withContext r
             is ArrResult.Ok -> r.value
         }
         val stamp = now()
@@ -286,7 +281,7 @@ class ProwlarrSettingsRepository(
                 )
             }
             val fetched = when (val r = fetch { tagApi.getTags() }) {
-                is ArrResult.Err -> return@withContext ArrResult.ok(cachedTags())
+                is ArrResult.Err -> return@withContext r
                 is ArrResult.Ok -> r.value
             }
             replace(
@@ -302,11 +297,10 @@ class ProwlarrSettingsRepository(
     private suspend fun cachedTags(): List<TagResource> =
         store.getAll(serverId, TAG_TYPE, TagResource.serializer())
 
-    private suspend fun refreshTags() {
-        val fetched = try {
-            tagApi.getTags()
-        } catch (_: Throwable) {
-            return
+    private suspend fun refreshTags(): ArrResult<Unit> {
+        val fetched = when (val result = fetch { tagApi.getTags() }) {
+            is ArrResult.Err -> return result
+            is ArrResult.Ok -> result.value
         }
         replace(
             TAG_TYPE,
@@ -315,6 +309,7 @@ class ProwlarrSettingsRepository(
             { it.id.toString() },
             now(),
         )
+        return ArrResult.ok(Unit)
     }
 
     /** Resolves tag labels to ids, creating tags the server does not have yet. */
@@ -328,7 +323,7 @@ class ProwlarrSettingsRepository(
             existing = try {
                 tagApi.getTags()
             } catch (e: Throwable) {
-                emptyList()
+                return@withContext ArrResult.err(e.arrError())
             }
             if (existing.isNotEmpty()) {
                 replace(
@@ -413,10 +408,7 @@ class ProwlarrSettingsRepository(
             return ArrResult.ok(store.getAll(serverId, type, serializer))
         }
         val fetched = when (val r = fetch { fetcher() }) {
-            is ArrResult.Err -> {
-                val cached = store.getAll(serverId, type, serializer)
-                if (cached.isNotEmpty()) ArrResult.ok(cached) else r
-            }
+            is ArrResult.Err -> r
 
             is ArrResult.Ok -> r
         }
@@ -698,17 +690,14 @@ class ProwlarrSettingsRepository(
                 ArrResult.ok(r.value)
             }
 
-            is ArrResult.Err -> ArrResult.ok(
-                store.getAll(serverId, LOCALIZATION_TYPE, LocalizationOption.serializer()),
-            )
+            is ArrResult.Err -> r
         }
     }
 
     /**
      * Root newznab categories offered by the grab-target editor. The table
      * is shared with the indexers group, so whichever group runs first seeds
-     * it. Failures fall back to the cache so the editor keeps working
-     * offline.
+     * it. Failures leave cached rows intact and return an error to the editor.
      */
     suspend fun newznabCategories(
         ttlMillis: Long = CATEGORY_TTL_MILLIS,
@@ -730,9 +719,7 @@ class ProwlarrSettingsRepository(
                 ArrResult.ok(r.value)
             }
 
-            is ArrResult.Err -> ArrResult.ok(
-                store.getAll(serverId, CATEGORY_TYPE, IndexerCategory.serializer()),
-            )
+            is ArrResult.Err -> r
         }
     }
 
@@ -838,7 +825,9 @@ class ProwlarrSettingsRepository(
 
     private fun actionOf(method: String, path: String, bodyJson: String?, description: String) =
         QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.PROWLARR,
             method = method,
@@ -953,16 +942,16 @@ class ProwlarrSettingsRepository(
         internal const val SINGLE_ID = "config"
 
         /** One minute; settings screens also re-read on pull-to-refresh. */
-        const val SETTINGS_TTL_MILLIS: Long = 60 * 1000
+        const val SETTINGS_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** A day; provider definitions change only on server upgrades. */
-        const val SCHEMA_TTL_MILLIS: Long = 24 * 60 * 60 * 1000
+        const val SCHEMA_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** One hour, matching the indexers group's tag TTL. */
-        const val TAG_TTL_MILLIS: Long = 60 * 60 * 1000
+        const val TAG_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** A day, matching the indexers group's category TTL. */
-        const val CATEGORY_TTL_MILLIS: Long = 24 * 60 * 60 * 1000
+        const val CATEGORY_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** Optimistic creates render under ids far below any server-assigned id. */
         internal const val TEMP_ID_BASE = -1_000_000_000L

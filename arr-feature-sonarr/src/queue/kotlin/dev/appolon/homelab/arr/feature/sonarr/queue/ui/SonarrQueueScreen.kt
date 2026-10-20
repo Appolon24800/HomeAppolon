@@ -67,6 +67,7 @@ import dev.appolon.homelab.arr.ui.shell.ArrScaffold
 import dev.appolon.homelab.arr.ui.shell.LocalArrShellNavigator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Built-in queue slot destination: wires the ViewModel for this route's
@@ -136,8 +137,8 @@ fun SonarrQueueDestination(
 @Composable
 private fun ForeignAppPlaceholder(app: String, modifier: Modifier = Modifier) {
     EmptyState(
-        title = stringResource(dev.appolon.homelab.arr.ui.R.string.arr_shell_unavailable_title),
-        message = stringResource(dev.appolon.homelab.arr.ui.R.string.arr_shell_unavailable_message, app),
+        title = stringResource(ArrUiR.string.arr_shell_unavailable_title),
+        message = stringResource(ArrUiR.string.arr_shell_unavailable_message, app),
         modifier = modifier,
     )
 }
@@ -180,19 +181,19 @@ fun SonarrQueueScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_queue_title),
+        title = stringResource(ArrUiR.string.arr_common_queue_title),
         subtitle = serverName,
         actions = {
             IconButton(onClick = { onOpenManualImport(null) }) {
                 Icon(
                     imageVector = Icons.Filled.FolderOpen,
-                    contentDescription = stringResource(R.string.arr_sonarr_queue_cd_manual_import),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_queue_cd_manual_import),
                 )
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_queue_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_queue_cd_refresh),
                 )
             }
         },
@@ -217,8 +218,8 @@ fun SonarrQueueScreen(
             ArrLceBox(
                 state = lce,
                 onRetry = onRefresh,
-                emptyTitle = stringResource(R.string.arr_sonarr_queue_empty_title),
-                emptyMessage = stringResource(R.string.arr_sonarr_queue_empty_message),
+                emptyTitle = stringResource(ArrUiR.string.arr_common_queue_empty_title),
+                emptyMessage = stringResource(ArrUiR.string.arr_common_queue_empty_message),
                 modifier = Modifier.fillMaxSize(),
             ) { shown ->
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -228,7 +229,7 @@ fun SonarrQueueScreen(
                     shown.overview?.let { overview ->
                         item(key = OverviewKey) { OverviewRow(overview) }
                     }
-                    items(shown.items, key = { it.id }) { item ->
+                    items(shown.items, key = { it.id }, contentType = { "queue-item" }) { item ->
                         QueueListItem(
                             item = item,
                             onRemove = { removeTargetId = item.id },
@@ -292,7 +293,7 @@ private fun QueueListItem(
             if (item.queuedOffline) {
                 Icon(
                     imageVector = Icons.Filled.CloudUpload,
-                    contentDescription = stringResource(R.string.arr_sonarr_queue_cd_queued_indicator),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_queued_indicator),
                     tint = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.padding(start = 8.dp),
                 )
@@ -302,7 +303,7 @@ private fun QueueListItem(
                     Icon(
                         imageVector = Icons.Filled.Replay,
                         contentDescription = stringResource(
-                            R.string.arr_sonarr_queue_cd_retry_import,
+                            ArrUiR.string.arr_common_queue_cd_retry_import,
                             item.title,
                         ),
                     )
@@ -313,7 +314,7 @@ private fun QueueListItem(
                     Icon(
                         imageVector = Icons.Filled.PlayArrow,
                         contentDescription = stringResource(
-                            R.string.arr_sonarr_queue_cd_grab,
+                            ArrUiR.string.arr_common_queue_cd_grab,
                             item.title,
                         ),
                     )
@@ -322,7 +323,7 @@ private fun QueueListItem(
             IconButton(onClick = onRemove) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
-                    contentDescription = stringResource(R.string.arr_sonarr_queue_cd_remove, item.title),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_queue_cd_remove, item.title),
                 )
             }
         },
@@ -344,7 +345,7 @@ private fun PendingSyncBanner(pending: Int) {
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = stringResource(R.string.arr_sonarr_queue_pending_banner, pending),
+            text = stringResource(ArrUiR.string.arr_common_system_pending_banner, pending),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.tertiary,
         )
@@ -353,14 +354,21 @@ private fun PendingSyncBanner(pending: Int) {
 
 @Composable
 private fun OverviewRow(overview: SonarrQueueOverview) {
-    var text = stringResource(
-        R.string.arr_sonarr_queue_overview_counts,
-        overview.downloadingCount,
-        overview.importingCount,
-        overview.failedCount,
-    )
-    if (overview.unknownCount > 0) {
-        text += stringResource(R.string.arr_sonarr_queue_overview_unknown, overview.unknownCount)
+    val text = if (overview.unknownCount > 0) {
+        stringResource(
+            ArrUiR.string.arr_common_queue_overview_with_unknown,
+            overview.downloadingCount,
+            overview.importingCount,
+            overview.failedCount,
+            overview.unknownCount,
+        )
+    } else {
+        stringResource(
+            ArrUiR.string.arr_common_queue_overview_counts,
+            overview.downloadingCount,
+            overview.importingCount,
+            overview.failedCount,
+        )
     }
     Text(
         text = text,
@@ -382,22 +390,22 @@ private fun RemoveQueueDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.arr_sonarr_queue_remove_title)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_queue_remove_title)) },
         text = {
             Column {
-                Text(stringResource(R.string.arr_sonarr_queue_remove_message, target.title))
+                Text(stringResource(ArrUiR.string.arr_common_queue_remove_message, target.title))
                 SwitchRow(
-                    label = stringResource(R.string.arr_sonarr_queue_remove_from_client),
+                    label = stringResource(ArrUiR.string.arr_common_queue_remove_from_client),
                     checked = removeFromClient,
                     onCheckedChange = { removeFromClient = it },
                 )
                 SwitchRow(
-                    label = stringResource(R.string.arr_sonarr_queue_remove_blocklist),
+                    label = stringResource(ArrUiR.string.arr_common_queue_remove_blocklist),
                     checked = blocklist,
                     onCheckedChange = { blocklist = it },
                 )
                 SwitchRow(
-                    label = stringResource(R.string.arr_sonarr_queue_remove_search),
+                    label = stringResource(ArrUiR.string.arr_common_queue_remove_search),
                     checked = searchReplacement,
                     onCheckedChange = { searchReplacement = it },
                 )
@@ -415,12 +423,12 @@ private fun RemoveQueueDialog(
                     )
                 },
             ) {
-                Text(stringResource(R.string.arr_sonarr_queue_action_remove))
+                Text(stringResource(ArrUiR.string.arr_common_queue_action_remove))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_queue_action_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )
@@ -435,13 +443,13 @@ private fun QueueItemDetailsDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.arr_sonarr_queue_details_title)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_queue_details_title)) },
         text = {
             Column {
                 Text(item.title, style = MaterialTheme.typography.titleSmall)
                 item.episodeLabel?.let { label ->
                     DetailLine(
-                        label = stringResource(R.string.arr_sonarr_queue_details_episode),
+                        label = stringResource(R.string.arr_sonarr_history_details_episode),
                         value = label,
                     )
                 }
@@ -452,41 +460,41 @@ private fun QueueItemDetailsDialog(
                     )
                 }
                 item.qualityName?.let { quality ->
-                    DetailLine(label = stringResource(R.string.arr_sonarr_queue_details_quality), value = quality)
+                    DetailLine(label = stringResource(ArrUiR.string.arr_common_quality), value = quality)
                 }
                 item.downloadClient?.let { client ->
                     DetailLine(
-                        label = stringResource(R.string.arr_sonarr_queue_details_download_client),
+                        label = stringResource(ArrUiR.string.arr_common_history_details_download_client),
                         value = client,
                     )
                 }
                 item.indexer?.let { indexer ->
-                    DetailLine(label = stringResource(R.string.arr_sonarr_queue_details_indexer), value = indexer)
+                    DetailLine(label = stringResource(ArrUiR.string.arr_common_releases_details_indexer), value = indexer)
                 }
                 item.totalBytes?.let { total ->
                     DetailLine(
-                        label = stringResource(R.string.arr_sonarr_queue_details_size),
+                        label = stringResource(ArrUiR.string.arr_common_size),
                         value = Humanize.bytes(total),
                     )
                 }
                 item.remainingBytes?.let { remaining ->
                     DetailLine(
-                        label = stringResource(R.string.arr_sonarr_queue_details_remaining),
+                        label = stringResource(ArrUiR.string.arr_common_queue_details_remaining),
                         value = Humanize.bytes(remaining),
                     )
                 }
                 item.etaSeconds?.let { eta ->
                     DetailLine(
-                        label = stringResource(R.string.arr_sonarr_queue_details_eta),
+                        label = stringResource(ArrUiR.string.arr_common_queue_details_eta),
                         value = formatEta(eta),
                     )
                 }
                 item.outputPath?.let { path ->
-                    DetailLine(label = stringResource(R.string.arr_sonarr_queue_details_output), value = path)
+                    DetailLine(label = stringResource(ArrUiR.string.arr_common_queue_details_output), value = path)
                 }
                 item.errorMessage?.let { error ->
                     Text(
-                        text = stringResource(R.string.arr_sonarr_queue_details_error),
+                        text = stringResource(ArrUiR.string.arr_common_queue_details_error),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(top = 8.dp),
@@ -495,7 +503,7 @@ private fun QueueItemDetailsDialog(
                 }
                 if (item.statusMessages.isNotEmpty()) {
                     Text(
-                        text = stringResource(R.string.arr_sonarr_queue_details_status_messages),
+                        text = stringResource(ArrUiR.string.arr_common_queue_details_status_messages),
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(top = 8.dp),
                     )
@@ -512,18 +520,18 @@ private fun QueueItemDetailsDialog(
         confirmButton = {
             if (item.canRetryImport) {
                 TextButton(onClick = onRetryImport) {
-                    Text(stringResource(R.string.arr_sonarr_queue_details_action_retry))
+                    Text(stringResource(ArrUiR.string.arr_common_queue_details_action_retry))
                 }
             } else {
                 TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.arr_sonarr_queue_action_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             }
         },
         dismissButton = {
             if (item.canManualImport) {
                 TextButton(onClick = onManualImport) {
-                    Text(stringResource(R.string.arr_sonarr_queue_details_action_manual_import))
+                    Text(stringResource(ArrUiR.string.arr_common_history_details_action_manual_import))
                 }
             }
         },
@@ -533,7 +541,7 @@ private fun QueueItemDetailsDialog(
 @Composable
 private fun DetailLine(label: String, value: String) {
     Text(
-        text = stringResource(R.string.arr_sonarr_queue_details_line, label, value),
+        text = stringResource(ArrUiR.string.arr_common_history_details_line, label, value),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -565,12 +573,12 @@ private fun NoticeHost(
     onConsumeWriteError: () -> Unit,
 ) {
     val message = when (notice) {
-        QueueNotice.REMOVED -> stringResource(R.string.arr_sonarr_queue_notice_removed)
-        QueueNotice.REMOVE_QUEUED -> stringResource(R.string.arr_sonarr_queue_notice_remove_queued)
-        QueueNotice.RETRY_SENT -> stringResource(R.string.arr_sonarr_queue_notice_retry_sent)
-        QueueNotice.RETRY_QUEUED -> stringResource(R.string.arr_sonarr_queue_notice_retry_queued)
-        QueueNotice.GRABBED -> stringResource(R.string.arr_sonarr_queue_notice_grabbed)
-        QueueNotice.GRAB_QUEUED -> stringResource(R.string.arr_sonarr_queue_notice_grab_queued)
+        QueueNotice.REMOVED -> stringResource(ArrUiR.string.arr_common_queue_notice_removed)
+        QueueNotice.REMOVE_QUEUED -> stringResource(ArrUiR.string.arr_common_blocklist_notice_remove_queued)
+        QueueNotice.RETRY_SENT -> stringResource(ArrUiR.string.arr_common_queue_notice_retry_sent)
+        QueueNotice.RETRY_QUEUED -> stringResource(ArrUiR.string.arr_common_queue_notice_retry_queued)
+        QueueNotice.GRABBED -> stringResource(ArrUiR.string.arr_common_releases_notice_grabbed)
+        QueueNotice.GRAB_QUEUED -> stringResource(ArrUiR.string.arr_common_releases_notice_grab_queued)
         null -> null
     }
     LaunchedEffect(message) {
@@ -590,11 +598,11 @@ private fun NoticeHost(
 
 @Composable
 private fun filterLabels(): Map<SonarrQueueFilter, String> = mapOf(
-    SonarrQueueFilter.ALL to stringResource(R.string.arr_sonarr_queue_filter_all),
-    SonarrQueueFilter.DOWNLOADING to stringResource(R.string.arr_sonarr_queue_filter_downloading),
-    SonarrQueueFilter.IMPORTING to stringResource(R.string.arr_sonarr_queue_filter_importing),
-    SonarrQueueFilter.FAILED to stringResource(R.string.arr_sonarr_queue_filter_failed),
-    SonarrQueueFilter.UNKNOWN to stringResource(R.string.arr_sonarr_queue_filter_unknown),
+    SonarrQueueFilter.ALL to stringResource(ArrUiR.string.arr_common_queue_filter_all),
+    SonarrQueueFilter.DOWNLOADING to stringResource(ArrUiR.string.arr_common_queue_filter_downloading),
+    SonarrQueueFilter.IMPORTING to stringResource(ArrUiR.string.arr_common_mm_section_importing),
+    SonarrQueueFilter.FAILED to stringResource(ArrUiR.string.arr_common_history_filter_failed),
+    SonarrQueueFilter.UNKNOWN to stringResource(ArrUiR.string.arr_common_status_unknown),
 )
 
 /**
@@ -615,18 +623,18 @@ private fun SonarrQueueItemUi.speedText(): String? {
     val eta = etaSeconds?.let { formatEta(it) }
     return when {
         remaining != null && eta != null -> stringResource(
-            R.string.arr_sonarr_queue_progress_eta,
+            ArrUiR.string.arr_common_queue_progress_eta,
             remaining,
             eta,
         )
 
         remaining != null && totalBytes != null -> stringResource(
-            R.string.arr_sonarr_queue_progress_total,
+            ArrUiR.string.arr_common_queue_progress_total,
             remaining,
             Humanize.bytes(totalBytes),
         )
 
-        eta != null -> stringResource(R.string.arr_sonarr_queue_eta_left, eta)
+        eta != null -> stringResource(ArrUiR.string.arr_common_queue_eta_left, eta)
         else -> null
     }
 }

@@ -52,6 +52,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the remote path mappings route. */
 @Composable
@@ -122,16 +123,16 @@ fun SonarrRemotePathMappingsScreen(
     ConnectNoticeHost(
         noticeMessage = when (state.notice) {
             RemotePathMappingsNotice.SAVED ->
-                stringResource(R.string.arr_sonarr_connect_notice_saved)
+                stringResource(ArrUiR.string.arr_common_connect_notice_saved)
 
             RemotePathMappingsNotice.SAVED_QUEUED ->
-                stringResource(R.string.arr_sonarr_connect_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
             RemotePathMappingsNotice.DELETED ->
-                stringResource(R.string.arr_sonarr_connect_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             RemotePathMappingsNotice.DELETED_QUEUED ->
-                stringResource(R.string.arr_sonarr_connect_notice_deleted_queued)
+                stringResource(ArrUiR.string.arr_common_backup_notice_deleted_queued)
 
             null -> null
         },
@@ -142,14 +143,14 @@ fun SonarrRemotePathMappingsScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_paths_title),
+        title = stringResource(ArrUiR.string.arr_common_paths_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_paths_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_paths_cd_refresh),
                 )
             }
         },
@@ -166,8 +167,8 @@ fun SonarrRemotePathMappingsScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_sonarr_paths_empty_title),
-                    emptyMessage = stringResource(R.string.arr_sonarr_paths_empty_message),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_paths_empty_title),
+                    emptyMessage = stringResource(ArrUiR.string.arr_common_paths_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
                     LazyColumn(
@@ -181,7 +182,11 @@ fun SonarrRemotePathMappingsScreen(
                         item {
                             SectionHeader(title = stringResource(R.string.arr_sonarr_paths_section))
                         }
-                        items(data.mappings, key = { it.id }) { mapping ->
+                        items(
+                            data.mappings,
+                            key = { it.id },
+                            contentType = { "mapping" },
+                        ) { mapping ->
                             MappingRow(
                                 mapping = mapping,
                                 onEdit = { onStartEdit(mapping) },
@@ -194,7 +199,7 @@ fun SonarrRemotePathMappingsScreen(
             ExtendedFloatingActionButton(
                 onClick = onAdd,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.arr_sonarr_paths_add)) },
+                text = { Text(stringResource(ArrUiR.string.arr_common_paths_add)) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
@@ -219,11 +224,11 @@ fun SonarrRemotePathMappingsScreen(
     state.confirmDeleteFor?.let { target ->
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_sonarr_connect_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_delete)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.arr_sonarr_paths_delete_message,
+                        ArrUiR.string.arr_common_paths_delete_message,
                         target.remotePath.orEmpty(),
                         target.localPath.orEmpty(),
                     ),
@@ -231,12 +236,12 @@ fun SonarrRemotePathMappingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_sonarr_connect_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_sonarr_connect_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -264,7 +269,7 @@ private fun MappingRow(
                 )
                 Text(
                     text = stringResource(
-                        R.string.arr_sonarr_paths_row_paths,
+                        ArrUiR.string.arr_common_paths_row_paths,
                         mapping.remotePath.orEmpty(),
                         mapping.localPath.orEmpty(),
                     ),
@@ -272,7 +277,7 @@ private fun MappingRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            val editCd = stringResource(R.string.arr_sonarr_paths_cd_edit, mapping.host.orEmpty())
+            val editCd = stringResource(ArrUiR.string.arr_common_paths_cd_edit, mapping.host.orEmpty())
             IconButton(
                 onClick = onEdit,
                 modifier = Modifier.semantics { contentDescription = editCd },
@@ -280,7 +285,7 @@ private fun MappingRow(
                 Icon(Icons.Filled.Edit, contentDescription = null)
             }
             val deleteCd = stringResource(
-                R.string.arr_sonarr_paths_cd_delete,
+                ArrUiR.string.arr_common_paths_cd_delete,
                 mapping.host.orEmpty(),
             )
             IconButton(
@@ -310,8 +315,8 @@ private fun MappingEditorDialog(
         title = {
             Text(
                 stringResource(
-                    if (draft.id > 0) R.string.arr_sonarr_paths_edit_title
-                    else R.string.arr_sonarr_paths_add_title,
+                    if (draft.id > 0) ArrUiR.string.arr_common_paths_edit_title
+                    else ArrUiR.string.arr_common_paths_add_title,
                 ),
             )
         },
@@ -320,21 +325,21 @@ private fun MappingEditorDialog(
                 OutlinedTextField(
                     value = draft.host,
                     onValueChange = { host -> onDraftChange { it.copy(host = host) } },
-                    label = { Text(stringResource(R.string.arr_sonarr_paths_host)) },
+                    label = { Text(stringResource(ArrUiR.string.arr_common_general_section_host)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = draft.remotePath,
                     onValueChange = { path -> onDraftChange { it.copy(remotePath = path) } },
-                    label = { Text(stringResource(R.string.arr_sonarr_paths_remote)) },
+                    label = { Text(stringResource(ArrUiR.string.arr_common_paths_remote)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = draft.localPath,
                     onValueChange = { path -> onDraftChange { it.copy(localPath = path) } },
-                    label = { Text(stringResource(R.string.arr_sonarr_paths_local)) },
+                    label = { Text(stringResource(ArrUiR.string.arr_common_paths_local)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -345,12 +350,12 @@ private fun MappingEditorDialog(
                 onClick = onSave,
                 enabled = !busy && draft.complete,
             ) {
-                Text(stringResource(R.string.arr_sonarr_connect_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onCancel) {
-                Text(stringResource(R.string.arr_sonarr_connect_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )

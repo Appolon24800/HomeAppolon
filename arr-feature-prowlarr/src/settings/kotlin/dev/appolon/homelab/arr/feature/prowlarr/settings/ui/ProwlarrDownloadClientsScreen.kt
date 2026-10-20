@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.api.prowlarr.model.DownloadClientResource
@@ -49,6 +50,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Download clients list. Each row carries the enable toggle, protocol,
@@ -82,7 +84,7 @@ fun ProwlarrDownloadClientsScreen(
     NoticeHost(
         noticeMessage = when (state.notice) {
             DownloadClientsNotice.DELETED ->
-                stringResource(R.string.arr_prowlarr_settings_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             DownloadClientsNotice.DELETED_QUEUED ->
                 stringResource(R.string.arr_prowlarr_settings_notice_deleted_queued)
@@ -105,7 +107,7 @@ fun ProwlarrDownloadClientsScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_prowlarr_settings_clients_title),
+        title = stringResource(ArrUiR.string.arr_common_clients_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
@@ -118,7 +120,7 @@ fun ProwlarrDownloadClientsScreen(
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_prowlarr_settings_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_refresh),
                 )
             }
         },
@@ -135,7 +137,7 @@ fun ProwlarrDownloadClientsScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_prowlarr_settings_clients_empty_title),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_clients_empty_title),
                     emptyMessage =
                         stringResource(R.string.arr_prowlarr_settings_clients_empty_message),
                     modifier = Modifier.fillMaxSize(),
@@ -153,6 +155,7 @@ fun ProwlarrDownloadClientsScreen(
                                 title = stringResource(
                                     R.string.arr_prowlarr_settings_clients_section,
                                 ),
+                                modifier = Modifier.semantics { heading() },
                             )
                         }
                         items(data.clients, key = { it.id }) { client ->
@@ -197,12 +200,12 @@ fun ProwlarrDownloadClientsScreen(
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_prowlarr_settings_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_prowlarr_settings_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -219,7 +222,7 @@ private fun DownloadClientRow(
     onDelete: () -> Unit,
 ) {
     val openCd = stringResource(
-        R.string.arr_prowlarr_settings_clients_cd_open,
+        ArrUiR.string.arr_common_mm_browser_cd_open,
         client.name.orEmpty(),
     )
     Card(
@@ -239,7 +242,7 @@ private fun DownloadClientRow(
                 Text(
                     text = listOfNotNull(
                         client.implementationName,
-                        stringResource(R.string.arr_prowlarr_settings_priority, client.priority),
+                        stringResource(ArrUiR.string.arr_common_connect_priority, client.priority),
                         if (client.supportsCategories) {
                             stringResource(
                                 R.string.arr_prowlarr_settings_clients_targets,
@@ -261,7 +264,7 @@ private fun DownloadClientRow(
                 }
             }
             val toggleCd = stringResource(
-                R.string.arr_prowlarr_settings_clients_cd_toggle,
+                ArrUiR.string.arr_common_clients_cd_toggle,
                 client.name.orEmpty(),
             )
             LabeledSwitch(

@@ -45,6 +45,7 @@ import dev.appolon.homelab.arr.feature.sonarr.detail.vm.RenamePreviewState
 import dev.appolon.homelab.arr.feature.sonarr.detail.vm.SearchTarget
 import dev.appolon.homelab.arr.ui.components.EmptyState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Rename preview: every file the server would rename under the current
@@ -59,7 +60,7 @@ fun RenamePreviewDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.arr_sonarr_detail_rename_title)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_detail_rename_title)) },
         text = {
             Column {
                 when {
@@ -91,7 +92,11 @@ fun RenamePreviewDialog(
                             modifier = Modifier.padding(bottom = 8.dp),
                         )
                         LazyColumn(modifier = Modifier.heightIn(max = 320.dp)) {
-                            items(preview.rows, key = { it.id }) { row ->
+                            items(
+                                preview.rows,
+                                key = { it.id },
+                                contentType = { "rename-row" },
+                            ) { row ->
                                 RenameRow(row)
                             }
                         }
@@ -102,13 +107,13 @@ fun RenamePreviewDialog(
         confirmButton = {
             if (!preview.loading && preview.error == null && preview.rows.isNotEmpty()) {
                 Button(onClick = onConfirm) {
-                    Text(stringResource(R.string.arr_sonarr_detail_rename_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_detail_rename_title))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_detail_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )
@@ -214,12 +219,16 @@ fun ManualSearchSheet(
                 }
 
                 releases.isEmpty() -> EmptyState(
-                    title = stringResource(R.string.arr_sonarr_detail_search_empty),
+                    title = stringResource(ArrUiR.string.arr_common_releases_empty_title),
                     message = "",
                 )
 
                 else -> LazyColumn(Modifier.heightIn(max = 480.dp)) {
-                    items(releases, key = { it.guid ?: it.id.toString() + it.title }) { release ->
+                    items(
+                        releases,
+                        key = { it.guid ?: it.id.toString() + it.title },
+                        contentType = { "release" },
+                    ) { release ->
                         ReleaseRow(release = release, onGrab = { onGrab(release) })
                     }
                 }
@@ -248,7 +257,7 @@ private fun ReleaseRow(release: ReleaseResource, onGrab: () -> Unit) {
             val quality = release.quality.quality.name?.let(Humanize::qualityName).orEmpty()
             Text(
                 text = stringResource(
-                    R.string.arr_sonarr_detail_episode_file_line,
+                    ArrUiR.string.arr_common_metadata_pair,
                     quality,
                     Humanize.bytes(release.size),
                 ),
@@ -257,7 +266,7 @@ private fun ReleaseRow(release: ReleaseResource, onGrab: () -> Unit) {
             )
             val details = listOfNotNull(
                 release.indexer,
-                release.seeders?.let { stringResource(R.string.arr_sonarr_detail_release_seeders, it) },
+                release.seeders?.let { stringResource(ArrUiR.string.arr_common_releases_seeders, it) },
             ).joinToString(" · ")
             if (details.isNotEmpty()) {
                 Text(
@@ -305,12 +314,12 @@ fun InteractiveImportSheet(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.arr_sonarr_detail_import_title),
+                        text = stringResource(ArrUiR.string.arr_common_import_flow_title),
                         style = MaterialTheme.typography.titleMedium,
                     )
                     val scope = state.seasonNumber?.let { season ->
-                        stringResource(R.string.arr_sonarr_detail_season_title, season)
-                    } ?: stringResource(R.string.arr_sonarr_detail_import_all_seasons)
+                        stringResource(R.string.arr_sonarr_wanted_filter_season_option, season)
+                    } ?: stringResource(R.string.arr_sonarr_detail_back_to_seasons)
                     Text(
                         text = scope,
                         style = MaterialTheme.typography.bodySmall,
@@ -319,7 +328,7 @@ fun InteractiveImportSheet(
                 }
                 Text(
                     text = stringResource(
-                        R.string.arr_sonarr_detail_import_selected_count,
+                        ArrUiR.string.arr_common_import_flow_selected,
                         state.selected.size,
                     ),
                     style = MaterialTheme.typography.labelMedium,
@@ -350,7 +359,11 @@ fun InteractiveImportSheet(
                 )
 
                 else -> LazyColumn(Modifier.heightIn(max = 420.dp)) {
-                    items(state.candidates, key = { it.id }) { candidate ->
+                    items(
+                        state.candidates,
+                        key = { it.id },
+                        contentType = { "candidate" },
+                    ) { candidate ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
@@ -375,7 +388,7 @@ fun InteractiveImportSheet(
                                     candidate.quality.quality.name?.let(Humanize::qualityName)
                                 val line = quality?.let { q ->
                                     stringResource(
-                                        R.string.arr_sonarr_detail_episode_file_line,
+                                        ArrUiR.string.arr_common_metadata_pair,
                                         q,
                                         Humanize.bytes(candidate.size),
                                     )
@@ -397,7 +410,7 @@ fun InteractiveImportSheet(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.arr_sonarr_detail_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
                 Spacer(Modifier.width(8.dp))
                 Button(onClick = onImport, enabled = state.selected.isNotEmpty()) {

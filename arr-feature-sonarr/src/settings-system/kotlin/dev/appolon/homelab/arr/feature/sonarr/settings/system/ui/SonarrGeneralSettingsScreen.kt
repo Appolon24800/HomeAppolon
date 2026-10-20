@@ -47,6 +47,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Shared repository factory for this group's screens. */
 internal fun systemRepository(
@@ -90,8 +91,8 @@ fun SonarrGeneralSettingsDestination(
     val noticeMessage = uiState.notice?.let { notice ->
         stringResource(
             when (notice) {
-                GeneralSettingsNotice.SAVED -> R.string.arr_sonarr_system_notice_saved
-                GeneralSettingsNotice.SAVED_QUEUED -> R.string.arr_sonarr_system_notice_saved_queued
+                GeneralSettingsNotice.SAVED -> ArrUiR.string.arr_common_system_notice_saved
+                GeneralSettingsNotice.SAVED_QUEUED -> ArrUiR.string.arr_common_system_notice_saved_queued
             },
         )
     }
@@ -148,20 +149,20 @@ fun SonarrGeneralSettingsScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_general_title),
+        title = stringResource(ArrUiR.string.arr_common_general_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_system_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_refresh),
                 )
             }
             IconButton(onClick = onSave, enabled = content?.dirty == true && !content.portError) {
                 Icon(
                     imageVector = Icons.Filled.Save,
-                    contentDescription = stringResource(R.string.arr_sonarr_system_cd_save),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_save_changes),
                 )
             }
         },
@@ -214,32 +215,32 @@ private fun GeneralHostSection(
 ) {
     SystemCard {
         Column {
-            SystemSectionHeader(stringResource(R.string.arr_sonarr_general_section_host))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_general_section_host))
             SystemTextField(
                 value = draft.instanceName,
-                label = stringResource(R.string.arr_sonarr_general_instance_name),
+                label = stringResource(ArrUiR.string.arr_common_general_instance_name),
                 onValue = { value -> onEdit { it.copy(instanceName = value) } },
             )
             SystemTextField(
                 value = draft.bindAddress,
-                label = stringResource(R.string.arr_sonarr_general_bind_address),
+                label = stringResource(ArrUiR.string.arr_common_general_bind_address),
                 onValue = { value -> onEdit { it.copy(bindAddress = value) } },
             )
             SystemTextField(
                 value = draft.port,
-                label = stringResource(R.string.arr_sonarr_general_port),
+                label = stringResource(ArrUiR.string.arr_common_general_port),
                 onValue = { value -> onEdit { it.copy(port = value.filter(Char::isDigit)) } },
                 isError = portError,
-                errorMessage = stringResource(R.string.arr_sonarr_general_port_error),
+                errorMessage = stringResource(ArrUiR.string.arr_common_general_port_error),
             )
             SystemTextField(
                 value = draft.urlBase,
-                label = stringResource(R.string.arr_sonarr_general_url_base),
+                label = stringResource(ArrUiR.string.arr_common_general_url_base),
                 onValue = { value -> onEdit { it.copy(urlBase = value) } },
                 supporting = stringResource(R.string.arr_sonarr_general_url_base_support),
             )
             LabeledSwitch(
-                label = stringResource(R.string.arr_sonarr_general_launch_browser),
+                label = stringResource(ArrUiR.string.arr_common_general_launch_browser),
                 supportingText = stringResource(R.string.arr_sonarr_general_launch_browser_support),
                 checked = draft.launchBrowser,
                 onCheckedChange = { checked -> onEdit { it.copy(launchBrowser = checked) } },
@@ -256,28 +257,28 @@ private fun GeneralSslSection(
 ) {
     SystemCard {
         Column {
-            SystemSectionHeader(stringResource(R.string.arr_sonarr_general_section_ssl))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_general_section_ssl))
             LabeledSwitch(
-                label = stringResource(R.string.arr_sonarr_general_ssl_enable),
+                label = stringResource(ArrUiR.string.arr_common_general_ssl_enable),
                 checked = draft.enableSsl,
                 onCheckedChange = { checked -> onEdit { it.copy(enableSsl = checked) } },
             )
             if (draft.enableSsl) {
                 SystemTextField(
                     value = draft.sslPort,
-                    label = stringResource(R.string.arr_sonarr_general_ssl_port),
+                    label = stringResource(ArrUiR.string.arr_common_general_ssl_port),
                     onValue = { value -> onEdit { it.copy(sslPort = value.filter(Char::isDigit)) } },
                 )
                 SystemValueRow(
-                    label = stringResource(R.string.arr_sonarr_general_ssl_cert_path),
+                    label = stringResource(ArrUiR.string.arr_common_general_ssl_cert_path),
                     value = draft.sslCertPath.ifBlank {
-                        stringResource(R.string.arr_sonarr_general_ssl_unset)
+                        stringResource(ArrUiR.string.arr_common_general_ssl_unset)
                     },
                 )
                 SystemValueRow(
-                    label = stringResource(R.string.arr_sonarr_general_ssl_key_path),
+                    label = stringResource(ArrUiR.string.arr_common_general_ssl_key_path),
                     value = draft.sslKeyPath.ifBlank {
-                        stringResource(R.string.arr_sonarr_general_ssl_unset)
+                        stringResource(ArrUiR.string.arr_common_general_ssl_unset)
                     },
                 )
             }
@@ -302,9 +303,9 @@ private fun GeneralSecuritySection(
 ) {
     SystemCard {
         Column {
-            SystemSectionHeader(stringResource(R.string.arr_sonarr_general_section_security))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_general_section_security))
             SystemDropdown(
-                label = stringResource(R.string.arr_sonarr_general_auth_method),
+                label = stringResource(ArrUiR.string.arr_common_general_auth_method),
                 selected = draft.authenticationMethod,
                 entries = AuthenticationType.entries,
                 labelOf = { it.authMethodLabel() },
@@ -320,34 +321,34 @@ private fun GeneralSecuritySection(
             )
             when {
                 draft.authenticationMethod == AuthenticationType.NONE -> HintText(
-                    stringResource(R.string.arr_sonarr_general_auth_none_warning),
+                    stringResource(ArrUiR.string.arr_common_general_auth_none_warning),
                 )
 
                 draft.usesCredentials() -> {
                     SystemTextField(
                         value = draft.username,
-                        label = stringResource(R.string.arr_sonarr_general_username),
+                        label = stringResource(ArrUiR.string.arr_common_general_username),
                         onValue = { value -> onEdit { it.copy(username = value) } },
                     )
                     SystemTextField(
                         value = draft.password,
-                        label = stringResource(R.string.arr_sonarr_general_password),
+                        label = stringResource(ArrUiR.string.arr_common_general_password),
                         onValue = { value -> onEdit { it.copy(password = value) } },
-                        supporting = stringResource(R.string.arr_sonarr_general_password_support),
+                        supporting = stringResource(ArrUiR.string.arr_common_general_password_support),
                     )
                 }
 
                 else -> HintText(stringResource(R.string.arr_sonarr_general_auth_external_hint))
             }
             SystemDropdown(
-                label = stringResource(R.string.arr_sonarr_general_auth_required),
+                label = stringResource(ArrUiR.string.arr_common_general_auth_required),
                 selected = draft.authenticationRequired,
                 entries = AuthenticationRequiredType.entries,
                 labelOf = { it.authRequiredLabel() },
                 onSelect = { value -> onEdit { it.copy(authenticationRequired = value) } },
             )
             SystemDropdown(
-                label = stringResource(R.string.arr_sonarr_general_certificate_validation),
+                label = stringResource(ArrUiR.string.arr_common_general_certificate_validation),
                 selected = draft.certificateValidation,
                 entries = CertificateValidationType.entries,
                 labelOf = { it.certValidationLabel() },
@@ -364,9 +365,9 @@ private fun GeneralLoggingSection(
 ) {
     SystemCard {
         Column {
-            SystemSectionHeader(stringResource(R.string.arr_sonarr_general_section_logging))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_general_section_logging))
             SystemDropdown(
-                label = stringResource(R.string.arr_sonarr_general_log_level),
+                label = stringResource(ArrUiR.string.arr_common_general_log_level),
                 selected = draft.logLevel,
                 entries = GeneralSettingsDraft.LOG_LEVELS,
                 labelOf = { it.logLevelLabel() },
@@ -383,9 +384,9 @@ private fun GeneralAnalyticsSection(
 ) {
     SystemCard {
         Column {
-            SystemSectionHeader(stringResource(R.string.arr_sonarr_general_section_analytics))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_general_section_analytics))
             LabeledSwitch(
-                label = stringResource(R.string.arr_sonarr_general_analytics),
+                label = stringResource(ArrUiR.string.arr_common_general_analytics),
                 supportingText = stringResource(R.string.arr_sonarr_general_analytics_support),
                 checked = draft.analyticsEnabled,
                 onCheckedChange = { checked -> onEdit { it.copy(analyticsEnabled = checked) } },
@@ -398,12 +399,12 @@ private fun GeneralAnalyticsSection(
 private fun GeneralProxySection(draft: GeneralSettingsDraft) {
     SystemCard {
         Column {
-            SystemSectionHeader(stringResource(R.string.arr_sonarr_general_section_proxy))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_general_section_proxy))
             if (draft.proxyEnabled) {
                 SystemValueRow(
-                    label = stringResource(R.string.arr_sonarr_general_proxy_enabled),
+                    label = stringResource(ArrUiR.string.arr_common_general_proxy_enabled),
                     value = stringResource(
-                        R.string.arr_sonarr_general_proxy_row,
+                        ArrUiR.string.arr_common_general_proxy_row,
                         draft.proxyType,
                         draft.proxyHost,
                         draft.proxyPort,
@@ -411,11 +412,11 @@ private fun GeneralProxySection(draft: GeneralSettingsDraft) {
                 )
             } else {
                 SystemValueRow(
-                    label = stringResource(R.string.arr_sonarr_general_proxy_enabled),
-                    value = stringResource(R.string.arr_sonarr_general_proxy_disabled),
+                    label = stringResource(ArrUiR.string.arr_common_general_proxy_enabled),
+                    value = stringResource(ArrUiR.string.arr_common_general_proxy_disabled),
                 )
             }
-            HintText(stringResource(R.string.arr_sonarr_general_proxy_app_hint))
+            HintText(stringResource(ArrUiR.string.arr_common_general_proxy_app_hint))
         }
     }
 }
@@ -432,42 +433,42 @@ private fun HintText(text: String, modifier: Modifier = Modifier) {
 
 @Composable
 private fun AuthenticationType.authMethodLabel(): String = when (this) {
-    AuthenticationType.NONE -> stringResource(R.string.arr_sonarr_general_auth_method_none)
-    AuthenticationType.BASIC -> stringResource(R.string.arr_sonarr_general_auth_method_basic)
-    AuthenticationType.FORMS -> stringResource(R.string.arr_sonarr_general_auth_method_forms)
-    AuthenticationType.EXTERNAL -> stringResource(R.string.arr_sonarr_general_auth_method_external)
-    AuthenticationType.OIDC -> stringResource(R.string.arr_sonarr_general_auth_method_oidc)
+    AuthenticationType.NONE -> stringResource(ArrUiR.string.arr_common_general_auth_method_none)
+    AuthenticationType.BASIC -> stringResource(ArrUiR.string.arr_common_general_auth_method_basic)
+    AuthenticationType.FORMS -> stringResource(ArrUiR.string.arr_common_general_auth_method_forms)
+    AuthenticationType.EXTERNAL -> stringResource(ArrUiR.string.arr_common_general_auth_method_external)
+    AuthenticationType.OIDC -> stringResource(ArrUiR.string.arr_common_general_auth_method_oidc)
 }
 
 @Composable
 private fun AuthenticationRequiredType.authRequiredLabel(): String = when (this) {
     AuthenticationRequiredType.ENABLED ->
-        stringResource(R.string.arr_sonarr_general_auth_required_enabled)
+        stringResource(ArrUiR.string.arr_common_general_auth_required_enabled)
 
     AuthenticationRequiredType.DISABLED_FOR_LOCAL_ADDRESSES ->
-        stringResource(R.string.arr_sonarr_general_auth_required_local_addresses)
+        stringResource(ArrUiR.string.arr_common_general_auth_required_local_addresses)
 
     AuthenticationRequiredType.DISABLED_FOR_LOCALHOST ->
-        stringResource(R.string.arr_sonarr_general_auth_required_localhost)
+        stringResource(ArrUiR.string.arr_common_general_auth_required_localhost)
 }
 
 @Composable
 private fun CertificateValidationType.certValidationLabel(): String = when (this) {
     CertificateValidationType.ENABLED ->
-        stringResource(R.string.arr_sonarr_general_cert_validation_enabled)
+        stringResource(ArrUiR.string.arr_common_general_cert_validation_enabled)
 
     CertificateValidationType.DISABLED_FOR_LOCAL_ADDRESSES ->
-        stringResource(R.string.arr_sonarr_general_cert_validation_local)
+        stringResource(ArrUiR.string.arr_common_general_cert_validation_local)
 
     CertificateValidationType.DISABLED ->
-        stringResource(R.string.arr_sonarr_general_cert_validation_disabled)
+        stringResource(ArrUiR.string.arr_common_general_cert_validation_disabled)
 }
 
 @Composable
 private fun String.logLevelLabel(): String = when (this) {
-    "debug" -> stringResource(R.string.arr_sonarr_general_log_level_debug)
-    "trace" -> stringResource(R.string.arr_sonarr_general_log_level_trace)
-    else -> stringResource(R.string.arr_sonarr_general_log_level_info)
+    "debug" -> stringResource(ArrUiR.string.arr_common_general_log_level_debug)
+    "trace" -> stringResource(ArrUiR.string.arr_common_general_log_level_trace)
+    else -> stringResource(ArrUiR.string.arr_common_general_log_level_info)
 }
 
 internal val SectionMaxWidth = 640.dp

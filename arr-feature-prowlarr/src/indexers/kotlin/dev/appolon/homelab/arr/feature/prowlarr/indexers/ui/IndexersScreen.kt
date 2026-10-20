@@ -2,6 +2,7 @@ package dev.appolon.homelab.arr.feature.prowlarr.indexers.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -71,7 +72,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.api.prowlarr.model.AppProfileResource
 import dev.appolon.homelab.arr.api.prowlarr.model.ApplyTags
@@ -94,6 +97,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The indexers screen: card and table views with filters, selection, bulk
@@ -147,9 +151,9 @@ fun IndexersScreen(
 
     ArrScaffold(
         title = if (state.selectMode) {
-            stringResource(R.string.arr_prowlarr_indexers_selected, state.selection.size)
+            stringResource(ArrUiR.string.arr_common_import_flow_selected, state.selection.size)
         } else {
-            stringResource(R.string.arr_prowlarr_indexers_title)
+            stringResource(ArrUiR.string.arr_common_indexers_title)
         },
         onBack = if (state.selectMode) onExitSelection else null,
         actions = {
@@ -201,7 +205,7 @@ fun IndexersScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_prowlarr_indexers_empty_title),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_indexers_empty_title),
                     emptyMessage = stringResource(R.string.arr_prowlarr_indexers_empty_message),
                     modifier = Modifier.weight(1f),
                 ) { _ ->
@@ -253,12 +257,12 @@ fun IndexersScreen(
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirm) {
-                    Text(stringResource(R.string.arr_prowlarr_delete))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteDismiss) {
-                    Text(stringResource(R.string.arr_prowlarr_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -278,7 +282,7 @@ private fun LibraryActions(
     onOpenApplications: () -> Unit,
 ) {
     val viewCd = stringResource(
-        if (state.view == IndexersView.CARDS) R.string.arr_prowlarr_cd_view_table
+        if (state.view == IndexersView.CARDS) ArrUiR.string.arr_common_library_cd_view_table
         else R.string.arr_prowlarr_cd_view_cards,
     )
     IconButton(onClick = { onViewChange(if (state.view == IndexersView.CARDS) IndexersView.TABLE else IndexersView.CARDS) }) {
@@ -292,10 +296,10 @@ private fun LibraryActions(
         )
     }
     val sortLabels = mapOf(
-        IndexerSorts.NAME to stringResource(R.string.arr_prowlarr_sort_name),
-        IndexerSorts.PRIORITY to stringResource(R.string.arr_prowlarr_sort_priority),
+        IndexerSorts.NAME to stringResource(ArrUiR.string.arr_common_autotag_name),
+        IndexerSorts.PRIORITY to stringResource(ArrUiR.string.arr_common_connect_priority_label),
         IndexerSorts.PROTOCOL to stringResource(R.string.arr_prowlarr_sort_protocol),
-        IndexerSorts.ADDED to stringResource(R.string.arr_prowlarr_sort_added),
+        IndexerSorts.ADDED to stringResource(ArrUiR.string.arr_common_sort_added),
     )
     SortMenu(
         options = IndexerSorts.ALL,
@@ -303,14 +307,22 @@ private fun LibraryActions(
         label = { sortLabels.getValue(it) },
         onSelect = onSortSelect,
     )
-    IconButton(onClick = onToggleSortDescending) {
+    val sortDescendingCd = stringResource(ArrUiR.string.arr_common_library_cd_sort_descending)
+    val sortState = stringResource(
+        if (state.query.sortDescending) R.string.arr_prowlarr_sort_state_descending
+        else R.string.arr_prowlarr_sort_state_ascending,
+    )
+    IconButton(
+        onClick = onToggleSortDescending,
+        modifier = Modifier.semantics { stateDescription = sortState },
+    ) {
         Icon(
             imageVector = Icons.Filled.SwapVert,
-            contentDescription = stringResource(R.string.arr_prowlarr_cd_sort_descending),
+            contentDescription = sortDescendingCd,
         )
     }
     var menuOpen by remember { mutableStateOf(false) }
-    val queueCd = stringResource(R.string.arr_prowlarr_queued_count, state.queuedForServer)
+    val queueCd = stringResource(ArrUiR.string.arr_common_system_pending_banner, state.queuedForServer)
     BadgedBox(
         badge = {
             if (state.queuedForServer > 0) Badge { Text(state.queuedForServer.toString()) }
@@ -326,7 +338,7 @@ private fun LibraryActions(
             }
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.arr_prowlarr_indexers_test_all)) },
+                    text = { Text(stringResource(ArrUiR.string.arr_common_indexers_cd_test_all)) },
                     leadingIcon = { Icon(Icons.Filled.Sync, contentDescription = null) },
                     onClick = {
                         menuOpen = false
@@ -334,14 +346,14 @@ private fun LibraryActions(
                     },
                 )
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.arr_prowlarr_categories_title)) },
+                    text = { Text(stringResource(R.string.arr_prowlarr_editor_categories)) },
                     onClick = {
                         menuOpen = false
                         onOpenCategories()
                     },
                 )
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.arr_prowlarr_proxies_title)) },
+                    text = { Text(stringResource(R.string.arr_prowlarr_settings_proxy_note_title)) },
                     onClick = {
                         menuOpen = false
                         onOpenProxies()
@@ -360,7 +372,7 @@ private fun LibraryActions(
     IconButton(onClick = onAddIndexer) {
         Icon(
             imageVector = Icons.Filled.Add,
-            contentDescription = stringResource(R.string.arr_prowlarr_indexers_add),
+            contentDescription = stringResource(ArrUiR.string.arr_common_indexers_add),
         )
     }
 }
@@ -448,7 +460,7 @@ private fun FilterBar(
                 FilterChip(
                     selected = false,
                     onClick = onClearFilters,
-                    label = { Text(stringResource(R.string.arr_prowlarr_indexers_clear_filters)) },
+                    label = { Text(stringResource(ArrUiR.string.arr_common_wanted_filter_clear)) },
                 )
             }
         }
@@ -458,8 +470,8 @@ private fun FilterBar(
 @Composable
 internal fun protocolFilterLabel(filter: ProtocolFilter): String = when (filter) {
     ProtocolFilter.ALL -> stringResource(R.string.arr_prowlarr_filter_protocol_all)
-    ProtocolFilter.TORRENT -> stringResource(R.string.arr_prowlarr_protocol_torrent)
-    ProtocolFilter.USENET -> stringResource(R.string.arr_prowlarr_protocol_usenet)
+    ProtocolFilter.TORRENT -> stringResource(ArrUiR.string.arr_common_quality_delay_torrent)
+    ProtocolFilter.USENET -> stringResource(ArrUiR.string.arr_common_quality_delay_usenet)
 }
 
 @Composable
@@ -473,9 +485,9 @@ internal fun privacyFilterLabel(filter: PrivacyFilter): String = when (filter) {
 @Composable
 internal fun stateFilterLabel(filter: StateFilter): String = when (filter) {
     StateFilter.ALL -> stringResource(R.string.arr_prowlarr_filter_state_all)
-    StateFilter.ENABLED -> stringResource(R.string.arr_prowlarr_filter_state_enabled)
-    StateFilter.DISABLED -> stringResource(R.string.arr_prowlarr_filter_state_disabled)
-    StateFilter.THROTTLED -> stringResource(R.string.arr_prowlarr_filter_state_throttled)
+    StateFilter.ENABLED -> stringResource(ArrUiR.string.arr_common_general_cert_validation_enabled)
+    StateFilter.DISABLED -> stringResource(ArrUiR.string.arr_common_general_cert_validation_disabled)
+    StateFilter.THROTTLED -> stringResource(ArrUiR.string.arr_common_filter_state_throttled)
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -517,11 +529,12 @@ private fun IndexerCard(
     onSetEnabled: (Int, Boolean) -> Unit,
     onTestIndexer: (Int) -> Unit,
 ) {
-    val activateCd = stringResource(R.string.arr_prowlarr_cd_open_indexer, indexer.name.orEmpty())
-    val selectCd = stringResource(R.string.arr_prowlarr_cd_select_indexer, indexer.name.orEmpty())
-    val categoryCount =
-        IndexerCategories.selectedIds(indexer).size.toString() +
-            " " + stringResource(R.string.arr_prowlarr_indexer_categories_count)
+    val activateCd = stringResource(ArrUiR.string.arr_common_mm_browser_cd_open, indexer.name.orEmpty())
+    val selectCd = stringResource(ArrUiR.string.arr_common_detail_import_cd_select, indexer.name.orEmpty())
+    val categoryCount = stringResource(
+        ArrUiR.string.arr_common_categories_count,
+        IndexerCategories.selectedIds(indexer).size,
+    )
     ElevatedCard(
         modifier = Modifier
             .heightIn(min = 96.dp)
@@ -570,7 +583,7 @@ private fun IndexerCard(
                     label = { Text(protocolLabel(indexer.protocol)) },
                 )
                 Text(
-                    stringResource(R.string.arr_prowlarr_indexer_priority, indexer.priority),
+                    stringResource(ArrUiR.string.arr_common_connect_priority, indexer.priority),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -594,7 +607,7 @@ private fun IndexerCard(
                 )
                 if (!state.selectMode) {
                     TextButton(onClick = { onTestIndexer(indexer.id) }) {
-                        Text(stringResource(R.string.arr_prowlarr_test))
+                        Text(stringResource(ArrUiR.string.arr_common_connect_test))
                     }
                 }
             }
@@ -622,17 +635,17 @@ private fun IndexerTable(
             ) {
                 Spacer(Modifier.width(72.dp))
                 Text(
-                    stringResource(R.string.arr_prowlarr_sort_name),
+                    stringResource(ArrUiR.string.arr_common_autotag_name),
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    stringResource(R.string.arr_prowlarr_table_priority),
+                    stringResource(ArrUiR.string.arr_common_connect_priority_label),
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.width(64.dp),
                 )
                 Text(
-                    stringResource(R.string.arr_prowlarr_indexer_tags),
+                    stringResource(ArrUiR.string.arr_common_tags_title),
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.width(120.dp),
                 )
@@ -754,16 +767,19 @@ private fun BulkEditSheet(
             Modifier
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
+                .focusGroup()
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
                 stringResource(R.string.arr_prowlarr_bulk_title),
                 style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
             )
             Text(
-                stringResource(R.string.arr_prowlarr_bulk_enable),
+                stringResource(ArrUiR.string.arr_common_general_cert_validation_enabled),
                 style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.semantics { heading() },
             )
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                 val options = listOf(null, true, false)
@@ -778,8 +794,8 @@ private fun BulkEditSheet(
                         label = {
                             Text(
                                 when (option) {
-                                    null -> stringResource(R.string.arr_prowlarr_bulk_unchanged)
-                                    true -> stringResource(R.string.arr_prowlarr_bulk_enable)
+                                    null -> stringResource(ArrUiR.string.arr_common_editor_unchanged)
+                                    true -> stringResource(ArrUiR.string.arr_common_general_cert_validation_enabled)
                                     false -> stringResource(R.string.arr_prowlarr_bulk_disable)
                                 },
                             )
@@ -811,7 +827,7 @@ private fun BulkEditSheet(
                     onDismissRequest = { profileExpanded = false },
                 ) {
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.arr_prowlarr_bulk_unchanged)) },
+                        text = { Text(stringResource(ArrUiR.string.arr_common_editor_unchanged)) },
                         onClick = {
                             profileExpanded = false
                             onChange { it.copy(appProfileId = null) }
@@ -840,8 +856,9 @@ private fun BulkEditSheet(
                 modifier = Modifier.fillMaxWidth(),
             )
             Text(
-                stringResource(R.string.arr_prowlarr_bulk_tags),
+                stringResource(ArrUiR.string.arr_common_tags_title),
                 style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.semantics { heading() },
             )
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                 applyOptions.forEachIndexed { index, option ->
@@ -885,13 +902,12 @@ private fun BulkEditSheet(
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.arr_prowlarr_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
                 Button(onClick = onSubmit, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.arr_prowlarr_bulk_apply))
+                    Text(stringResource(ArrUiR.string.arr_common_filter_dialog_apply))
                 }
             }
         }
     }
 }
-

@@ -94,6 +94,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The movies library: poster grid or table over the presented list, filter
@@ -149,7 +150,7 @@ fun MovieLibraryScreen(
 
     ArrScaffold(
         title = if (state.selectMode && state.selection.isNotEmpty()) {
-            stringResource(R.string.arr_radarr_library_selected_count, state.selection.size)
+            stringResource(ArrUiR.string.arr_common_import_flow_selected, state.selection.size)
         } else {
             stringResource(R.string.arr_radarr_library_title)
         },
@@ -280,7 +281,7 @@ private fun LibraryActions(
     val sortLabels = MovieLibrarySorts.ALL.associateWith { id -> sortLabel(id) }
     if (state.queuedForServer > 0) {
         val queuedDescription =
-            stringResource(R.string.arr_radarr_library_cd_queued, state.queuedForServer)
+            stringResource(ArrUiR.string.arr_common_system_pending_banner, state.queuedForServer)
         BadgedBox(
             badge = { Badge { Text(state.queuedForServer.coerceAtMost(99).toString()) } },
             modifier = Modifier.semantics { contentDescription = queuedDescription },
@@ -304,9 +305,9 @@ private fun LibraryActions(
                 Icons.Filled.GridView
             },
             contentDescription = if (state.view == LibraryView.POSTERS) {
-                stringResource(R.string.arr_radarr_library_cd_view_table)
+                stringResource(ArrUiR.string.arr_common_library_cd_view_table)
             } else {
-                stringResource(R.string.arr_radarr_library_cd_view_posters)
+                stringResource(ArrUiR.string.arr_common_library_cd_view_posters)
             },
         )
     }
@@ -323,7 +324,7 @@ private fun LibraryActions(
             } else {
                 Icons.Filled.ArrowUpward
             },
-            contentDescription = stringResource(R.string.arr_radarr_library_cd_sort_descending),
+            contentDescription = stringResource(ArrUiR.string.arr_common_library_cd_sort_descending),
         )
     }
     SavedFiltersMenu(
@@ -337,10 +338,10 @@ private fun LibraryActions(
 
 @Composable
 private fun sortLabel(id: String): String = when (id) {
-    MovieLibrarySorts.YEAR -> stringResource(R.string.arr_radarr_sort_year)
+    MovieLibrarySorts.YEAR -> stringResource(ArrUiR.string.arr_common_exclusions_year_label)
     MovieLibrarySorts.ADDED -> stringResource(R.string.arr_radarr_sort_added)
     MovieLibrarySorts.SIZE -> stringResource(R.string.arr_radarr_sort_size)
-    else -> stringResource(R.string.arr_radarr_sort_title)
+    else -> stringResource(ArrUiR.string.arr_common_quality_definitions_title_field)
 }
 
 /** Saved filters anchor; the icon is a 48dp target per the accessibility contract. */
@@ -361,7 +362,7 @@ private fun SavedFiltersMenu(
     }
     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
         DropdownMenuItem(
-            text = { Text(stringResource(R.string.arr_radarr_saved_filter_save)) },
+            text = { Text(stringResource(ArrUiR.string.arr_common_saved_filter_save)) },
             onClick = {
                 expanded = false
                 onSaveClick()
@@ -371,7 +372,7 @@ private fun SavedFiltersMenu(
             DropdownMenuItem(
                 text = {
                     Text(
-                        stringResource(R.string.arr_radarr_saved_filter_empty),
+                        stringResource(ArrUiR.string.arr_common_saved_filter_empty),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 },
@@ -444,7 +445,7 @@ private fun FilterBar(
             Row(modifier = Modifier.padding(start = 16.dp, top = 4.dp, bottom = 4.dp)) {
                 AssistChip(
                     onClick = onClear,
-                    label = { Text(stringResource(R.string.arr_radarr_filter_clear)) },
+                    label = { Text(stringResource(ArrUiR.string.arr_common_wanted_filter_clear)) },
                 )
             }
         }
@@ -472,7 +473,7 @@ private fun PosterGrid(
         state = gridState,
         modifier = Modifier.fillMaxSize(),
     ) {
-        items(state.presentation.visible, key = { it.id }) { movie ->
+        items(state.presentation.visible, key = { it.id }, contentType = { "movie" }) { movie ->
             MoviePosterCard(
                 movie = movie,
                 baseUrl = baseUrl,
@@ -506,9 +507,9 @@ private fun MoviePosterCard(
 ) {
     val title = movie.title.orEmpty().ifEmpty { "#" + movie.id }
     val description = if (selectMode) {
-        stringResource(R.string.arr_radarr_library_cd_select_movie, title)
+        stringResource(ArrUiR.string.arr_common_detail_import_cd_select, title)
     } else {
-        stringResource(R.string.arr_radarr_library_cd_open_movie, title)
+        stringResource(ArrUiR.string.arr_common_mm_browser_cd_open, title)
     }
     Box(
         modifier = Modifier
@@ -528,13 +529,13 @@ private fun MoviePosterCard(
                 ) {
                     if (MovieLibraryFilters.isMissing(movie)) {
                         PosterBadge(
-                            stringResource(R.string.arr_radarr_library_badge_missing),
+                            stringResource(ArrUiR.string.arr_common_wanted_tab_missing),
                             MaterialTheme.colorScheme.errorContainer,
                         )
                     }
                     if (queued) {
                         PosterBadge(
-                            stringResource(R.string.arr_radarr_library_badge_queued),
+                            stringResource(ArrUiR.string.arr_common_connect_badge_queued),
                             MaterialTheme.colorScheme.tertiaryContainer,
                         )
                     }
@@ -605,7 +606,7 @@ private fun MovieTable(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
-        items(state.presentation.visible, key = { it.id }) { movie ->
+        items(state.presentation.visible, key = { it.id }, contentType = { "movie" }) { movie ->
             MovieTableRow(
                 movie = movie,
                 state = state,
@@ -630,9 +631,9 @@ private fun MovieTableRow(
 ) {
     val title = movie.title.orEmpty().ifEmpty { "#" + movie.id }
     val description = if (state.selectMode) {
-        stringResource(R.string.arr_radarr_library_cd_select_movie, title)
+        stringResource(ArrUiR.string.arr_common_detail_import_cd_select, title)
     } else {
-        stringResource(R.string.arr_radarr_library_cd_open_movie, title)
+        stringResource(ArrUiR.string.arr_common_mm_browser_cd_open, title)
     }
     Surface(
         shape = RoundedCornerShape(12.dp),
@@ -689,22 +690,22 @@ private fun MovieTableRow(
             }
             if (MovieLibraryFilters.isMissing(movie)) {
                 PosterBadge(
-                    stringResource(R.string.arr_radarr_library_badge_missing),
+                    stringResource(ArrUiR.string.arr_common_wanted_tab_missing),
                     MaterialTheme.colorScheme.errorContainer,
                 )
             }
             if (movie.id in state.queuedMovieIds) {
                 PosterBadge(
-                    stringResource(R.string.arr_radarr_library_badge_queued),
+                    stringResource(ArrUiR.string.arr_common_connect_badge_queued),
                     MaterialTheme.colorScheme.tertiaryContainer,
                 )
             }
             Icon(
                 imageVector = Icons.Filled.Done,
                 contentDescription = if (movie.monitored) {
-                    stringResource(R.string.arr_radarr_library_cd_monitored)
+                    stringResource(ArrUiR.string.arr_common_monitored)
                 } else {
-                    stringResource(R.string.arr_radarr_library_cd_unmonitored)
+                    stringResource(ArrUiR.string.arr_common_wanted_cd_unmonitored)
                 },
                 tint = if (movie.monitored) {
                     MaterialTheme.colorScheme.primary
@@ -789,7 +790,7 @@ private fun SelectionBar(
                 Icon(
                     imageVector = Icons.Filled.Refresh,
                     contentDescription = stringResource(
-                        R.string.arr_radarr_library_cd_refresh_metadata,
+                        ArrUiR.string.arr_common_library_cd_refresh_metadata,
                     ),
                 )
             }
@@ -861,7 +862,7 @@ private fun SaveFilterDialog(onSave: (String) -> Unit, onDismiss: () -> Unit) {
     var name by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.arr_radarr_saved_filter_dialog_title)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_saved_filter_dialog_title)) },
         text = {
             OutlinedTextField(
                 value = name,
@@ -878,12 +879,12 @@ private fun SaveFilterDialog(onSave: (String) -> Unit, onDismiss: () -> Unit) {
                 },
                 enabled = name.isNotBlank(),
             ) {
-                Text(stringResource(R.string.arr_radarr_saved_filter_save_button))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_radarr_saved_filter_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )
@@ -891,11 +892,11 @@ private fun SaveFilterDialog(onSave: (String) -> Unit, onDismiss: () -> Unit) {
 
 @Composable
 private fun libraryMessageText(message: LibraryMessage): String = when (message) {
-    LibraryMessage.EditSynced -> stringResource(R.string.arr_radarr_msg_edit_synced)
-    LibraryMessage.EditQueued -> stringResource(R.string.arr_radarr_msg_edit_queued)
+    LibraryMessage.EditSynced -> stringResource(ArrUiR.string.arr_common_system_notice_saved)
+    LibraryMessage.EditQueued -> stringResource(ArrUiR.string.arr_common_msg_edit_queued)
     LibraryMessage.DeleteSynced -> stringResource(R.string.arr_radarr_msg_delete_synced)
     LibraryMessage.DeleteQueued -> stringResource(R.string.arr_radarr_msg_delete_queued)
     LibraryMessage.CommandStarted -> stringResource(R.string.arr_radarr_msg_command_started)
     LibraryMessage.CommandQueued -> stringResource(R.string.arr_radarr_msg_command_queued)
-    is LibraryMessage.WriteFailed -> stringResource(R.string.arr_radarr_msg_write_failed)
+    is LibraryMessage.WriteFailed -> stringResource(ArrUiR.string.arr_common_msg_write_failed)
 }

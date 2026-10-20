@@ -70,6 +70,7 @@ import dev.appolon.homelab.arr.ui.components.SectionHeader
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The add-new screen body: a search tab (query with year disambiguation,
@@ -136,7 +137,7 @@ fun AddSeriesContent(
                 Tab(
                     selected = tab == AddTab.SEARCH.ordinal,
                     onClick = { tab = AddTab.SEARCH.ordinal },
-                    text = { Text(stringResource(R.string.arr_sonarr_add_tab_search)) },
+                    text = { Text(stringResource(ArrUiR.string.arr_common_indexers_mode_search)) },
                 )
                 Tab(
                     selected = tab == AddTab.LISTS.ordinal,
@@ -144,7 +145,7 @@ fun AddSeriesContent(
                         tab = AddTab.LISTS.ordinal
                         onRefreshLists()
                     },
-                    text = { Text(stringResource(R.string.arr_sonarr_add_tab_lists)) },
+                    text = { Text(stringResource(ArrUiR.string.arr_common_lists_title)) },
                 )
             }
             if (tab == AddTab.SEARCH.ordinal) {
@@ -249,7 +250,7 @@ private fun SearchTab(
             modifier = Modifier.fillMaxSize(),
             emptyTitle = stringResource(
                 if (state.searched) {
-                    R.string.arr_sonarr_add_results_none_title
+                    ArrUiR.string.arr_common_addnew_search_empty_title
                 } else {
                     R.string.arr_sonarr_add_results_start_title
                 },
@@ -282,7 +283,11 @@ private fun SearchTab(
                     }
                 } else {
                     LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
-                        items(results, key = { resultKey(it) }) { series ->
+                        items(
+                            results,
+                            key = { resultKey(it) },
+                            contentType = { "search-result" },
+                        ) { series ->
                             ResultRow(
                                 series = series,
                                 state = state,
@@ -314,7 +319,7 @@ private fun YearChipRow(
                 label = { Text(stringResource(R.string.arr_sonarr_add_year_all)) },
             )
         }
-        items(state.availableYears, key = { it }) { year ->
+        items(state.availableYears, key = { it }, contentType = { "year" }) { year ->
             FilterChip(
                 selected = state.yearFilter == year,
                 onClick = { onYearPicked(if (state.yearFilter == year) null else year) },
@@ -341,7 +346,7 @@ private fun QueuedBanner(count: Int) {
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = stringResource(R.string.arr_sonarr_add_queued_banner, count),
+            text = stringResource(ArrUiR.string.arr_common_system_pending_banner, count),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.tertiary,
         )
@@ -383,7 +388,7 @@ private fun ResultRow(
                     AsyncImage(
                         model = url,
                         contentDescription = stringResource(
-                            R.string.arr_sonarr_add_cd_result_poster,
+                            ArrUiR.string.arr_common_add_cd_result_poster,
                             title,
                         ),
                         imageLoader = loader,
@@ -448,7 +453,7 @@ private fun ResultRow(
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = stringResource(
-                        R.string.arr_sonarr_add_cd_open_add,
+                        ArrUiR.string.arr_common_add_cd_open_add,
                         title,
                     ),
                 )
@@ -461,7 +466,7 @@ private fun ResultRow(
 @Composable
 private fun InLibraryBadge() {
     Text(
-        text = stringResource(R.string.arr_sonarr_add_in_library),
+        text = stringResource(ArrUiR.string.arr_common_lists_preview_existing),
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onPrimaryContainer,
         modifier = Modifier
@@ -487,7 +492,7 @@ private fun ListsTab(
         state = listsLceOf(state),
         onRetry = onRefresh,
         modifier = Modifier.fillMaxSize(),
-        emptyTitle = stringResource(R.string.arr_sonarr_add_lists_empty_title),
+        emptyTitle = stringResource(ArrUiR.string.arr_common_lists_empty_title),
         emptyMessage = stringResource(R.string.arr_sonarr_add_lists_empty_message),
     ) { content ->
         ArrPullToRefreshBox(
@@ -503,16 +508,16 @@ private fun ListsTab(
                 if (content.queuedForServer > 0) {
                     QueuedBanner(count = content.queuedForServer)
                 }
-                SectionHeader(title = stringResource(R.string.arr_sonarr_add_lists_title))
+                SectionHeader(title = stringResource(ArrUiR.string.arr_common_lists_title))
                 content.importLists.forEach { list ->
                     ImportListRow(list = list, onSyncList = onSyncList)
                     HorizontalDivider()
                 }
                 SectionHeader(
-                    title = stringResource(R.string.arr_sonarr_add_exclusions_title),
+                    title = stringResource(R.string.arr_sonarr_exclusions_section),
                     action = {
                         TextButton(onClick = onOpenExclusionDraft) {
-                            Text(stringResource(R.string.arr_sonarr_add_exclusion_add))
+                            Text(stringResource(ArrUiR.string.arr_common_exclusions_add))
                         }
                     },
                 )
@@ -604,7 +609,7 @@ private fun ExclusionRow(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = stringResource(R.string.arr_sonarr_add_exclusion_tvdb, exclusion.tvdbId),
+                text = stringResource(R.string.arr_sonarr_exclusions_tvdb_value, exclusion.tvdbId),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -667,7 +672,7 @@ private fun addMessageText(message: AddMessage?): String? = when (message) {
     null -> null
     is AddMessage.Added -> stringResource(R.string.arr_sonarr_add_message_added, message.title)
     is AddMessage.AddQueued -> stringResource(
-        R.string.arr_sonarr_add_message_add_queued,
+        ArrUiR.string.arr_common_add_notice_queued,
         message.title,
     )
 

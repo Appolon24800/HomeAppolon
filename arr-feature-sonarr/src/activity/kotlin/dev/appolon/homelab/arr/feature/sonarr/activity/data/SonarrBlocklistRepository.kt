@@ -257,7 +257,9 @@ class SonarrBlocklistRepository(
 
     private fun action(method: String, path: String, bodyJson: String?, description: String) =
         QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.SONARR,
             method = method,
@@ -280,7 +282,7 @@ class SonarrBlocklistRepository(
         internal val META_TYPE = EntityType("sonarr.blocklist.meta")
 
         /** One minute; blocklists change only through queue removals. */
-        const val BLOCKLIST_TTL_MILLIS: Long = 60 * 1000
+        const val BLOCKLIST_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         internal const val META_ID = "entries"
         internal const val ENTRY_PATH_PREFIX = "api/v3/blocklist/"

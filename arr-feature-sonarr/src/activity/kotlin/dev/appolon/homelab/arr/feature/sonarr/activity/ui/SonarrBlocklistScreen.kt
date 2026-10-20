@@ -61,6 +61,7 @@ import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Destination for the blocklist route: wires the repository and ViewModel
@@ -145,7 +146,7 @@ fun SonarrBlocklistScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_blocklist_title),
+        title = stringResource(ArrUiR.string.arr_common_blocklist_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
@@ -155,13 +156,13 @@ fun SonarrBlocklistScreen(
             ) {
                 Icon(
                     imageVector = Icons.Filled.DeleteSweep,
-                    contentDescription = stringResource(R.string.arr_sonarr_blocklist_cd_clear),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_blocklist_cd_clear),
                 )
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_blocklist_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_blocklist_cd_refresh),
                 )
             }
         },
@@ -194,8 +195,8 @@ fun SonarrBlocklistScreen(
     if (confirmClear) {
         AlertDialog(
             onDismissRequest = { confirmClear = false },
-            title = { Text(stringResource(R.string.arr_sonarr_blocklist_clear_title)) },
-            text = { Text(stringResource(R.string.arr_sonarr_blocklist_clear_message)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_blocklist_cd_clear)) },
+            text = { Text(stringResource(ArrUiR.string.arr_common_blocklist_clear_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -203,12 +204,12 @@ fun SonarrBlocklistScreen(
                         confirmClear = false
                     },
                 ) {
-                    Text(stringResource(R.string.arr_sonarr_blocklist_clear_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_blocklist_clear_confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmClear = false }) {
-                    Text(stringResource(R.string.arr_sonarr_blocklist_clear_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -235,7 +236,7 @@ private fun BlocklistList(
     ArrLceBox(
         state = lce,
         onRetry = onRefresh,
-        emptyTitle = stringResource(R.string.arr_sonarr_blocklist_empty_title),
+        emptyTitle = stringResource(ArrUiR.string.arr_common_blocklist_empty_title),
         emptyMessage = stringResource(R.string.arr_sonarr_blocklist_empty_message),
         modifier = modifier,
     ) { shown ->
@@ -247,7 +248,7 @@ private fun BlocklistList(
             if (shown.pendingActions > 0) {
                 item(key = PendingBannerKey) { PendingSyncBanner(shown.pendingActions) }
             }
-            items(shown.entries, key = { it.id }) { entry ->
+            items(shown.entries, key = { it.id }, contentType = { "entry" }) { entry ->
                 BlocklistEntryRow(
                     entry = entry,
                     onRemove = { onRemove(entry) },
@@ -345,14 +346,14 @@ private fun BlocklistEntryRow(
                     Icon(
                         imageVector = Icons.Filled.CloudUpload,
                         contentDescription = stringResource(
-                            R.string.arr_sonarr_blocklist_cd_queued_indicator,
+                            ArrUiR.string.arr_common_system_cd_queued_indicator,
                         ),
                         tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.size(16.dp),
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = stringResource(R.string.arr_sonarr_blocklist_queued_row),
+                        text = stringResource(ArrUiR.string.arr_common_roots_queued_row),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.tertiary,
                     )
@@ -363,7 +364,7 @@ private fun BlocklistEntryRow(
             Icon(
                 imageVector = Icons.Filled.Delete,
                 contentDescription = stringResource(
-                    R.string.arr_sonarr_blocklist_cd_remove,
+                    ArrUiR.string.arr_common_blocklist_cd_remove,
                     entry.title,
                 ),
             )
@@ -374,8 +375,8 @@ private fun BlocklistEntryRow(
 @Composable
 private fun protocolLabel(protocol: DownloadProtocol): String = when (protocol) {
     DownloadProtocol.UNKNOWN -> ""
-    DownloadProtocol.USENET -> stringResource(R.string.arr_sonarr_blocklist_protocol_usenet)
-    DownloadProtocol.TORRENT -> stringResource(R.string.arr_sonarr_blocklist_protocol_torrent)
+    DownloadProtocol.USENET -> stringResource(ArrUiR.string.arr_common_quality_delay_usenet)
+    DownloadProtocol.TORRENT -> stringResource(ArrUiR.string.arr_common_quality_delay_torrent)
 }
 
 @Composable
@@ -393,7 +394,7 @@ private fun PendingSyncBanner(pending: Int) {
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = stringResource(R.string.arr_sonarr_blocklist_pending_banner, pending),
+            text = stringResource(ArrUiR.string.arr_common_system_pending_banner, pending),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.tertiary,
         )
@@ -421,7 +422,7 @@ private fun LoadMoreFailedRow(onRetry: () -> Unit) {
             .padding(8.dp),
     ) {
         TextButton(onClick = onRetry) {
-            Text(stringResource(R.string.arr_sonarr_blocklist_load_more_retry))
+            Text(stringResource(ArrUiR.string.arr_common_history_load_more_retry))
         }
     }
 }
@@ -435,12 +436,12 @@ private fun NoticeHost(
     onConsumeWriteError: () -> Unit,
 ) {
     val message = when (notice) {
-        BlocklistNotice.REMOVED -> stringResource(R.string.arr_sonarr_blocklist_notice_removed)
+        BlocklistNotice.REMOVED -> stringResource(ArrUiR.string.arr_common_blocklist_notice_removed)
         BlocklistNotice.REMOVE_QUEUED ->
-            stringResource(R.string.arr_sonarr_blocklist_notice_remove_queued)
-        BlocklistNotice.CLEARED -> stringResource(R.string.arr_sonarr_blocklist_notice_cleared)
+            stringResource(ArrUiR.string.arr_common_blocklist_notice_remove_queued)
+        BlocklistNotice.CLEARED -> stringResource(ArrUiR.string.arr_common_blocklist_notice_cleared)
         BlocklistNotice.CLEAR_QUEUED ->
-            stringResource(R.string.arr_sonarr_blocklist_notice_clear_queued)
+            stringResource(ArrUiR.string.arr_common_blocklist_notice_clear_queued)
         null -> null
     }
     LaunchedEffect(message) {

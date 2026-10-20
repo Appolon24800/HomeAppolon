@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import coil3.request.crossfade
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ArrTime
 import dev.appolon.homelab.arr.core.Humanize
@@ -69,6 +70,7 @@ import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
 import okhttp3.OkHttpClient
 import java.util.Locale
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The movie detail screen: hero art, monitored toggle, overview, cast, files
@@ -267,7 +269,7 @@ private fun DetailBody(
         MovieHero(movie, imageLoader)
         MovieFactsRow(state, movie)
         LabeledSwitch(
-            label = stringResource(R.string.arr_radarr_detail_monitored),
+            label = stringResource(ArrUiR.string.arr_common_monitored),
             checked = movie.monitored,
             onCheckedChange = { onToggleMonitored() },
             supportingText = stringResource(R.string.arr_radarr_detail_monitored_support),
@@ -307,7 +309,7 @@ private fun QueuedBanner(count: Int) {
             )
             Spacer(Modifier.width(12.dp))
             Text(
-                text = stringResource(R.string.arr_radarr_detail_queued_banner, count),
+                text = stringResource(ArrUiR.string.arr_common_system_pending_banner, count),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
             )
@@ -353,7 +355,7 @@ private fun MovieHero(movie: MovieDetailUi, imageLoader: ImageLoader?) {
         ) {
             val posterShape = RoundedCornerShape(10.dp)
             val posterDescription =
-                stringResource(R.string.arr_radarr_detail_cd_poster, movie.title)
+                stringResource(ArrUiR.string.arr_common_addnew_cd_poster, movie.title)
             Box(
                 Modifier
                     .size(width = 92.dp, height = 138.dp)
@@ -443,7 +445,7 @@ private fun MovieFactsRow(state: RadarrMovieDetailUiState, movie: MovieDetailUi)
                 Text(
                     state.editOptions.qualityProfileName(movie.qualityProfileId)
                         ?: stringResource(
-                            R.string.arr_radarr_detail_profile_id,
+                            ArrUiR.string.arr_common_quality_delay_profile_title,
                             movie.qualityProfileId,
                         ),
                 )
@@ -465,7 +467,7 @@ private fun MovieFactsRow(state: RadarrMovieDetailUiState, movie: MovieDetailUi)
 private fun ReleaseDates(movie: MovieDetailUi) {
     val dates = listOfNotNull(
         movie.inCinemas?.let {
-            stringResource(R.string.arr_radarr_detail_in_cinemas) to ArrTime.dateTimeShort(it)
+            stringResource(R.string.arr_radarr_addnew_availability_in_cinemas) to ArrTime.dateTimeShort(it)
         },
         movie.digitalRelease?.let {
             stringResource(R.string.arr_radarr_detail_digital_release) to ArrTime.dateTimeShort(it)
@@ -542,7 +544,11 @@ private fun CastSection(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.padding(vertical = 8.dp),
             ) {
-                items(section.data, key = { "${if (crew) "c" else "a"}-${it.id}" }) { credit ->
+                items(
+                    section.data,
+                    key = { "${if (crew) "c" else "a"}-${it.id}" },
+                    contentType = { "credit" },
+                ) { credit ->
                     CreditTile(credit, imageLoader)
                 }
             }
@@ -630,7 +636,7 @@ private fun ActionRow(
         Button(onClick = onSearch, enabled = !state.working) {
             Icon(imageVector = Icons.Filled.Search, contentDescription = null)
             Spacer(Modifier.width(6.dp))
-            Text(stringResource(R.string.arr_radarr_detail_search))
+            Text(stringResource(ArrUiR.string.arr_common_indexers_mode_search))
         }
         OutlinedButton(onClick = onRename, enabled = !state.working && hasFiles) {
             Icon(imageVector = Icons.Filled.DriveFileRenameOutline, contentDescription = null)
@@ -640,7 +646,7 @@ private fun ActionRow(
         OutlinedButton(onClick = onOpenImport) {
             Icon(imageVector = Icons.Filled.Input, contentDescription = null)
             Spacer(Modifier.width(6.dp))
-            Text(stringResource(R.string.arr_radarr_detail_import))
+            Text(stringResource(ArrUiR.string.arr_common_import_flow_approve))
         }
     }
 }
@@ -649,7 +655,7 @@ private fun ActionRow(
 private fun FilesSection(state: RadarrMovieDetailUiState) {
     when (val files = state.files) {
         is LceState.Content -> {
-            SectionHeader(title = stringResource(R.string.arr_radarr_detail_files))
+            SectionHeader(title = stringResource(ArrUiR.string.arr_common_import_flow_files_label))
             if (files.data.isEmpty()) {
                 SectionEmpty(R.string.arr_radarr_detail_files_none)
             } else {
@@ -662,7 +668,7 @@ private fun FilesSection(state: RadarrMovieDetailUiState) {
             }
         }
         is LceState.Error -> SectionError(
-            stringResource(R.string.arr_radarr_detail_files),
+            stringResource(ArrUiR.string.arr_common_import_flow_files_label),
             files.error,
         )
         else -> Unit
@@ -748,7 +754,7 @@ private fun ExtraFilesSection(state: RadarrMovieDetailUiState) {
 private fun HistorySection(state: RadarrMovieDetailUiState) {
     when (val history = state.history) {
         is LceState.Content -> {
-            SectionHeader(title = stringResource(R.string.arr_radarr_detail_history))
+            SectionHeader(title = stringResource(ArrUiR.string.arr_common_history_title))
             if (history.data.isEmpty()) {
                 SectionEmpty(R.string.arr_radarr_detail_history_none)
             } else {
@@ -790,7 +796,7 @@ private fun HistorySection(state: RadarrMovieDetailUiState) {
             }
         }
         is LceState.Error -> SectionError(
-            stringResource(R.string.arr_radarr_detail_history),
+            stringResource(ArrUiR.string.arr_common_history_title),
             history.error,
         )
         else -> Unit
@@ -828,14 +834,14 @@ private fun historyIcon(eventType: String): ImageVector = when (eventType) {
 @Composable
 internal fun historyEventLabel(eventType: String): String = stringResource(
     when (eventType) {
-        "GRABBED" -> R.string.arr_radarr_detail_event_grabbed
+        "GRABBED" -> ArrUiR.string.arr_common_history_filter_grabbed
         "DOWNLOAD_FOLDER_IMPORTED" -> R.string.arr_radarr_detail_event_folder_imported
         "MOVIE_FOLDER_IMPORTED" -> R.string.arr_radarr_detail_event_movie_imported
-        "DOWNLOAD_FAILED" -> R.string.arr_radarr_detail_event_failed
-        "MOVIE_FILE_DELETED" -> R.string.arr_radarr_detail_event_file_deleted
-        "MOVIE_FILE_RENAMED" -> R.string.arr_radarr_detail_event_renamed
-        "DOWNLOAD_IGNORED" -> R.string.arr_radarr_detail_event_ignored
-        else -> R.string.arr_radarr_detail_event_unknown
+        "DOWNLOAD_FAILED" -> ArrUiR.string.arr_common_detail_event_failed
+        "MOVIE_FILE_DELETED" -> ArrUiR.string.arr_common_detail_event_file_deleted
+        "MOVIE_FILE_RENAMED" -> ArrUiR.string.arr_common_history_filter_renamed
+        "DOWNLOAD_IGNORED" -> ArrUiR.string.arr_common_history_type_ignored
+        else -> ArrUiR.string.arr_common_detail_event_unknown
     },
 )
 
@@ -851,6 +857,7 @@ internal fun rememberRadarrImageLoader(client: OkHttpClient?): ImageLoader? {
     return remember(client) {
         ImageLoader.Builder(context)
             .components { add(OkHttpNetworkFetcherFactory(client)) }
+            .crossfade(true)
             .build()
     }
 }

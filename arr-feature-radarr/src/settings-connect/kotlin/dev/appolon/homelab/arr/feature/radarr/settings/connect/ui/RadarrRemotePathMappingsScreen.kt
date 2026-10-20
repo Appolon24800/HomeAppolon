@@ -51,6 +51,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the remote path mappings route. */
 @Composable
@@ -122,16 +123,16 @@ fun RadarrRemotePathMappingsScreen(
     NoticeHost(
         noticeMessage = when (state.notice) {
             RemotePathMappingNotice.SAVED ->
-                stringResource(R.string.arr_radarr_connect_notice_saved)
+                stringResource(ArrUiR.string.arr_common_connect_notice_saved)
 
             RemotePathMappingNotice.SAVED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
             RemotePathMappingNotice.DELETED ->
-                stringResource(R.string.arr_radarr_connect_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             RemotePathMappingNotice.DELETED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_deleted_queued)
+                stringResource(ArrUiR.string.arr_common_backup_notice_deleted_queued)
 
             null -> null
         },
@@ -142,14 +143,14 @@ fun RadarrRemotePathMappingsScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_paths_title),
+        title = stringResource(ArrUiR.string.arr_common_paths_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_paths_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_paths_cd_refresh),
                 )
             }
         },
@@ -166,8 +167,8 @@ fun RadarrRemotePathMappingsScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_radarr_paths_empty_title),
-                    emptyMessage = stringResource(R.string.arr_radarr_paths_empty_message),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_paths_empty_title),
+                    emptyMessage = stringResource(ArrUiR.string.arr_common_paths_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
                     LazyColumn(
@@ -178,7 +179,11 @@ fun RadarrRemotePathMappingsScreen(
                         if (data.pendingActions > 0) {
                             item { PendingBanner(data.pendingActions) }
                         }
-                        items(data.mappings, key = { it.id }) { mapping ->
+                        items(
+                            data.mappings,
+                            key = { it.id },
+                            contentType = { "mapping" },
+                        ) { mapping ->
                             MappingRow(
                                 mapping = mapping,
                                 onEdit = { onEdit(mapping) },
@@ -191,7 +196,7 @@ fun RadarrRemotePathMappingsScreen(
             ExtendedFloatingActionButton(
                 onClick = onAdd,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.arr_radarr_paths_add)) },
+                text = { Text(stringResource(ArrUiR.string.arr_common_paths_add)) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
@@ -209,8 +214,8 @@ fun RadarrRemotePathMappingsScreen(
             title = {
                 Text(
                     stringResource(
-                        if (draft.id == 0) R.string.arr_radarr_paths_add_title
-                        else R.string.arr_radarr_paths_edit_title,
+                        if (draft.id == 0) ArrUiR.string.arr_common_paths_add_title
+                        else ArrUiR.string.arr_common_paths_edit_title,
                     ),
                 )
             },
@@ -219,21 +224,21 @@ fun RadarrRemotePathMappingsScreen(
                     OutlinedTextField(
                         value = draft.host,
                         onValueChange = { host -> onDraftChange { it.copy(host = host) } },
-                        label = { Text(stringResource(R.string.arr_radarr_paths_host)) },
+                        label = { Text(stringResource(ArrUiR.string.arr_common_general_section_host)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
                     OutlinedTextField(
                         value = draft.remotePath,
                         onValueChange = { path -> onDraftChange { it.copy(remotePath = path) } },
-                        label = { Text(stringResource(R.string.arr_radarr_paths_remote)) },
+                        label = { Text(stringResource(ArrUiR.string.arr_common_paths_remote)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
                     OutlinedTextField(
                         value = draft.localPath,
                         onValueChange = { path -> onDraftChange { it.copy(localPath = path) } },
-                        label = { Text(stringResource(R.string.arr_radarr_paths_local)) },
+                        label = { Text(stringResource(ArrUiR.string.arr_common_paths_local)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -247,12 +252,12 @@ fun RadarrRemotePathMappingsScreen(
                         draft.remotePath.isNotBlank() &&
                         draft.localPath.isNotBlank(),
                 ) {
-                    Text(stringResource(R.string.arr_radarr_connect_save))
+                    Text(stringResource(ArrUiR.string.arr_common_save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onCancelEdit) {
-                    Text(stringResource(R.string.arr_radarr_connect_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -261,11 +266,11 @@ fun RadarrRemotePathMappingsScreen(
     state.confirmDeleteFor?.let { target ->
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_radarr_connect_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_delete)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.arr_radarr_paths_delete_message,
+                        ArrUiR.string.arr_common_paths_delete_message,
                         target.remotePath.orEmpty(),
                         target.localPath.orEmpty(),
                     ),
@@ -273,12 +278,12 @@ fun RadarrRemotePathMappingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -306,7 +311,7 @@ private fun MappingRow(
                 )
                 Text(
                     text = stringResource(
-                        R.string.arr_radarr_paths_row_paths,
+                        ArrUiR.string.arr_common_paths_row_paths,
                         mapping.remotePath.orEmpty(),
                         mapping.localPath.orEmpty(),
                     ),
@@ -314,7 +319,7 @@ private fun MappingRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            val editCd = stringResource(R.string.arr_radarr_paths_cd_edit, mapping.host.orEmpty())
+            val editCd = stringResource(ArrUiR.string.arr_common_paths_cd_edit, mapping.host.orEmpty())
             IconButton(
                 onClick = onEdit,
                 modifier = Modifier.semantics { contentDescription = editCd },
@@ -322,7 +327,7 @@ private fun MappingRow(
                 Icon(Icons.Filled.Edit, contentDescription = null)
             }
             val deleteCd = stringResource(
-                R.string.arr_radarr_paths_cd_delete,
+                ArrUiR.string.arr_common_paths_cd_delete,
                 mapping.host.orEmpty(),
             )
             IconButton(

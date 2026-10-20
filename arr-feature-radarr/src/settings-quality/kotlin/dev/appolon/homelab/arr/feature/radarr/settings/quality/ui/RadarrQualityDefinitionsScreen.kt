@@ -42,6 +42,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Destination for the quality definitions route: wires the repository and
@@ -115,9 +116,9 @@ fun RadarrQualityDefinitionsScreen(
     val refreshing = content != null && (lce as LceState.Content<RadarrQualityDefinitionsContent>).refreshing
 
     val savedMessage = when (state.notice) {
-        QualityDefinitionsNotice.SAVED -> stringResource(R.string.arr_radarr_quality_notice_saved)
+        QualityDefinitionsNotice.SAVED -> stringResource(ArrUiR.string.arr_common_system_notice_saved)
         QualityDefinitionsNotice.SAVED_QUEUED ->
-            stringResource(R.string.arr_radarr_quality_notice_saved_queued)
+            stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
         null -> null
     }
     QualityNoticeHost(
@@ -129,7 +130,7 @@ fun RadarrQualityDefinitionsScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_quality_definitions_title),
+        title = stringResource(ArrUiR.string.arr_common_quality_definitions_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
@@ -137,14 +138,14 @@ fun RadarrQualityDefinitionsScreen(
                 IconButton(onClick = onSave, enabled = !state.saving) {
                     Icon(
                         imageVector = Icons.Filled.Save,
-                        contentDescription = stringResource(R.string.arr_radarr_quality_cd_save),
+                        contentDescription = stringResource(ArrUiR.string.arr_common_save_changes),
                     )
                 }
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_quality_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_refresh),
                 )
             }
         },
@@ -173,7 +174,7 @@ fun RadarrQualityDefinitionsScreen(
                     ) {
                         if (data.pendingActions > 0) QualityPendingSyncBanner(data.pendingActions)
                         Text(
-                            text = stringResource(R.string.arr_radarr_quality_definitions_hint),
+                            text = stringResource(ArrUiR.string.arr_common_quality_definitions_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -216,11 +217,11 @@ private fun QualityDefinitionCard(
         }
         QualityTextField(
             value = draft.title,
-            label = stringResource(R.string.arr_radarr_quality_definitions_title_field),
+            label = stringResource(ArrUiR.string.arr_common_quality_definitions_title_field),
             onValue = { text -> onEditRow(draft.id) { it.copy(title = text) } },
         )
         QualityWeightSlider(
-            label = stringResource(R.string.arr_radarr_quality_definitions_weight),
+            label = stringResource(ArrUiR.string.arr_common_quality_definitions_weight),
             value = draft.weight,
             min = weightMin,
             max = weightMax,
@@ -230,55 +231,55 @@ private fun QualityDefinitionCard(
             Column(Modifier.weight(1f)) {
                 QualityTextField(
                     value = draft.minSize,
-                    label = stringResource(R.string.arr_radarr_quality_definitions_min),
+                    label = stringResource(ArrUiR.string.arr_common_quality_definitions_min),
                     onValue = { text -> onEditRow(draft.id) { it.copy(minSize = text) } },
                     isError = errors.contains(QualityDefinitionFieldError.MIN_NOT_A_NUMBER) ||
                         errors.contains(QualityDefinitionFieldError.MIN_NEGATIVE) ||
                         errors.contains(QualityDefinitionFieldError.MIN_ABOVE_MAX),
                     errorMessage = when {
                         errors.contains(QualityDefinitionFieldError.MIN_NOT_A_NUMBER) ->
-                            stringResource(R.string.arr_radarr_quality_definitions_error_number)
+                            stringResource(ArrUiR.string.arr_common_quality_definitions_error_number)
 
                         errors.contains(QualityDefinitionFieldError.MIN_NEGATIVE) ->
-                            stringResource(R.string.arr_radarr_quality_definitions_error_negative)
+                            stringResource(ArrUiR.string.arr_common_quality_definitions_error_negative)
 
-                        else -> stringResource(R.string.arr_radarr_quality_definitions_error_min_above_max)
+                        else -> stringResource(ArrUiR.string.arr_common_quality_definitions_error_min_above_max)
                     },
                 )
             }
             Column(Modifier.weight(1f)) {
                 QualityTextField(
                     value = draft.maxSize,
-                    label = stringResource(R.string.arr_radarr_quality_definitions_max),
+                    label = stringResource(ArrUiR.string.arr_common_quality_definitions_max),
                     onValue = { text -> onEditRow(draft.id) { it.copy(maxSize = text) } },
                     isError = errors.contains(QualityDefinitionFieldError.MAX_NOT_A_NUMBER) ||
                         errors.contains(QualityDefinitionFieldError.MIN_ABOVE_MAX) ||
                         errors.contains(QualityDefinitionFieldError.PREFERRED_ABOVE_MAX),
                     errorMessage = when {
                         errors.contains(QualityDefinitionFieldError.MAX_NOT_A_NUMBER) ->
-                            stringResource(R.string.arr_radarr_quality_definitions_error_number)
+                            stringResource(ArrUiR.string.arr_common_quality_definitions_error_number)
 
-                        else -> stringResource(R.string.arr_radarr_quality_definitions_error_min_above_max)
+                        else -> stringResource(ArrUiR.string.arr_common_quality_definitions_error_min_above_max)
                     },
                 )
             }
         }
         QualityTextField(
             value = draft.preferredSize,
-            label = stringResource(R.string.arr_radarr_quality_definitions_preferred),
-            supporting = stringResource(R.string.arr_radarr_quality_definitions_preferred_support),
+            label = stringResource(ArrUiR.string.arr_common_quality_definitions_preferred),
+            supporting = stringResource(ArrUiR.string.arr_common_quality_definitions_preferred_support),
             onValue = { text -> onEditRow(draft.id) { it.copy(preferredSize = text) } },
             isError = errors.contains(QualityDefinitionFieldError.PREFERRED_NOT_A_NUMBER) ||
                 errors.contains(QualityDefinitionFieldError.PREFERRED_ABOVE_MAX),
             errorMessage = when {
                 errors.contains(QualityDefinitionFieldError.PREFERRED_NOT_A_NUMBER) ->
-                    stringResource(R.string.arr_radarr_quality_definitions_error_number)
+                    stringResource(ArrUiR.string.arr_common_quality_definitions_error_number)
 
-                else -> stringResource(R.string.arr_radarr_quality_definitions_error_preferred_above_max)
+                else -> stringResource(ArrUiR.string.arr_common_quality_definitions_error_preferred_above_max)
             },
         )
         Text(
-            text = stringResource(R.string.arr_radarr_quality_definitions_size_unit),
+            text = stringResource(ArrUiR.string.arr_common_quality_definitions_size_unit),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

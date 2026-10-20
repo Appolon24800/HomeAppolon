@@ -3,6 +3,7 @@ package dev.appolon.homelab.arr.feature.sonarr.library
 import android.content.Context
 import coil3.ImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import coil3.request.crossfade
 import dev.appolon.homelab.arr.api.sonarr.QualityProfileApi
 import dev.appolon.homelab.arr.api.sonarr.SeasonPassApi
 import dev.appolon.homelab.arr.api.sonarr.SeriesApi
@@ -105,6 +106,7 @@ class SonarrSeriesLibraryApis(
      */
     fun imageLoader(context: Context): ImageLoader = ImageLoader.Builder(context)
         .components { add(OkHttpNetworkFetcherFactory(client)) }
+        .crossfade(true)
         .build()
 }
 

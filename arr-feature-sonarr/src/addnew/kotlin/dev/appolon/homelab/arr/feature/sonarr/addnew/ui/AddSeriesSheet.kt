@@ -41,6 +41,7 @@ import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.feature.sonarr.addnew.vm.AddSeriesForm
 import dev.appolon.homelab.arr.feature.sonarr.addnew.vm.ExclusionDraft
 import dev.appolon.homelab.arr.ui.components.LabeledSwitch
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The add-series sheet: root folder (with free space), quality and language
@@ -95,7 +96,7 @@ fun AddSeriesSheet(
             )
 
             Text(
-                text = stringResource(R.string.arr_sonarr_add_root_folder),
+                text = stringResource(ArrUiR.string.arr_common_addnew_sheet_root_folder),
                 modifier = Modifier.padding(top = 8.dp),
             )
             if (rootFolders.isEmpty()) {
@@ -111,7 +112,7 @@ fun AddSeriesSheet(
                         PickerRow(
                             label = folder.path.orEmpty(),
                             supporting = stringResource(
-                                R.string.arr_sonarr_add_root_folder_free,
+                                ArrUiR.string.arr_common_roots_free_only,
                                 Humanize.bytes(folder.freeSpace),
                             ),
                             selected = form.rootFolderPath == folder.path,
@@ -123,7 +124,7 @@ fun AddSeriesSheet(
                 }
             }
 
-            Text(stringResource(R.string.arr_sonarr_add_quality))
+            Text(stringResource(ArrUiR.string.arr_common_wanted_filter_quality))
             Column(Modifier.padding(bottom = 12.dp)) {
                 qualityProfiles.forEach { profile ->
                     PickerRow(
@@ -147,7 +148,7 @@ fun AddSeriesSheet(
                 }
             }
 
-            Text(stringResource(R.string.arr_sonarr_add_series_type))
+            Text(stringResource(R.string.arr_sonarr_list_series_type))
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
@@ -161,7 +162,7 @@ fun AddSeriesSheet(
                 }
             }
 
-            Text(stringResource(R.string.arr_sonarr_add_monitor_strategy))
+            Text(stringResource(R.string.arr_sonarr_list_monitor))
             Column(Modifier.padding(bottom = 12.dp)) {
                 monitorStrategyOptions().forEach { (strategy, label) ->
                     PickerRow(
@@ -187,7 +188,7 @@ fun AddSeriesSheet(
 
             if (tags.isNotEmpty()) {
                 Text(
-                    text = stringResource(R.string.arr_sonarr_add_tags),
+                    text = stringResource(ArrUiR.string.arr_common_tags_title),
                     modifier = Modifier.padding(top = 8.dp),
                 )
                 FlowRow(
@@ -212,13 +213,13 @@ fun AddSeriesSheet(
                     .padding(vertical = 16.dp),
             ) {
                 TextButton(onClick = onDismiss, enabled = !submitting) {
-                    Text(stringResource(R.string.arr_sonarr_add_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
                 OutlinedButton(onClick = { onAdd(false) }, enabled = canSubmit) {
-                    Text(stringResource(R.string.arr_sonarr_add_action_add))
+                    Text(stringResource(ArrUiR.string.arr_common_roots_add_confirm))
                 }
                 Button(onClick = { onAdd(true) }, enabled = canSubmit) {
-                    Text(stringResource(R.string.arr_sonarr_add_action_add_search))
+                    Text(stringResource(ArrUiR.string.arr_common_addnew_action_add_search))
                 }
             }
         }
@@ -257,7 +258,7 @@ private fun SeasonChipRow(
                             stringResource(R.string.arr_sonarr_add_season_specials)
                         } else {
                             stringResource(
-                                R.string.arr_sonarr_add_season_number,
+                                R.string.arr_sonarr_wanted_filter_season_option,
                                 season.seasonNumber,
                             )
                         },
@@ -316,7 +317,7 @@ fun AddExclusionDialog(
                     onValueChange = { value ->
                         onUpdate(draft.copy(title = value, titleError = false))
                     },
-                    label = { Text(stringResource(R.string.arr_sonarr_add_exclusion_title_label)) },
+                    label = { Text(stringResource(R.string.arr_sonarr_exclusions_title_label)) },
                     isError = draft.titleError,
                     supportingText = if (draft.titleError) {
                         { Text(stringResource(R.string.arr_sonarr_add_exclusion_title_error)) }
@@ -333,7 +334,7 @@ fun AddExclusionDialog(
                     onValueChange = { value ->
                         onUpdate(draft.copy(tvdbText = value, tvdbError = false))
                     },
-                    label = { Text(stringResource(R.string.arr_sonarr_add_exclusion_tvdb_label)) },
+                    label = { Text(stringResource(R.string.arr_sonarr_exclusions_tvdb_label)) },
                     isError = draft.tvdbError,
                     supportingText = if (draft.tvdbError) {
                         { Text(stringResource(R.string.arr_sonarr_add_exclusion_tvdb_error)) }
@@ -348,12 +349,12 @@ fun AddExclusionDialog(
         },
         confirmButton = {
             TextButton(onClick = onSave) {
-                Text(stringResource(R.string.arr_sonarr_add_exclusion_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_add_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )

@@ -380,7 +380,7 @@ private fun ReleasesDestination(
             showGroupFilter = scope !is ReleaseScope.Episode,
             onRefresh = vm::refresh,
             onRetry = vm::retry,
-            onBack = { navigator.back() },
+            onBack = remember(navigator) { { navigator.back() } },
             onSort = vm::setSort,
             onGroupFilter = vm::setGroupFilter,
             onToggleRejections = vm::toggleRejections,
@@ -438,9 +438,9 @@ private fun ImportDestination(
     val navigator = LocalArrShellNavigator.current
     InteractiveImportScreen(
         state = state,
-        onBack = { navigator.back() },
+        onBack = remember(navigator) { { navigator.back() } },
         onRetrySeries = vm::loadSeries,
-        onOpenFolder = { folder -> vm.browse(folder.path) },
+        onOpenFolder = remember(vm) { { folder -> vm.browse(folder.path) } },
         onPickFolder = vm::pickFolder,
         onRetryFolders = vm::retryFolders,
         onRetryFiles = vm::retryFiles,

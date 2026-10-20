@@ -1,5 +1,7 @@
 package dev.appolon.homelab.arr.feature.sonarr.activity.logic
 
+import dev.appolon.homelab.arr.api.sonarr.model.EpisodeResource
+import dev.appolon.homelab.arr.api.sonarr.model.SeriesResource
 import dev.appolon.homelab.arr.api.sonarr.model.BlocklistResource
 import dev.appolon.homelab.arr.api.sonarr.model.CustomFormatResource
 import dev.appolon.homelab.arr.api.sonarr.model.DownloadProtocol
@@ -22,21 +24,18 @@ class ActivityPresentersTest {
 
     private val now: Instant = Instant.parse("2026-10-20T12:00:00Z")
 
-    private fun seriesObject(title: String? = null, year: Int? = null): JsonObject =
-        buildJsonObject {
-            title?.let { put("title", it) }
-            year?.let { put("year", it) }
-        }
+    private fun seriesObject(title: String? = null, year: Int? = null): SeriesResource =
+        SeriesResource(title = title, year = year ?: 0)
 
     private fun episodeObject(
         season: Int? = null,
         episode: Int? = null,
         title: String? = null,
-    ): JsonObject = buildJsonObject {
-        season?.let { put("seasonNumber", it) }
-        episode?.let { put("episodeNumber", it) }
-        title?.let { put("title", it) }
-    }
+    ): EpisodeResource = EpisodeResource(
+        seasonNumber = season ?: 0,
+        episodeNumber = episode ?: 0,
+        title = title,
+    )
 
     private fun event(
         id: Int,

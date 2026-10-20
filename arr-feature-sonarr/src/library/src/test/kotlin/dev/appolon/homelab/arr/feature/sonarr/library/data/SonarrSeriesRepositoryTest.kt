@@ -83,6 +83,21 @@ class SonarrSeriesRepositoryTest {
     }
 
     @Test
+    fun `repeated offline edits keep the same action id`() = runTest {
+        seeded(1)
+        repository.refresh()
+        fake.error = { IOException("offline") }
+        val editor = SeriesEditorResource(seriesIds = listOf(1), monitored = false)
+        val first = repository.editSeries(editor)
+        clock += 1_000
+        val second = repository.editSeries(editor)
+        val firstId = ((first as ArrResult.Ok).value as WriteOutcome.Queued).actionId
+        val secondId = ((second as ArrResult.Ok).value as WriteOutcome.Queued).actionId
+        assertEquals(firstId, secondId)
+        assertEquals(false, repository.cachedSeries().first().monitored)
+    }
+
+    @Test
     fun `refresh reconciles removed series`() = runTest {
         seeded(1, 2)
         repository.refresh()

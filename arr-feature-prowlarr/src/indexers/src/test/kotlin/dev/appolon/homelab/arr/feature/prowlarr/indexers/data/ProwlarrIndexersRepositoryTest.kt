@@ -101,6 +101,17 @@ class ProwlarrIndexersRepositoryTest {
     }
 
     @Test
+    fun `repeated offline sync commands keep the same action id`() = runTest {
+        syncResult = ArrResult.err(ArrError.Network(IOException("offline")))
+        val first = repository.syncApplications()
+        nowMs += 1_000
+        val second = repository.syncApplications()
+        val firstId = ((first as ArrResult.Ok).value as WriteOutcome.Queued).actionId
+        val secondId = ((second as ArrResult.Ok).value as WriteOutcome.Queued).actionId
+        assertEquals(firstId, secondId)
+    }
+
+    @Test
     fun `refresh also stores statuses and tags`() = runTest {
         repository.refresh()
         assertEquals(1, repository.observeStatuses().first().size)

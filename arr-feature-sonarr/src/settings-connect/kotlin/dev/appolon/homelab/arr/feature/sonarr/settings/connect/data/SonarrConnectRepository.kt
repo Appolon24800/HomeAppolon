@@ -186,9 +186,11 @@ class SonarrConnectRepository(
         replace(EXCLUSION_TYPE, exclusions, ImportListExclusionResource.serializer(), stamp)
         replace(NOTIFICATION_TYPE, notifications, NotificationResource.serializer(), stamp)
         replace(METADATA_TYPE, metadata, MetadataResource.serializer(), stamp)
-        refreshTags()
+        when (val result = refreshTags()) {
+            is ArrResult.Err -> return@withContext result
+            is ArrResult.Ok -> Unit
+        }
         refreshConfigs()
-        ArrResult.ok(Unit)
     }
 
     /** Refresh only when the TTL expired. */
@@ -204,7 +206,7 @@ class SonarrConnectRepository(
                 )
             }
             val fetched = when (val r = fetch { tagApi.list() }) {
-                is ArrResult.Err -> return@withContext ArrResult.ok(cachedTags())
+                is ArrResult.Err -> return@withContext r
                 is ArrResult.Ok -> r.value
             }
             replace(TAG_TYPE, fetched.sortedBy { it.label }, TagResource.serializer(), now())
@@ -252,13 +254,13 @@ class SonarrConnectRepository(
             ArrResult.ok(ids.toList())
         }
 
-    private suspend fun refreshTags() {
-        val fetched = try {
-            tagApi.list()
-        } catch (e: Throwable) {
-            return
+    private suspend fun refreshTags(): ArrResult<Unit> {
+        val fetched = when (val result = fetch { tagApi.list() }) {
+            is ArrResult.Err -> return result
+            is ArrResult.Ok -> result.value
         }
         replace(TAG_TYPE, fetched.sortedBy { it.label }, TagResource.serializer(), now())
+        return ArrResult.ok(Unit)
     }
 
     // --------------------------------------------------------------- schemas
@@ -314,10 +316,7 @@ class SonarrConnectRepository(
             return ArrResult.ok(store.getAll(serverId, type, serializer))
         }
         val fetched: ArrResult<List<T>> = when (val r = fetch { fetcher() }) {
-            is ArrResult.Err -> {
-                val cached = store.getAll(serverId, type, serializer)
-                if (cached.isNotEmpty()) ArrResult.ok(cached) else r
-            }
+            is ArrResult.Err -> r
 
             is ArrResult.Ok -> r
         }
@@ -362,38 +361,29 @@ class SonarrConnectRepository(
     suspend fun cachedImportListConfig(): ImportListConfigResource? =
         store.get(serverId, IMPORT_LIST_CONFIG_TYPE, SINGLE_ID, ImportListConfigResource.serializer())
 
-    private suspend fun refreshConfigs() {
-        try {
-            store.put(
-                serverId,
-                INDEXER_CONFIG_TYPE,
-                SINGLE_ID,
-                indexerConfigApi.get(),
-                IndexerConfigResource.serializer(),
-            )
-        } catch (_: Throwable) {
-            // Options cards keep the cached row; never fails the refresh.
-        }
-        try {
-            store.put(
-                serverId,
-                DOWNLOAD_CLIENT_CONFIG_TYPE,
-                SINGLE_ID,
-                downloadClientConfigApi.get(),
-                DownloadClientConfigResource.serializer(),
-            )
-        } catch (_: Throwable) {
-        }
-        try {
-            store.put(
-                serverId,
-                IMPORT_LIST_CONFIG_TYPE,
-                SINGLE_ID,
-                importListConfigApi.list(),
-                ImportListConfigResource.serializer(),
-            )
-        } catch (_: Throwable) {
-        }
+    private suspend fun refreshConfigs(): ArrResult<Unit> = fetch {
+        store.put(
+            serverId,
+            INDEXER_CONFIG_TYPE,
+            SINGLE_ID,
+            indexerConfigApi.get(),
+            IndexerConfigResource.serializer(),
+        )
+        store.put(
+            serverId,
+            DOWNLOAD_CLIENT_CONFIG_TYPE,
+            SINGLE_ID,
+            downloadClientConfigApi.get(),
+            DownloadClientConfigResource.serializer(),
+        )
+        store.put(
+            serverId,
+            IMPORT_LIST_CONFIG_TYPE,
+            SINGLE_ID,
+            importListConfigApi.list(),
+            ImportListConfigResource.serializer(),
+        )
+        Unit
     }
 
     suspend fun saveIndexerConfig(
@@ -983,7 +973,9 @@ class SonarrConnectRepository(
         } catch (e: IOException) {
             val error = ArrError.Network(e)
             val action = QueuedAction(
-                actionId = ActionId(UUID.randomUUID().toString()),
+                actionId = ActionId(UUID.nameUUIDFromBytes(
+                    "$serverId:$DELETE_METHOD:$path".toByteArray(Charsets.UTF_8),
+                ).toString()),
                 serverId = serverId,
                 appType = AppType.SONARR,
                 method = DELETE_METHOD,
@@ -1014,7 +1006,9 @@ class SonarrConnectRepository(
     ): ArrResult<WriteOutcome> {
         if (!error.isRetryable()) return ArrResult.err(error)
         val action = QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$body".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.SONARR,
             method = method,
@@ -1132,13 +1126,13 @@ class SonarrConnectRepository(
         internal const val SINGLE_ID = "1"
 
         /** One minute; settings screens also re-read on pull-to-refresh. */
-        const val CONNECT_TTL_MILLIS: Long = 60 * 1000
+        const val CONNECT_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** A day; provider definitions change only on server upgrades. */
-        const val SCHEMA_TTL_MILLIS: Long = 24 * 60 * 60 * 1000
+        const val SCHEMA_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** Five minutes, matching the other settings groups' config rows. */
-        const val TAG_TTL_MILLIS: Long = 5 * 60 * 1000
+        const val TAG_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         internal const val IMPORT_LIST_SYNC_COMMAND = "ImportListSync"
 

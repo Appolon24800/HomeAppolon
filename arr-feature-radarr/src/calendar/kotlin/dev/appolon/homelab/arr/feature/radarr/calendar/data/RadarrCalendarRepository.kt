@@ -41,7 +41,7 @@ class RadarrCalendarRepository(
         val WINDOW_TYPE = EntityType("radarr.calendar-window")
 
         /** Windows stay fresh for ten minutes, matching the sync poll floor. */
-        const val WINDOW_TTL_MILLIS: Long = 10 * 60 * 1000
+        const val WINDOW_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.CALENDAR
 
         /** Padding around a month so the grid's overflow cells have data. */
         const val WINDOW_PAD_DAYS: Long = 7

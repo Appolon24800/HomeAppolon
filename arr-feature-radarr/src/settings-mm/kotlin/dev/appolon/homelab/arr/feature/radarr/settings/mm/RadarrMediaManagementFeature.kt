@@ -1,6 +1,7 @@
 package dev.appolon.homelab.arr.feature.radarr.settings.mm
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.appolon.homelab.arr.core.ServerId
@@ -127,13 +128,13 @@ fun RadarrMediaManagementFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
-                onOpenNaming = {
+                onBack = remember(navigator) { { navigator.back() } },
+                onOpenNaming = remember(navigator, serverId) { {
                     RadarrMediaManagementFeature.openNaming(navigator, serverId)
-                },
-                onOpenRootFolders = {
+                } },
+                onOpenRootFolders = remember(navigator, serverId) { {
                     RadarrMediaManagementFeature.openRootFolders(navigator, serverId)
-                },
+                } },
                 modifier = modifier,
             )
         }
@@ -144,7 +145,7 @@ fun RadarrMediaManagementFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -155,7 +156,7 @@ fun RadarrMediaManagementFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }

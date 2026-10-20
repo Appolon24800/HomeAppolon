@@ -196,7 +196,9 @@ class RadarrMediaManagementRepository(
     ): ArrResult<WriteOutcome> {
         if (!error.isRetryable()) return ArrResult.err(error)
         val action = QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$body".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.RADARR,
             method = method,
@@ -255,7 +257,7 @@ class RadarrMediaManagementRepository(
         internal val NAMING_TYPE = EntityType("radarr.naming.config")
 
         /** Five minutes; a settings screen re-reads on pull-to-refresh anyway. */
-        const val CONFIG_TTL_MILLIS: Long = 5 * 60 * 1000
+        const val CONFIG_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         internal const val SINGLE_ID = "config"
         private const val PUT_METHOD = "PUT"

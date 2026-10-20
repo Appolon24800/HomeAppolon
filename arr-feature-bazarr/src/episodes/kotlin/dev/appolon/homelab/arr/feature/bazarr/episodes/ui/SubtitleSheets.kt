@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Label
@@ -41,7 +43,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -154,7 +158,13 @@ internal fun MissingLanguageRow(
         if (language.forced) ForcedBadge()
         Spacer(Modifier.weight(1f))
         if (busy) {
-            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+            val busyCd = stringResource(R.string.arr_bazarr_cd_loading)
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(24.dp)
+                    .semantics { contentDescription = busyCd },
+                strokeWidth = 2.dp,
+            )
         } else {
             val cd = stringResource(R.string.arr_bazarr_cd_download)
             IconButton(onClick = onDownload, modifier = Modifier.semantics { contentDescription = cd }) {
@@ -185,7 +195,9 @@ internal fun ManualSearchSheet(
         Text(
             text = stringResource(R.string.arr_bazarr_manual_search_title, state.mediaLabel),
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .semantics { heading() },
         )
         val lce = when {
             state.loading -> LceState.Loading
@@ -245,7 +257,13 @@ internal fun ManualSearchSheet(
                         },
                         trailingContent = {
                             if (state.downloadingKey == key) {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                                val busyCd = stringResource(R.string.arr_bazarr_cd_loading)
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .semantics { contentDescription = busyCd },
+                                    strokeWidth = 2.dp,
+                                )
                             } else {
                                 val cd = stringResource(R.string.arr_bazarr_cd_download)
                                 IconButton(
@@ -287,7 +305,9 @@ internal fun UploadSheet(
         Text(
             text = stringResource(R.string.arr_bazarr_upload_title),
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .semantics { heading() },
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -317,22 +337,38 @@ internal fun UploadSheet(
                 }
             }
         }
+        // Toggleable rows pair each label with its checkbox and keep the
+        // full row as the 48dp touch target.
         Row(
             verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .toggleable(
+                    value = state.forced,
+                    onValueChange = { onUpdate(state.copy(forced = it)) },
+                    role = Role.Checkbox,
+                )
                 .padding(horizontal = 16.dp),
         ) {
-            Checkbox(
-                checked = state.forced,
-                onCheckedChange = { onUpdate(state.copy(forced = it)) },
-            )
+            Checkbox(checked = state.forced, onCheckedChange = null)
             Text(stringResource(R.string.arr_bazarr_forced))
-            Spacer(Modifier.size(16.dp))
-            Checkbox(
-                checked = state.hearingImpaired,
-                onCheckedChange = { onUpdate(state.copy(hearingImpaired = it)) },
-            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .toggleable(
+                    value = state.hearingImpaired,
+                    onValueChange = { onUpdate(state.copy(hearingImpaired = it)) },
+                    role = Role.Checkbox,
+                )
+                .padding(horizontal = 16.dp),
+        ) {
+            Checkbox(checked = state.hearingImpaired, onCheckedChange = null)
             Text(stringResource(R.string.arr_bazarr_hearing_impaired))
         }
         Row(
@@ -379,7 +415,14 @@ internal fun SubtitleViewerDialog(
         },
         text = {
             when {
-                state.loading -> CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                state.loading -> {
+                    val busyCd = stringResource(R.string.arr_bazarr_cd_loading)
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .semantics { contentDescription = busyCd },
+                    )
+                }
                 state.error != null -> Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),

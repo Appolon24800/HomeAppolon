@@ -403,7 +403,9 @@ class SonarrSeriesRepository(
 
     private fun action(method: String, path: String, bodyJson: String?, description: String) =
         QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.SONARR,
             method = method,
@@ -432,9 +434,9 @@ class SonarrSeriesRepository(
         private val SEASONPASS = SeasonPassResource.serializer()
 
         /** Ten minutes; the web library polls no faster either. */
-        const val SERIES_TTL_MILLIS: Long = 10 * 60 * 1000
+        const val SERIES_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.LIBRARY
 
         /** One hour; profiles and tags change rarely. */
-        const val LOOKUP_TTL_MILLIS: Long = 60 * 60 * 1000
+        const val LOOKUP_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
     }
 }

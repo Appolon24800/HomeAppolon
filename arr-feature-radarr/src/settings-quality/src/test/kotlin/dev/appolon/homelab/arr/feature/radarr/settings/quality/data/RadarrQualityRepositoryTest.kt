@@ -322,7 +322,7 @@ class RadarrQualityRepositoryTest {
     }
 
     @Test
-    fun `refreshProfileSchema caches the blank profile for offline creates`() = runTest {
+    fun `refreshProfileSchema reports failures even with a cached schema`() = runTest {
         seed()
         val schema = repository.refreshProfileSchema()
         assertTrue(schema is ArrResult.Ok)
@@ -330,8 +330,8 @@ class RadarrQualityRepositoryTest {
 
         api.errorFor = { IOException("offline") }
         val cached = repository.refreshProfileSchema()
-        assertTrue(cached is ArrResult.Ok)
-        assertEquals("New Profile", (cached as ArrResult.Ok).value.name)
+        assertTrue(cached is ArrResult.Err)
+        assertTrue((cached as ArrResult.Err).error is ArrError.Network)
     }
 
     @Test

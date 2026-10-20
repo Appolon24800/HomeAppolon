@@ -26,7 +26,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import okhttp3.OkHttpClient
 import retrofit2.Response
-import java.util.concurrent.atomic.AtomicLong
+import java.util.UUID
 
 /**
  * English fallback labels for queued actions; the sync status screen shows
@@ -80,9 +80,8 @@ class RadarrMovieDetailRepository(
         val TAG = EntityType("radarr.tag")
         val QUALITY_PROFILE = EntityType("radarr.qualityprofile")
 
-        const val DEFAULT_TTL_MILLIS = 10L * 60L * 1000L
+        const val DEFAULT_TTL_MILLIS = dev.appolon.homelab.arr.core.CacheTtl.LIBRARY
         private const val MOVIE_PATH_PREFIX = "api/v3/movie/"
-        private val actionSequence = AtomicLong(0)
     }
 
     /** Live cached movie; emits on every store write, null until cached. */
@@ -105,10 +104,10 @@ class RadarrMovieDetailRepository(
         val cached = store.get(serverId, MOVIE, movieId.toString(), MovieResource.serializer())
         if (cached != null && !force && fresh(serverId, MOVIE)) return ArrResult.ok(cached)
         val apis = connection.apis(serverId)
-            ?: return cached?.let { ArrResult.ok(it) } ?: ArrResult.err(ArrError.Offline())
+            ?: return ArrResult.err(ArrError.Offline())
         val response = runCatching { apis.movie.get(movieId) }
             .getOrElse { t ->
-                return cached?.let { ArrResult.ok(it) } ?: ArrResult.err(t.toArrError())
+                return ArrResult.err(t.toArrError())
             }
         return when {
             response.isSuccessful -> {
@@ -122,7 +121,6 @@ class RadarrMovieDetailRepository(
                 evictMovie(serverId, movieId)
                 ArrResult.err(response.toArrError())
             }
-            cached != null -> ArrResult.ok(cached)
             else -> ArrResult.err(response.toArrError())
         }
     }
@@ -153,10 +151,10 @@ class RadarrMovieDetailRepository(
             return ArrResult.ok(cached)
         }
         val apis = connection.apis(serverId)
-            ?: return cached?.let { ArrResult.ok(it) } ?: ArrResult.err(ArrError.Offline())
+            ?: return ArrResult.err(ArrError.Offline())
         val fetched = runCatching { apis.credit.list(movieId = movieId) }
             .getOrElse { t ->
-                return cached?.let { ArrResult.ok(it) } ?: ArrResult.err(t.toArrError())
+                return ArrResult.err(t.toArrError())
             }
         store.put(serverId, CREDIT, key, CachedCredits(fetched), CachedCredits.serializer())
         return ArrResult.ok(fetched)
@@ -386,7 +384,9 @@ class RadarrMovieDetailRepository(
     ): WriteOutcome<Nothing> {
         queue.enqueue(
             QueuedAction(
-                actionId = ActionId("$method:$path:${nowMillis()}:${actionSequence.incrementAndGet()}"),
+                actionId = ActionId(UUID.nameUUIDFromBytes(
+                    "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+                ).toString()),
                 serverId = serverId,
                 appType = AppType.RADARR,
                 method = method,
@@ -422,9 +422,8 @@ class RadarrMovieDetailRepository(
 
     /**
      * Shared cache-first read: cached rows inside the TTL short-circuit the
-     * network; a fetch stores this movie's fresh rows (pruning cached ids
-     * that disappeared server-side) and falls back to stale cache on
-     * connection loss so the screen keeps rendering.
+     * network; a fetch stores this movie's fresh rows and prunes missing ids.
+     * Failures preserve the cache but return an error for the screen's LCE state.
      */
     private suspend fun <T : Any> cachedList(
         serverId: ServerId,
@@ -441,18 +440,10 @@ class RadarrMovieDetailRepository(
         }
         val apis = connection.apis(serverId)
         if (apis == null) {
-            return if (cached.isNotEmpty()) {
-                ArrResult.ok(cached)
-            } else {
-                ArrResult.err(ArrError.Offline())
-            }
+            return ArrResult.err(ArrError.Offline())
         }
         val fetched = runCatching { fetch(apis) }.getOrElse { t ->
-            return if (cached.isNotEmpty()) {
-                ArrResult.ok(cached)
-            } else {
-                ArrResult.err(t.toArrError())
-            }
+            return ArrResult.err(t.toArrError())
         }
         store.putAll(
             serverId,

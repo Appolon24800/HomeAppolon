@@ -61,6 +61,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Builds this group's repository against the per-server client bundle. */
 internal fun qualityRepository(serverId: ServerId, clients: RadarrQualityClients): RadarrQualityRepository =
@@ -174,9 +175,9 @@ fun RadarrQualityProfilesScreen(
     val refreshing = content != null && (lce as LceState.Content<RadarrQualityProfilesContent>).refreshing
 
     val noticeMessage = when (state.notice) {
-        QualityProfilesNotice.DELETED -> stringResource(R.string.arr_radarr_quality_notice_deleted)
+        QualityProfilesNotice.DELETED -> stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
         QualityProfilesNotice.QUEUED ->
-            stringResource(R.string.arr_radarr_quality_notice_saved_queued)
+            stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
         else -> null
     }
     QualityNoticeHost(
@@ -188,20 +189,20 @@ fun RadarrQualityProfilesScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_quality_profiles_title),
+        title = stringResource(ArrUiR.string.arr_common_quality_profiles_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onAdd) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.arr_radarr_quality_cd_add_profile),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_add_profile),
                 )
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_quality_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_refresh),
                 )
             }
         },
@@ -217,7 +218,7 @@ fun RadarrQualityProfilesScreen(
             Box(Modifier.fillMaxSize()) {
                 if (content != null && content.profiles.isEmpty()) {
                     EmptyState(
-                        title = stringResource(R.string.arr_radarr_quality_profiles_empty_title),
+                        title = stringResource(ArrUiR.string.arr_common_quality_profiles_empty_title),
                         message = stringResource(R.string.arr_radarr_quality_profiles_empty_message),
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -233,7 +234,11 @@ fun RadarrQualityProfilesScreen(
                             if (data.pendingActions > 0) {
                                 item { QualityPendingSyncBanner(data.pendingActions) }
                             }
-                            items(data.profiles, key = { it.id }) { profile ->
+                            items(
+                                data.profiles,
+                                key = { it.id },
+                                contentType = { "profile" },
+                            ) { profile ->
                                 ProfileRow(
                                     profile = profile,
                                     onOpen = { onOpenProfile(profile.id) },
@@ -254,16 +259,16 @@ fun RadarrQualityProfilesScreen(
     if (state.confirmDeleteId != null) {
         AlertDialog(
             onDismissRequest = { onRequestDelete(null) },
-            title = { Text(stringResource(R.string.arr_radarr_quality_delete_profile_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_quality_delete_profile_title)) },
             text = { Text(stringResource(R.string.arr_radarr_quality_delete_profile_message)) },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_radarr_quality_action_delete))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { onRequestDelete(null) }) {
-                    Text(stringResource(R.string.arr_radarr_quality_action_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -288,7 +293,7 @@ private fun ProfileRow(
             Text(profile.name.orEmpty(), style = MaterialTheme.typography.bodyLarge)
             Text(
                 text = stringResource(
-                    R.string.arr_radarr_quality_profiles_row_support,
+                    ArrUiR.string.arr_common_quality_profiles_row_support,
                     profile.formatItems.orEmpty().size,
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -299,7 +304,7 @@ private fun ProfileRow(
             Icon(
                 imageVector = Icons.Filled.Delete,
                 contentDescription = stringResource(
-                    R.string.arr_radarr_quality_cd_delete_profile,
+                    ArrUiR.string.arr_common_quality_cd_delete_profile,
                     profile.name.orEmpty(),
                 ),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -340,8 +345,8 @@ fun RadarrQualityProfileEditorScreen(
     val content = (lce as? LceState.Content<RadarrQualityProfileEditorContent>)?.data
 
     val savedMessage = when {
-        state.savedNotice -> stringResource(R.string.arr_radarr_quality_notice_saved)
-        state.savedQueued -> stringResource(R.string.arr_radarr_quality_notice_saved_queued)
+        state.savedNotice -> stringResource(ArrUiR.string.arr_common_system_notice_saved)
+        state.savedQueued -> stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
         else -> null
     }
     QualityNoticeHost(
@@ -355,9 +360,9 @@ fun RadarrQualityProfileEditorScreen(
     ArrScaffold(
         title = stringResource(
             if (state.draft.isExisting) {
-                R.string.arr_radarr_quality_profile_editor_title_edit
+                ArrUiR.string.arr_common_quality_profile_editor_title_edit
             } else {
-                R.string.arr_radarr_quality_profile_editor_title_new
+                ArrUiR.string.arr_common_quality_profile_editor_title_new
             },
         ),
         subtitle = serverName,
@@ -367,14 +372,14 @@ fun RadarrQualityProfileEditorScreen(
                 IconButton(onClick = onSave, enabled = !state.saving) {
                     Icon(
                         imageVector = Icons.Filled.Save,
-                        contentDescription = stringResource(R.string.arr_radarr_quality_cd_save),
+                        contentDescription = stringResource(ArrUiR.string.arr_common_save_changes),
                     )
                 }
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_quality_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_refresh),
                 )
             }
         },
@@ -400,25 +405,25 @@ fun RadarrQualityProfileEditorScreen(
                         if (data.pendingActions > 0) QualityPendingSyncBanner(data.pendingActions)
                         QualityTextField(
                             value = data.draft.name,
-                            label = stringResource(R.string.arr_radarr_quality_profile_name),
+                            label = stringResource(ArrUiR.string.arr_common_autotag_name),
                             onValue = { text -> onEdit { it.copy(name = text) } },
                         )
                         LabeledSwitch(
-                            label = stringResource(R.string.arr_radarr_quality_profile_upgrade_allowed),
+                            label = stringResource(ArrUiR.string.arr_common_quality_profile_upgrade_allowed),
                             supportingText = stringResource(
-                                R.string.arr_radarr_quality_profile_upgrade_allowed_support,
+                                ArrUiR.string.arr_common_quality_profile_upgrade_allowed_support,
                             ),
                             checked = data.draft.upgradeAllowed,
                             onCheckedChange = { value -> onEdit { it.copy(upgradeAllowed = value) } },
                         )
-                        QualitySectionHeader(stringResource(R.string.arr_radarr_quality_profile_section_qualities))
+                        QualitySectionHeader(stringResource(ArrUiR.string.arr_common_qualities))
                         data.draft.items.forEach { item ->
                             QualityItemRow(item, data.draft.cutoff, 0, onToggleAllowed, onSetCutoff)
                         }
-                        QualitySectionHeader(stringResource(R.string.arr_radarr_quality_profile_section_upgrade))
+                        QualitySectionHeader(stringResource(ArrUiR.string.arr_common_quality_profile_section_upgrade))
                         val allowedLeaves = data.draft.allowedLeaves()
                         QualityDropdown(
-                            label = stringResource(R.string.arr_radarr_quality_profile_upgrade_until),
+                            label = stringResource(ArrUiR.string.arr_common_quality_profile_upgrade_until),
                             selected = allowedLeaves.firstOrNull { it.qualityId == data.draft.cutoff }
                                 ?: allowedLeaves.firstOrNull()
                                 ?: ProfileQualityItem(0, "", 0, false),
@@ -428,37 +433,37 @@ fun RadarrQualityProfileEditorScreen(
                             labelOf = { it.name },
                             onSelect = { choice -> choice.qualityId?.let(onSetCutoff) },
                         )
-                        QualitySectionHeader(stringResource(R.string.arr_radarr_quality_profile_section_scores))
+                        QualitySectionHeader(stringResource(ArrUiR.string.arr_common_quality_profile_section_scores))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Column(Modifier.weight(1f)) {
                                 QualityTextField(
                                     value = data.draft.minFormatScore,
-                                    label = stringResource(R.string.arr_radarr_quality_profile_min_score),
+                                    label = stringResource(ArrUiR.string.arr_common_quality_profile_min_score),
                                     onValue = { text -> onEdit { it.copy(minFormatScore = text) } },
                                 )
                             }
                             Column(Modifier.weight(1f)) {
                                 QualityTextField(
                                     value = data.draft.cutoffFormatScore,
-                                    label = stringResource(R.string.arr_radarr_quality_profile_cutoff_score),
+                                    label = stringResource(ArrUiR.string.arr_common_quality_profile_cutoff_score),
                                     onValue = { text -> onEdit { it.copy(cutoffFormatScore = text) } },
                                 )
                             }
                         }
                         QualityTextField(
                             value = data.draft.minUpgradeFormatScore,
-                            label = stringResource(R.string.arr_radarr_quality_profile_min_upgrade_score),
+                            label = stringResource(ArrUiR.string.arr_common_quality_profile_min_upgrade_score),
                             onValue = { text -> onEdit { it.copy(minUpgradeFormatScore = text) } },
                         )
                         if (data.draft.formatItems.isNotEmpty()) {
                             QualitySectionHeader(
-                                stringResource(R.string.arr_radarr_quality_profile_section_format_scores),
+                                stringResource(ArrUiR.string.arr_common_quality_profile_section_format_scores),
                             )
                             data.draft.formatItems.forEach { item ->
                                 FormatScoreField(item, onSetFormatScore)
                             }
                         }
-                        QualitySectionHeader(stringResource(R.string.arr_radarr_quality_profile_section_language))
+                        QualitySectionHeader(stringResource(ArrUiR.string.arr_common_language))
                         LanguageDropdown(
                             selected = data.draft.language,
                             languages = data.languages,
@@ -508,7 +513,7 @@ private fun QualityItemRow(
                     .heightIn(min = 48.dp)
                     .clickable(
                         onClickLabel = stringResource(
-                            R.string.arr_radarr_quality_profile_cd_upgrade_until,
+                            ArrUiR.string.arr_common_quality_profile_cd_upgrade_until,
                             item.name,
                         ),
                     ) { item.qualityId?.let(onSetCutoff) }
@@ -520,7 +525,7 @@ private fun QualityItemRow(
                     modifier = Modifier.heightIn(min = 48.dp),
                 )
                 Text(
-                    text = stringResource(R.string.arr_radarr_quality_profile_upgrade_until_row),
+                    text = stringResource(ArrUiR.string.arr_common_quality_profile_upgrade_until_row),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -543,7 +548,7 @@ private fun FormatScoreField(
         Spacer(Modifier.width(16.dp))
         QualityTextField(
             value = item.score.toString(),
-            label = stringResource(R.string.arr_radarr_quality_profile_score_label),
+            label = stringResource(ArrUiR.string.arr_common_quality_profile_score_label),
             onValue = { text -> onSetFormatScore(item.format, text) },
             modifier = Modifier.width(120.dp),
         )
@@ -556,7 +561,7 @@ private fun LanguageDropdown(
     languages: List<LanguageResource>,
     onSelect: (Language) -> Unit,
 ) {
-    val anyLanguage = Language(id = 0, name = stringResource(R.string.arr_radarr_quality_language_any))
+    val anyLanguage = Language(id = 0, name = stringResource(ArrUiR.string.arr_common_quality_language_any))
     val entries = listOf(anyLanguage) + languages.map { Language(id = it.id, name = it.name ?: "") }
     val current = entries.firstOrNull { it.id == selected.id } ?: anyLanguage
     QualityDropdown(

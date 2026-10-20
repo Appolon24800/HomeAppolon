@@ -30,6 +30,7 @@ import dev.appolon.homelab.arr.core.FilterSpec
 import dev.appolon.homelab.arr.core.FilterValue
 import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.ui.components.LabeledSwitch
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Edits one filter's value: choice filters list every option with checkboxes,
@@ -67,12 +68,12 @@ private fun ChoiceFilterDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = { onApply(FilterValue.Choice(selected.value)) }) {
-                Text(stringResource(R.string.arr_sonarr_filter_dialog_apply))
+                Text(stringResource(ArrUiR.string.arr_common_filter_dialog_apply))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_filter_dialog_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
         title = { Text(title) },
@@ -119,19 +120,19 @@ private fun ToggleFilterDialog(
     onApply: (FilterValue) -> Unit,
 ) {
     val on = remember { mutableStateOf(value?.on) }
-    val anyLabel = stringResource(R.string.arr_sonarr_filter_toggle_any)
-    val yesLabel = stringResource(R.string.arr_sonarr_filter_toggle_on)
-    val noLabel = stringResource(R.string.arr_sonarr_filter_toggle_off)
+    val anyLabel = stringResource(ArrUiR.string.arr_common_quality_language_any)
+    val yesLabel = stringResource(ArrUiR.string.arr_common_yes)
+    val noLabel = stringResource(ArrUiR.string.arr_common_no)
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = { onApply(FilterValue.Toggle(on.value)) }) {
-                Text(stringResource(R.string.arr_sonarr_filter_dialog_apply))
+                Text(stringResource(ArrUiR.string.arr_common_filter_dialog_apply))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_filter_dialog_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
         title = { Text(title) },
@@ -175,12 +176,12 @@ private fun RangeFilterDialog(
                     onApply(FilterValue.Range(appliedMin, appliedMax))
                 },
             ) {
-                Text(stringResource(R.string.arr_sonarr_filter_dialog_apply))
+                Text(stringResource(ArrUiR.string.arr_common_filter_dialog_apply))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_filter_dialog_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
         title = { Text(title) },
@@ -271,20 +272,20 @@ fun SaveFilterDialog(
                 onClick = { onSave(label) },
                 enabled = label.isNotBlank(),
             ) {
-                Text(stringResource(R.string.arr_sonarr_saved_save_action))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_filter_dialog_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
-        title = { Text(stringResource(R.string.arr_sonarr_saved_save_title)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_saved_filter_dialog_title)) },
         text = {
             OutlinedTextField(
                 value = label,
                 onValueChange = { label = it },
-                label = { Text(stringResource(R.string.arr_sonarr_saved_name_label)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_autotag_name)) },
                 singleLine = true,
             )
         },
@@ -305,25 +306,25 @@ fun DeleteSeriesDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.arr_sonarr_delete_confirm))
+                Text(stringResource(ArrUiR.string.arr_common_delete))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_delete_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
-        title = { Text(stringResource(R.string.arr_sonarr_delete_title)) },
+        title = { Text(stringResource(R.string.arr_sonarr_detail_delete_title)) },
         text = {
             Column {
                 Text(stringResource(R.string.arr_sonarr_delete_message, count))
                 LabeledSwitch(
-                    label = stringResource(R.string.arr_sonarr_delete_files),
+                    label = stringResource(R.string.arr_sonarr_detail_delete_files),
                     checked = deleteFiles,
                     onCheckedChange = { checked -> onOptionChange(checked, addImportListExclusion) },
                 )
                 LabeledSwitch(
-                    label = stringResource(R.string.arr_sonarr_delete_exclusion),
+                    label = stringResource(R.string.arr_sonarr_detail_delete_exclusion),
                     checked = addImportListExclusion,
                     onCheckedChange = { checked -> onOptionChange(deleteFiles, checked) },
                 )

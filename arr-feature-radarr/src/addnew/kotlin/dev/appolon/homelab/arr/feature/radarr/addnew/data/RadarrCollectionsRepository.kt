@@ -214,7 +214,9 @@ class RadarrCollectionsRepository(
 
     private fun action(method: String, path: String, bodyJson: String, description: String) =
         QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.RADARR,
             method = method,
@@ -249,6 +251,6 @@ class RadarrCollectionsRepository(
         internal const val COMMAND_PATH = "api/v3/command"
 
         /** Ten minutes; collections change only when movies are added. */
-        const val COLLECTION_TTL_MILLIS: Long = 10 * 60 * 1000
+        const val COLLECTION_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.LIBRARY
     }
 }

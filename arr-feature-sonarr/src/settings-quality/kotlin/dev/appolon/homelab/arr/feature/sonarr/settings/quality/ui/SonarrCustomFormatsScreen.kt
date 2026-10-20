@@ -62,6 +62,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the custom formats list route. */
 @Composable
@@ -157,9 +158,9 @@ fun SonarrCustomFormatsScreen(
     val refreshing = content != null && (lce as LceState.Content<SonarrCustomFormatsContent>).refreshing
 
     val noticeMessage = when (state.notice) {
-        CustomFormatsNotice.DELETED -> stringResource(R.string.arr_sonarr_quality_notice_deleted)
+        CustomFormatsNotice.DELETED -> stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
         CustomFormatsNotice.QUEUED ->
-            stringResource(R.string.arr_sonarr_quality_notice_saved_queued)
+            stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
         else -> null
     }
     QualityNoticeHost(
@@ -171,20 +172,20 @@ fun SonarrCustomFormatsScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_quality_custom_formats_title),
+        title = stringResource(ArrUiR.string.arr_common_quality_custom_formats_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onAdd) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.arr_sonarr_quality_cd_add_format),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_add_format),
                 )
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_quality_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_refresh),
                 )
             }
         },
@@ -200,8 +201,8 @@ fun SonarrCustomFormatsScreen(
             Box(Modifier.fillMaxSize()) {
                 if (content != null && content.formats.isEmpty()) {
                     EmptyState(
-                        title = stringResource(R.string.arr_sonarr_quality_formats_empty_title),
-                        message = stringResource(R.string.arr_sonarr_quality_formats_empty_message),
+                        title = stringResource(ArrUiR.string.arr_common_quality_formats_empty_title),
+                        message = stringResource(ArrUiR.string.arr_common_quality_formats_empty_message),
                         modifier = Modifier.fillMaxSize(),
                     )
                 } else {
@@ -216,7 +217,11 @@ fun SonarrCustomFormatsScreen(
                             if (data.pendingActions > 0) {
                                 item { QualityPendingSyncBanner(data.pendingActions) }
                             }
-                            items(data.formats, key = { it.id }) { format ->
+                            items(
+                                data.formats,
+                                key = { it.id },
+                                contentType = { "format" },
+                            ) { format ->
                                 FormatRow(
                                     format = format,
                                     onOpen = { onOpenFormat(format.id) },
@@ -237,16 +242,16 @@ fun SonarrCustomFormatsScreen(
     if (state.confirmDeleteId != null) {
         AlertDialog(
             onDismissRequest = { onRequestDelete(null) },
-            title = { Text(stringResource(R.string.arr_sonarr_quality_delete_format_title)) },
-            text = { Text(stringResource(R.string.arr_sonarr_quality_delete_format_message)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_quality_delete_format_title)) },
+            text = { Text(stringResource(ArrUiR.string.arr_common_quality_delete_format_message)) },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_sonarr_quality_action_delete))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { onRequestDelete(null) }) {
-                    Text(stringResource(R.string.arr_sonarr_quality_action_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -271,7 +276,7 @@ private fun FormatRow(
             Text(format.name.orEmpty(), style = MaterialTheme.typography.bodyLarge)
             Text(
                 text = stringResource(
-                    R.string.arr_sonarr_quality_formats_row_support,
+                    ArrUiR.string.arr_common_autotag_row_support,
                     format.specifications.orEmpty().size,
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -282,7 +287,7 @@ private fun FormatRow(
             Icon(
                 imageVector = Icons.Filled.Delete,
                 contentDescription = stringResource(
-                    R.string.arr_sonarr_quality_cd_delete_format,
+                    ArrUiR.string.arr_common_quality_cd_delete_format,
                     format.name.orEmpty(),
                 ),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -321,8 +326,8 @@ fun SonarrCustomFormatEditorScreen(
     val content = (lce as? LceState.Content<SonarrCustomFormatEditorContent>)?.data
 
     val savedMessage = when {
-        state.savedNotice -> stringResource(R.string.arr_sonarr_quality_notice_saved)
-        state.savedQueued -> stringResource(R.string.arr_sonarr_quality_notice_saved_queued)
+        state.savedNotice -> stringResource(ArrUiR.string.arr_common_system_notice_saved)
+        state.savedQueued -> stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
         else -> null
     }
     QualityNoticeHost(
@@ -336,9 +341,9 @@ fun SonarrCustomFormatEditorScreen(
     ArrScaffold(
         title = stringResource(
             if (state.draft.isExisting) {
-                R.string.arr_sonarr_quality_format_editor_title_edit
+                ArrUiR.string.arr_common_quality_format_editor_title_edit
             } else {
-                R.string.arr_sonarr_quality_format_editor_title_new
+                ArrUiR.string.arr_common_quality_format_editor_title_new
             },
         ),
         subtitle = serverName,
@@ -348,14 +353,14 @@ fun SonarrCustomFormatEditorScreen(
                 IconButton(onClick = onSave, enabled = !state.saving) {
                     Icon(
                         imageVector = Icons.Filled.Save,
-                        contentDescription = stringResource(R.string.arr_sonarr_quality_cd_save),
+                        contentDescription = stringResource(ArrUiR.string.arr_common_save_changes),
                     )
                 }
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_quality_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_refresh),
                 )
             }
         },
@@ -381,20 +386,20 @@ fun SonarrCustomFormatEditorScreen(
                         if (data.pendingActions > 0) QualityPendingSyncBanner(data.pendingActions)
                         QualityTextField(
                             value = data.draft.name,
-                            label = stringResource(R.string.arr_sonarr_quality_format_name),
+                            label = stringResource(ArrUiR.string.arr_common_autotag_name),
                             onValue = { text -> onEdit { it.copy(name = text) } },
                         )
                         LabeledSwitch(
-                            label = stringResource(R.string.arr_sonarr_quality_format_rename),
+                            label = stringResource(ArrUiR.string.arr_common_quality_format_rename),
                             supportingText = stringResource(
-                                R.string.arr_sonarr_quality_format_rename_support,
+                                ArrUiR.string.arr_common_quality_format_rename_support,
                             ),
                             checked = data.draft.includeWhenRenaming,
                             onCheckedChange = { value ->
                                 onEdit { it.copy(includeWhenRenaming = value) }
                             },
                         )
-                        QualitySectionHeader(stringResource(R.string.arr_sonarr_quality_format_section_conditions))
+                        QualitySectionHeader(stringResource(ArrUiR.string.arr_common_autotag_section_conditions))
                         data.draft.conditions.forEach { condition ->
                             ConditionCard(
                                 condition = condition,
@@ -408,7 +413,7 @@ fun SonarrCustomFormatEditorScreen(
                         if (data.draft.passthroughConditions.isNotEmpty()) {
                             Text(
                                 text = stringResource(
-                                    R.string.arr_sonarr_quality_format_passthrough,
+                                    ArrUiR.string.arr_common_quality_format_passthrough,
                                     data.draft.passthroughConditions.size,
                                 ),
                                 style = MaterialTheme.typography.bodySmall,
@@ -418,7 +423,7 @@ fun SonarrCustomFormatEditorScreen(
                         AddConditionRow(onAddCondition)
                         if (data.draft.isExisting && data.scoreRows.isNotEmpty()) {
                             QualitySectionHeader(
-                                stringResource(R.string.arr_sonarr_quality_format_section_scores),
+                                stringResource(ArrUiR.string.arr_common_quality_format_section_scores),
                             )
                             data.scoreRows.forEach { row -> ScoreRow(row, onSetScore) }
                         }
@@ -457,7 +462,7 @@ private fun ConditionCard(
                 Icon(
                     imageVector = Icons.Filled.Delete,
                     contentDescription = stringResource(
-                        R.string.arr_sonarr_quality_cd_remove_condition,
+                        ArrUiR.string.arr_common_autotag_cd_remove_condition,
                         conditionKindLabel(condition.kind),
                     ),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -465,14 +470,14 @@ private fun ConditionCard(
             }
         }
         LabeledSwitch(
-            label = stringResource(R.string.arr_sonarr_quality_condition_negate),
+            label = stringResource(ArrUiR.string.arr_common_autotag_condition_negate),
             checked = condition.negate,
             onCheckedChange = { value ->
                 onEditCondition(condition) { it.copy(negate = value) }
             },
         )
         LabeledSwitch(
-            label = stringResource(R.string.arr_sonarr_quality_condition_required),
+            label = stringResource(ArrUiR.string.arr_common_autotag_condition_required),
             checked = condition.required,
             onCheckedChange = { value ->
                 onEditCondition(condition) { it.copy(required = value) }
@@ -482,8 +487,8 @@ private fun ConditionCard(
             CustomFormatConditionKind.RELEASE_NAME -> {
                 QualityTextField(
                     value = condition.value,
-                    label = stringResource(R.string.arr_sonarr_quality_condition_regex),
-                    supporting = stringResource(R.string.arr_sonarr_quality_condition_regex_support),
+                    label = stringResource(ArrUiR.string.arr_common_quality_condition_regex),
+                    supporting = stringResource(ArrUiR.string.arr_common_quality_condition_regex_support),
                     onValue = { text ->
                         onEditCondition(condition) { it.copy(value = text) }
                         onSetRegexTester(text, regexSample)
@@ -501,7 +506,7 @@ private fun ConditionCard(
                     Column(Modifier.weight(1f)) {
                         QualityTextField(
                             value = condition.minSize,
-                            label = stringResource(R.string.arr_sonarr_quality_definitions_min),
+                            label = stringResource(ArrUiR.string.arr_common_quality_definitions_min),
                             onValue = { text ->
                                 onEditCondition(condition) { it.copy(minSize = text) }
                             },
@@ -510,7 +515,7 @@ private fun ConditionCard(
                     Column(Modifier.weight(1f)) {
                         QualityTextField(
                             value = condition.maxSize,
-                            label = stringResource(R.string.arr_sonarr_quality_definitions_max),
+                            label = stringResource(ArrUiR.string.arr_common_quality_definitions_max),
                             onValue = { text ->
                                 onEditCondition(condition) { it.copy(maxSize = text) }
                             },
@@ -518,7 +523,7 @@ private fun ConditionCard(
                     }
                 }
                 Text(
-                    text = stringResource(R.string.arr_sonarr_quality_condition_size_unit),
+                    text = stringResource(ArrUiR.string.arr_common_quality_condition_size_unit),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -527,7 +532,7 @@ private fun ConditionCard(
             else -> QualityTextField(
                 value = condition.value,
                 label = conditionNumericLabel(condition.kind),
-                supporting = stringResource(R.string.arr_sonarr_quality_condition_id_support),
+                supporting = stringResource(ArrUiR.string.arr_common_quality_condition_id_support),
                 onValue = { text -> onEditCondition(condition) { it.copy(value = text) } },
             )
         }
@@ -543,21 +548,21 @@ private fun RegexTester(
     Column {
         QualityTextField(
             value = sample,
-            label = stringResource(R.string.arr_sonarr_quality_regex_tester_sample),
+            label = stringResource(ArrUiR.string.arr_common_quality_regex_tester_sample),
             onValue = { text -> onSetRegexTester(pattern, text) },
         )
         val status = remember(pattern, sample) { regexStatus(pattern, sample) }
         val (text, color) = when (status) {
-            RegexStatus.IDLE -> stringResource(R.string.arr_sonarr_quality_regex_tester_idle) to
+            RegexStatus.IDLE -> stringResource(ArrUiR.string.arr_common_quality_regex_tester_idle) to
                 MaterialTheme.colorScheme.onSurfaceVariant
 
-            RegexStatus.INVALID -> stringResource(R.string.arr_sonarr_quality_regex_tester_invalid) to
+            RegexStatus.INVALID -> stringResource(ArrUiR.string.arr_common_quality_regex_tester_invalid) to
                 MaterialTheme.colorScheme.error
 
-            RegexStatus.MATCH -> stringResource(R.string.arr_sonarr_quality_regex_tester_match) to
+            RegexStatus.MATCH -> stringResource(ArrUiR.string.arr_common_quality_regex_tester_match) to
                 MaterialTheme.colorScheme.tertiary
 
-            RegexStatus.NO_MATCH -> stringResource(R.string.arr_sonarr_quality_regex_tester_no_match) to
+            RegexStatus.NO_MATCH -> stringResource(ArrUiR.string.arr_common_quality_regex_tester_no_match) to
                 MaterialTheme.colorScheme.error
         }
         Text(
@@ -587,7 +592,7 @@ private fun AddConditionRow(onAddCondition: (CustomFormatConditionKind) -> Unit)
         onClick = { expanded = !expanded },
         modifier = Modifier.heightIn(min = 48.dp),
     ) {
-        Text(stringResource(R.string.arr_sonarr_quality_condition_add))
+        Text(stringResource(ArrUiR.string.arr_common_autotag_condition_add))
     }
     if (expanded) {
         CustomFormatConditionKind.entries.forEach { kind ->
@@ -609,7 +614,7 @@ private fun ScoreRow(row: FormatScoreRow, onSetScore: (Int, Int) -> Unit) {
             Text(row.profile.name.orEmpty(), style = MaterialTheme.typography.bodyMedium)
             Text(
                 text = stringResource(
-                    R.string.arr_sonarr_quality_format_score_row_support,
+                    ArrUiR.string.arr_common_quality_format_score_row_support,
                     row.score,
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -619,7 +624,7 @@ private fun ScoreRow(row: FormatScoreRow, onSetScore: (Int, Int) -> Unit) {
         Spacer(Modifier.width(16.dp))
         QualityTextField(
             value = row.score.toString(),
-            label = stringResource(R.string.arr_sonarr_quality_profile_score_label),
+            label = stringResource(ArrUiR.string.arr_common_quality_profile_score_label),
             onValue = { text -> onSetScore(row.profile.id, text.toIntOrNull() ?: 0) },
             modifier = Modifier.width(120.dp),
         )
@@ -629,20 +634,20 @@ private fun ScoreRow(row: FormatScoreRow, onSetScore: (Int, Int) -> Unit) {
 @Composable
 private fun conditionKindLabel(kind: CustomFormatConditionKind): String = when (kind) {
     CustomFormatConditionKind.RELEASE_NAME ->
-        stringResource(R.string.arr_sonarr_quality_condition_release_name)
+        stringResource(ArrUiR.string.arr_common_quality_condition_release_name)
     CustomFormatConditionKind.LANGUAGE ->
-        stringResource(R.string.arr_sonarr_quality_condition_language)
+        stringResource(ArrUiR.string.arr_common_quality_condition_language)
     CustomFormatConditionKind.INDEXER_FLAG ->
-        stringResource(R.string.arr_sonarr_quality_condition_indexer_flag)
+        stringResource(ArrUiR.string.arr_common_quality_condition_indexer_flag)
     CustomFormatConditionKind.SIZE_RANGE ->
-        stringResource(R.string.arr_sonarr_quality_condition_size_range)
+        stringResource(ArrUiR.string.arr_common_quality_condition_size_range)
 }
 
 @Composable
 private fun conditionNumericLabel(kind: CustomFormatConditionKind): String = when (kind) {
     CustomFormatConditionKind.LANGUAGE ->
-        stringResource(R.string.arr_sonarr_quality_condition_language)
+        stringResource(ArrUiR.string.arr_common_quality_condition_language)
     CustomFormatConditionKind.INDEXER_FLAG ->
-        stringResource(R.string.arr_sonarr_quality_condition_indexer_flag)
+        stringResource(ArrUiR.string.arr_common_quality_condition_indexer_flag)
     else -> ""
 }

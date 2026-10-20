@@ -1,6 +1,7 @@
 package dev.appolon.homelab.arr.feature.radarr.settings.connect
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.appolon.homelab.arr.core.ServerId
@@ -262,10 +263,10 @@ fun RadarrSettingsConnectFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
-                onOpenIndexer = { indexerId ->
+                onBack = remember(navigator) { { navigator.back() } },
+                onOpenIndexer = remember(navigator, serverId) { { indexerId ->
                     RadarrSettingsConnectFeature.openIndexerEditor(navigator, serverId, indexerId)
-                },
+                } },
                 modifier = modifier,
             )
         }
@@ -277,7 +278,7 @@ fun RadarrSettingsConnectFeatureSlot(
                 indexerId = indexerEditor.getValue("indexerId").toIntOrNull(),
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -288,7 +289,7 @@ fun RadarrSettingsConnectFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 onOpenClient = { clientId ->
                     RadarrSettingsConnectFeature.openDownloadClientEditor(
                         navigator,
@@ -296,9 +297,9 @@ fun RadarrSettingsConnectFeatureSlot(
                         clientId,
                     )
                 },
-                onOpenMappings = {
+                onOpenMappings = remember(navigator, serverId) { {
                     RadarrSettingsConnectFeature.openRemotePathMappings(navigator, serverId)
-                },
+                } },
                 modifier = modifier,
             )
         }
@@ -310,7 +311,7 @@ fun RadarrSettingsConnectFeatureSlot(
                 clientId = downloadClientEditor.getValue("clientId").toIntOrNull(),
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -321,7 +322,7 @@ fun RadarrSettingsConnectFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -332,13 +333,13 @@ fun RadarrSettingsConnectFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
-                onOpenList = { listId ->
+                onBack = remember(navigator) { { navigator.back() } },
+                onOpenList = remember(navigator, serverId) { { listId ->
                     RadarrSettingsConnectFeature.openImportListEditor(navigator, serverId, listId)
-                },
-                onOpenExclusions = {
+                } },
+                onOpenExclusions = remember(navigator, serverId) { {
                     RadarrSettingsConnectFeature.openImportListExclusions(navigator, serverId)
-                },
+                } },
                 modifier = modifier,
             )
         }
@@ -350,7 +351,7 @@ fun RadarrSettingsConnectFeatureSlot(
                 listId = importListEditor.getValue("listId").toIntOrNull(),
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -361,7 +362,7 @@ fun RadarrSettingsConnectFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -372,7 +373,7 @@ fun RadarrSettingsConnectFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 onOpenNotification = { notificationId ->
                     RadarrSettingsConnectFeature.openNotificationEditor(
                         navigator,
@@ -391,7 +392,7 @@ fun RadarrSettingsConnectFeatureSlot(
                 notificationId = notificationEditor.getValue("notificationId").toIntOrNull(),
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -402,7 +403,7 @@ fun RadarrSettingsConnectFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }

@@ -48,6 +48,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the tags route. */
 @Composable
@@ -128,20 +129,20 @@ fun SonarrTagsScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_tags_title),
+        title = stringResource(ArrUiR.string.arr_common_tags_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_system_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_refresh),
                 )
             }
             IconButton(onClick = onAdd) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.arr_sonarr_tags_cd_add),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_tags_cd_add),
                 )
             }
         },
@@ -158,7 +159,7 @@ fun SonarrTagsScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_sonarr_tags_empty_title),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_tags_empty_title),
                     emptyMessage = stringResource(R.string.arr_sonarr_tags_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
@@ -169,7 +170,7 @@ fun SonarrTagsScreen(
                         if (data.pendingActions > 0) {
                             item { SystemPendingSyncBanner(data.pendingActions) }
                         }
-                        items(data.rows, key = { it.tag.id }) { row ->
+                        items(data.rows, key = { it.tag.id }, contentType = { "tag" }) { row ->
                             TagRow(row, onRename, onDelete)
                         }
                     }
@@ -207,7 +208,7 @@ private fun TagRow(
             ) {
                 Text(row.label, style = MaterialTheme.typography.bodyLarge)
                 val support = if (row.queuedForRemoval) {
-                    stringResource(R.string.arr_sonarr_system_cd_queued_indicator)
+                    stringResource(ArrUiR.string.arr_common_system_cd_queued_indicator)
                 } else {
                     row.usageSummary()
                 }
@@ -221,7 +222,7 @@ private fun TagRow(
                 Icon(
                     imageVector = Icons.Filled.Edit,
                     contentDescription = stringResource(
-                        R.string.arr_sonarr_tags_cd_rename,
+                        ArrUiR.string.arr_common_tags_cd_rename,
                         row.label,
                     ),
                 )
@@ -230,7 +231,7 @@ private fun TagRow(
                 Icon(
                     imageVector = Icons.Filled.Delete,
                     contentDescription = stringResource(
-                        R.string.arr_sonarr_tags_cd_delete,
+                        ArrUiR.string.arr_common_tags_cd_delete,
                         row.label,
                     ),
                 )
@@ -250,13 +251,13 @@ private fun SonarrTagRow.usageSummary(): String {
         texts += stringResource(R.string.arr_sonarr_tags_usage_series, seriesCount)
     }
     if (importListCount > 0) {
-        texts += stringResource(R.string.arr_sonarr_tags_usage_import_lists, importListCount)
+        texts += stringResource(ArrUiR.string.arr_common_tags_usage_import_lists, importListCount)
     }
     if (notificationCount > 0) {
-        texts += stringResource(R.string.arr_sonarr_tags_usage_notifications, notificationCount)
+        texts += stringResource(ArrUiR.string.arr_common_tags_usage_notifications, notificationCount)
     }
     if (releaseProfileCount > 0) {
-        texts += stringResource(R.string.arr_sonarr_tags_usage_release_profiles, releaseProfileCount)
+        texts += stringResource(ArrUiR.string.arr_common_tags_usage_release_profiles, releaseProfileCount)
     }
     if (excludedReleaseProfileCount > 0) {
         texts += stringResource(
@@ -265,19 +266,19 @@ private fun SonarrTagRow.usageSummary(): String {
         )
     }
     if (indexerCount > 0) {
-        texts += stringResource(R.string.arr_sonarr_tags_usage_indexers, indexerCount)
+        texts += stringResource(ArrUiR.string.arr_common_tags_usage_indexers, indexerCount)
     }
     if (downloadClientCount > 0) {
-        texts += stringResource(R.string.arr_sonarr_tags_usage_download_clients, downloadClientCount)
+        texts += stringResource(ArrUiR.string.arr_common_tags_usage_download_clients, downloadClientCount)
     }
     if (delayProfileCount > 0) {
-        texts += stringResource(R.string.arr_sonarr_tags_usage_delay_profiles, delayProfileCount)
+        texts += stringResource(ArrUiR.string.arr_common_tags_usage_delay_profiles, delayProfileCount)
     }
     if (autoTagCount > 0) {
-        texts += stringResource(R.string.arr_sonarr_tags_usage_auto_tags, autoTagCount)
+        texts += stringResource(ArrUiR.string.arr_common_tags_usage_auto_tags, autoTagCount)
     }
     return if (texts.isEmpty()) {
-        stringResource(R.string.arr_sonarr_tags_usage_unused)
+        stringResource(ArrUiR.string.arr_common_tags_usage_unused)
     } else {
         texts.joinToString(", ")
     }
@@ -285,12 +286,12 @@ private fun SonarrTagRow.usageSummary(): String {
 
 @Composable
 private fun tagsNoticeText(notice: TagsNotice): String = when (notice) {
-    TagsNotice.CREATED -> stringResource(R.string.arr_sonarr_tags_notice_created)
-    TagsNotice.CREATED_QUEUED -> stringResource(R.string.arr_sonarr_tags_notice_queued)
-    TagsNotice.RENAMED -> stringResource(R.string.arr_sonarr_tags_notice_renamed)
-    TagsNotice.RENAMED_QUEUED -> stringResource(R.string.arr_sonarr_tags_notice_queued)
-    TagsNotice.DELETED -> stringResource(R.string.arr_sonarr_tags_notice_deleted)
-    TagsNotice.DELETED_QUEUED -> stringResource(R.string.arr_sonarr_tags_notice_queued)
+    TagsNotice.CREATED -> stringResource(ArrUiR.string.arr_common_tags_notice_created)
+    TagsNotice.CREATED_QUEUED -> stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
+    TagsNotice.RENAMED -> stringResource(ArrUiR.string.arr_common_tags_notice_renamed)
+    TagsNotice.RENAMED_QUEUED -> stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
+    TagsNotice.DELETED -> stringResource(ArrUiR.string.arr_common_tags_notice_deleted)
+    TagsNotice.DELETED_QUEUED -> stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 }
 
 @Composable
@@ -307,9 +308,9 @@ private fun TagEditorDialog(
         title = {
             Text(
                 text = if (state.editingTagId == null) {
-                    stringResource(R.string.arr_sonarr_tags_add_title)
+                    stringResource(ArrUiR.string.arr_common_tags_add_title)
                 } else {
-                    stringResource(R.string.arr_sonarr_tags_rename_title)
+                    stringResource(ArrUiR.string.arr_common_tags_rename_title)
                 },
             )
         },
@@ -317,21 +318,21 @@ private fun TagEditorDialog(
             Column {
                 SystemTextField(
                     value = state.editingLabel,
-                    label = stringResource(R.string.arr_sonarr_tags_label),
+                    label = stringResource(ArrUiR.string.arr_common_tags_label),
                     onValue = onLabel,
                     isError = state.editingLabel.isNotBlank() && !labelValid,
-                    errorMessage = stringResource(R.string.arr_sonarr_tags_label_error),
+                    errorMessage = stringResource(ArrUiR.string.arr_common_tags_label_error),
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = onConfirm, enabled = labelValid) {
-                Text(stringResource(R.string.arr_sonarr_system_action_save_row))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_system_action_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )
@@ -346,16 +347,16 @@ private fun TagsConfirmDialogs(
     state.confirmDeleteFor?.let { tag ->
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_sonarr_tags_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_tags_delete_title)) },
             text = { Text(stringResource(R.string.arr_sonarr_tags_delete_message)) },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_sonarr_system_action_delete))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_sonarr_system_action_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )

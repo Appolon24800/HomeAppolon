@@ -214,7 +214,7 @@ private fun ReleaseListDestination(
             queued = movieId in queuedMovieIds,
             onRefresh = vm::refresh,
             onRetry = vm::retry,
-            onBack = { navigator.back() },
+            onBack = remember(navigator) { { navigator.back() } },
             onSort = vm::setSort,
             onToggleRejections = vm::toggleRejections,
             onGrab = vm::openGrabSheet,
@@ -262,9 +262,9 @@ private fun InteractiveImportDestination(
     val navigator = LocalArrShellNavigator.current
     InteractiveImportScreen(
         state = state,
-        onBack = { navigator.back() },
+        onBack = remember(navigator) { { navigator.back() } },
         onRetryMovie = vm::loadMovie,
-        onOpenFolder = { folder -> vm.browse(folder.path) },
+        onOpenFolder = remember(vm) { { folder -> vm.browse(folder.path) } },
         onPickFolder = vm::pickFolder,
         onRetryFolders = vm::retryFolders,
         onRetryFiles = vm::retryFiles,

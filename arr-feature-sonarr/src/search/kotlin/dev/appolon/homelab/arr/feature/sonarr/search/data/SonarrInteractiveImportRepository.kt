@@ -48,7 +48,7 @@ data class ImportDecision(
 )
 
 /** Matched series title of an import candidate; null when unmatched. */
-fun ManualImportResource.seriesTitleOrNull(): String? = series.stringOf("title")
+fun ManualImportResource.seriesTitleOrNull(): String? = series.title
 
 /**
  * The series-scoped interactive import decision flow: browse folders, list
@@ -206,7 +206,9 @@ class SonarrInteractiveImportRepository(
             failure == null -> ArrResult.ok(WriteOutcome.Synced)
 
             failure is ArrError.Offline || failure is ArrError.Network -> {
-                val actionId = ActionId(UUID.randomUUID().toString())
+                val actionId = ActionId(UUID.nameUUIDFromBytes(
+                    "$serverId:POST:$IMPORT_PATH:$body".toByteArray(Charsets.UTF_8),
+                ).toString())
                 actionQueue.enqueue(
                     QueuedAction(
                         actionId = actionId,
@@ -250,7 +252,7 @@ class SonarrInteractiveImportRepository(
             seriesId = series.id,
             seasonNumber = resource.seasonNumber,
             episodes = resource.episodes,
-            episodeIds = resource.episodes.orEmpty().mapNotNull { it.intOf("id") },
+            episodeIds = resource.episodes.orEmpty().mapNotNull { it.id },
             quality = quality,
             languages = languages,
             releaseGroup = resource.releaseGroup,
@@ -299,8 +301,3 @@ class SonarrInteractiveImportRepository(
 
 private fun JsonObject.stringOf(key: String): String? =
     (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.content?.takeIf { it.isNotEmpty() }
-
-internal fun JsonObject.intOf(key: String): Int? = when (val element = this[key]) {
-    is JsonPrimitive -> element.content.toIntOrNull()
-    else -> null
-}

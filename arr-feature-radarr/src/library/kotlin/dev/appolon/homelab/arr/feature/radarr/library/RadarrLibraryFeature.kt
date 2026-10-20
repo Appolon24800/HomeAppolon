@@ -123,6 +123,15 @@ fun RadarrLibraryDestination(
     val state by vm.state.collectAsState()
     val lce by vm.lce.collectAsState()
     val navigator = LocalArrShellNavigator.current
+    val onMovieActivate = remember(vm, navigator, serverId, state.selectMode) {
+        { movieId: Int ->
+            if (state.selectMode) {
+                vm.toggleSelected(movieId)
+            } else {
+                navigator.open(ArrRoute.Detail(serverId, AppType.RADARR, movieId.toString()))
+            }
+        }
+    }
 
     MovieLibraryScreen(
         state = state,
@@ -139,13 +148,7 @@ fun RadarrLibraryDestination(
         onSaveFilter = vm::saveFilter,
         onApplySavedFilter = vm::applySavedFilter,
         onDeleteSavedFilter = vm::deleteSavedFilter,
-        onMovieActivate = { movieId ->
-            if (state.selectMode) {
-                vm.toggleSelected(movieId)
-            } else {
-                navigator.open(ArrRoute.Detail(serverId, AppType.RADARR, movieId.toString()))
-            }
-        },
+        onMovieActivate = onMovieActivate,
         onMovieLongClick = vm::enterSelectMode,
         onSelectAll = vm::selectAllPresented,
         onExitSelection = vm::exitSelectMode,

@@ -49,6 +49,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the delay profiles route. */
 @Composable
@@ -120,12 +121,12 @@ fun RadarrDelayProfilesScreen(
     val refreshing = content != null && (lce as LceState.Content<RadarrDelayProfilesContent>).refreshing
 
     val noticeMessage = when (state.notice) {
-        DelayProfilesNotice.CREATED -> stringResource(R.string.arr_radarr_quality_notice_created)
-        DelayProfilesNotice.UPDATED -> stringResource(R.string.arr_radarr_quality_notice_saved)
-        DelayProfilesNotice.DELETED -> stringResource(R.string.arr_radarr_quality_notice_deleted)
-        DelayProfilesNotice.MOVED -> stringResource(R.string.arr_radarr_quality_notice_moved)
+        DelayProfilesNotice.CREATED -> stringResource(ArrUiR.string.arr_common_quality_notice_created)
+        DelayProfilesNotice.UPDATED -> stringResource(ArrUiR.string.arr_common_system_notice_saved)
+        DelayProfilesNotice.DELETED -> stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
+        DelayProfilesNotice.MOVED -> stringResource(ArrUiR.string.arr_common_quality_notice_moved)
         DelayProfilesNotice.QUEUED ->
-            stringResource(R.string.arr_radarr_quality_notice_saved_queued)
+            stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
         null -> null
     }
     QualityNoticeHost(
@@ -137,20 +138,20 @@ fun RadarrDelayProfilesScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_quality_delay_title),
+        title = stringResource(ArrUiR.string.arr_common_quality_delay_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onAdd) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.arr_radarr_quality_cd_add_delay),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_add_delay),
                 )
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_quality_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_refresh),
                 )
             }
         },
@@ -167,8 +168,8 @@ fun RadarrDelayProfilesScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_radarr_quality_delay_empty_title),
-                    emptyMessage = stringResource(R.string.arr_radarr_quality_delay_empty_message),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_quality_delay_empty_title),
+                    emptyMessage = stringResource(ArrUiR.string.arr_common_quality_delay_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
                     LazyColumn(
@@ -184,6 +185,7 @@ fun RadarrDelayProfilesScreen(
                             key = { index, profile ->
                                 if (profile.id > 0) profile.id else -1000 - index
                             },
+                            contentType = { _, _ -> "profile" },
                         ) { index, profile ->
                             DelayProfileCard(
                                 profile = profile,
@@ -213,16 +215,16 @@ fun RadarrDelayProfilesScreen(
     if (state.confirmDeleteId != null) {
         AlertDialog(
             onDismissRequest = { onRequestDelete(null) },
-            title = { Text(stringResource(R.string.arr_radarr_quality_delete_delay_title)) },
-            text = { Text(stringResource(R.string.arr_radarr_quality_delete_delay_message)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_quality_delete_delay_title)) },
+            text = { Text(stringResource(ArrUiR.string.arr_common_quality_delete_delay_message)) },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_radarr_quality_action_delete))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { onRequestDelete(null) }) {
-                    Text(stringResource(R.string.arr_radarr_quality_action_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -248,7 +250,7 @@ private fun DelayProfileCard(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.arr_radarr_quality_delay_profile_title, profile.order + 1),
+                    text = stringResource(ArrUiR.string.arr_common_quality_delay_profile_title, profile.order + 1),
                     style = MaterialTheme.typography.titleSmall,
                 )
             }
@@ -256,7 +258,7 @@ private fun DelayProfileCard(
                 Icon(
                     imageVector = Icons.Filled.ArrowUpward,
                     contentDescription = stringResource(
-                        R.string.arr_radarr_quality_cd_delay_move_up,
+                        ArrUiR.string.arr_common_quality_cd_delay_move_up,
                         profile.order + 1,
                     ),
                 )
@@ -265,7 +267,7 @@ private fun DelayProfileCard(
                 Icon(
                     imageVector = Icons.Filled.ArrowDownward,
                     contentDescription = stringResource(
-                        R.string.arr_radarr_quality_cd_delay_move_down,
+                        ArrUiR.string.arr_common_quality_cd_delay_move_down,
                         profile.order + 1,
                     ),
                 )
@@ -279,7 +281,7 @@ private fun DelayProfileCard(
                         Icon(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = stringResource(
-                                R.string.arr_radarr_quality_cd_delete_delay,
+                                ArrUiR.string.arr_common_quality_cd_delete_delay,
                                 profile.order + 1,
                             ),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -291,7 +293,7 @@ private fun DelayProfileCard(
                         Icon(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = stringResource(
-                                R.string.arr_radarr_quality_cd_discard_draft,
+                                ArrUiR.string.arr_common_quality_cd_discard_draft,
                             ),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -300,19 +302,19 @@ private fun DelayProfileCard(
             }
         }
         LabeledSwitch(
-            label = stringResource(R.string.arr_radarr_quality_delay_usenet),
+            label = stringResource(ArrUiR.string.arr_common_quality_delay_usenet),
             checked = profile.enableUsenet,
             onCheckedChange = { value -> onEditDraft(profile) { it.copy(enableUsenet = value) } },
         )
         LabeledSwitch(
-            label = stringResource(R.string.arr_radarr_quality_delay_torrent),
+            label = stringResource(ArrUiR.string.arr_common_quality_delay_torrent),
             checked = profile.enableTorrent,
             onCheckedChange = { value -> onEditDraft(profile) { it.copy(enableTorrent = value) } },
         )
         if (profile.enableUsenet) {
             QualityTextField(
                 value = profile.usenetDelay.toString(),
-                label = stringResource(R.string.arr_radarr_quality_delay_usenet_minutes),
+                label = stringResource(ArrUiR.string.arr_common_quality_delay_usenet_minutes),
                 onValue = { text ->
                     onEditDraft(profile) { it.copy(usenetDelay = text.toIntOrNull() ?: it.usenetDelay) }
                 },
@@ -321,7 +323,7 @@ private fun DelayProfileCard(
         if (profile.enableTorrent) {
             QualityTextField(
                 value = profile.torrentDelay.toString(),
-                label = stringResource(R.string.arr_radarr_quality_delay_torrent_minutes),
+                label = stringResource(ArrUiR.string.arr_common_quality_delay_torrent_minutes),
                 onValue = { text ->
                     onEditDraft(profile) { it.copy(torrentDelay = text.toIntOrNull() ?: it.torrentDelay) }
                 },
@@ -329,7 +331,7 @@ private fun DelayProfileCard(
         }
         if (profile.enableUsenet && profile.enableTorrent) {
             QualityDropdown(
-                label = stringResource(R.string.arr_radarr_quality_delay_preferred_protocol),
+                label = stringResource(ArrUiR.string.arr_common_quality_delay_preferred_protocol),
                 selected = profile.preferredProtocol ?: DownloadProtocol.USENET,
                 entries = listOf(DownloadProtocol.USENET, DownloadProtocol.TORRENT),
                 labelOf = { it.toString() },
@@ -339,15 +341,15 @@ private fun DelayProfileCard(
             )
         }
         LabeledSwitch(
-            label = stringResource(R.string.arr_radarr_quality_delay_bypass_highest),
-            supportingText = stringResource(R.string.arr_radarr_quality_delay_bypass_highest_support),
+            label = stringResource(ArrUiR.string.arr_common_quality_delay_bypass_highest),
+            supportingText = stringResource(ArrUiR.string.arr_common_quality_delay_bypass_highest_support),
             checked = profile.bypassIfHighestQuality,
             onCheckedChange = { value ->
                 onEditDraft(profile) { it.copy(bypassIfHighestQuality = value) }
             },
         )
         LabeledSwitch(
-            label = stringResource(R.string.arr_radarr_quality_delay_bypass_score),
+            label = stringResource(ArrUiR.string.arr_common_quality_delay_bypass_score),
             checked = profile.bypassIfAboveCustomFormatScore,
             onCheckedChange = { value ->
                 onEditDraft(profile) { it.copy(bypassIfAboveCustomFormatScore = value) }
@@ -356,7 +358,7 @@ private fun DelayProfileCard(
         if (profile.bypassIfAboveCustomFormatScore) {
             QualityTextField(
                 value = profile.minimumCustomFormatScore.toString(),
-                label = stringResource(R.string.arr_radarr_quality_delay_minimum_score),
+                label = stringResource(ArrUiR.string.arr_common_quality_delay_minimum_score),
                 onValue = { text ->
                     onEditDraft(profile) {
                         it.copy(minimumCustomFormatScore = text.toIntOrNull() ?: it.minimumCustomFormatScore)
@@ -372,7 +374,7 @@ private fun DelayProfileCard(
                 .heightIn(min = 48.dp),
         ) {
             Icon(imageVector = Icons.Filled.Save, contentDescription = null)
-            Text(stringResource(R.string.arr_radarr_quality_action_save_row))
+            Text(stringResource(ArrUiR.string.arr_common_save))
         }
     }
 }

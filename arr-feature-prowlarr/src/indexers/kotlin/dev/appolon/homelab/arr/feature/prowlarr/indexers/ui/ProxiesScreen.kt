@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -37,6 +38,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerProxyResource
 import dev.appolon.homelab.arr.feature.prowlarr.R
@@ -49,6 +52,7 @@ import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
 import kotlinx.serialization.json.JsonElement
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Indexer proxies screen: list with CRUD over the generic field model.
@@ -86,7 +90,7 @@ fun ProxiesScreen(
     }
 
     ArrScaffold(
-        title = stringResource(R.string.arr_prowlarr_proxies_title),
+        title = stringResource(R.string.arr_prowlarr_settings_proxy_note_title),
         onBack = onBack,
         modifier = modifier,
     ) { padding ->
@@ -156,12 +160,12 @@ fun ProxiesScreen(
             text = { Text(stringResource(R.string.arr_prowlarr_proxies_delete_message)) },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirm) {
-                    Text(stringResource(R.string.arr_prowlarr_delete))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteDismiss) {
-                    Text(stringResource(R.string.arr_prowlarr_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -194,7 +198,7 @@ private fun ProxyCard(
                 IconButton(onClick = { onTest() }) {
                     Icon(
                         imageVector = Icons.Filled.Science,
-                        contentDescription = stringResource(R.string.arr_prowlarr_test),
+                        contentDescription = stringResource(ArrUiR.string.arr_common_connect_test),
                     )
                 }
                 IconButton(onClick = { onEdit(proxy) }) {
@@ -238,6 +242,7 @@ private fun ProxyEditorSheet(
             Modifier
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
+                .focusGroup()
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -247,11 +252,12 @@ private fun ProxyEditorSheet(
                     else R.string.arr_prowlarr_proxies_add,
                 ),
                 style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
             )
             OutlinedTextField(
                 value = form.name,
                 onValueChange = onNameChange,
-                label = { Text(stringResource(R.string.arr_prowlarr_editor_name)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_autotag_name)) },
                 isError = form.nameMissing,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -270,10 +276,10 @@ private fun ProxyEditorSheet(
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.arr_prowlarr_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
                 Button(onClick = onSave, enabled = !state.saving, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.arr_prowlarr_save))
+                    Text(stringResource(ArrUiR.string.arr_common_save))
                 }
             }
         }
@@ -283,7 +289,7 @@ private fun ProxyEditorSheet(
 /** One-line snackbar text for a proxies message. */
 @Composable
 internal fun proxiesMessageText(message: ProxiesMessage): String = when (message) {
-    ProxiesMessage.Saved -> stringResource(R.string.arr_prowlarr_message_saved)
+    ProxiesMessage.Saved -> stringResource(ArrUiR.string.arr_common_connect_notice_saved)
     ProxiesMessage.SavedQueued -> stringResource(R.string.arr_prowlarr_message_saved_queued)
     ProxiesMessage.Deleted -> stringResource(R.string.arr_prowlarr_message_delete_synced)
     ProxiesMessage.DeleteQueued -> stringResource(R.string.arr_prowlarr_message_delete_queued)
@@ -294,5 +300,5 @@ internal fun proxiesMessageText(message: ProxiesMessage): String = when (message
     is ProxiesMessage.WriteFailed ->
         stringResource(R.string.arr_prowlarr_message_write_failed, arrErrorMessage(message.error))
 
-    ProxiesMessage.NameMissing -> stringResource(R.string.arr_prowlarr_editor_name_missing)
+    ProxiesMessage.NameMissing -> stringResource(ArrUiR.string.arr_common_tags_label_error)
 }

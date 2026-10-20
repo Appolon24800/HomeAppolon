@@ -1,6 +1,7 @@
 package dev.appolon.homelab.arr.feature.prowlarr.settings.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.api.prowlarr.model.NotificationResource
@@ -51,6 +53,7 @@ import dev.appolon.homelab.arr.ui.components.SectionHeader
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Notification add/edit. Add renders the definition picker first; after a
@@ -86,19 +89,19 @@ fun ProwlarrNotificationEditorScreen(
     NoticeHost(
         noticeMessage = when (state.notice) {
             NotificationEditorNotice.SAVED ->
-                stringResource(R.string.arr_prowlarr_settings_notice_saved)
+                stringResource(ArrUiR.string.arr_common_connect_notice_saved)
 
             NotificationEditorNotice.SAVED_QUEUED ->
                 stringResource(R.string.arr_prowlarr_settings_notice_saved_queued)
 
             NotificationEditorNotice.DELETED ->
-                stringResource(R.string.arr_prowlarr_settings_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             NotificationEditorNotice.DELETED_QUEUED ->
                 stringResource(R.string.arr_prowlarr_settings_notice_deleted_queued)
 
             NotificationEditorNotice.TEST_PASSED ->
-                stringResource(R.string.arr_prowlarr_settings_notice_test_passed)
+                stringResource(ArrUiR.string.arr_common_connect_notice_test_passed)
 
             null -> null
         },
@@ -110,8 +113,8 @@ fun ProwlarrNotificationEditorScreen(
 
     ArrScaffold(
         title = stringResource(
-            if (state.isNew) R.string.arr_prowlarr_settings_notification_editor_title_new
-            else R.string.arr_prowlarr_settings_notification_editor_title,
+            if (state.isNew) ArrUiR.string.arr_common_notifications_add
+            else ArrUiR.string.arr_common_notification_editor_title,
         ),
         subtitle = serverName,
         onBack = onBack,
@@ -124,7 +127,7 @@ fun ProwlarrNotificationEditorScreen(
                     )
                 }
                 if (!state.isNew) {
-                    val deleteCd = stringResource(R.string.arr_prowlarr_settings_cd_delete)
+                    val deleteCd = stringResource(ArrUiR.string.arr_common_delete)
                     IconButton(
                         onClick = onDeleteRequest,
                         modifier = Modifier.semantics { contentDescription = deleteCd },
@@ -144,7 +147,7 @@ fun ProwlarrNotificationEditorScreen(
             ArrLceBox(
                 state = lce,
                 onRetry = onBack,
-                emptyTitle = stringResource(R.string.arr_prowlarr_settings_picker_empty_title),
+                emptyTitle = stringResource(ArrUiR.string.arr_common_connect_picker_empty_title),
                 emptyMessage = stringResource(R.string.arr_prowlarr_settings_picker_empty_message),
                 modifier = Modifier.fillMaxSize(),
             ) { data ->
@@ -185,12 +188,12 @@ fun ProwlarrNotificationEditorScreen(
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_prowlarr_settings_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_prowlarr_settings_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -254,13 +257,15 @@ private fun NotificationForm(
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.widthIn(max = ListMaxWidth + 32.dp),
+        modifier = Modifier
+            .widthIn(max = ListMaxWidth + 32.dp)
+            .focusGroup(),
     ) {
         item {
             OutlinedTextField(
                 value = draft.name,
                 onValueChange = onNameChange,
-                label = { Text(stringResource(R.string.arr_prowlarr_settings_name_label)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_autotag_name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -269,6 +274,7 @@ private fun NotificationForm(
             Column {
                 SectionHeader(
                     title = stringResource(R.string.arr_prowlarr_settings_events_section),
+                    modifier = Modifier.semantics { heading() },
                 )
                 draft.events.forEach { event ->
                     LabeledSwitch(
@@ -310,7 +316,7 @@ private fun NotificationForm(
                     Modifier
                 },
             ) {
-                Text(stringResource(R.string.arr_prowlarr_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         }
     }
@@ -318,17 +324,17 @@ private fun NotificationForm(
 
 @Composable
 private fun eventLabel(key: String): String = when (key) {
-    "onGrab" -> stringResource(R.string.arr_prowlarr_settings_event_grab)
+    "onGrab" -> stringResource(ArrUiR.string.arr_common_notification_event_grab)
     "includeManualGrabs" ->
         stringResource(R.string.arr_prowlarr_settings_event_include_manual_grabs)
 
-    "onHealthIssue" -> stringResource(R.string.arr_prowlarr_settings_event_health_issue)
+    "onHealthIssue" -> stringResource(ArrUiR.string.arr_common_notification_event_health)
     "includeHealthWarnings" ->
-        stringResource(R.string.arr_prowlarr_settings_event_include_health_warnings)
+        stringResource(ArrUiR.string.arr_common_notification_event_include_warnings)
 
-    "onHealthRestored" -> stringResource(R.string.arr_prowlarr_settings_event_health_restored)
+    "onHealthRestored" -> stringResource(ArrUiR.string.arr_common_notification_event_health_restored)
     "onApplicationUpdate" ->
-        stringResource(R.string.arr_prowlarr_settings_event_application_update)
+        stringResource(ArrUiR.string.arr_common_notification_event_application_update)
 
     else -> key
 }

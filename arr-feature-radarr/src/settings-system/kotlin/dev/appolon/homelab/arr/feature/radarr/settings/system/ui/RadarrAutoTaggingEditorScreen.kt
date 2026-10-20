@@ -51,6 +51,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Destination for the auto tagging editor route. A null [ruleId] opens the
@@ -74,13 +75,13 @@ fun RadarrAutoTaggingEditorDestination(
     val state by vm.state.collectAsState()
     val noticeMessage = state.notice?.let { notice ->
         when (notice) {
-            AutoTaggingNotice.SAVED -> stringResource(R.string.arr_radarr_system_notice_saved)
+            AutoTaggingNotice.SAVED -> stringResource(ArrUiR.string.arr_common_system_notice_saved)
             AutoTaggingNotice.SAVED_QUEUED ->
-                stringResource(R.string.arr_radarr_system_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
-            AutoTaggingNotice.DELETED -> stringResource(R.string.arr_radarr_tags_notice_deleted)
+            AutoTaggingNotice.DELETED -> stringResource(ArrUiR.string.arr_common_tags_notice_deleted)
             AutoTaggingNotice.DELETED_QUEUED ->
-                stringResource(R.string.arr_radarr_tags_notice_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
         }
     }
 
@@ -145,9 +146,9 @@ fun RadarrAutoTaggingEditorScreen(
     ArrScaffold(
         title = stringResource(
             if (state.isNew) {
-                R.string.arr_radarr_autotag_editor_title_new
+                ArrUiR.string.arr_common_autotag_editor_title_new
             } else {
-                R.string.arr_radarr_autotag_editor_title_edit
+                ArrUiR.string.arr_common_autotag_editor_title_edit
             },
         ),
         subtitle = serverName,
@@ -156,13 +157,13 @@ fun RadarrAutoTaggingEditorScreen(
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_system_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_refresh),
                 )
             }
             IconButton(onClick = onSave, enabled = state.dirty && !state.saving) {
                 Icon(
                     imageVector = Icons.Filled.Save,
-                    contentDescription = stringResource(R.string.arr_radarr_system_cd_save),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_save_changes),
                 )
             }
         },
@@ -221,15 +222,15 @@ private fun EditorBody(
                 Column {
                     SystemTextField(
                         value = state.draft.name,
-                        label = stringResource(R.string.arr_radarr_autotag_name),
+                        label = stringResource(ArrUiR.string.arr_common_autotag_name),
                         onValue = { value -> onEdit { it.copy(name = value) } },
                         isError = state.nameError,
-                        errorMessage = stringResource(R.string.arr_radarr_tags_label_error),
+                        errorMessage = stringResource(ArrUiR.string.arr_common_tags_label_error),
                     )
                     LabeledSwitch(
-                        label = stringResource(R.string.arr_radarr_autotag_remove_automatically),
+                        label = stringResource(ArrUiR.string.arr_common_autotag_remove_automatically),
                         supportingText = stringResource(
-                            R.string.arr_radarr_autotag_remove_automatically_support,
+                            ArrUiR.string.arr_common_autotag_remove_automatically_support,
                         ),
                         checked = state.draft.removeTagsAutomatically,
                         onCheckedChange = { checked ->
@@ -242,10 +243,10 @@ private fun EditorBody(
         item {
             SystemCard {
                 Column {
-                    SystemSectionHeader(stringResource(R.string.arr_radarr_autotag_section_tags))
+                    SystemSectionHeader(stringResource(ArrUiR.string.arr_common_autotag_section_tags))
                     if (state.tags.isEmpty()) {
                         Text(
-                            text = stringResource(R.string.arr_radarr_autotag_no_tags_hint),
+                            text = stringResource(ArrUiR.string.arr_common_autotag_no_tags_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -261,12 +262,16 @@ private fun EditorBody(
         item {
             SystemCard {
                 Column {
-                    SystemSectionHeader(stringResource(R.string.arr_radarr_autotag_section_conditions))
+                    SystemSectionHeader(stringResource(ArrUiR.string.arr_common_autotag_section_conditions))
                     ConditionAddRow(state.schema, onAddCondition)
                 }
             }
         }
-        itemsIndexed(state.draft.conditions) { index, condition ->
+        itemsIndexed(
+            state.draft.conditions,
+            key = { _, condition -> condition.hashCode() },
+            contentType = { _, _ -> "condition" },
+        ) { index, condition ->
             ConditionCard(
                 index = index,
                 condition = condition,
@@ -293,7 +298,7 @@ private fun ConditionAddRow(
             selected = expanded,
             onClick = { expanded = !expanded },
             label = {
-                Text(stringResource(R.string.arr_radarr_autotag_condition_add))
+                Text(stringResource(ArrUiR.string.arr_common_autotag_condition_add))
             },
             leadingIcon = {
                 Icon(
@@ -348,21 +353,21 @@ private fun ConditionCard(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = stringResource(
-                            R.string.arr_radarr_autotag_cd_remove_condition,
+                            ArrUiR.string.arr_common_autotag_cd_remove_condition,
                             title,
                         ),
                     )
                 }
             }
             LabeledSwitch(
-                label = stringResource(R.string.arr_radarr_autotag_condition_negate),
+                label = stringResource(ArrUiR.string.arr_common_autotag_condition_negate),
                 checked = condition.specification.negate,
                 onCheckedChange = { checked ->
                     onEditCondition(index) { it.copy(specification = it.specification.copy(negate = checked)) }
                 },
             )
             LabeledSwitch(
-                label = stringResource(R.string.arr_radarr_autotag_condition_required),
+                label = stringResource(ArrUiR.string.arr_common_autotag_condition_required),
                 checked = condition.specification.required,
                 onCheckedChange = { checked ->
                     onEditCondition(index) { it.copy(specification = it.specification.copy(required = checked)) }

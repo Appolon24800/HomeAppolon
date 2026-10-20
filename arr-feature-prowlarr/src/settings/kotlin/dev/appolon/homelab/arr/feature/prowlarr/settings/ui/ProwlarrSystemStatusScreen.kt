@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.core.ArrTime
 import dev.appolon.homelab.arr.feature.prowlarr.R
@@ -38,6 +40,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The system page: status card (version, runtime, database,
@@ -69,14 +72,14 @@ fun ProwlarrSystemStatusScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_prowlarr_settings_system_title),
+        title = stringResource(ArrUiR.string.arr_common_status_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_prowlarr_settings_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_refresh),
                 )
             }
         },
@@ -93,7 +96,7 @@ fun ProwlarrSystemStatusScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_prowlarr_settings_system_title),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_status_title),
                     emptyMessage = stringResource(R.string.arr_prowlarr_settings_system_empty),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
@@ -144,7 +147,10 @@ private fun StatusCard(data: ProwlarrSystemStatusContent) {
     val status = data.status
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            SectionHeader(title = stringResource(R.string.arr_prowlarr_settings_status_section))
+            SectionHeader(
+                title = stringResource(R.string.arr_prowlarr_settings_status_section),
+                modifier = Modifier.semantics { heading() },
+            )
             LabelRow(
                 label = stringResource(R.string.arr_prowlarr_settings_status_app),
                 value = listOfNotNull(
@@ -157,7 +163,7 @@ private fun StatusCard(data: ProwlarrSystemStatusContent) {
                 value = status.instanceName.orEmpty(),
             )
             LabelRow(
-                label = stringResource(R.string.arr_prowlarr_settings_status_branch),
+                label = stringResource(ArrUiR.string.arr_common_status_branch),
                 value = status.branch.orEmpty(),
             )
             LabelRow(
@@ -168,14 +174,14 @@ private fun StatusCard(data: ProwlarrSystemStatusContent) {
                 ).joinToString(" "),
             )
             LabelRow(
-                label = stringResource(R.string.arr_prowlarr_settings_status_os),
+                label = stringResource(ArrUiR.string.arr_common_status_os),
                 value = listOfNotNull(
                     status.osName,
                     status.osVersion,
                 ).joinToString(" "),
             )
             LabelRow(
-                label = stringResource(R.string.arr_prowlarr_settings_status_database),
+                label = stringResource(ArrUiR.string.arr_common_status_section_database),
                 value = listOfNotNull(
                     status.databaseType?.name?.lowercase(),
                     status.databaseVersion,
@@ -188,14 +194,14 @@ private fun StatusCard(data: ProwlarrSystemStatusContent) {
             LabelRow(
                 label = stringResource(R.string.arr_prowlarr_settings_status_is_docker),
                 value = if (status.isDocker) {
-                    stringResource(R.string.arr_prowlarr_settings_status_yes)
+                    stringResource(ArrUiR.string.arr_common_yes)
                 } else {
-                    stringResource(R.string.arr_prowlarr_settings_status_no)
+                    stringResource(ArrUiR.string.arr_common_no)
                 },
             )
             ArrTime.parse(status.startTime)?.let { started ->
                 LabelRow(
-                    label = stringResource(R.string.arr_prowlarr_settings_status_start_time),
+                    label = stringResource(ArrUiR.string.arr_common_status_start_time),
                     value = ArrTime.dateTimeShort(started),
                 )
             }
@@ -209,7 +215,10 @@ private fun HealthCard(data: ProwlarrSystemStatusContent) {
     val uriHandler = LocalUriHandler.current
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeader(title = stringResource(R.string.arr_prowlarr_settings_health_section))
+            SectionHeader(
+                title = stringResource(ArrUiR.string.arr_common_status_section_health),
+                modifier = Modifier.semantics { heading() },
+            )
             data.health.forEach { finding ->
                 Column {
                     Text(
@@ -237,7 +246,10 @@ private fun HealthCard(data: ProwlarrSystemStatusContent) {
 private fun TasksCard(data: ProwlarrSystemStatusContent) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeader(title = stringResource(R.string.arr_prowlarr_settings_tasks_section))
+            SectionHeader(
+                title = stringResource(ArrUiR.string.arr_common_status_section_tasks),
+                modifier = Modifier.semantics { heading() },
+            )
             if (data.tasks.isEmpty()) {
                 Text(
                     stringResource(R.string.arr_prowlarr_settings_tasks_empty),

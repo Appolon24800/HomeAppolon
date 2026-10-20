@@ -215,18 +215,18 @@ fun SonarrSeriesLibrary(
         onExitSelectMode = vm::exitSelectMode,
         onToggleSelected = vm::toggleSelected,
         onSelectAllPresented = vm::selectAllPresented,
-        onOpenSeries = { seriesId ->
+        onOpenSeries = remember(navigator, serverId) { { seriesId: Int ->
             // Detail is a built-in shell route owned by a later task; the
             // library only navigates to it.
             navigator.open(ArrRoute.Detail(serverId, AppType.SONARR, seriesId.toString()))
-        },
+        } },
         onOpenEditor = vm::openEditor,
         onCloseEditor = vm::closeEditor,
-        onUpdateEditorForm = { form -> vm.updateEditor { form } },
+        onUpdateEditorForm = remember(vm) { { form -> vm.updateEditor { form } } },
         onSubmitEditor = vm::submitEditor,
         onOpenSeasonPass = vm::openSeasonPass,
         onCloseSeasonPass = vm::closeSeasonPass,
-        onUpdateSeasonPassForm = { form -> vm.updateSeasonPass { form } },
+        onUpdateSeasonPassForm = remember(vm) { { form -> vm.updateSeasonPass { form } } },
         onSubmitSeasonPass = vm::submitSeasonPass,
         onRequestDelete = vm::requestDelete,
         onDismissDelete = vm::dismissDelete,

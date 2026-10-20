@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.api.prowlarr.model.NotificationResource
@@ -50,6 +51,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Connect notifications list. Each row summarizes the implementation and
@@ -82,7 +84,7 @@ fun ProwlarrNotificationsScreen(
     NoticeHost(
         noticeMessage = when (state.notice) {
             NotificationsNotice.DELETED ->
-                stringResource(R.string.arr_prowlarr_settings_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             NotificationsNotice.DELETED_QUEUED ->
                 stringResource(R.string.arr_prowlarr_settings_notice_deleted_queued)
@@ -118,7 +120,7 @@ fun ProwlarrNotificationsScreen(
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_prowlarr_settings_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_refresh),
                 )
             }
         },
@@ -136,7 +138,7 @@ fun ProwlarrNotificationsScreen(
                     state = lce,
                     onRetry = onRefresh,
                     emptyTitle = stringResource(
-                        R.string.arr_prowlarr_settings_notifications_empty_title,
+                        ArrUiR.string.arr_common_notifications_empty_title,
                     ),
                     emptyMessage = stringResource(
                         R.string.arr_prowlarr_settings_notifications_empty_message,
@@ -156,6 +158,7 @@ fun ProwlarrNotificationsScreen(
                                 title = stringResource(
                                     R.string.arr_prowlarr_settings_notifications_section,
                                 ),
+                                modifier = Modifier.semantics { heading() },
                             )
                         }
                         items(data.notifications, key = { it.id }) { notification ->
@@ -173,7 +176,7 @@ fun ProwlarrNotificationsScreen(
             ExtendedFloatingActionButton(
                 onClick = onAdd,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.arr_prowlarr_settings_notifications_add)) },
+                text = { Text(stringResource(ArrUiR.string.arr_common_notifications_add)) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
@@ -199,12 +202,12 @@ fun ProwlarrNotificationsScreen(
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_prowlarr_settings_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_prowlarr_settings_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -220,7 +223,7 @@ private fun NotificationRow(
     onDelete: () -> Unit,
 ) {
     val openCd = stringResource(
-        R.string.arr_prowlarr_settings_notifications_cd_open,
+        ArrUiR.string.arr_common_mm_browser_cd_open,
         notification.name.orEmpty(),
     )
     Card(
@@ -258,7 +261,7 @@ private fun NotificationRow(
                 TagChips(notification.tags.orEmpty().toList(), tags)
             }
             val deleteCd = stringResource(
-                R.string.arr_prowlarr_settings_notifications_cd_delete,
+                R.string.arr_prowlarr_settings_clients_cd_delete,
                 notification.name.orEmpty(),
             )
             IconButton(
@@ -278,11 +281,11 @@ private fun NotificationRow(
 /** Short chips on the list rows reuse the editor's event labels. */
 @Composable
 private fun eventSummaryLabel(key: String): String = when (key) {
-    "onGrab" -> stringResource(R.string.arr_prowlarr_settings_event_grab)
-    "onHealthIssue" -> stringResource(R.string.arr_prowlarr_settings_event_health_issue)
-    "onHealthRestored" -> stringResource(R.string.arr_prowlarr_settings_event_health_restored)
+    "onGrab" -> stringResource(ArrUiR.string.arr_common_notification_event_grab)
+    "onHealthIssue" -> stringResource(ArrUiR.string.arr_common_notification_event_health)
+    "onHealthRestored" -> stringResource(ArrUiR.string.arr_common_notification_event_health_restored)
     "onApplicationUpdate" ->
-        stringResource(R.string.arr_prowlarr_settings_event_application_update)
+        stringResource(ArrUiR.string.arr_common_notification_event_application_update)
 
     else -> key
 }

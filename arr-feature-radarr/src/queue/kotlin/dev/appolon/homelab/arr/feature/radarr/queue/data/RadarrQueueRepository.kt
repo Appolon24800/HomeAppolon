@@ -150,11 +150,7 @@ class RadarrQueueRepository(
             }
             when (val result = refreshStatus()) {
                 is ArrResult.Ok -> ArrResult.ok(result.value ?: QueueStatusResource())
-                is ArrResult.Err -> if (cached.isNotEmpty()) {
-                    ArrResult.ok(cached.first())
-                } else {
-                    ArrResult.err(result.error)
-                }
+                is ArrResult.Err -> result
             }
         }
 
@@ -377,7 +373,9 @@ class RadarrQueueRepository(
 
     private fun action(method: String, path: String, bodyJson: String?, description: String) =
         QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.RADARR,
             method = method,
@@ -411,7 +409,7 @@ class RadarrQueueRepository(
         internal val QUEUE_STATUS_TYPE = EntityType("radarr.queue.status")
 
         /** Fifteen seconds: queues move fast, and live events extend freshness. */
-        const val QUEUE_TTL_MILLIS: Long = 15 * 1000
+        const val QUEUE_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.QUEUE
 
         internal const val STATUS_ENTITY_ID = "status"
         internal const val QUEUE_ITEM_PATH_PREFIX = "api/v3/queue/"

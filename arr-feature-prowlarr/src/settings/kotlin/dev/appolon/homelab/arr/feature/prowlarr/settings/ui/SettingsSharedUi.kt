@@ -23,11 +23,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.feature.prowlarr.R
 import dev.appolon.homelab.arr.ui.components.SectionHeader
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Wide-screen list width cap; phones render full width. */
 internal val ListMaxWidth = 640.dp
@@ -44,7 +49,10 @@ internal fun PendingBanner(pending: Int) {
     AssistChip(
         onClick = {},
         enabled = false,
-        label = { Text(stringResource(R.string.arr_prowlarr_queued_count, pending)) },
+        label = { Text(stringResource(ArrUiR.string.arr_common_system_pending_banner, pending)) },
+        // Polite live region: the pending count changes as the queue drains,
+        // without focus moving here.
+        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
     )
 }
 
@@ -88,7 +96,7 @@ internal fun LabelRow(label: String, value: String, modifier: Modifier = Modifie
             modifier = Modifier.padding(end = 16.dp),
         )
         Text(
-            value.ifBlank { stringResource(R.string.arr_prowlarr_settings_value_unset) },
+            value.ifBlank { stringResource(ArrUiR.string.arr_common_general_ssl_unset) },
             style = MaterialTheme.typography.bodyMedium,
         )
     }
@@ -98,7 +106,7 @@ internal fun LabelRow(label: String, value: String, modifier: Modifier = Modifie
 @Composable
 internal fun SettingsSection(title: String, content: @Composable () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        SectionHeader(title = title)
+        SectionHeader(title = title, modifier = Modifier.semantics { heading() })
         content()
     }
 }

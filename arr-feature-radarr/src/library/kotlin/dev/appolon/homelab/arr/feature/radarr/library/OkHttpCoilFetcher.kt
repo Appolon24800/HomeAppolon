@@ -8,6 +8,7 @@ import coil3.decode.ImageSource
 import coil3.fetch.Fetcher
 import coil3.fetch.SourceFetchResult
 import coil3.request.Options
+import coil3.request.crossfade
 import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -72,6 +73,7 @@ class OkHttpCoilFetcher private constructor(
 fun okhttpImageLoader(context: Context, client: OkHttpClient): ImageLoader =
     ImageLoader.Builder(context)
         .components { add(OkHttpCoilFetcher.Factory(client)) }
+        .crossfade(true)
         .build()
 
 /** Suspends until the call answers; cancelling the coroutine cancels the call. */

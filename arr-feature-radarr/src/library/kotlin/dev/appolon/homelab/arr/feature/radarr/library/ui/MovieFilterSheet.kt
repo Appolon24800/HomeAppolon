@@ -35,6 +35,7 @@ import dev.appolon.homelab.arr.core.FilterState
 import dev.appolon.homelab.arr.core.FilterValue
 import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.feature.radarr.library.data.MovieLibraryFilters
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Filter sheet of the movies library: one section per filter of the brief
@@ -74,10 +75,10 @@ fun MovieFilterSheet(
                     .padding(top = 8.dp),
             ) {
                 TextButton(onClick = onClear) {
-                    Text(stringResource(R.string.arr_radarr_filter_clear))
+                    Text(stringResource(ArrUiR.string.arr_common_wanted_filter_clear))
                 }
                 Button(onClick = onDismiss) {
-                    Text(stringResource(R.string.arr_radarr_saved_filter_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             }
         }
@@ -114,8 +115,8 @@ private fun ToggleSection(
         modifier = Modifier.padding(bottom = 8.dp),
     )
     val options = listOf(
-        true to R.string.arr_radarr_filter_yes,
-        false to R.string.arr_radarr_filter_no,
+        true to ArrUiR.string.arr_common_yes,
+        false to ArrUiR.string.arr_common_no,
     )
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
         options.forEachIndexed { index, (value, res) ->
@@ -136,7 +137,7 @@ private fun ToggleSection(
                 index = options.size,
                 count = options.size + 1,
             ),
-            label = { Text(stringResource(R.string.arr_radarr_filter_any)) },
+            label = { Text(stringResource(ArrUiR.string.arr_common_quality_language_any)) },
         )
     }
 }
@@ -157,7 +158,7 @@ private fun ChoiceSection(
     )
     if (spec.options.isEmpty()) {
         Text(
-            stringResource(R.string.arr_radarr_filter_empty_options),
+            stringResource(ArrUiR.string.arr_common_wanted_filter_empty_options),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -243,13 +244,13 @@ private fun RangeSection(
 
 @Composable
 internal fun filterLabel(id: String): String = when (id) {
-    MovieLibraryFilters.MONITORED -> stringResource(R.string.arr_radarr_filter_monitored)
-    MovieLibraryFilters.MISSING -> stringResource(R.string.arr_radarr_filter_missing)
-    MovieLibraryFilters.QUALITY -> stringResource(R.string.arr_radarr_filter_quality)
-    MovieLibraryFilters.GENRE -> stringResource(R.string.arr_radarr_filter_genre)
-    MovieLibraryFilters.YEAR -> stringResource(R.string.arr_radarr_filter_year)
-    MovieLibraryFilters.FOLDER -> stringResource(R.string.arr_radarr_filter_folder)
-    MovieLibraryFilters.TAGS -> stringResource(R.string.arr_radarr_filter_tags)
+    MovieLibraryFilters.MONITORED -> stringResource(ArrUiR.string.arr_common_monitored)
+    MovieLibraryFilters.MISSING -> stringResource(ArrUiR.string.arr_common_wanted_tab_missing)
+    MovieLibraryFilters.QUALITY -> stringResource(ArrUiR.string.arr_common_wanted_filter_quality)
+    MovieLibraryFilters.GENRE -> stringResource(ArrUiR.string.arr_common_filter_genre)
+    MovieLibraryFilters.YEAR -> stringResource(ArrUiR.string.arr_common_exclusions_year_label)
+    MovieLibraryFilters.FOLDER -> stringResource(ArrUiR.string.arr_common_filter_folder)
+    MovieLibraryFilters.TAGS -> stringResource(ArrUiR.string.arr_common_tags_title)
     else -> id
 }
 

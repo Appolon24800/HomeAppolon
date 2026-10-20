@@ -38,6 +38,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Interactive import for one movie: candidate files Radarr parsed inside the
@@ -81,7 +82,7 @@ fun RadarrManualImportScreen(
             Column(Modifier.fillMaxSize()) {
                 state.folder?.let {
                     Text(
-                        text = stringResource(R.string.arr_radarr_detail_import_folder, it),
+                        text = stringResource(R.string.arr_radarr_detail_path_value, it),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -92,7 +93,7 @@ fun RadarrManualImportScreen(
                     modifier = Modifier.padding(horizontal = 16.dp),
                 ) {
                     OutlinedButton(onClick = { onSelectAll(true) }, enabled = items.isNotEmpty()) {
-                        Text(stringResource(R.string.arr_radarr_detail_import_select_all))
+                        Text(stringResource(ArrUiR.string.arr_common_import_flow_select_all))
                     }
                     OutlinedButton(onClick = { onSelectAll(false) }, enabled = items.isNotEmpty()) {
                         Text(stringResource(R.string.arr_radarr_detail_import_select_none))
@@ -123,7 +124,7 @@ fun RadarrManualImportScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp),
                     ) {
-                        items(list, key = { it.id }) { item ->
+                        items(list, key = { it.id }, contentType = { "import-item" }) { item ->
                             ImportItemCard(item = item, onToggle = onToggle)
                         }
                     }
@@ -151,7 +152,7 @@ fun RadarrManualImportScreen(
 @Composable
 private fun ImportItemCard(item: ManualImportItemUi, onToggle: (Int) -> Unit) {
     val toggleDescription = stringResource(
-        R.string.arr_radarr_detail_import_cd_select,
+        ArrUiR.string.arr_common_detail_import_cd_select,
         item.relativePath,
     )
     ElevatedCard(

@@ -214,7 +214,9 @@ class RadarrHistoryRepository(
 
     private fun action(method: String, path: String, bodyJson: String?, description: String) =
         QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.RADARR,
             method = method,
@@ -237,7 +239,7 @@ class RadarrHistoryRepository(
         internal val META_TYPE = EntityType("radarr.history.meta")
 
         /** One minute: new events arrive through live refresh signals anyway. */
-        const val HISTORY_TTL_MILLIS: Long = 60 * 1000
+        const val HISTORY_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         internal const val META_ID = "events"
         internal const val MARK_FAILED_PATH_PREFIX = "api/v3/history/failed/"

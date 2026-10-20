@@ -1,6 +1,7 @@
 package dev.appolon.homelab.arr.feature.prowlarr.settings.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.api.prowlarr.model.DownloadClientResource
@@ -56,6 +58,7 @@ import dev.appolon.homelab.arr.ui.components.SectionHeader
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Download client add/edit. Add renders the definition picker first; after
@@ -95,19 +98,19 @@ fun ProwlarrDownloadClientEditorScreen(
     NoticeHost(
         noticeMessage = when (state.notice) {
             DownloadClientEditorNotice.SAVED ->
-                stringResource(R.string.arr_prowlarr_settings_notice_saved)
+                stringResource(ArrUiR.string.arr_common_connect_notice_saved)
 
             DownloadClientEditorNotice.SAVED_QUEUED ->
                 stringResource(R.string.arr_prowlarr_settings_notice_saved_queued)
 
             DownloadClientEditorNotice.DELETED ->
-                stringResource(R.string.arr_prowlarr_settings_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             DownloadClientEditorNotice.DELETED_QUEUED ->
                 stringResource(R.string.arr_prowlarr_settings_notice_deleted_queued)
 
             DownloadClientEditorNotice.TEST_PASSED ->
-                stringResource(R.string.arr_prowlarr_settings_notice_test_passed)
+                stringResource(ArrUiR.string.arr_common_connect_notice_test_passed)
 
             null -> null
         },
@@ -119,8 +122,8 @@ fun ProwlarrDownloadClientEditorScreen(
 
     ArrScaffold(
         title = stringResource(
-            if (state.isNew) R.string.arr_prowlarr_settings_client_editor_title_new
-            else R.string.arr_prowlarr_settings_client_editor_title,
+            if (state.isNew) ArrUiR.string.arr_common_clients_add
+            else ArrUiR.string.arr_common_client_editor_title,
         ),
         subtitle = serverName,
         onBack = onBack,
@@ -133,7 +136,7 @@ fun ProwlarrDownloadClientEditorScreen(
                     )
                 }
                 if (!state.isNew) {
-                    val deleteCd = stringResource(R.string.arr_prowlarr_settings_cd_delete)
+                    val deleteCd = stringResource(ArrUiR.string.arr_common_delete)
                     IconButton(
                         onClick = onDeleteRequest,
                         modifier = Modifier.semantics { contentDescription = deleteCd },
@@ -153,7 +156,7 @@ fun ProwlarrDownloadClientEditorScreen(
             ArrLceBox(
                 state = lce,
                 onRetry = onBack,
-                emptyTitle = stringResource(R.string.arr_prowlarr_settings_picker_empty_title),
+                emptyTitle = stringResource(ArrUiR.string.arr_common_connect_picker_empty_title),
                 emptyMessage = stringResource(R.string.arr_prowlarr_settings_picker_empty_message),
                 modifier = Modifier.fillMaxSize(),
             ) { data ->
@@ -199,12 +202,12 @@ fun ProwlarrDownloadClientEditorScreen(
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_prowlarr_settings_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_prowlarr_settings_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -276,20 +279,22 @@ private fun ClientForm(
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.widthIn(max = ListMaxWidth + 32.dp),
+        modifier = Modifier
+            .widthIn(max = ListMaxWidth + 32.dp)
+            .focusGroup(),
     ) {
         item {
             OutlinedTextField(
                 value = draft.name,
                 onValueChange = onNameChange,
-                label = { Text(stringResource(R.string.arr_prowlarr_settings_name_label)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_autotag_name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
         item {
             LabeledSwitch(
-                label = stringResource(R.string.arr_prowlarr_settings_enabled_label),
+                label = stringResource(ArrUiR.string.arr_common_general_cert_validation_enabled),
                 checked = draft.enable,
                 onCheckedChange = onEnableChange,
             )
@@ -301,7 +306,7 @@ private fun ClientForm(
                     priorityText = next
                     next.toIntOrNull()?.let(onPriorityChange)
                 },
-                label = { Text(stringResource(R.string.arr_prowlarr_settings_priority_label)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_connect_priority_label)) },
                 supportingText = {
                     Text(stringResource(R.string.arr_prowlarr_settings_priority_help))
                 },
@@ -348,7 +353,7 @@ private fun ClientForm(
                     Modifier
                 },
             ) {
-                Text(stringResource(R.string.arr_prowlarr_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         }
     }
@@ -369,7 +374,10 @@ private fun GrabTargetEditors(
     onToggleNewznab: (Int, Int) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        SectionHeader(title = stringResource(R.string.arr_prowlarr_settings_targets_title))
+        SectionHeader(
+            title = stringResource(R.string.arr_prowlarr_settings_targets_title),
+            modifier = Modifier.semantics { heading() },
+        )
         Text(
             stringResource(R.string.arr_prowlarr_settings_targets_help),
             style = MaterialTheme.typography.bodySmall,
@@ -463,7 +471,7 @@ private fun GrabTargetCard(
                 modifier = Modifier.semantics { contentDescription = removeCd },
             ) {
                 Text(
-                    stringResource(R.string.arr_prowlarr_settings_targets_remove),
+                    stringResource(ArrUiR.string.arr_common_queue_action_remove),
                     color = MaterialTheme.colorScheme.error,
                 )
             }

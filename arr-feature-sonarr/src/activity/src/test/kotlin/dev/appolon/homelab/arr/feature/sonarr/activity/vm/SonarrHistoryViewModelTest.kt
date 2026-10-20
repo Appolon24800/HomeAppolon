@@ -1,5 +1,7 @@
 package dev.appolon.homelab.arr.feature.sonarr.activity.vm
 
+import dev.appolon.homelab.arr.api.sonarr.model.EpisodeResource
+import dev.appolon.homelab.arr.api.sonarr.model.SeriesResource
 import dev.appolon.homelab.arr.api.sonarr.FakeSonarrQueue
 import dev.appolon.homelab.arr.api.sonarr.model.EpisodeHistoryEventType
 import dev.appolon.homelab.arr.api.sonarr.model.HistoryResource
@@ -72,12 +74,8 @@ class SonarrHistoryViewModelTest {
         date = date.toString(),
         eventType = eventType,
         downloadId = if (eventType == EpisodeHistoryEventType.DOWNLOAD_FAILED) "dl-$id" else null,
-        episode = buildJsonObject {
-            put("seasonNumber", 1)
-            put("episodeNumber", id)
-            put("title", "Episode $id")
-        },
-        series = buildJsonObject { put("title", "Series $id") },
+        episode = EpisodeResource(seasonNumber = 1, episodeNumber = id, title = "Episode $id"),
+        series = SeriesResource(title = "Series $id"),
     )
 
     @Before

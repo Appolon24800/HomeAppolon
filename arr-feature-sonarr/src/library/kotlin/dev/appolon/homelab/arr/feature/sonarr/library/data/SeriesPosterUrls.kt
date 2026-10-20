@@ -16,8 +16,12 @@ import dev.appolon.homelab.arr.core.CoverType
  */
 object SeriesPosterUrls {
 
-    /** Original-size local cover; Sonarr 404s ungenerated resized variants. */
-    private val LOCAL_SIZE_PX: Int? = null
+    /**
+     * Server-generated resized poster variant (`poster-500.jpg`), small
+     * enough for grid tiles and wanted row thumbs. Banners stay original:
+     * Sonarr only generates resized poster variants reliably.
+     */
+    private const val LOCAL_SIZE_PX = 500
 
     /**
      * The poster URL for one series, or null when neither a local cover nor a

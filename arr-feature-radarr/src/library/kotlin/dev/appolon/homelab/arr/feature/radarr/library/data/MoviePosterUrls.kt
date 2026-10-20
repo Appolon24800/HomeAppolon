@@ -14,8 +14,12 @@ import dev.appolon.homelab.arr.core.ArrImages
  */
 object MoviePosterUrls {
 
-    /** Original-size local cover; Radarr 404s ungenerated resized variants. */
-    private val LOCAL_SIZE_PX: Int? = null
+    /**
+     * Server-generated resized poster variant (`poster-500.jpg`): a third of
+     * the bytes of the original for grid and table thumbnails, which render
+     * at roughly 128dp wide. Detail hero art does not use this path.
+     */
+    private const val LOCAL_SIZE_PX = 500
 
     /**
      * The poster URL for one movie, or null when neither a local cover nor a

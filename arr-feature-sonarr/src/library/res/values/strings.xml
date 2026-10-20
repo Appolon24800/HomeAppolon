@@ -2,46 +2,19 @@
 <resources>
     <!-- Series library: shell title, views, sort, filters. -->
     <string name="arr_sonarr_library_title">Series</string>
-    <string name="arr_sonarr_cd_view_posters">Switch to poster view</string>
-    <string name="arr_sonarr_cd_view_table">Switch to table view</string>
-    <string name="arr_sonarr_sort_title">Title</string>
-    <string name="arr_sonarr_sort_year">Year</string>
-    <string name="arr_sonarr_sort_seasons">Seasons</string>
-    <string name="arr_sonarr_sort_added">Added</string>
-    <string name="arr_sonarr_sort_size">Size</string>
-    <string name="arr_sonarr_cd_toggle_descending">Reverse sort order</string>
 
-    <string name="arr_sonarr_filter_monitored">Monitored</string>
-    <string name="arr_sonarr_filter_missing">Missing episodes</string>
-    <string name="arr_sonarr_filter_quality">Quality profile</string>
-    <string name="arr_sonarr_filter_genre">Genre</string>
     <string name="arr_sonarr_filter_network">Network</string>
     <string name="arr_sonarr_filter_seasons">Season count</string>
-    <string name="arr_sonarr_filter_year">Year</string>
-    <string name="arr_sonarr_filter_folder">Folder</string>
-    <string name="arr_sonarr_filter_tags">Tags</string>
-    <string name="arr_sonarr_filter_clear">Clear filters</string>
-    <string name="arr_sonarr_filter_dialog_apply">Apply</string>
-    <string name="arr_sonarr_filter_dialog_cancel">Cancel</string>
-    <string name="arr_sonarr_filter_toggle_any">Any</string>
-    <string name="arr_sonarr_filter_toggle_on">Yes</string>
-    <string name="arr_sonarr_filter_toggle_off">No</string>
     <string name="arr_sonarr_filter_range_min">Minimum</string>
     <string name="arr_sonarr_filter_range_max">Maximum</string>
     <string name="arr_sonarr_filter_active_count">%1$d filters on</string>
 
-    <string name="arr_sonarr_saved_empty">No saved filters yet</string>
-    <string name="arr_sonarr_saved_save">Save current filters</string>
-    <string name="arr_sonarr_saved_save_title">Save filter</string>
-    <string name="arr_sonarr_saved_name_label">Name</string>
-    <string name="arr_sonarr_saved_save_action">Save</string>
     <string name="arr_sonarr_saved_delete_cd">Delete saved filter %1$s</string>
 
     <string name="arr_sonarr_empty_title">No series yet</string>
     <string name="arr_sonarr_empty_message">Series you add to Sonarr will appear here.</string>
 
     <!-- Selection mode and bulk actions. -->
-    <string name="arr_sonarr_selected_count">%1$d selected</string>
     <string name="arr_sonarr_cd_exit_select">Leave selection</string>
     <string name="arr_sonarr_cd_select_all">Select everything shown</string>
     <string name="arr_sonarr_cd_open_editor">Edit selected series</string>
@@ -49,87 +22,36 @@
     <string name="arr_sonarr_cd_refresh_selected">Refresh metadata for selection</string>
     <string name="arr_sonarr_cd_scan_selected">Rescan disk for selection</string>
     <string name="arr_sonarr_cd_delete_selected">Delete selected series</string>
-    <string name="arr_sonarr_cd_selected_state">%1$s, selected</string>
 
     <!-- Overflow menu. -->
-    <string name="arr_sonarr_menu_refresh">Refresh metadata</string>
     <string name="arr_sonarr_menu_scan">Rescan disks</string>
     <string name="arr_sonarr_menu_save_filter">Save filter…</string>
-    <string name="arr_sonarr_cd_more_options">More options</string>
 
     <!-- Series editor sheet. -->
-    <string name="arr_sonarr_editor_title">Edit series</string>
-    <string name="arr_sonarr_type_standard">Standard</string>
-    <string name="arr_sonarr_type_anime">Anime</string>
-    <string name="arr_sonarr_type_daily">Daily</string>
     <string name="arr_sonarr_editor_targets">Applies to %1$d series</string>
-    <string name="arr_sonarr_editor_monitored">Monitored</string>
     <string name="arr_sonarr_editor_monitored_unset">Leave unchanged</string>
-    <string name="arr_sonarr_editor_quality">Quality profile</string>
-    <string name="arr_sonarr_editor_quality_unset">Leave unchanged</string>
-    <string name="arr_sonarr_editor_type">Series type</string>
-    <string name="arr_sonarr_editor_season_folder">Season folders</string>
-    <string name="arr_sonarr_editor_season_folder_unset">Leave unchanged</string>
-    <string name="arr_sonarr_editor_root_folder">Root folder path</string>
-    <string name="arr_sonarr_editor_tags">Tags (ids, comma separated)</string>
-    <string name="arr_sonarr_editor_tags_error">Enter numbers separated by commas.</string>
     <string name="arr_sonarr_editor_apply_tags">Tag action</string>
-    <string name="arr_sonarr_editor_tags_add">Add</string>
-    <string name="arr_sonarr_editor_tags_remove">Remove</string>
-    <string name="arr_sonarr_editor_tags_replace">Replace</string>
-    <string name="arr_sonarr_editor_move_files">Move files to the new path</string>
     <string name="arr_sonarr_editor_submit">Apply changes</string>
-    <string name="arr_sonarr_editor_cancel">Cancel</string>
 
     <!-- Season pass sheet. -->
     <string name="arr_sonarr_season_pass_title">Season pass</string>
     <string name="arr_sonarr_season_pass_targets">Changes monitoring for %1$d series</string>
-    <string name="arr_sonarr_season_pass_monitored">Monitor series</string>
-    <string name="arr_sonarr_season_pass_strategy">Monitor strategy</string>
-    <string name="arr_sonarr_season_pass_ignore_with_files">Ignore episodes that have files</string>
-    <string name="arr_sonarr_season_pass_ignore_without_files">Ignore episodes without files</string>
-    <string name="arr_sonarr_season_pass_submit">Apply monitoring</string>
-    <string name="arr_sonarr_season_pass_cancel">Cancel</string>
-    <string name="arr_sonarr_strategy_all">All episodes</string>
-    <string name="arr_sonarr_strategy_future">Future episodes</string>
-    <string name="arr_sonarr_strategy_missing">Missing episodes</string>
-    <string name="arr_sonarr_strategy_existing">Existing episodes</string>
-    <string name="arr_sonarr_strategy_first_season">First season only</string>
-    <string name="arr_sonarr_strategy_last_season">Last season only</string>
-    <string name="arr_sonarr_strategy_latest_season">Latest season only</string>
-    <string name="arr_sonarr_strategy_pilot">Pilot only</string>
-    <string name="arr_sonarr_strategy_recent">Recent episodes</string>
-    <string name="arr_sonarr_strategy_monitor_specials">Monitor specials</string>
-    <string name="arr_sonarr_strategy_unmonitor_specials">Unmonitor specials</string>
-    <string name="arr_sonarr_strategy_none">No episodes</string>
 
     <!-- Delete dialog. -->
-    <string name="arr_sonarr_delete_title">Delete series?</string>
     <string name="arr_sonarr_delete_message">%1$d series will be deleted from Sonarr.</string>
-    <string name="arr_sonarr_delete_files">Delete episode files too</string>
-    <string name="arr_sonarr_delete_exclusion">Add an import list exclusion</string>
-    <string name="arr_sonarr_delete_confirm">Delete</string>
-    <string name="arr_sonarr_delete_cancel">Cancel</string>
 
     <!-- Result snackbars. -->
-    <string name="arr_sonarr_message_edit_synced">Changes applied.</string>
     <string name="arr_sonarr_message_edit_queued">Offline. Changes are queued and will sync.</string>
     <string name="arr_sonarr_message_season_pass_synced">Monitoring updated.</string>
     <string name="arr_sonarr_message_season_pass_queued">Offline. Monitoring change is queued.</string>
-    <string name="arr_sonarr_message_delete_synced">Series deleted.</string>
-    <string name="arr_sonarr_message_delete_queued">Offline. Deletion is queued.</string>
     <string name="arr_sonarr_message_command_started">Command started.</string>
     <string name="arr_sonarr_message_command_queued">Offline. Command is queued.</string>
-    <string name="arr_sonarr_message_write_failed">The change didn\'t go through. Try again.</string>
-    <string name="arr_sonarr_queued_banner">%1$d changes waiting to sync</string>
 
     <!-- Poster badges and table rows. -->
     <string name="arr_sonarr_cd_monitored">%1$s is monitored</string>
     <string name="arr_sonarr_cd_not_monitored">%1$s is not monitored</string>
     <string name="arr_sonarr_cd_queued_change">Change pending sync</string>
     <string name="arr_sonarr_cd_missing_episodes">%1$d missing episodes</string>
-    <string name="arr_sonarr_cd_series_banner">Banner for %1$s</string>
-    <string name="arr_sonarr_cd_open_series">Open %1$s</string>
     <plurals name="arr_sonarr_season_count">
         <item quantity="one">%1$d season</item>
         <item quantity="other">%1$d seasons</item>

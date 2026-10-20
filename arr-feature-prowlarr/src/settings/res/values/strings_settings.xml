@@ -2,87 +2,43 @@
 <resources>
     <!-- Shared by every settings screen -->
     <string name="arr_prowlarr_settings_cd_test_all">Test all connections</string>
-    <string name="arr_prowlarr_settings_cd_refresh">Refresh settings</string>
     <string name="arr_prowlarr_settings_cd_test">Test this connection</string>
-    <string name="arr_prowlarr_settings_cd_delete">Delete</string>
-    <string name="arr_prowlarr_settings_value_unset">Not set</string>
-    <string name="arr_prowlarr_settings_name_label">Name</string>
-    <string name="arr_prowlarr_settings_enabled_label">Enabled</string>
-    <string name="arr_prowlarr_settings_priority_label">Priority</string>
     <string name="arr_prowlarr_settings_priority_help">Lower priority wins when several clients can take a grab.</string>
-    <string name="arr_prowlarr_settings_priority">Priority %1$d</string>
     <string name="arr_prowlarr_settings_delete_title">Delete?</string>
     <string name="arr_prowlarr_settings_delete_message">Delete %1$s? This cannot be undone.</string>
-    <string name="arr_prowlarr_settings_delete_confirm">Delete</string>
-    <string name="arr_prowlarr_settings_delete_cancel">Cancel</string>
     <string name="arr_prowlarr_settings_picker_hint">Pick a definition to add.</string>
-    <string name="arr_prowlarr_settings_picker_empty_title">No definitions</string>
     <string name="arr_prowlarr_settings_picker_empty_message">The server returned no definitions.</string>
     <string name="arr_prowlarr_settings_picker_cd_pick">Pick %1$s</string>
-    <string name="arr_prowlarr_settings_notice_saved">Saved</string>
     <string name="arr_prowlarr_settings_notice_saved_queued">Saved offline and queued</string>
-    <string name="arr_prowlarr_settings_notice_deleted">Deleted</string>
     <string name="arr_prowlarr_settings_notice_deleted_queued">Delete queued for when the server is reachable</string>
-    <string name="arr_prowlarr_settings_notice_test_passed">Test succeeded</string>
     <string name="arr_prowlarr_settings_notice_test_all_passed">All tests succeeded</string>
     <string name="arr_prowlarr_settings_notice_test_all_failed">A test failed</string>
 
     <!-- Download clients -->
-    <string name="arr_prowlarr_settings_clients_title">Download clients</string>
     <string name="arr_prowlarr_settings_clients_section">Clients</string>
     <string name="arr_prowlarr_settings_clients_add">Add client</string>
-    <string name="arr_prowlarr_settings_clients_empty_title">No download clients</string>
     <string name="arr_prowlarr_settings_clients_empty_message">Add a client to push grabs to.</string>
-    <string name="arr_prowlarr_settings_clients_cd_open">Open %1$s</string>
-    <string name="arr_prowlarr_settings_clients_cd_toggle">Enable or disable %1$s</string>
     <string name="arr_prowlarr_settings_clients_cd_delete">Delete %1$s</string>
     <string name="arr_prowlarr_settings_clients_targets">%1$d grab targets</string>
-    <string name="arr_prowlarr_settings_client_editor_title_new">Add download client</string>
-    <string name="arr_prowlarr_settings_client_editor_title">Edit download client</string>
     <string name="arr_prowlarr_settings_targets_title">Grab targets</string>
     <string name="arr_prowlarr_settings_targets_help">Route newznab categories to a category inside the client. Lower priority wins when several clients match a grab.</string>
     <string name="arr_prowlarr_settings_targets_add">Add grab target</string>
     <string name="arr_prowlarr_settings_targets_category">Client category</string>
     <string name="arr_prowlarr_settings_targets_newznab">Newznab categories</string>
-    <string name="arr_prowlarr_settings_targets_remove">Remove</string>
     <string name="arr_prowlarr_settings_targets_cd_remove">Remove grab target %1$s</string>
 
     <!-- Notifications -->
     <string name="arr_prowlarr_settings_notifications_title">Connect notifications</string>
     <string name="arr_prowlarr_settings_notifications_section">Notifications</string>
-    <string name="arr_prowlarr_settings_notifications_add">Add notification</string>
-    <string name="arr_prowlarr_settings_notifications_empty_title">No notifications</string>
     <string name="arr_prowlarr_settings_notifications_empty_message">Add a connection to be notified of grabs and health changes.</string>
-    <string name="arr_prowlarr_settings_notifications_cd_open">Open %1$s</string>
-    <string name="arr_prowlarr_settings_notifications_cd_delete">Delete %1$s</string>
-    <string name="arr_prowlarr_settings_notification_editor_title_new">Add notification</string>
-    <string name="arr_prowlarr_settings_notification_editor_title">Edit notification</string>
     <string name="arr_prowlarr_settings_events_section">Events</string>
-    <string name="arr_prowlarr_settings_event_grab">On grab</string>
     <string name="arr_prowlarr_settings_event_include_manual_grabs">Include manual grabs</string>
-    <string name="arr_prowlarr_settings_event_health_issue">On health issue</string>
-    <string name="arr_prowlarr_settings_event_include_health_warnings">Include health warnings</string>
-    <string name="arr_prowlarr_settings_event_health_restored">On health restored</string>
-    <string name="arr_prowlarr_settings_event_application_update">On application update</string>
 
     <!-- General settings -->
     <string name="arr_prowlarr_settings_general_title">General settings</string>
     <string name="arr_prowlarr_settings_general_empty">Settings could not be loaded.</string>
-    <string name="arr_prowlarr_settings_host_section">Host</string>
-    <string name="arr_prowlarr_settings_instance_name">Instance name</string>
-    <string name="arr_prowlarr_settings_bind_address">Bind address</string>
     <string name="arr_prowlarr_settings_port">Port</string>
-    <string name="arr_prowlarr_settings_port_invalid">Enter a port between 1 and 65535.</string>
-    <string name="arr_prowlarr_settings_url_base">URL base</string>
-    <string name="arr_prowlarr_settings_launch_browser">Open browser on startup</string>
-    <string name="arr_prowlarr_settings_security_section">Security</string>
-    <string name="arr_prowlarr_settings_auth_method">Authentication method</string>
-    <string name="arr_prowlarr_settings_auth_required">Require authentication</string>
     <string name="arr_prowlarr_settings_auth_off_help">Authentication is off. The API key is still required for API calls.</string>
-    <string name="arr_prowlarr_settings_username">Username</string>
-    <string name="arr_prowlarr_settings_password">Password</string>
-    <string name="arr_prowlarr_settings_password_help">Leave blank to keep the current password.</string>
-    <string name="arr_prowlarr_settings_log_level">Log level</string>
     <string name="arr_prowlarr_settings_analytics">Send anonymous usage data</string>
     <string name="arr_prowlarr_settings_development_section">Development</string>
     <string name="arr_prowlarr_settings_log_sql">Log SQL queries</string>
@@ -96,23 +52,14 @@
     <string name="arr_prowlarr_settings_proxy_note_open">Open indexer proxies</string>
 
     <!-- System -->
-    <string name="arr_prowlarr_settings_system_title">System status</string>
     <string name="arr_prowlarr_settings_system_empty">Status could not be loaded.</string>
     <string name="arr_prowlarr_settings_status_section">Status</string>
     <string name="arr_prowlarr_settings_status_app">Application</string>
     <string name="arr_prowlarr_settings_status_instance">Instance</string>
-    <string name="arr_prowlarr_settings_status_branch">Branch</string>
     <string name="arr_prowlarr_settings_status_runtime">Runtime</string>
-    <string name="arr_prowlarr_settings_status_os">Operating system</string>
-    <string name="arr_prowlarr_settings_status_database">Database</string>
     <string name="arr_prowlarr_settings_status_auth">Authentication</string>
     <string name="arr_prowlarr_settings_status_is_docker">Running in Docker</string>
-    <string name="arr_prowlarr_settings_status_yes">Yes</string>
-    <string name="arr_prowlarr_settings_status_no">No</string>
-    <string name="arr_prowlarr_settings_status_start_time">Started</string>
-    <string name="arr_prowlarr_settings_health_section">Health</string>
     <string name="arr_prowlarr_settings_health_wiki">Read the wiki page</string>
-    <string name="arr_prowlarr_settings_tasks_section">Scheduled tasks</string>
     <string name="arr_prowlarr_settings_tasks_empty">No scheduled tasks.</string>
     <string name="arr_prowlarr_settings_task_last">Last run</string>
     <string name="arr_prowlarr_settings_task_next">Next run</string>

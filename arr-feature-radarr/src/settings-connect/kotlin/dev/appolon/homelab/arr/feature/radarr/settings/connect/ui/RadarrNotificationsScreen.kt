@@ -50,6 +50,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the notifications route. */
 @Composable
@@ -118,13 +119,13 @@ fun RadarrNotificationsScreen(
     NoticeHost(
         noticeMessage = when (state.notice) {
             NotificationsNotice.DELETED ->
-                stringResource(R.string.arr_radarr_connect_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             NotificationsNotice.DELETED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_deleted_queued)
+                stringResource(ArrUiR.string.arr_common_backup_notice_deleted_queued)
 
             NotificationsNotice.TEST_ALL_DONE ->
-                stringResource(R.string.arr_radarr_connect_notice_test_all_done)
+                stringResource(ArrUiR.string.arr_common_connect_notice_test_all_done)
 
             null -> null
         },
@@ -135,20 +136,20 @@ fun RadarrNotificationsScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_notifications_title),
+        title = stringResource(ArrUiR.string.arr_common_notifications_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onTestAll, enabled = !state.testingAll && content != null) {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = stringResource(R.string.arr_radarr_notifications_cd_test_all),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_notifications_cd_test_all),
                 )
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_notifications_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_notifications_cd_refresh),
                 )
             }
         },
@@ -165,8 +166,8 @@ fun RadarrNotificationsScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_radarr_notifications_empty_title),
-                    emptyMessage = stringResource(R.string.arr_radarr_notifications_empty_message),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_notifications_empty_title),
+                    emptyMessage = stringResource(ArrUiR.string.arr_common_notifications_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
                     LazyColumn(
@@ -180,11 +181,15 @@ fun RadarrNotificationsScreen(
                         item {
                             SectionHeader(
                                 title = stringResource(
-                                    R.string.arr_radarr_notifications_section_connections,
+                                    ArrUiR.string.arr_common_notifications_section_connections,
                                 ),
                             )
                         }
-                        items(data.notifications, key = { it.id }) { notification ->
+                        items(
+                            data.notifications,
+                            key = { it.id },
+                            contentType = { "notification" },
+                        ) { notification ->
                             NotificationRow(
                                 notification = notification,
                                 tags = data.tags,
@@ -200,7 +205,7 @@ fun RadarrNotificationsScreen(
             ExtendedFloatingActionButton(
                 onClick = onAdd,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.arr_radarr_notifications_add)) },
+                text = { Text(stringResource(ArrUiR.string.arr_common_notifications_add)) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
@@ -215,23 +220,23 @@ fun RadarrNotificationsScreen(
     state.confirmDeleteFor?.let { target ->
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_radarr_connect_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_delete)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.arr_radarr_connect_delete_message,
+                        ArrUiR.string.arr_common_connect_delete_message,
                         target.name ?: target.id.toString(),
                     ),
                 )
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -248,7 +253,7 @@ private fun NotificationRow(
     onDelete: () -> Unit,
 ) {
     val openCd = stringResource(
-        R.string.arr_radarr_notifications_cd_open,
+        ArrUiR.string.arr_common_notifications_cd_open,
         notification.name.orEmpty(),
     )
     Card(
@@ -288,7 +293,7 @@ private fun NotificationRow(
                 testResult?.let { TestResultBadge(it) }
             }
             val deleteCd = stringResource(
-                R.string.arr_radarr_notifications_cd_delete,
+                ArrUiR.string.arr_common_notifications_cd_delete,
                 notification.name.orEmpty(),
             )
             IconButton(onClick = onDelete) {
@@ -304,10 +309,10 @@ private fun NotificationRow(
 
 @Composable
 private fun enabledEventLabels(notification: NotificationResource): List<String> = buildList {
-    if (notification.onGrab) add(stringResource(R.string.arr_radarr_notification_event_grab))
-    if (notification.onDownload) add(stringResource(R.string.arr_radarr_notification_event_import))
-    if (notification.onUpgrade) add(stringResource(R.string.arr_radarr_notification_event_upgrade))
-    if (notification.onRename) add(stringResource(R.string.arr_radarr_notification_event_rename))
+    if (notification.onGrab) add(stringResource(ArrUiR.string.arr_common_notification_event_grab))
+    if (notification.onDownload) add(stringResource(ArrUiR.string.arr_common_notification_event_import))
+    if (notification.onUpgrade) add(stringResource(ArrUiR.string.arr_common_notification_event_upgrade))
+    if (notification.onRename) add(stringResource(ArrUiR.string.arr_common_notification_event_rename))
     if (notification.onMovieDelete) {
         add(stringResource(R.string.arr_radarr_notification_event_movie_delete))
     }
@@ -318,12 +323,12 @@ private fun enabledEventLabels(notification: NotificationResource): List<String>
         add(stringResource(R.string.arr_radarr_notification_event_movie_added))
     }
     if (notification.onHealthIssue || notification.onHealthRestored) {
-        add(stringResource(R.string.arr_radarr_notification_event_health))
+        add(stringResource(ArrUiR.string.arr_common_notification_event_health))
     }
     if (notification.onApplicationUpdate) {
-        add(stringResource(R.string.arr_radarr_notification_event_application_update))
+        add(stringResource(ArrUiR.string.arr_common_notification_event_application_update))
     }
     if (notification.onManualInteractionRequired) {
-        add(stringResource(R.string.arr_radarr_notification_event_manual_interaction))
+        add(stringResource(ArrUiR.string.arr_common_notification_event_manual_interaction))
     }
 }

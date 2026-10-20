@@ -59,6 +59,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the language profiles list route. */
 @Composable
@@ -157,9 +158,9 @@ fun SonarrLanguageProfilesScreen(
     val refreshing = content != null && (lce as LceState.Content<SonarrLanguageProfilesContent>).refreshing
 
     val noticeMessage = when (state.notice) {
-        LanguageProfilesNotice.DELETED -> stringResource(R.string.arr_sonarr_quality_notice_deleted)
+        LanguageProfilesNotice.DELETED -> stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
         LanguageProfilesNotice.QUEUED ->
-            stringResource(R.string.arr_sonarr_quality_notice_saved_queued)
+            stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
         else -> null
     }
     QualityNoticeHost(
@@ -184,7 +185,7 @@ fun SonarrLanguageProfilesScreen(
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_quality_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_refresh),
                 )
             }
         },
@@ -216,7 +217,11 @@ fun SonarrLanguageProfilesScreen(
                             if (data.pendingActions > 0) {
                                 item { QualityPendingSyncBanner(data.pendingActions) }
                             }
-                            items(data.profiles, key = { it.id }) { profile ->
+                            items(
+                                data.profiles,
+                                key = { it.id },
+                                contentType = { "profile" },
+                            ) { profile ->
                                 LanguageProfileRow(
                                     profile = profile,
                                     onOpen = { onOpenProfile(profile.id) },
@@ -238,15 +243,15 @@ fun SonarrLanguageProfilesScreen(
         AlertDialog(
             onDismissRequest = { onRequestDelete(null) },
             title = { Text(stringResource(R.string.arr_sonarr_quality_delete_language_profile_title)) },
-            text = { Text(stringResource(R.string.arr_sonarr_quality_delete_language_profile_message)) },
+            text = { Text(stringResource(R.string.arr_sonarr_quality_delete_profile_message)) },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_sonarr_quality_action_delete))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { onRequestDelete(null) }) {
-                    Text(stringResource(R.string.arr_sonarr_quality_action_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -323,8 +328,8 @@ fun SonarrLanguageProfileEditorScreen(
     val content = (lce as? LceState.Content<SonarrLanguageProfileEditorContent>)?.data
 
     val savedMessage = when {
-        state.savedNotice -> stringResource(R.string.arr_sonarr_quality_notice_saved)
-        state.savedQueued -> stringResource(R.string.arr_sonarr_quality_notice_saved_queued)
+        state.savedNotice -> stringResource(ArrUiR.string.arr_common_system_notice_saved)
+        state.savedQueued -> stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
         else -> null
     }
     QualityNoticeHost(
@@ -350,14 +355,14 @@ fun SonarrLanguageProfileEditorScreen(
                 IconButton(onClick = onSave, enabled = !state.saving) {
                     Icon(
                         imageVector = Icons.Filled.Save,
-                        contentDescription = stringResource(R.string.arr_sonarr_quality_cd_save),
+                        contentDescription = stringResource(ArrUiR.string.arr_common_save_changes),
                     )
                 }
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_quality_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_refresh),
                 )
             }
         },
@@ -383,7 +388,7 @@ fun SonarrLanguageProfileEditorScreen(
                         if (data.pendingActions > 0) QualityPendingSyncBanner(data.pendingActions)
                         QualityTextField(
                             value = data.draft.name,
-                            label = stringResource(R.string.arr_sonarr_quality_profile_name),
+                            label = stringResource(ArrUiR.string.arr_common_autotag_name),
                             onValue = onSetName,
                         )
                         LabeledSwitch(
@@ -395,7 +400,7 @@ fun SonarrLanguageProfileEditorScreen(
                             onCheckedChange = onSetUpgradeAllowed,
                         )
                         QualitySectionHeader(
-                            stringResource(R.string.arr_sonarr_quality_language_profile_section_languages),
+                            stringResource(ArrUiR.string.arr_common_quality_languages_title),
                         )
                         data.draft.items.forEach { item ->
                             LanguageItemRow(
@@ -452,7 +457,7 @@ private fun LanguageItemRow(
                     .heightIn(min = 48.dp)
                     .clickable(
                         onClickLabel = stringResource(
-                            R.string.arr_sonarr_quality_language_profile_cd_cutoff,
+                            ArrUiR.string.arr_common_quality_profile_cd_upgrade_until,
                             item.language.name.orEmpty(),
                         ),
                     ) { onSetCutoff(item.language) }

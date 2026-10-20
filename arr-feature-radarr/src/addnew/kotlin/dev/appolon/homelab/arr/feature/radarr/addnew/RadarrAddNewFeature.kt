@@ -148,9 +148,11 @@ fun RadarrAddNewDestination(
         serverName = serverName,
         onQueryChange = addViewModel::onQueryChange,
         onSearchSubmit = addViewModel::submitSearch,
-        onRefresh = {
-            addViewModel.refreshAll()
-            if (state.tab == AddNewTab.COLLECTIONS) collectionsViewModel.refresh()
+        onRefresh = remember(addViewModel, collectionsViewModel, state.tab) {
+            {
+                addViewModel.refreshAll()
+                if (state.tab == AddNewTab.COLLECTIONS) collectionsViewModel.refresh()
+            }
         },
         onTabSelect = addViewModel::setTab,
         onOpenAddSheet = addViewModel::openAddSheet,

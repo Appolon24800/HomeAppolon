@@ -51,6 +51,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the import list exclusions route. */
 @Composable
@@ -119,15 +120,15 @@ fun SonarrImportListExclusionsScreen(
 
     ConnectNoticeHost(
         noticeMessage = when (state.notice) {
-            ExclusionsNotice.ADDED -> stringResource(R.string.arr_sonarr_exclusions_notice_added)
+            ExclusionsNotice.ADDED -> stringResource(ArrUiR.string.arr_common_exclusions_notice_added)
             ExclusionsNotice.ADDED_QUEUED ->
-                stringResource(R.string.arr_sonarr_connect_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
             ExclusionsNotice.DELETED ->
-                stringResource(R.string.arr_sonarr_connect_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             ExclusionsNotice.DELETED_QUEUED ->
-                stringResource(R.string.arr_sonarr_connect_notice_deleted_queued)
+                stringResource(ArrUiR.string.arr_common_backup_notice_deleted_queued)
 
             null -> null
         },
@@ -138,14 +139,14 @@ fun SonarrImportListExclusionsScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_exclusions_title),
+        title = stringResource(ArrUiR.string.arr_common_exclusions_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_exclusions_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_exclusions_cd_refresh),
                 )
             }
         },
@@ -162,7 +163,7 @@ fun SonarrImportListExclusionsScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_sonarr_exclusions_empty_title),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_exclusions_empty_title),
                     emptyMessage = stringResource(R.string.arr_sonarr_exclusions_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
@@ -180,6 +181,7 @@ fun SonarrImportListExclusionsScreen(
                         items(
                             data.exclusions,
                             key = { if (it.id > 0) it.id else it.tvdbId * 1_000_003 },
+                            contentType = { "exclusion" },
                         ) { exclusion ->
                             ExclusionRow(
                                 exclusion = exclusion,
@@ -192,7 +194,7 @@ fun SonarrImportListExclusionsScreen(
             ExtendedFloatingActionButton(
                 onClick = onAdd,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.arr_sonarr_exclusions_add)) },
+                text = { Text(stringResource(ArrUiR.string.arr_common_exclusions_add)) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
@@ -207,7 +209,7 @@ fun SonarrImportListExclusionsScreen(
     state.addDraft?.let { draft ->
         AlertDialog(
             onDismissRequest = onCancelAdd,
-            title = { Text(stringResource(R.string.arr_sonarr_exclusions_add_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_exclusions_add)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedTextField(
@@ -234,12 +236,12 @@ fun SonarrImportListExclusionsScreen(
                     onClick = onConfirmAdd,
                     enabled = !state.busy && draft.complete,
                 ) {
-                    Text(stringResource(R.string.arr_sonarr_connect_save))
+                    Text(stringResource(ArrUiR.string.arr_common_save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onCancelAdd) {
-                    Text(stringResource(R.string.arr_sonarr_connect_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -248,23 +250,23 @@ fun SonarrImportListExclusionsScreen(
     state.confirmDeleteFor?.let { target ->
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_sonarr_connect_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_delete)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.arr_sonarr_exclusions_delete_message,
+                        ArrUiR.string.arr_common_exclusions_delete_message,
                         target.title ?: target.tvdbId.toString(),
                     ),
                 )
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_sonarr_connect_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_sonarr_connect_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )

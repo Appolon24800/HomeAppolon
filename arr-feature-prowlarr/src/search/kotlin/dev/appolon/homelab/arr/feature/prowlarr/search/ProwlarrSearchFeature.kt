@@ -36,6 +36,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Registers this group's routes without claiming sibling feature owners. */
 object ProwlarrSearchFeature {
@@ -89,7 +90,7 @@ fun ProwlarrSearchFeatureSlot(route: ArrRoute.Feature, graph: ArrDataGraph) {
     }
     ArrLceBox(
         state = repository, onRetry = { attempt++ },
-        emptyTitle = stringResource(R.string.prowlarr_search_title),
+        emptyTitle = stringResource(ArrUiR.string.arr_common_indexers_mode_search),
         emptyMessage = stringResource(R.string.prowlarr_search_connection),
     ) { resolved ->
         val vm: ProwlarrSearchViewModel = viewModel(key = "prowlarr-search-${serverId.value}") {

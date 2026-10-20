@@ -53,6 +53,7 @@ import dev.appolon.homelab.arr.ui.components.SectionHeader
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the notification editor route (notificationId null creates). */
 @Composable
@@ -128,19 +129,19 @@ fun RadarrNotificationEditorScreen(
     NoticeHost(
         noticeMessage = when (state.notice) {
             NotificationEditorNotice.SAVED ->
-                stringResource(R.string.arr_radarr_connect_notice_saved)
+                stringResource(ArrUiR.string.arr_common_connect_notice_saved)
 
             NotificationEditorNotice.SAVED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
             NotificationEditorNotice.DELETED ->
-                stringResource(R.string.arr_radarr_connect_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             NotificationEditorNotice.DELETED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_deleted_queued)
+                stringResource(ArrUiR.string.arr_common_backup_notice_deleted_queued)
 
             NotificationEditorNotice.TEST_PASSED ->
-                stringResource(R.string.arr_radarr_connect_notice_test_passed)
+                stringResource(ArrUiR.string.arr_common_connect_notice_test_passed)
 
             null -> null
         },
@@ -152,8 +153,8 @@ fun RadarrNotificationEditorScreen(
 
     ArrScaffold(
         title = stringResource(
-            if (state.isNew) R.string.arr_radarr_notification_editor_title_new
-            else R.string.arr_radarr_notification_editor_title,
+            if (state.isNew) ArrUiR.string.arr_common_notifications_add
+            else ArrUiR.string.arr_common_notification_editor_title,
         ),
         subtitle = serverName,
         onBack = onBack,
@@ -162,11 +163,11 @@ fun RadarrNotificationEditorScreen(
                 IconButton(onClick = onTest, enabled = !state.testing) {
                     Icon(
                         imageVector = Icons.Filled.Science,
-                        contentDescription = stringResource(R.string.arr_radarr_connect_cd_test),
+                        contentDescription = stringResource(ArrUiR.string.arr_common_connect_cd_test),
                     )
                 }
                 if (!state.isNew) {
-                    val deleteCd = stringResource(R.string.arr_radarr_connect_cd_delete)
+                    val deleteCd = stringResource(ArrUiR.string.arr_common_connect_cd_delete)
                     IconButton(
                         onClick = onDeleteRequest,
                         modifier = Modifier.semantics { contentDescription = deleteCd },
@@ -186,8 +187,8 @@ fun RadarrNotificationEditorScreen(
             ArrLceBox(
                 state = lce,
                 onRetry = onBack,
-                emptyTitle = stringResource(R.string.arr_radarr_connect_picker_empty_title),
-                emptyMessage = stringResource(R.string.arr_radarr_connect_picker_empty_message),
+                emptyTitle = stringResource(ArrUiR.string.arr_common_connect_picker_empty_title),
+                emptyMessage = stringResource(ArrUiR.string.arr_common_connect_picker_empty_message),
                 modifier = Modifier.fillMaxSize(),
             ) { data ->
                 when {
@@ -216,23 +217,23 @@ fun RadarrNotificationEditorScreen(
     if (state.confirmDelete) {
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_radarr_connect_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_delete)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.arr_radarr_connect_delete_message,
+                        ArrUiR.string.arr_common_connect_delete_message,
                         state.draft?.name.orEmpty(),
                     ),
                 )
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -251,14 +252,18 @@ private fun NotificationSchemaPicker(
     ) {
         item {
             Text(
-                stringResource(R.string.arr_radarr_connect_picker_hint),
+                stringResource(ArrUiR.string.arr_common_connect_picker_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        items(schemas, key = { it.implementation ?: it.id.toString() }) { schema ->
+        items(
+            schemas,
+            key = { it.implementation ?: it.id.toString() },
+            contentType = { "schema" },
+        ) { schema ->
             val cd = stringResource(
-                R.string.arr_radarr_connect_picker_cd_pick,
+                ArrUiR.string.arr_common_connect_picker_cd_pick,
                 schema.implementationName.orEmpty(),
             )
             Card(
@@ -302,14 +307,14 @@ private fun NotificationForm(
             OutlinedTextField(
                 value = draft.name,
                 onValueChange = onNameChange,
-                label = { Text(stringResource(R.string.arr_radarr_connect_name_label)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_autotag_name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
         item {
             Column {
-                SectionHeader(title = stringResource(R.string.arr_radarr_notification_section_events))
+                SectionHeader(title = stringResource(ArrUiR.string.arr_common_notification_section_events))
                 draft.events.forEach { event ->
                     LabeledSwitch(
                         label = eventLabel(event.key),
@@ -320,7 +325,7 @@ private fun NotificationForm(
                 if (draft.onHealthIssue || draft.supportsOnHealthIssue) {
                     LabeledSwitch(
                         label = stringResource(
-                            R.string.arr_radarr_notification_event_include_warnings,
+                            ArrUiR.string.arr_common_notification_event_include_warnings,
                         ),
                         checked = draft.includeHealthWarnings,
                         onCheckedChange = { onToggleEvent("includeHealthWarnings") },
@@ -354,7 +359,7 @@ private fun NotificationForm(
                     Modifier
                 },
             ) {
-                Text(stringResource(R.string.arr_radarr_connect_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         }
     }
@@ -362,23 +367,23 @@ private fun NotificationForm(
 
 @Composable
 private fun eventLabel(key: String): String = when (key) {
-    "onGrab" -> stringResource(R.string.arr_radarr_notification_event_grab)
-    "onDownload" -> stringResource(R.string.arr_radarr_notification_event_import)
-    "onUpgrade" -> stringResource(R.string.arr_radarr_notification_event_upgrade)
-    "onRename" -> stringResource(R.string.arr_radarr_notification_event_rename)
+    "onGrab" -> stringResource(ArrUiR.string.arr_common_notification_event_grab)
+    "onDownload" -> stringResource(ArrUiR.string.arr_common_notification_event_import)
+    "onUpgrade" -> stringResource(ArrUiR.string.arr_common_notification_event_upgrade)
+    "onRename" -> stringResource(ArrUiR.string.arr_common_notification_event_rename)
     "onMovieDelete" -> stringResource(R.string.arr_radarr_notification_event_movie_delete)
     "onMovieFileDelete" -> stringResource(R.string.arr_radarr_notification_event_file_delete)
     "onMovieFileDeleteForUpgrade" ->
         stringResource(R.string.arr_radarr_notification_event_file_delete_upgrade)
 
     "onMovieAdded" -> stringResource(R.string.arr_radarr_notification_event_movie_added)
-    "onHealthIssue" -> stringResource(R.string.arr_radarr_notification_event_health)
-    "onHealthRestored" -> stringResource(R.string.arr_radarr_notification_event_health_restored)
+    "onHealthIssue" -> stringResource(ArrUiR.string.arr_common_notification_event_health)
+    "onHealthRestored" -> stringResource(ArrUiR.string.arr_common_notification_event_health_restored)
     "onApplicationUpdate" ->
-        stringResource(R.string.arr_radarr_notification_event_application_update)
+        stringResource(ArrUiR.string.arr_common_notification_event_application_update)
 
     "onManualInteractionRequired" ->
-        stringResource(R.string.arr_radarr_notification_event_manual_interaction)
+        stringResource(ArrUiR.string.arr_common_notification_event_manual_interaction)
 
     else -> key
 }

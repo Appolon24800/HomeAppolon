@@ -135,7 +135,9 @@ class ProwlarrSearchRepository(
                 }
                 if (!duplicate) queue.enqueue(
                     QueuedAction(
-                        ActionId(UUID.randomUUID().toString()), serverId, AppType.PROWLARR,
+                        ActionId(UUID.nameUUIDFromBytes(
+                            "$serverId:POST:$GRAB_PATH:$encoded".toByteArray(Charsets.UTF_8),
+                        ).toString()), serverId, AppType.PROWLARR,
                         "POST", GRAB_PATH, encoded, body.title.orEmpty(), now(),
                     ),
                 )
@@ -192,7 +194,7 @@ class ProwlarrSearchRepository(
     }
 
     companion object {
-        const val TTL_MILLIS = 300_000L
+        const val TTL_MILLIS = dev.appolon.homelab.arr.core.CacheTtl.LIBRARY
         internal const val GRAB_PATH = "api/v1/search"
         private val CACHE = EntityType("prowlarr.search.cache")
     }

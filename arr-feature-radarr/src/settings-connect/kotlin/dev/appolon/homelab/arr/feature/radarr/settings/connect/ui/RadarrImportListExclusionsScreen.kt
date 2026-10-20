@@ -53,6 +53,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the import list exclusions route. */
 @Composable
@@ -122,16 +123,16 @@ fun RadarrImportListExclusionsScreen(
     NoticeHost(
         noticeMessage = when (state.notice) {
             ImportListExclusionNotice.ADDED ->
-                stringResource(R.string.arr_radarr_exclusions_notice_added)
+                stringResource(ArrUiR.string.arr_common_exclusions_notice_added)
 
             ImportListExclusionNotice.ADDED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
             ImportListExclusionNotice.DELETED ->
-                stringResource(R.string.arr_radarr_connect_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             ImportListExclusionNotice.DELETED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_deleted_queued)
+                stringResource(ArrUiR.string.arr_common_backup_notice_deleted_queued)
 
             null -> null
         },
@@ -142,14 +143,14 @@ fun RadarrImportListExclusionsScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_exclusions_title),
+        title = stringResource(ArrUiR.string.arr_common_exclusions_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_exclusions_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_exclusions_cd_refresh),
                 )
             }
         },
@@ -166,7 +167,7 @@ fun RadarrImportListExclusionsScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_radarr_exclusions_empty_title),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_exclusions_empty_title),
                     emptyMessage = stringResource(R.string.arr_radarr_exclusions_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
@@ -178,7 +179,11 @@ fun RadarrImportListExclusionsScreen(
                         if (data.pendingActions > 0) {
                             item { PendingBanner(data.pendingActions) }
                         }
-                        items(data.exclusions, key = { it.id }) { exclusion ->
+                        items(
+                            data.exclusions,
+                            key = { it.id },
+                            contentType = { "exclusion" },
+                        ) { exclusion ->
                             ExclusionRow(
                                 exclusion = exclusion,
                                 queued = exclusion.id in data.queuedRemovedIds,
@@ -191,7 +196,7 @@ fun RadarrImportListExclusionsScreen(
             ExtendedFloatingActionButton(
                 onClick = onAdd,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.arr_radarr_exclusions_add)) },
+                text = { Text(stringResource(ArrUiR.string.arr_common_exclusions_add)) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
@@ -208,7 +213,7 @@ fun RadarrImportListExclusionsScreen(
         var yearText by remember { mutableStateOf(draft.year.toString()) }
         AlertDialog(
             onDismissRequest = onCancelAdd,
-            title = { Text(stringResource(R.string.arr_radarr_exclusions_add_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_exclusions_add)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedTextField(
@@ -235,7 +240,7 @@ fun RadarrImportListExclusionsScreen(
                             yearText = text
                             text.toIntOrNull()?.let { year -> onDraftChange { it.copy(year = year) } }
                         },
-                        label = { Text(stringResource(R.string.arr_radarr_exclusions_year_label)) },
+                        label = { Text(stringResource(ArrUiR.string.arr_common_exclusions_year_label)) },
                         isError = yearText.isNotBlank() && yearText.toIntOrNull() == null,
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
@@ -247,12 +252,12 @@ fun RadarrImportListExclusionsScreen(
                     onClick = onSave,
                     enabled = !state.busy && draft.title.isNotBlank() && draft.tmdbId > 0,
                 ) {
-                    Text(stringResource(R.string.arr_radarr_connect_save))
+                    Text(stringResource(ArrUiR.string.arr_common_save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onCancelAdd) {
-                    Text(stringResource(R.string.arr_radarr_connect_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -261,23 +266,23 @@ fun RadarrImportListExclusionsScreen(
     state.confirmDeleteFor?.let { target ->
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_radarr_connect_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_delete)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.arr_radarr_exclusions_delete_message,
+                        ArrUiR.string.arr_common_exclusions_delete_message,
                         target.movieTitle ?: target.tmdbId.toString(),
                     ),
                 )
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )

@@ -51,16 +51,17 @@ import dev.appolon.homelab.arr.ui.components.LabeledSwitch
 import dev.appolon.homelab.arr.ui.components.SectionHeader
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import kotlinx.serialization.json.JsonElement
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Chip marking rows with queued offline writes. */
 @Composable
 fun ConnectQueuedBadge(modifier: Modifier = Modifier) {
-    val description = stringResource(R.string.arr_sonarr_connect_cd_queued_indicator)
+    val description = stringResource(ArrUiR.string.arr_common_system_cd_queued_indicator)
     AssistChip(
         onClick = {},
         enabled = false,
         modifier = modifier.semantics { contentDescription = description },
-        label = { Text(stringResource(R.string.arr_sonarr_connect_badge_queued)) },
+        label = { Text(stringResource(ArrUiR.string.arr_common_connect_badge_queued)) },
     )
 }
 
@@ -87,12 +88,12 @@ fun ConnectPendingBanner(pending: Int) {
     ) {
         Icon(
             imageVector = Icons.Filled.CloudUpload,
-            contentDescription = stringResource(R.string.arr_sonarr_connect_cd_queued_indicator),
+            contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_queued_indicator),
             tint = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.size(20.dp),
         )
         Text(
-            text = stringResource(R.string.arr_sonarr_connect_pending_banner, pending),
+            text = stringResource(ArrUiR.string.arr_common_system_pending_banner, pending),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.padding(start = 8.dp),
@@ -158,8 +159,8 @@ fun ConnectFieldEditors(
             TextButton(onClick = onToggleAdvanced) {
                 Text(
                     stringResource(
-                        if (showAdvanced) R.string.arr_sonarr_connect_fields_hide_advanced
-                        else R.string.arr_sonarr_connect_fields_show_advanced,
+                        if (showAdvanced) ArrUiR.string.arr_common_connect_fields_hide_advanced
+                        else ArrUiR.string.arr_common_connect_fields_show_advanced,
                     ),
                 )
             }
@@ -170,7 +171,7 @@ fun ConnectFieldEditors(
 /** The seed criteria section label, so the wire name reads as English. */
 @Composable
 private fun sectionTitle(section: String): String = when (section) {
-    "seedCriteria" -> stringResource(R.string.arr_sonarr_connect_section_seed_criteria)
+    "seedCriteria" -> stringResource(ArrUiR.string.arr_common_connect_section_seed_criteria)
     else -> section
 }
 
@@ -241,7 +242,7 @@ fun ConnectFieldEditor(
         }
         field.helpLink?.let { link ->
             TextButton(onClick = { runCatching { uriHandler.openUri(link) } }) {
-                Text(stringResource(R.string.arr_sonarr_connect_fields_help_link))
+                Text(stringResource(ArrUiR.string.arr_common_connect_fields_help_link))
             }
         }
     }
@@ -359,8 +360,8 @@ fun ConnectPasswordField(
                         Icons.Filled.Visibility
                     },
                     contentDescription = stringResource(
-                        if (visible) R.string.arr_sonarr_connect_fields_hide_password
-                        else R.string.arr_sonarr_connect_fields_show_password,
+                        if (visible) ArrUiR.string.arr_common_connect_fields_hide_password
+                        else ArrUiR.string.arr_common_connect_fields_show_password,
                     ),
                 )
             }
@@ -422,7 +423,7 @@ fun ConnectTagPicker(
     var newText by rememberSaveable { mutableStateOf("") }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            stringResource(R.string.arr_sonarr_connect_fields_tags),
+            stringResource(ArrUiR.string.arr_common_tags_title),
             style = MaterialTheme.typography.bodyMedium,
         )
         val chips = (allTags.mapNotNull { it.label } + selected).distinct().sorted()
@@ -443,7 +444,7 @@ fun ConnectTagPicker(
             OutlinedTextField(
                 value = newText,
                 onValueChange = { newText = it },
-                label = { Text(stringResource(R.string.arr_sonarr_connect_fields_new_tag)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_tags_add_title)) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
             )
@@ -457,7 +458,7 @@ fun ConnectTagPicker(
                 },
                 enabled = newText.trim().isNotEmpty(),
             ) {
-                Text(stringResource(R.string.arr_sonarr_connect_fields_add_tag))
+                Text(stringResource(ArrUiR.string.arr_common_connect_fields_add_tag))
             }
         }
     }

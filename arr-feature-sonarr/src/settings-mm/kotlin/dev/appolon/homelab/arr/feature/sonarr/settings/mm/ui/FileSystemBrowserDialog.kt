@@ -40,6 +40,7 @@ import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.feature.sonarr.settings.mm.data.FileSystemListing
 import dev.appolon.homelab.arr.feature.sonarr.settings.mm.data.SonarrFileSystemRepository
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Server-side folder picker over the FileSystem endpoint. Tapping a
@@ -66,7 +67,7 @@ fun FileSystemBrowserDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.arr_sonarr_mm_browser_title)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_mm_browser_title)) },
         text = {
             Column(Modifier.heightIn(max = 420.dp)) {
                 Row(
@@ -81,12 +82,12 @@ fun FileSystemBrowserDialog(
                         Icon(
                             imageVector = Icons.Filled.ArrowUpward,
                             contentDescription = stringResource(
-                                R.string.arr_sonarr_mm_browser_cd_up,
+                                ArrUiR.string.arr_common_mm_browser_cd_up,
                             ),
                         )
                     }
                     Text(
-                        text = path ?: stringResource(R.string.arr_sonarr_mm_browser_root),
+                        text = path ?: stringResource(ArrUiR.string.arr_common_mm_browser_root),
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
@@ -116,7 +117,7 @@ fun FileSystemBrowserDialog(
                             color = MaterialTheme.colorScheme.error,
                         )
                         TextButton(onClick = { reload += 1 }) {
-                            Text(stringResource(R.string.arr_sonarr_mm_browser_retry))
+                            Text(stringResource(ArrUiR.string.arr_common_retry))
                         }
                     }
 
@@ -124,7 +125,7 @@ fun FileSystemBrowserDialog(
                         val page = result.value
                         if (page.directories.isEmpty()) {
                             Text(
-                                text = stringResource(R.string.arr_sonarr_mm_browser_empty),
+                                text = stringResource(ArrUiR.string.arr_common_mm_browser_empty),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 16.dp),
@@ -135,7 +136,11 @@ fun FileSystemBrowserDialog(
                                     .fillMaxWidth()
                                     .padding(top = 8.dp),
                             ) {
-                                items(page.directories, key = { it.path ?: it.name ?: "" }) { entry ->
+                                items(
+                                    page.directories,
+                                    key = { it.path ?: it.name ?: "" },
+                                    contentType = { "directory" },
+                                ) { entry ->
                                     val name = entry.name
                                         ?: entry.path?.trimEnd('/')?.substringAfterLast('/')
                                         ?: ""
@@ -146,7 +151,7 @@ fun FileSystemBrowserDialog(
                                             .heightIn(min = 48.dp)
                                             .clickable(
                                                 onClickLabel = stringResource(
-                                                    R.string.arr_sonarr_mm_browser_cd_open,
+                                                    ArrUiR.string.arr_common_mm_browser_cd_open,
                                                     name,
                                                 ),
                                                 onClick = { path = entry.path },
@@ -182,12 +187,12 @@ fun FileSystemBrowserDialog(
                 onClick = { onPick(path ?: return@TextButton) },
                 enabled = path != null,
             ) {
-                Text(stringResource(R.string.arr_sonarr_mm_browser_use))
+                Text(stringResource(ArrUiR.string.arr_common_mm_browser_use))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_mm_browser_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )

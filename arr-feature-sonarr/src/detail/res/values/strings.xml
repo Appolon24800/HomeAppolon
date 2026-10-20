@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Series detail: hero, top bar, and menu. -->
-    <string name="arr_sonarr_detail_cd_back">Go back</string>
     <string name="arr_sonarr_detail_cd_more">More options</string>
     <string name="arr_sonarr_detail_cd_series_banner">Banner for %1$s</string>
     <string name="arr_sonarr_detail_cd_monitored">%1$s is monitored. Tap to stop monitoring.</string>
     <string name="arr_sonarr_detail_cd_not_monitored">%1$s is not monitored. Tap to start monitoring.</string>
     <string name="arr_sonarr_detail_meta">%1$d · %2$d min · %3$s</string>
-    <string name="arr_sonarr_detail_menu_refresh_metadata">Refresh metadata</string>
     <string name="arr_sonarr_detail_menu_scan">Rescan series folder</string>
     <string name="arr_sonarr_detail_menu_search">Search for missing episodes</string>
     <string name="arr_sonarr_detail_menu_rename">Preview file renames</string>
-    <string name="arr_sonarr_detail_menu_import">Interactive import</string>
     <string name="arr_sonarr_detail_menu_edit">Edit series</string>
     <string name="arr_sonarr_detail_menu_delete">Delete series</string>
     <string name="arr_sonarr_detail_empty_title">Series not found</string>
@@ -19,64 +16,37 @@
 
     <!-- Tabs and seasons grid. -->
     <string name="arr_sonarr_detail_tab_seasons">Seasons</string>
-    <string name="arr_sonarr_detail_tab_history">History</string>
-    <string name="arr_sonarr_detail_season_title">Season %1$d</string>
-    <string name="arr_sonarr_detail_season_specials">Specials</string>
-    <string name="arr_sonarr_detail_cd_season_monitored">%1$s is monitored. Tap to stop monitoring.</string>
-    <string name="arr_sonarr_detail_cd_season_not_monitored">%1$s is not monitored. Tap to start monitoring.</string>
     <string name="arr_sonarr_detail_season_episodes">%1$d of %2$d episodes</string>
     <string name="arr_sonarr_detail_cd_season_progress">%1$s, %2$d percent downloaded</string>
     <string name="arr_sonarr_detail_cd_search_season">Search season %1$d</string>
-    <string name="arr_sonarr_detail_cd_open_season">Open season %1$d</string>
     <string name="arr_sonarr_detail_back_to_seasons">All seasons</string>
 
     <!-- Episode list. -->
     <string name="arr_sonarr_detail_episode_label">S%1$d E%2$d</string>
-    <string name="arr_sonarr_detail_cd_episode_monitored">%1$s is monitored. Tap to stop monitoring.</string>
-    <string name="arr_sonarr_detail_cd_episode_not_monitored">%1$s is not monitored. Tap to start monitoring.</string>
-    <string name="arr_sonarr_detail_cd_search_episode">Search for %1$s</string>
     <string name="arr_sonarr_detail_cd_expand_episode">Show details and history for %1$s</string>
     <string name="arr_sonarr_detail_cd_manual_search_episode">Search releases for %1$s</string>
     <string name="arr_sonarr_detail_cd_edit_file">Edit the file for %1$s</string>
-    <string name="arr_sonarr_detail_episode_missing">Missing</string>
-    <string name="arr_sonarr_detail_episode_not_aired">Not aired</string>
     <string name="arr_sonarr_detail_airing_on">Airs %1$s</string>
-    <string name="arr_sonarr_detail_episode_file_line">%1$s · %2$s</string>
     <string name="arr_sonarr_detail_episodes_empty">No episodes in this season.</string>
-    <string name="arr_sonarr_detail_episode_history_header">History</string>
 
     <!-- History tab. -->
     <string name="arr_sonarr_detail_history_empty">No history for this series yet.</string>
     <string name="arr_sonarr_detail_cd_refresh_history">Refresh history</string>
-    <string name="arr_sonarr_detail_history_grabbed">Grabbed</string>
-    <string name="arr_sonarr_detail_history_imported">Imported</string>
-    <string name="arr_sonarr_detail_history_failed">Download failed</string>
-    <string name="arr_sonarr_detail_history_deleted">File deleted</string>
     <string name="arr_sonarr_detail_history_renamed">File renamed</string>
-    <string name="arr_sonarr_detail_history_ignored">Ignored</string>
-    <string name="arr_sonarr_detail_history_unknown">Event</string>
 
     <!-- Manual search sheet. -->
     <string name="arr_sonarr_detail_manual_search_action">Manual search</string>
     <string name="arr_sonarr_detail_search_title_episode">Manual search: %1$s</string>
     <string name="arr_sonarr_detail_search_title_season">Manual search: season %1$d</string>
-    <string name="arr_sonarr_detail_search_empty">No releases found.</string>
     <string name="arr_sonarr_detail_cd_refresh_releases">Search again</string>
     <string name="arr_sonarr_detail_cd_grab_release">Download %1$s</string>
-    <string name="arr_sonarr_detail_release_seeders">%1$d seeders</string>
 
     <!-- Rename preview. -->
-    <string name="arr_sonarr_detail_rename_title">Rename files</string>
     <string name="arr_sonarr_detail_rename_note">Renaming applies to every file in this series.</string>
     <string name="arr_sonarr_detail_rename_empty">Nothing needs renaming.</string>
-    <string name="arr_sonarr_detail_rename_confirm">Rename files</string>
 
     <!-- Interactive import. -->
-    <string name="arr_sonarr_detail_import_title">Interactive import</string>
-    <string name="arr_sonarr_detail_import_all_seasons">All seasons</string>
     <string name="arr_sonarr_detail_import_empty">No files found to import.</string>
-    <string name="arr_sonarr_detail_import_selected_count">%1$d selected</string>
-    <string name="arr_sonarr_detail_cd_import_select">Select %1$s</string>
     <plurals name="arr_sonarr_detail_import_action">
         <item quantity="one">Import %1$d file</item>
         <item quantity="other">Import %1$d files</item>
@@ -84,33 +54,17 @@
 
     <!-- Episode file editor. -->
     <string name="arr_sonarr_detail_file_title">Edit file</string>
-    <string name="arr_sonarr_detail_file_quality">Quality</string>
-    <string name="arr_sonarr_detail_file_languages">Languages</string>
-    <string name="arr_sonarr_detail_file_no_languages">None</string>
-    <string name="arr_sonarr_detail_file_release_group">Release group</string>
     <string name="arr_sonarr_detail_file_delete">Delete file</string>
     <string name="arr_sonarr_detail_file_delete_title">Delete file?</string>
     <string name="arr_sonarr_detail_file_delete_message">The file will be removed from disk and the episode will show as missing.</string>
-    <string name="arr_sonarr_detail_file_save">Save</string>
-    <string name="arr_sonarr_detail_cancel">Cancel</string>
 
     <!-- Series edit sheet. -->
-    <string name="arr_sonarr_detail_edit_title">Edit series</string>
-    <string name="arr_sonarr_detail_edit_monitored">Monitored</string>
-    <string name="arr_sonarr_detail_edit_type">Series type</string>
-    <string name="arr_sonarr_detail_edit_quality">Quality profile</string>
-    <string name="arr_sonarr_detail_edit_path">Path</string>
-    <string name="arr_sonarr_detail_edit_season_folder">Season folders</string>
     <string name="arr_sonarr_detail_edit_tags">Tags (ids, comma separated)</string>
     <string name="arr_sonarr_detail_edit_tags_error">Enter numbers separated by commas.</string>
-    <string name="arr_sonarr_detail_edit_move_files">Move files to the new path</string>
-    <string name="arr_sonarr_detail_edit_save">Save changes</string>
     <string name="arr_sonarr_detail_edit_season_pass">Set monitoring strategy</string>
 
     <!-- Monitoring strategy sheet, scoped to this series. -->
     <string name="arr_sonarr_detail_season_pass_title">Monitoring strategy</string>
-    <string name="arr_sonarr_detail_season_pass_monitored">Monitor series</string>
-    <string name="arr_sonarr_detail_season_pass_strategy">Monitor strategy</string>
     <string name="arr_sonarr_detail_season_pass_ignore_with_files">Ignore episodes that have files</string>
     <string name="arr_sonarr_detail_season_pass_ignore_without_files">Ignore episodes without files</string>
     <string name="arr_sonarr_detail_season_pass_submit">Apply monitoring</string>
@@ -120,12 +74,10 @@
     <string name="arr_sonarr_detail_delete_message">%1$s will be deleted from Sonarr.</string>
     <string name="arr_sonarr_detail_delete_files">Delete episode files too</string>
     <string name="arr_sonarr_detail_delete_exclusion">Add an import list exclusion</string>
-    <string name="arr_sonarr_detail_delete_confirm">Delete</string>
 
     <!-- Result snackbars. -->
     <string name="arr_sonarr_detail_message_synced">Changes applied.</string>
     <string name="arr_sonarr_detail_message_queued">Offline. The change is queued and will sync.</string>
-    <string name="arr_sonarr_detail_message_search_started">Search started.</string>
     <string name="arr_sonarr_detail_message_search_queued">Offline. Search is queued.</string>
     <string name="arr_sonarr_detail_message_grabbed">Release sent to the download client.</string>
     <string name="arr_sonarr_detail_message_grab_queued">Offline. The grab is queued.</string>
@@ -134,7 +86,6 @@
     <string name="arr_sonarr_detail_message_rename_queued">Offline. Renaming is queued.</string>
     <string name="arr_sonarr_detail_message_delete_synced">Series deleted.</string>
     <string name="arr_sonarr_detail_message_delete_queued">Offline. Deletion is queued.</string>
-    <string name="arr_sonarr_detail_message_failed">The change didn\'t go through. Try again.</string>
     <plurals name="arr_sonarr_detail_message_imported">
         <item quantity="one">%1$d file imported.</item>
         <item quantity="other">%1$d files imported.</item>

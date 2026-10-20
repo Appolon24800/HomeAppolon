@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -48,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.api.prowlarr.model.AppProfileResource
@@ -64,6 +66,7 @@ import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.components.LabeledSwitch
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
 import kotlinx.serialization.json.JsonElement
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Applications screen: sync targets for Radarr, Sonarr, and Lidarr with sync
@@ -371,6 +374,7 @@ private fun ApplicationEditorSheet(
             Modifier
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
+                .focusGroup()
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -380,11 +384,12 @@ private fun ApplicationEditorSheet(
                     else R.string.arr_prowlarr_applications_add,
                 ),
                 style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
             )
             OutlinedTextField(
                 value = form.name,
                 onValueChange = onNameChange,
-                label = { Text(stringResource(R.string.arr_prowlarr_editor_name)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_autotag_name)) },
                 isError = form.nameMissing,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -392,6 +397,7 @@ private fun ApplicationEditorSheet(
             Text(
                 stringResource(R.string.arr_prowlarr_sync_level),
                 style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.semantics { heading() },
             )
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                 val levels = listOf(
@@ -422,13 +428,13 @@ private fun ApplicationEditorSheet(
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextButton(onClick = onDismiss, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.arr_prowlarr_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
                 TextButton(onClick = onTest, enabled = !state.testing, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.arr_prowlarr_test))
+                    Text(stringResource(ArrUiR.string.arr_common_connect_test))
                 }
                 Button(onClick = onSave, enabled = !state.saving, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.arr_prowlarr_save))
+                    Text(stringResource(ArrUiR.string.arr_common_save))
                 }
             }
         }
@@ -448,6 +454,7 @@ private fun ProfilesSheet(
             Modifier
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
+                .focusGroup()
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -455,7 +462,9 @@ private fun ProfilesSheet(
                 Text(
                     stringResource(R.string.arr_prowlarr_profiles_title),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .semantics { heading() },
                 )
                 IconButton(onClick = { onEdit(null) }) {
                     Icon(
@@ -524,6 +533,7 @@ private fun AppProfileEditorSheet(
             Modifier
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
+                .focusGroup()
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -533,11 +543,12 @@ private fun AppProfileEditorSheet(
                     else R.string.arr_prowlarr_profiles_add,
                 ),
                 style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
             )
             OutlinedTextField(
                 value = form.name,
                 onValueChange = onNameChange,
-                label = { Text(stringResource(R.string.arr_prowlarr_editor_name)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_autotag_name)) },
                 isError = form.nameMissing,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -571,7 +582,7 @@ private fun AppProfileEditorSheet(
                 onCheckedChange = onEnableInteractiveSearchChange,
             )
             Button(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.arr_prowlarr_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         }
     }
@@ -590,12 +601,12 @@ private fun ConfirmDialog(
         text = { Text(message) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.arr_prowlarr_delete))
+                Text(stringResource(ArrUiR.string.arr_common_delete))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_prowlarr_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )
@@ -604,7 +615,7 @@ private fun ConfirmDialog(
 /** One-line snackbar text for an applications message. */
 @Composable
 internal fun applicationsMessageText(message: ApplicationsMessage): String = when (message) {
-    ApplicationsMessage.Saved -> stringResource(R.string.arr_prowlarr_message_saved)
+    ApplicationsMessage.Saved -> stringResource(ArrUiR.string.arr_common_connect_notice_saved)
     ApplicationsMessage.SavedQueued -> stringResource(R.string.arr_prowlarr_message_saved_queued)
     ApplicationsMessage.Deleted -> stringResource(R.string.arr_prowlarr_message_delete_synced)
     ApplicationsMessage.DeleteQueued -> stringResource(R.string.arr_prowlarr_message_delete_queued)
@@ -630,5 +641,5 @@ internal fun applicationsMessageText(message: ApplicationsMessage): String = whe
     is ApplicationsMessage.WriteFailed ->
         stringResource(R.string.arr_prowlarr_message_write_failed, arrErrorMessage(message.error))
 
-    ApplicationsMessage.NameMissing -> stringResource(R.string.arr_prowlarr_editor_name_missing)
+    ApplicationsMessage.NameMissing -> stringResource(ArrUiR.string.arr_common_tags_label_error)
 }

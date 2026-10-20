@@ -80,4 +80,7 @@
     <string name="arr_bazarr_series_episodes_cd_missing">Missing %1$s</string>
     <string name="arr_bazarr_series_episodes_cd_open">Open subtitles for %1$s</string>
     <string name="arr_bazarr_series_episodes_cd_hearing_impaired">Hearing impaired</string>
+    <string name="arr_bazarr_lib_cd_select">Select %1$s</string>
+    <string name="arr_bazarr_sort_state_ascending">Ascending</string>
+    <string name="arr_bazarr_sort_state_descending">Descending</string>
 </resources>

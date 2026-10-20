@@ -1,5 +1,7 @@
 package dev.appolon.homelab.arr.feature.sonarr.queue.logic
 
+import dev.appolon.homelab.arr.api.sonarr.model.EpisodeResource
+import dev.appolon.homelab.arr.api.sonarr.model.SeriesResource
 import dev.appolon.homelab.arr.api.sonarr.model.QueueResource
 import dev.appolon.homelab.arr.api.sonarr.model.QueueStatus
 import dev.appolon.homelab.arr.api.sonarr.model.QueueStatusResource
@@ -17,22 +19,19 @@ import org.junit.Test
 
 class QueuePresentersTest {
 
-    private fun seriesJson(id: Int, title: String): JsonObject = buildJsonObject {
-        put("id", id)
-        put("title", title)
-    }
+    private fun seriesJson(id: Int, title: String): SeriesResource = SeriesResource(id = id, title = title)
 
     private fun episodeJson(
         id: Int,
         season: Int,
         number: Int,
         title: String,
-    ): JsonObject = buildJsonObject {
-        put("id", id)
-        put("seasonNumber", season)
-        put("episodeNumber", number)
-        put("title", title)
-    }
+    ): EpisodeResource = EpisodeResource(
+        id = id,
+        seasonNumber = season,
+        episodeNumber = number,
+        title = title,
+    )
 
     private fun item(
         id: Int = 10,
@@ -44,8 +43,8 @@ class QueuePresentersTest {
         seriesId: Int? = 1,
         seasonNumber: Int? = 2,
         title: String? = "Release.Title.S02E05.2026.1080p",
-        series: JsonObject = seriesJson(1, "Alpha Show"),
-        episode: JsonObject = episodeJson(50, 2, 5, "Pilot"),
+        series: SeriesResource = seriesJson(1, "Alpha Show"),
+        episode: EpisodeResource = episodeJson(50, 2, 5, "Pilot"),
         downloadId: String? = "dl-1",
         outputPath: String? = "/downloads/alpha",
         timeleft: String? = null,
@@ -133,7 +132,7 @@ class QueuePresentersTest {
     fun `title prefers the series and falls back to the release title`() {
         assertEquals("Alpha Show", SonarrQueuePresenters.titleOf(item()))
         val unmatched = item(
-            series = JsonObject(emptyMap()),
+            series = SeriesResource(),
             seriesId = null,
             title = "Release.Title.S02E05.2026.1080p",
         )
@@ -148,7 +147,7 @@ class QueuePresentersTest {
             "S02E05",
             SonarrQueuePresenters.episodeLabelOf(item(seasonNumber = null)),
         )
-        assertNull(SonarrQueuePresenters.episodeLabelOf(item(episode = JsonObject(emptyMap()))))
+        assertNull(SonarrQueuePresenters.episodeLabelOf(item(episode = EpisodeResource())))
         assertEquals("Pilot", SonarrQueuePresenters.episodeTitleOf(item()))
         assertEquals(2, SonarrQueuePresenters.seasonOf(item()))
         assertEquals(5, SonarrQueuePresenters.episodeNumberOf(item()))
@@ -216,8 +215,8 @@ class QueuePresentersTest {
         val unknown = item(
             id = 5,
             seriesId = null,
-            series = JsonObject(emptyMap()),
-            episode = JsonObject(emptyMap()),
+            series = SeriesResource(),
+            episode = EpisodeResource(),
             seasonNumber = null,
         )
         val presented = SonarrQueuePresenters.present(

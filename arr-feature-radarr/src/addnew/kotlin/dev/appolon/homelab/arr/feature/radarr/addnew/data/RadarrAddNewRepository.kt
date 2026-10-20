@@ -381,7 +381,7 @@ class RadarrAddNewRepository(
     }
 
     private fun <T> serveOrErr(cached: List<T>, error: ArrError): ArrResult<List<T>> =
-        if (cached.isNotEmpty()) ArrResult.ok(cached) else ArrResult.err(error)
+        ArrResult.err(error)
 
     /**
      * Freshness gate shared by every cache-first read: a positive TTL honors
@@ -392,7 +392,9 @@ class RadarrAddNewRepository(
 
     private fun action(method: String, path: String, bodyJson: String, description: String) =
         QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.RADARR,
             method = method,
@@ -433,12 +435,12 @@ class RadarrAddNewRepository(
         internal fun optimisticKey(tmdbId: Int): String = "add-tmdb-$tmdbId"
 
         /** Ten minutes, matching the library feature's movie TTL. */
-        const val MOVIE_TTL_MILLIS: Long = 10 * 60 * 1000
+        const val MOVIE_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.LIBRARY
 
         /** One hour; add-option catalogs change rarely. */
-        const val CATALOG_TTL_MILLIS: Long = 60 * 60 * 1000
+        const val CATALOG_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** Five minutes; discovery feeds move faster than catalogs. */
-        const val DISCOVERY_TTL_MILLIS: Long = 5 * 60 * 1000
+        const val DISCOVERY_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.LIBRARY
     }
 }

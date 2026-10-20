@@ -8,6 +8,7 @@ import coil3.decode.ImageSource
 import coil3.fetch.Fetcher
 import coil3.fetch.SourceFetchResult
 import coil3.request.Options
+import coil3.request.crossfade
 import dev.appolon.homelab.arr.api.radarr.CollectionApi
 import dev.appolon.homelab.arr.api.radarr.ImportListMoviesApi
 import dev.appolon.homelab.arr.api.radarr.QualityProfileApi
@@ -225,6 +226,7 @@ class AddNewPosterFetcher private constructor(
 fun addNewImageLoader(context: Context, client: OkHttpClient): ImageLoader =
     ImageLoader.Builder(context)
         .components { add(AddNewPosterFetcher.Factory(client)) }
+        .crossfade(true)
         .build()
 
 /** Suspends until the call answers; cancelling the coroutine cancels the call. */

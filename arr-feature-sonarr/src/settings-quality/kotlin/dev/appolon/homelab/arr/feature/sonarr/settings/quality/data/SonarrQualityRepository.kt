@@ -205,10 +205,7 @@ class SonarrQualityRepository(
     suspend fun refreshQualityProfileSchema(): ArrResult<QualityProfileResource> =
         withContext(ioContext) {
             val schema = when (val r = fetch { qualityProfileSchemaApi.list() }) {
-                is ArrResult.Err -> {
-                    val cached = cachedQualityProfileSchema()
-                    return@withContext if (cached != null) ArrResult.ok(cached) else r
-                }
+                is ArrResult.Err -> return@withContext r
 
                 is ArrResult.Ok -> r.value
             }
@@ -229,10 +226,7 @@ class SonarrQualityRepository(
     suspend fun refreshLanguageProfileSchema(): ArrResult<LanguageProfileResource> =
         withContext(ioContext) {
             val schema = when (val r = fetch { languageProfileSchemaApi.list() }) {
-                is ArrResult.Err -> {
-                    val cached = cachedLanguageProfileSchema()
-                    return@withContext if (cached != null) ArrResult.ok(cached) else r
-                }
+                is ArrResult.Err -> return@withContext r
 
                 is ArrResult.Ok -> r.value
             }
@@ -730,7 +724,9 @@ class SonarrQualityRepository(
 
     private fun action(method: String, path: String, bodyJson: String?, description: String) =
         QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.SONARR,
             method = method,
@@ -833,7 +829,7 @@ class SonarrQualityRepository(
         internal val LANGUAGE_PROFILE_SCHEMA_TYPE = EntityType("sonarr.settings.languageprofile.schema")
 
         /** Five minutes; settings screens also re-read on pull-to-refresh. */
-        const val QUALITY_TTL_MILLIS: Long = 5 * 60 * 1000
+        const val QUALITY_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** Optimistic creates render under ids far below any server-assigned id. */
         internal const val TEMP_ID_BASE = -1_000_000_000L

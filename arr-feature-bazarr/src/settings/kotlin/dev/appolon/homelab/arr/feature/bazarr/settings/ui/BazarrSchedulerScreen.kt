@@ -173,8 +173,12 @@ private fun TaskRow(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (queued) QueuedBadge()
                     if (busy) {
+                        val busyCd = stringResource(R.string.arr_bazarr_cd_loading)
                         CircularProgressIndicator(
-                            modifier = Modifier.padding(4.dp).size(24.dp),
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .size(24.dp)
+                                .semantics { contentDescription = busyCd },
                             strokeWidth = 2.dp,
                         )
                     } else {

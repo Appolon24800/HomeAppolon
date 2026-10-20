@@ -111,7 +111,7 @@ class RadarrWantedRepository(
             // The counter only advances on success so a failed follow-up page
             // cannot leave pagesLoaded ahead of what the cache holds.
             when (val next = fetch(tab, page + 1)) {
-                is ArrResult.Err -> break
+                is ArrResult.Err -> return@withContext next
                 is ArrResult.Ok -> {
                     page += 1
                     combined = mergePages(combined, next.value)
@@ -233,7 +233,9 @@ class RadarrWantedRepository(
                 put("movieIds", JsonArray(movieIds.map { JsonPrimitive(it) }))
             }
             val action = QueuedAction(
-                actionId = ActionId(UUID.randomUUID().toString()),
+                actionId = ActionId(UUID.nameUUIDFromBytes(
+                    "$serverId:POST:$COMMAND_PATH:$body".toByteArray(Charsets.UTF_8),
+                ).toString()),
                 serverId = serverId,
                 appType = AppType.RADARR,
                 method = "POST",
@@ -342,10 +344,10 @@ class RadarrWantedRepository(
 
     companion object {
         /** Five minutes; wanted lists shrink as downloads land. */
-        const val WANTED_TTL_MILLIS: Long = 5 * 60 * 1000
+        const val WANTED_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.LIBRARY
 
         /** One hour; profiles change rarely. */
-        const val PROFILE_TTL_MILLIS: Long = 60 * 60 * 1000
+        const val PROFILE_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** Pull-to-refresh recenters the cache on the first pages. */
         const val REFRESH_PAGES = 2

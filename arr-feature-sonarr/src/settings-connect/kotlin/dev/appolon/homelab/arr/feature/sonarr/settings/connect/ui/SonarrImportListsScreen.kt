@@ -66,6 +66,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the import lists route. */
 @Composable
@@ -146,25 +147,25 @@ fun SonarrImportListsScreen(
     ConnectNoticeHost(
         noticeMessage = when (state.notice) {
             ImportListsNotice.DELETED ->
-                stringResource(R.string.arr_sonarr_connect_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             ImportListsNotice.DELETED_QUEUED ->
-                stringResource(R.string.arr_sonarr_connect_notice_deleted_queued)
+                stringResource(ArrUiR.string.arr_common_backup_notice_deleted_queued)
 
             ImportListsNotice.TEST_ALL_DONE ->
-                stringResource(R.string.arr_sonarr_connect_notice_test_all_done)
+                stringResource(ArrUiR.string.arr_common_connect_notice_test_all_done)
 
             ImportListsNotice.SYNC_STARTED ->
-                stringResource(R.string.arr_sonarr_lists_notice_sync_started)
+                stringResource(ArrUiR.string.arr_common_lists_notice_sync_started)
 
             ImportListsNotice.SYNC_FAILED ->
-                stringResource(R.string.arr_sonarr_lists_notice_sync_failed)
+                stringResource(ArrUiR.string.arr_common_lists_notice_sync_failed)
 
             ImportListsNotice.OPTIONS_SAVED ->
-                stringResource(R.string.arr_sonarr_connect_notice_saved)
+                stringResource(ArrUiR.string.arr_common_connect_notice_saved)
 
             ImportListsNotice.OPTIONS_SAVED_QUEUED ->
-                stringResource(R.string.arr_sonarr_connect_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
             null -> null
         },
@@ -175,14 +176,14 @@ fun SonarrImportListsScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_lists_title),
+        title = stringResource(ArrUiR.string.arr_common_lists_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onOpenExclusions) {
                 Icon(
                     imageVector = Icons.Filled.Block,
-                    contentDescription = stringResource(R.string.arr_sonarr_lists_cd_exclusions),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_lists_cd_exclusions),
                 )
             }
             IconButton(onClick = onOpenPreview) {
@@ -194,25 +195,25 @@ fun SonarrImportListsScreen(
             IconButton(onClick = onSync, enabled = !state.syncing) {
                 Icon(
                     imageVector = Icons.Filled.Sync,
-                    contentDescription = stringResource(R.string.arr_sonarr_lists_cd_sync),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_lists_cd_sync),
                 )
             }
             IconButton(onClick = onTestAll, enabled = !state.testingAll && content != null) {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = stringResource(R.string.arr_sonarr_lists_cd_test_all),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_lists_cd_test_all),
                 )
             }
             IconButton(onClick = { showOptions = true }) {
                 Icon(
                     imageVector = Icons.Filled.Tune,
-                    contentDescription = stringResource(R.string.arr_sonarr_lists_cd_options),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_lists_cd_options),
                 )
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_lists_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_lists_cd_refresh),
                 )
             }
         },
@@ -229,7 +230,7 @@ fun SonarrImportListsScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_sonarr_lists_empty_title),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_lists_empty_title),
                     emptyMessage = stringResource(R.string.arr_sonarr_lists_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
@@ -242,9 +243,9 @@ fun SonarrImportListsScreen(
                             item { ConnectPendingBanner(data.pendingActions) }
                         }
                         item {
-                            SectionHeader(title = stringResource(R.string.arr_sonarr_lists_section_lists))
+                            SectionHeader(title = stringResource(ArrUiR.string.arr_common_lists_title))
                         }
-                        items(data.lists, key = { it.id }) { list ->
+                        items(data.lists, key = { it.id }, contentType = { "list" }) { list ->
                             ImportListRow(
                                 list = list,
                                 tags = data.tags,
@@ -259,7 +260,7 @@ fun SonarrImportListsScreen(
             ExtendedFloatingActionButton(
                 onClick = onAdd,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.arr_sonarr_lists_add)) },
+                text = { Text(stringResource(ArrUiR.string.arr_common_lists_add)) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
@@ -274,23 +275,23 @@ fun SonarrImportListsScreen(
     state.confirmDeleteFor?.let { target ->
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_sonarr_connect_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_delete)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.arr_sonarr_connect_delete_message,
+                        ArrUiR.string.arr_common_connect_delete_message,
                         target.name ?: target.id.toString(),
                     ),
                 )
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_sonarr_connect_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_sonarr_connect_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -325,7 +326,7 @@ private fun ImportListRow(
     onOpen: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val openCd = stringResource(R.string.arr_sonarr_lists_cd_open, list.name.orEmpty())
+    val openCd = stringResource(ArrUiR.string.arr_common_lists_cd_open, list.name.orEmpty())
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -356,7 +357,7 @@ private fun ImportListRow(
                             null
                         },
                         if (list.searchForMissingEpisodes) {
-                            stringResource(R.string.arr_sonarr_lists_search_on_add)
+                            stringResource(ArrUiR.string.arr_common_lists_search_on_add)
                         } else {
                             null
                         },
@@ -373,7 +374,7 @@ private fun ImportListRow(
                     ConnectTagChips(list.tags.orEmpty(), tags)
                 }
             }
-            val deleteCd = stringResource(R.string.arr_sonarr_lists_cd_delete, list.name.orEmpty())
+            val deleteCd = stringResource(ArrUiR.string.arr_common_lists_cd_delete, list.name.orEmpty())
             IconButton(onClick = onDelete, modifier = Modifier.semantics { contentDescription = deleteCd }) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
@@ -407,7 +408,7 @@ private fun SyncPreviewSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                stringResource(R.string.arr_sonarr_lists_preview_title),
+                stringResource(ArrUiR.string.arr_common_lists_preview_title),
                 style = MaterialTheme.typography.titleMedium,
             )
             if (preview == null) {
@@ -442,7 +443,7 @@ private fun SyncPreviewSheet(
                                 ),
                                 row.rootFolderPath,
                                 if (row.searchForMissing) {
-                                    stringResource(R.string.arr_sonarr_lists_search_on_add)
+                                    stringResource(ArrUiR.string.arr_common_lists_search_on_add)
                                 } else {
                                     null
                                 },
@@ -454,7 +455,7 @@ private fun SyncPreviewSheet(
                 }
                 if (preview.rows.size > PREVIEW_ROW_LIMIT) {
                     Text(
-                        stringResource(R.string.arr_sonarr_lists_preview_more, preview.rows.size - PREVIEW_ROW_LIMIT),
+                        stringResource(ArrUiR.string.arr_common_lists_preview_more, preview.rows.size - PREVIEW_ROW_LIMIT),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
@@ -475,7 +476,7 @@ private fun SyncPreviewSheet(
 
 @Composable
 private fun syncLevelLabel(level: ListSyncLevelType): String = when (level) {
-    ListSyncLevelType.DISABLED -> stringResource(R.string.arr_sonarr_lists_level_disabled)
+    ListSyncLevelType.DISABLED -> stringResource(ArrUiR.string.arr_common_general_cert_validation_disabled)
     ListSyncLevelType.LOG_ONLY -> stringResource(R.string.arr_sonarr_lists_level_log_only)
     ListSyncLevelType.KEEP_AND_UNMONITOR ->
         stringResource(R.string.arr_sonarr_lists_level_keep_and_unmonitor)
@@ -496,7 +497,7 @@ private fun ImportListOptionsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.arr_sonarr_lists_options_title)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_lists_cd_options)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 var expanded by remember { mutableStateOf(false) }
@@ -508,7 +509,7 @@ private fun ImportListOptionsDialog(
                         value = syncLevelLabel(syncLevel),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text(stringResource(R.string.arr_sonarr_lists_option_sync_level)) },
+                        label = { Text(stringResource(ArrUiR.string.arr_common_lists_option_sync_level)) },
                         supportingText = {
                             Text(stringResource(R.string.arr_sonarr_lists_option_sync_level_support))
                         },
@@ -536,12 +537,12 @@ private fun ImportListOptionsDialog(
                 onClick = { onSave(initial.copy(listSyncLevel = syncLevel)) },
                 enabled = !busy,
             ) {
-                Text(stringResource(R.string.arr_sonarr_connect_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_connect_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )

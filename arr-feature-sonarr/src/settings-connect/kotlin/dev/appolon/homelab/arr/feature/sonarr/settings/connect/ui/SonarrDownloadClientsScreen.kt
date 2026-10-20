@@ -59,6 +59,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the download clients route. */
 @Composable
@@ -134,22 +135,22 @@ fun SonarrDownloadClientsScreen(
     ConnectNoticeHost(
         noticeMessage = when (state.notice) {
             DownloadClientsNotice.DELETED ->
-                stringResource(R.string.arr_sonarr_connect_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             DownloadClientsNotice.DELETED_QUEUED ->
-                stringResource(R.string.arr_sonarr_connect_notice_deleted_queued)
+                stringResource(ArrUiR.string.arr_common_backup_notice_deleted_queued)
 
             DownloadClientsNotice.TOGGLED_QUEUED ->
-                stringResource(R.string.arr_sonarr_connect_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
             DownloadClientsNotice.TEST_ALL_DONE ->
-                stringResource(R.string.arr_sonarr_connect_notice_test_all_done)
+                stringResource(ArrUiR.string.arr_common_connect_notice_test_all_done)
 
             DownloadClientsNotice.OPTIONS_SAVED ->
-                stringResource(R.string.arr_sonarr_connect_notice_saved)
+                stringResource(ArrUiR.string.arr_common_connect_notice_saved)
 
             DownloadClientsNotice.OPTIONS_SAVED_QUEUED ->
-                stringResource(R.string.arr_sonarr_connect_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
             null -> null
         },
@@ -160,32 +161,32 @@ fun SonarrDownloadClientsScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_clients_title),
+        title = stringResource(ArrUiR.string.arr_common_clients_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onOpenMappings) {
                 Icon(
                     imageVector = Icons.Filled.SettingsEthernet,
-                    contentDescription = stringResource(R.string.arr_sonarr_clients_cd_mappings),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_clients_cd_mappings),
                 )
             }
             IconButton(onClick = onTestAll, enabled = !state.testingAll && content != null) {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = stringResource(R.string.arr_sonarr_clients_cd_test_all),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_clients_cd_test_all),
                 )
             }
             IconButton(onClick = { showOptions = true }) {
                 Icon(
                     imageVector = Icons.Filled.Tune,
-                    contentDescription = stringResource(R.string.arr_sonarr_clients_cd_options),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_clients_cd_options),
                 )
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_clients_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_clients_cd_refresh),
                 )
             }
         },
@@ -202,8 +203,8 @@ fun SonarrDownloadClientsScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_sonarr_clients_empty_title),
-                    emptyMessage = stringResource(R.string.arr_sonarr_clients_empty_message),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_clients_empty_title),
+                    emptyMessage = stringResource(ArrUiR.string.arr_common_clients_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
                     LazyColumn(
@@ -215,9 +216,9 @@ fun SonarrDownloadClientsScreen(
                             item { ConnectPendingBanner(data.pendingActions) }
                         }
                         item {
-                            SectionHeader(title = stringResource(R.string.arr_sonarr_clients_section_clients))
+                            SectionHeader(title = stringResource(ArrUiR.string.arr_common_clients_title))
                         }
-                        items(data.clients, key = { it.id }) { client ->
+                        items(data.clients, key = { it.id }, contentType = { "client" }) { client ->
                             DownloadClientRow(
                                 client = client,
                                 tags = data.tags,
@@ -233,7 +234,7 @@ fun SonarrDownloadClientsScreen(
             ExtendedFloatingActionButton(
                 onClick = onAdd,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.arr_sonarr_clients_add)) },
+                text = { Text(stringResource(ArrUiR.string.arr_common_clients_add)) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
@@ -248,23 +249,23 @@ fun SonarrDownloadClientsScreen(
     state.confirmDeleteFor?.let { target ->
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_sonarr_connect_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_delete)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.arr_sonarr_connect_delete_message,
+                        ArrUiR.string.arr_common_connect_delete_message,
                         target.name ?: target.id.toString(),
                     ),
                 )
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_sonarr_connect_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_sonarr_connect_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -292,7 +293,7 @@ private fun DownloadClientRow(
     onToggleEnabled: (Boolean) -> Unit,
     onDelete: () -> Unit,
 ) {
-    val openCd = stringResource(R.string.arr_sonarr_clients_cd_open, client.name.orEmpty())
+    val openCd = stringResource(ArrUiR.string.arr_common_clients_cd_open, client.name.orEmpty())
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -310,7 +311,7 @@ private fun DownloadClientRow(
                 Text(
                     text = listOfNotNull(
                         client.implementationName,
-                        stringResource(R.string.arr_sonarr_connect_priority, client.priority),
+                        stringResource(ArrUiR.string.arr_common_connect_priority, client.priority),
                     ).joinToString(" · "),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -324,7 +325,7 @@ private fun DownloadClientRow(
                 }
             }
             val toggleCd = stringResource(
-                R.string.arr_sonarr_clients_cd_toggle,
+                ArrUiR.string.arr_common_clients_cd_toggle,
                 client.name.orEmpty(),
             )
             LabeledSwitch(
@@ -334,7 +335,7 @@ private fun DownloadClientRow(
                 modifier = Modifier.semantics { contentDescription = toggleCd },
             )
             val deleteCd = stringResource(
-                R.string.arr_sonarr_clients_cd_delete,
+                ArrUiR.string.arr_common_clients_cd_delete,
                 client.name.orEmpty(),
             )
             IconButton(onClick = onDelete, modifier = Modifier.semantics { contentDescription = deleteCd }) {
@@ -365,30 +366,30 @@ private fun DownloadClientOptionsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.arr_sonarr_clients_options_title)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_clients_cd_options)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = workingFolders,
                     onValueChange = { workingFolders = it },
                     label = {
-                        Text(stringResource(R.string.arr_sonarr_clients_option_working_folders))
+                        Text(stringResource(ArrUiR.string.arr_common_clients_option_working_folders))
                     },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 LabeledSwitch(
-                    label = stringResource(R.string.arr_sonarr_clients_option_completed),
+                    label = stringResource(ArrUiR.string.arr_common_clients_option_completed),
                     checked = enableCompleted,
                     onCheckedChange = { enableCompleted = it },
                 )
                 LabeledSwitch(
-                    label = stringResource(R.string.arr_sonarr_clients_option_redownload_failed),
+                    label = stringResource(ArrUiR.string.arr_common_clients_option_redownload_failed),
                     checked = autoRedownloadFailed,
                     onCheckedChange = { autoRedownloadFailed = it },
                 )
                 LabeledSwitch(
-                    label = stringResource(R.string.arr_sonarr_clients_option_redownload_interactive),
+                    label = stringResource(ArrUiR.string.arr_common_clients_option_redownload_interactive),
                     checked = autoRedownloadInteractive,
                     onCheckedChange = { autoRedownloadInteractive = it },
                 )
@@ -408,12 +409,12 @@ private fun DownloadClientOptionsDialog(
                 },
                 enabled = !busy,
             ) {
-                Text(stringResource(R.string.arr_sonarr_connect_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_connect_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )

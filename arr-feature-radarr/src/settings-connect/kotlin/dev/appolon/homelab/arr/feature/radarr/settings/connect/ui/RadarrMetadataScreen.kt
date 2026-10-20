@@ -56,6 +56,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the metadata consumers route. */
 @Composable
@@ -116,12 +117,12 @@ fun RadarrMetadataScreen(
 
     NoticeHost(
         noticeMessage = when (state.notice) {
-            MetadataNotice.SAVED -> stringResource(R.string.arr_radarr_connect_notice_saved)
+            MetadataNotice.SAVED -> stringResource(ArrUiR.string.arr_common_connect_notice_saved)
             MetadataNotice.SAVED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
             MetadataNotice.TEST_PASSED ->
-                stringResource(R.string.arr_radarr_connect_notice_test_passed)
+                stringResource(ArrUiR.string.arr_common_connect_notice_test_passed)
 
             null -> null
         },
@@ -132,14 +133,14 @@ fun RadarrMetadataScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_metadata_title),
+        title = stringResource(ArrUiR.string.arr_common_metadata_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_metadata_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_metadata_cd_refresh),
                 )
             }
         },
@@ -156,8 +157,8 @@ fun RadarrMetadataScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_radarr_metadata_empty_title),
-                    emptyMessage = stringResource(R.string.arr_radarr_metadata_empty_message),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_metadata_empty_title),
+                    emptyMessage = stringResource(ArrUiR.string.arr_common_metadata_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
                     MetadataList(
@@ -197,9 +198,9 @@ private fun MetadataList(
             item { PendingBanner(data.pendingActions) }
         }
         item {
-            SectionHeader(title = stringResource(R.string.arr_radarr_metadata_section_consumers))
+            SectionHeader(title = stringResource(ArrUiR.string.arr_common_metadata_section_consumers))
         }
-        items(data.consumers, key = { it.id }) { consumer ->
+        items(data.consumers, key = { it.id }, contentType = { "consumer" }) { consumer ->
             val draft = data.drafts[consumer.id]
             MetadataRow(
                 consumer = consumer,
@@ -233,7 +234,7 @@ private fun MetadataRow(
     onSave: () -> Unit,
 ) {
     val expandCd = stringResource(
-        R.string.arr_radarr_metadata_cd_expand,
+        ArrUiR.string.arr_common_metadata_cd_expand,
         consumer.name.orEmpty(),
     )
     Card(Modifier.fillMaxWidth()) {
@@ -285,7 +286,7 @@ private fun MetadataRow(
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             ExtendedFloatingActionButton(onClick = onSave) {
-                                Text(stringResource(R.string.arr_radarr_connect_save))
+                                Text(stringResource(ArrUiR.string.arr_common_save))
                             }
                             ExtendedFloatingActionButton(
                                 onClick = onTest,
@@ -298,7 +299,7 @@ private fun MetadataRow(
                                 Icon(
                                     Icons.Filled.Science,
                                     contentDescription = stringResource(
-                                        R.string.arr_radarr_connect_cd_test,
+                                        ArrUiR.string.arr_common_connect_cd_test,
                                     ),
                                 )
                             }

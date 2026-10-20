@@ -38,6 +38,7 @@ import dev.appolon.homelab.arr.api.radarr.model.MovieStatusType
 import dev.appolon.homelab.arr.api.radarr.model.QualityProfileResource
 import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.feature.radarr.library.vm.MovieEditorForm
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Bulk movie editor sheet. Every field starts as "unchanged"; only the fields
@@ -75,13 +76,13 @@ fun MovieEditorSheet(
             )
 
             TriStateRow(
-                label = stringResource(R.string.arr_radarr_editor_monitored),
+                label = stringResource(ArrUiR.string.arr_common_monitored),
                 value = form.monitored,
                 onChange = { setting -> onChange { form -> form.copy(monitored = setting) } },
             )
 
             DropdownRow(
-                label = stringResource(R.string.arr_radarr_editor_quality),
+                label = stringResource(ArrUiR.string.arr_common_wanted_filter_quality),
                 selected = form.qualityProfileId?.let { id ->
                     qualityProfiles.firstOrNull { it.id == id }?.name ?: "#$id"
                 },
@@ -92,7 +93,7 @@ fun MovieEditorSheet(
             )
 
             DropdownRow(
-                label = stringResource(R.string.arr_radarr_editor_availability),
+                label = stringResource(R.string.arr_radarr_addnew_sheet_minimum_availability),
                 selected = form.minimumAvailability?.let { availabilityLabel(it) },
                 options = availabilityOptions(),
                 onSelect = { value, _ ->
@@ -105,7 +106,7 @@ fun MovieEditorSheet(
                 onValueChange = { value ->
                     onChange { form -> form.copy(rootFolderPath = value) }
                 },
-                label = { Text(stringResource(R.string.arr_radarr_editor_root_folder)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_addnew_sheet_root_folder)) },
                 supportingText = {
                     Text(stringResource(R.string.arr_radarr_editor_root_folder_hint))
                 },
@@ -120,7 +121,7 @@ fun MovieEditorSheet(
                 onValueChange = { value ->
                     onChange { form -> form.copy(tagsText = value, tagsError = false) }
                 },
-                label = { Text(stringResource(R.string.arr_radarr_editor_tags)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_tags_title)) },
                 supportingText = {
                     Text(
                         stringResource(
@@ -149,9 +150,9 @@ fun MovieEditorSheet(
                     .padding(top = 8.dp, bottom = 12.dp),
             ) {
                 val modes = listOf(
-                    ApplyTags.ADD to R.string.arr_radarr_editor_tags_add,
-                    ApplyTags.REMOVE to R.string.arr_radarr_editor_tags_remove,
-                    ApplyTags.REPLACE to R.string.arr_radarr_editor_tags_replace,
+                    ApplyTags.ADD to ArrUiR.string.arr_common_roots_add_confirm,
+                    ApplyTags.REMOVE to ArrUiR.string.arr_common_queue_action_remove,
+                    ApplyTags.REPLACE to ArrUiR.string.arr_common_editor_tags_replace,
                 )
                 modes.forEachIndexed { index, (mode, res) ->
                     SegmentedButton(
@@ -179,10 +180,10 @@ fun MovieEditorSheet(
                     .padding(top = 8.dp),
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.arr_radarr_editor_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
                 Button(onClick = onSubmit) {
-                    Text(stringResource(R.string.arr_radarr_editor_save))
+                    Text(stringResource(ArrUiR.string.arr_common_save))
                 }
             }
         }
@@ -204,9 +205,9 @@ private fun TriStateRow(
             .padding(top = 8.dp, bottom = 12.dp),
     ) {
         val options = listOf(
-            null to R.string.arr_radarr_editor_unchanged,
-            true to R.string.arr_radarr_filter_yes,
-            false to R.string.arr_radarr_filter_no,
+            null to ArrUiR.string.arr_common_editor_unchanged,
+            true to ArrUiR.string.arr_common_yes,
+            false to ArrUiR.string.arr_common_no,
         )
         options.forEachIndexed { index, (option, res) ->
             SegmentedButton(
@@ -237,7 +238,7 @@ private fun DropdownRow(
             .padding(bottom = 12.dp),
     ) {
         OutlinedTextField(
-            value = selected ?: stringResource(R.string.arr_radarr_editor_unchanged),
+            value = selected ?: stringResource(ArrUiR.string.arr_common_editor_unchanged),
             onValueChange = {},
             readOnly = true,
             label = { Text(label) },
@@ -252,7 +253,7 @@ private fun DropdownRow(
         ) {
             if (selected != null) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.arr_radarr_editor_unchanged)) },
+                    text = { Text(stringResource(ArrUiR.string.arr_common_editor_unchanged)) },
                     onClick = {
                         expanded = false
                         onSelect("", "")
@@ -313,12 +314,12 @@ fun MovieDeleteDialog(
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(deleteFiles, addExclusion) }) {
-                Text(stringResource(R.string.arr_radarr_delete_confirm))
+                Text(stringResource(ArrUiR.string.arr_common_delete))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_radarr_delete_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )
@@ -326,11 +327,11 @@ fun MovieDeleteDialog(
 
 @Composable
 internal fun availabilityLabel(status: MovieStatusType): String = when (status) {
-    MovieStatusType.TBA -> stringResource(R.string.arr_radarr_status_tba)
-    MovieStatusType.ANNOUNCED -> stringResource(R.string.arr_radarr_status_announced)
-    MovieStatusType.IN_CINEMAS -> stringResource(R.string.arr_radarr_status_in_cinemas)
-    MovieStatusType.RELEASED -> stringResource(R.string.arr_radarr_status_released)
-    MovieStatusType.DELETED -> stringResource(R.string.arr_radarr_status_deleted)
+    MovieStatusType.TBA -> stringResource(R.string.arr_radarr_addnew_availability_tba)
+    MovieStatusType.ANNOUNCED -> stringResource(R.string.arr_radarr_addnew_availability_announced)
+    MovieStatusType.IN_CINEMAS -> stringResource(R.string.arr_radarr_addnew_availability_in_cinemas)
+    MovieStatusType.RELEASED -> stringResource(R.string.arr_radarr_addnew_availability_released)
+    MovieStatusType.DELETED -> stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 }
 
 /** Options with the label doubling as the value, so [availabilityOf] can invert it. */

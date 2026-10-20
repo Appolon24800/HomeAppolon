@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.core.Humanize
 import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.ui.components.LabeledSwitch
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Edit sheet: monitoring, quality profile, path (with a move-files toggle),
@@ -52,20 +53,20 @@ fun RadarrMovieEditSheet(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.arr_radarr_detail_edit_title)) },
+        title = { Text(stringResource(R.string.arr_radarr_detail_cd_edit)) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.verticalScroll(rememberScrollState()),
             ) {
                 LabeledSwitch(
-                    label = stringResource(R.string.arr_radarr_detail_monitored),
+                    label = stringResource(ArrUiR.string.arr_common_monitored),
                     checked = monitored,
                     onCheckedChange = { monitored = it },
                     supportingText = stringResource(R.string.arr_radarr_detail_monitored_support),
                 )
                 Text(
-                    text = stringResource(R.string.arr_radarr_detail_edit_quality),
+                    text = stringResource(ArrUiR.string.arr_common_wanted_filter_quality),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 8.dp),
@@ -80,21 +81,21 @@ fun RadarrMovieEditSheet(
                 OutlinedTextField(
                     value = path,
                     onValueChange = { path = it },
-                    label = { Text(stringResource(R.string.arr_radarr_detail_edit_path)) },
+                    label = { Text(stringResource(ArrUiR.string.arr_common_detail_edit_path)) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp),
                 )
                 LabeledSwitch(
-                    label = stringResource(R.string.arr_radarr_detail_edit_move),
+                    label = stringResource(ArrUiR.string.arr_common_detail_edit_move),
                     checked = moveFiles,
                     onCheckedChange = { moveFiles = it },
                     supportingText = stringResource(R.string.arr_radarr_detail_edit_move_support),
                 )
                 if (options.tags.isNotEmpty()) {
                     Text(
-                        text = stringResource(R.string.arr_radarr_detail_edit_tags),
+                        text = stringResource(ArrUiR.string.arr_common_tags_title),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(top = 8.dp),
@@ -137,12 +138,12 @@ fun RadarrMovieEditSheet(
                     )
                 },
             ) {
-                Text(stringResource(R.string.arr_radarr_detail_edit_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_radarr_detail_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )
@@ -209,14 +210,14 @@ fun RadarrMovieDeleteDialog(
         confirmButton = {
             TextButton(onClick = { onConfirm(deleteFiles, addExclusion) }) {
                 Text(
-                    text = stringResource(R.string.arr_radarr_detail_delete_confirm),
+                    text = stringResource(ArrUiR.string.arr_common_delete),
                     color = MaterialTheme.colorScheme.error,
                 )
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_radarr_detail_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )
@@ -236,7 +237,7 @@ fun RadarrMovieRenameDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.arr_radarr_detail_rename_title)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_detail_rename_title)) },
         text = {
             Column {
                 Text(stringResource(R.string.arr_radarr_detail_rename_message))
@@ -273,12 +274,12 @@ fun RadarrMovieRenameDialog(
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.arr_radarr_detail_rename_confirm))
+                Text(stringResource(R.string.arr_radarr_detail_rename))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_radarr_detail_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )

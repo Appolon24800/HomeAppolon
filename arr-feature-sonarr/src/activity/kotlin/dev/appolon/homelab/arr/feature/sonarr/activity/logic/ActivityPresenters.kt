@@ -8,8 +8,6 @@ import dev.appolon.homelab.arr.core.ArrTime
 import dev.appolon.homelab.arr.core.Humanize
 import java.time.Instant
 import java.util.Locale
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 
 /** Event-type slices the history feed offers as filter chips. */
 enum class HistoryEventTypeFilter(val wireNames: Set<String>) {
@@ -100,10 +98,10 @@ data class SonarrBlocklistEntryUi(
 
 /**
  * Pure presentation for the Sonarr activity screens: wire resources in,
- * episode-granular row models and filter rules out. The committed DTOs embed
- * series and episode as raw JSON objects, so the label extraction lives
- * here, free of framework types and directly unit-testable per the
- * architecture doc.
+ * episode-granular row models and filter rules out. Series and episode
+ * arrive as typed DTOs with empty defaults (id = 0, null titles) meaning
+ * "unmatched", so the label extraction lives here, free of framework types
+ * and directly unit-testable per the architecture doc.
  */
 object ActivityPresenters {
 
@@ -111,8 +109,8 @@ object ActivityPresenters {
     fun episodeLabelOf(seasonNumber: Int, episodeNumber: Int): String =
         String.format(Locale.US, "S%02dE%02d", seasonNumber, episodeNumber)
 
-    /** Matched series title from the embedded series object, when present. */
-    fun seriesTitleOf(event: HistoryResource): String? = event.series.stringOf("title")
+    /** Matched series title; null when the embedded series is the empty unmatched default. */
+    fun seriesTitleOf(event: HistoryResource): String? = event.series.title
 
     /** Row title: the series when Sonarr matched one, else the release title. */
     fun titleOf(event: HistoryResource): String =
@@ -128,11 +126,11 @@ object ActivityPresenters {
         episodeId = event.episodeId,
         seriesId = event.seriesId,
         title = titleOf(event),
-        seriesYear = event.series.intOf("year")?.takeIf { it > 0 },
-        seasonNumber = event.episode.intOf("seasonNumber"),
-        episodeNumber = event.episode.intOf("episodeNumber"),
+        seriesYear = event.series.year.takeIf { it > 0 },
+        seasonNumber = event.episode.seasonNumber?.takeIf { it > 0 },
+        episodeNumber = event.episode.episodeNumber?.takeIf { it > 0 },
         episodeLabel = episodeLabelOf(event),
-        episodeTitle = event.episode.stringOf("title"),
+        episodeTitle = event.episode.title,
         sourceTitle = event.sourceTitle?.takeIf { it.isNotEmpty() },
         date = ArrTime.parse(event.date),
         relativeDate = ArrTime.parse(event.date)?.let { ArrTime.relative(it, now) },
@@ -171,9 +169,9 @@ object ActivityPresenters {
     ): SonarrBlocklistEntryUi = SonarrBlocklistEntryUi(
         id = entry.id,
         seriesId = entry.seriesId,
-        title = entry.series.stringOf("title")
+        title = entry.series.title
             ?: entry.sourceTitle.orEmpty().ifEmpty { UNKNOWN_TITLE },
-        seriesYear = entry.series.intOf("year")?.takeIf { it > 0 },
+        seriesYear = entry.series.year.takeIf { it > 0 },
         sourceTitle = entry.sourceTitle?.takeIf { it.isNotEmpty() },
         date = ArrTime.parse(entry.date),
         relativeDate = ArrTime.parse(entry.date)?.let { ArrTime.relative(it, now) },
@@ -233,8 +231,8 @@ object ActivityPresenters {
 
     /** "S02E05" when the embedded episode object carries both parts; null otherwise. */
     private fun episodeLabelOf(event: HistoryResource): String? {
-        val season = event.episode.intOf("seasonNumber") ?: return null
-        val episode = event.episode.intOf("episodeNumber") ?: return null
+        val season = event.episode.seasonNumber?.takeIf { it > 0 } ?: return null
+        val episode = event.episode.episodeNumber?.takeIf { it > 0 } ?: return null
         return episodeLabelOf(season, episode)
     }
 
@@ -272,14 +270,6 @@ object ActivityPresenters {
             if (minutes >= 0.0) return Humanize.duration((minutes * 60).toLong())
         }
         return null
-    }
-
-    private fun JsonObject.stringOf(key: String): String? =
-        (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.content?.takeIf { it.isNotEmpty() }
-
-    private fun JsonObject.intOf(key: String): Int? = when (val element = this[key]) {
-        is JsonPrimitive -> element.content.toIntOrNull()
-        else -> null
     }
 
     private const val UNKNOWN_TITLE = "—"

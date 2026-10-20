@@ -183,10 +183,7 @@ class RadarrQualityRepository(
     suspend fun refreshProfileSchema(): ArrResult<QualityProfileResource> =
         withContext(ioContext) {
             val schema = when (val r = fetch { qualityProfileSchemaApi.qualityProfileSchema() }) {
-                is ArrResult.Err -> {
-                    val cached = cachedQualityProfileSchema()
-                    return@withContext if (cached != null) ArrResult.ok(cached) else r
-                }
+                is ArrResult.Err -> return@withContext r
 
                 is ArrResult.Ok -> r.value
             }
@@ -682,7 +679,9 @@ class RadarrQualityRepository(
 
     private fun action(method: String, path: String, bodyJson: String?, description: String) =
         QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.RADARR,
             method = method,
@@ -796,7 +795,7 @@ class RadarrQualityRepository(
         internal val PROFILE_SCHEMA_TYPE = EntityType("radarr.qualityprofile.schema")
 
         /** Five minutes; settings screens also re-read on pull-to-refresh. */
-        const val QUALITY_TTL_MILLIS: Long = 5 * 60 * 1000
+        const val QUALITY_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** Optimistic creates render under ids far below any server-assigned id. */
         internal const val TEMP_ID_BASE = -1_000_000_000L

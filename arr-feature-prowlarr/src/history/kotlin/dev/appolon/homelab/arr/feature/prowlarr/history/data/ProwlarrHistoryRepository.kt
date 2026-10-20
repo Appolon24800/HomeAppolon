@@ -151,7 +151,9 @@ class ProwlarrHistoryRepository(
     private suspend fun queueClear(): ActionId {
         store.deleteAll(serverId, HISTORY_TYPE)
         val action = QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:POST:$COMMAND_PATH:$CLEAR_HISTORY_COMMAND".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.PROWLARR,
             method = "POST",
@@ -188,7 +190,7 @@ class ProwlarrHistoryRepository(
     }
 
     private fun <T> staleOrErr(cached: List<T>, error: ArrError): ArrResult<List<T>> =
-        if (cached.isNotEmpty()) ArrResult.ok(cached) else ArrResult.err(error)
+        ArrResult.err(error)
 
     private inline fun offlineOrErr(
         error: ArrError,

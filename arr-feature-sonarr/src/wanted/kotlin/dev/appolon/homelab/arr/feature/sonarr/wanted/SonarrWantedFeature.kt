@@ -199,17 +199,19 @@ fun SonarrWanted(
         onToggleMonitored = vm::toggleMonitored,
         onSeasonToggle = vm::toggleSeason,
         onClearFilters = vm::clearFilters,
-        onOpenSeasonPass = {
-            val libraryRoute = SonarrLibraryRoutes.libraryRoute(serverId)
-            if (libraryRoute != null) {
-                navigator.open(libraryRoute)
-            } else {
-                onOpenSeasonPass(serverId)
+        onOpenSeasonPass = remember(navigator, serverId, onOpenSeasonPass) {
+            {
+                val libraryRoute = SonarrLibraryRoutes.libraryRoute(serverId)
+                if (libraryRoute != null) {
+                    navigator.open(libraryRoute)
+                } else {
+                    onOpenSeasonPass(serverId)
+                }
             }
         },
-        onSeriesOpen = { seriesId ->
+        onSeriesOpen = remember(navigator, serverId) { { seriesId: Int ->
             navigator.open(ArrRoute.Detail(serverId, AppType.SONARR, seriesId.toString()))
-        },
+        } },
         onSearchEpisode = vm::searchEpisode,
         onSearchSeries = vm::searchSeries,
         onSearchAll = vm::searchAll,

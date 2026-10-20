@@ -34,7 +34,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.feature.bazarr.R
@@ -104,7 +106,13 @@ fun BazarrProvidersScreen(
         onBack = onBack,
         actions = {
             if (state.resetting) {
-                CircularProgressIndicator(modifier = Modifier.padding(12.dp).size(24.dp))
+                val resettingCd = stringResource(R.string.arr_bazarr_cd_loading)
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .padding(12.dp)
+                        .size(24.dp)
+                        .semantics { contentDescription = resettingCd },
+                )
             } else {
                 val cd = stringResource(R.string.arr_bazarr_settings_providers_cd_reset)
                 IconButton(
@@ -150,7 +158,10 @@ fun BazarrProvidersScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .widthIn(max = contentWidth)
-                                        .padding(bottom = 4.dp),
+                                        .padding(bottom = 4.dp)
+                                        // Polite live region: the queued-reset
+                                        // notice appears without a focus move.
+                                        .semantics { liveRegion = LiveRegionMode.Polite },
                                 )
                             }
                         }

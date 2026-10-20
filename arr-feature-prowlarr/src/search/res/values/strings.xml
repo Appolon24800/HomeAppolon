@@ -1,5 +1,4 @@
 <resources>
-    <string name="prowlarr_search_title">Search</string>
     <string name="prowlarr_search_history">Search history</string>
     <string name="prowlarr_search_stats">Indexer statistics</string>
     <string name="prowlarr_search_query">Search query</string>
@@ -7,25 +6,16 @@
     <string name="prowlarr_search_indexers">Indexers. Select none to search all.</string>
     <string name="prowlarr_search_categories">Categories. Select none to search all.</string>
     <string name="prowlarr_search_retry">Refresh</string>
-    <string name="prowlarr_search_empty">No results</string>
     <string name="prowlarr_search_empty_message">Change the query or filters and search again.</string>
-    <string name="prowlarr_search_age_sort">Age</string>
-    <string name="prowlarr_search_size_sort">Size</string>
-    <string name="prowlarr_search_seeders_sort">Seeders</string>
-    <string name="prowlarr_search_quality">Quality: %1$s</string>
     <string name="prowlarr_search_quality_unknown">Not reported</string>
-    <string name="prowlarr_search_metadata">%1$s · %2$s · %3$s</string>
     <string name="prowlarr_search_age_days">%1$d days old</string>
     <string name="prowlarr_search_age_hours">%1$.1f hours old</string>
-    <string name="prowlarr_search_peers">%1$d seeders · %2$d leechers</string>
-    <string name="prowlarr_search_grab">Grab</string>
     <string name="prowlarr_search_copy">Copy magnet</string>
     <string name="prowlarr_search_queued">Queued for download</string>
     <string name="prowlarr_search_grabbing">Sending download</string>
     <string name="prowlarr_search_grabbed">Download requested</string>
     <string name="prowlarr_search_client">Choose a download client</string>
     <string name="prowlarr_search_no_clients">No enabled download client supports this protocol. Configure one in Prowlarr settings.</string>
-    <string name="prowlarr_search_cancel">Cancel</string>
     <string name="prowlarr_search_previous">Previous page</string>
     <string name="prowlarr_search_next">Next page</string>
     <string name="prowlarr_search_page">Page %1$d</string>
@@ -38,8 +28,6 @@
     <string name="prowlarr_search_history_row">%1$s · Indexer %2$d · %3$s</string>
     <string name="prowlarr_search_history_data">Query: %1$s · Response: %2$s ms · User agent: %3$s</string>
     <string name="prowlarr_search_success">Successful</string>
-    <string name="prowlarr_search_failure">Failed</string>
-    <string name="prowlarr_search_unknown">Unknown</string>
     <string name="prowlarr_search_connection">Unable to open this server. Check its connection settings.</string>
     <string name="prowlarr_search_cached">Refresh failed. Previously cached data remains visible.</string>
 </resources>

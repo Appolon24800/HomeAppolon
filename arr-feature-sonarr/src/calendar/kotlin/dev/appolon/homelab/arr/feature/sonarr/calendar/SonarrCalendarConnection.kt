@@ -3,6 +3,7 @@ package dev.appolon.homelab.arr.feature.sonarr.calendar
 import android.content.Context
 import coil3.ImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import coil3.request.crossfade
 import dev.appolon.homelab.arr.api.sonarr.CalendarApi
 import dev.appolon.homelab.arr.api.sonarr.SonarrCalendarApis
 import dev.appolon.homelab.arr.core.ServerId
@@ -78,5 +79,6 @@ class SonarrCalendarApisBundle(
      */
     fun imageLoader(context: Context): ImageLoader = ImageLoader.Builder(context)
         .components { add(OkHttpNetworkFetcherFactory(client)) }
+        .crossfade(true)
         .build()
 }

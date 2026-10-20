@@ -2,6 +2,7 @@ package dev.appolon.homelab.arr.feature.prowlarr.stats.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -28,6 +29,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -118,7 +120,11 @@ private fun StatsContent(state: StatsUiState, onRefresh: () -> Unit) {
                 horizontal = 16.dp, vertical = 12.dp,
             ),
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                // Summary tiles, charts, and detail rows form one traversal
+                // group over the same data.
+                .focusGroup(),
         ) {
             item {
                 val totals = state.totals
@@ -127,7 +133,7 @@ private fun StatsContent(state: StatsUiState, onRefresh: () -> Unit) {
                     totals.grabRatioPercent,
                 )
                 val responseText = stringResource(
-                    R.string.arr_prowlarr_stats_ms_value,
+                    R.string.arr_prowlarr_history_ms_value,
                     totals.averageResponseTimeMs,
                 )
                 if (wide) {
@@ -183,7 +189,12 @@ private fun StatsContent(state: StatsUiState, onRefresh: () -> Unit) {
                 }
             }
 
-            item { SectionHeader(title = stringResource(R.string.arr_prowlarr_stats_per_indexer)) }
+            item {
+                SectionHeader(
+                    title = stringResource(R.string.arr_prowlarr_stats_per_indexer),
+                    modifier = Modifier.semantics { heading() },
+                )
+            }
 
             item {
                 val rows = state.indexerRows
@@ -207,7 +218,10 @@ private fun StatsContent(state: StatsUiState, onRefresh: () -> Unit) {
             val agents = state.stats?.let(StatsPresentation::userAgents).orEmpty()
             if (agents.isNotEmpty()) {
                 item {
-                    SectionHeader(title = stringResource(R.string.arr_prowlarr_stats_user_agents))
+                    SectionHeader(
+                        title = stringResource(R.string.prowlarr_search_user_agents),
+                        modifier = Modifier.semantics { heading() },
+                    )
                 }
                 val totalQueries = agents.sumOf { it.numberOfQueries }
                 items(agents, key = { it.userAgent.orEmpty() + it.numberOfQueries }) { agent ->
@@ -218,7 +232,12 @@ private fun StatsContent(state: StatsUiState, onRefresh: () -> Unit) {
 
             val hosts = state.stats?.let(StatsPresentation::hosts).orEmpty()
             if (hosts.isNotEmpty()) {
-                item { SectionHeader(title = stringResource(R.string.arr_prowlarr_stats_hosts)) }
+                item {
+                    SectionHeader(
+                        title = stringResource(R.string.arr_prowlarr_stats_hosts),
+                        modifier = Modifier.semantics { heading() },
+                    )
+                }
                 items(hosts, key = { it.host.orEmpty() + it.numberOfQueries }) { host ->
                     HostStatRow(host, wide)
                     HorizontalDivider()
@@ -279,7 +298,7 @@ private fun IndexerStatRow(stat: IndexerStatistics, wide: Boolean) {
         ValueColumn(
             label = stringResource(R.string.arr_prowlarr_stats_response),
             value = stringResource(
-                R.string.arr_prowlarr_stats_ms_value,
+                R.string.arr_prowlarr_history_ms_value,
                 stat.averageResponseTime,
             ),
         )

@@ -52,6 +52,7 @@ import dev.appolon.homelab.arr.core.Humanize
 import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.feature.radarr.addnew.data.AddNewLogic
 import dev.appolon.homelab.arr.feature.radarr.addnew.vm.AddSheetUiState
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The add sheet opened from a search result or discovery card: root folder
@@ -89,7 +90,7 @@ fun AddMovieSheet(
                     AsyncImage(
                         model = posterUrl,
                         contentDescription = stringResource(
-                            R.string.arr_radarr_addnew_cd_poster,
+                            ArrUiR.string.arr_common_addnew_cd_poster,
                             title,
                         ),
                         contentScale = ContentScale.Crop,
@@ -129,7 +130,7 @@ fun AddMovieSheet(
 
                 Spacer(Modifier.height(16.dp))
                 ChoiceDropdown(
-                    label = stringResource(R.string.arr_radarr_addnew_sheet_root_folder),
+                    label = stringResource(ArrUiR.string.arr_common_addnew_sheet_root_folder),
                     selectedLabel = sheet.rootFolderPath
                         ?: stringResource(R.string.arr_radarr_addnew_sheet_pick_folder),
                     choices = rootFolders.map { folder ->
@@ -138,7 +139,7 @@ fun AddMovieSheet(
                             label = folder.path.orEmpty(),
                             secondary = folder.freeSpace?.let {
                                 stringResource(
-                                    R.string.arr_radarr_addnew_sheet_free_space,
+                                    ArrUiR.string.arr_common_roots_free_only,
                                     Humanize.bytes(it),
                                 )
                             },
@@ -156,7 +157,7 @@ fun AddMovieSheet(
                     )
                 }
                 ChoiceDropdown(
-                    label = stringResource(R.string.arr_radarr_addnew_sheet_quality_profile),
+                    label = stringResource(ArrUiR.string.arr_common_wanted_filter_quality),
                     selectedLabel = sheet.qualityProfileId
                         ?.let { id -> qualityProfiles.firstOrNull { it.id == id }?.name }
                         ?: stringResource(R.string.arr_radarr_addnew_sheet_pick_profile),
@@ -207,7 +208,7 @@ fun AddMovieSheet(
                 )
 
                 Text(
-                    text = stringResource(R.string.arr_radarr_addnew_sheet_tags),
+                    text = stringResource(ArrUiR.string.arr_common_tags_title),
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
                 )
@@ -245,7 +246,7 @@ fun AddMovieSheet(
                         enabled = sheet.submittable && !sheet.submitting,
                         modifier = Modifier.weight(1f),
                     ) {
-                        Text(stringResource(R.string.arr_radarr_addnew_action_add))
+                        Text(stringResource(ArrUiR.string.arr_common_roots_add_confirm))
                     }
                     Button(
                         onClick = onAddAndSearch,
@@ -258,7 +259,7 @@ fun AddMovieSheet(
                                 strokeWidth = 2.dp,
                             )
                         } else {
-                            Text(stringResource(R.string.arr_radarr_addnew_action_add_search))
+                            Text(stringResource(ArrUiR.string.arr_common_addnew_action_add_search))
                         }
                     }
                 }
@@ -274,7 +275,7 @@ private fun monitorLabel(monitor: MonitorTypes): String = when (monitor) {
     MonitorTypes.MOVIE_AND_COLLECTION ->
         stringResource(R.string.arr_radarr_addnew_monitor_movie_and_collection)
 
-    MonitorTypes.NONE -> stringResource(R.string.arr_radarr_addnew_monitor_none)
+    MonitorTypes.NONE -> stringResource(ArrUiR.string.arr_common_general_auth_method_none)
 }
 
 /** Minimum availability labels; every option ships its own translation. */

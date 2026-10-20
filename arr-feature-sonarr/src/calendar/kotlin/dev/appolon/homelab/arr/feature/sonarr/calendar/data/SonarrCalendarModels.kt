@@ -72,6 +72,9 @@ data class SonarrCalendarEntry(
 fun episodeCodeOf(seasonNumber: Int, episodeNumber: Int): String =
     String.format(Locale.ROOT, "S%02dE%02d", seasonNumber, episodeNumber)
 
+/** Resized local poster variant requested for calendar row thumbnails. */
+private const val CALENDAR_THUMB_SIZE_PX = 500
+
 /**
  * Maps one episode to its calendar entry, or null when its air date is absent
  * or unparseable (TBA episodes never reach the calendar). Series fields come
@@ -88,7 +91,10 @@ fun calendarEntryOf(episode: EpisodeResource): SonarrCalendarEntry? {
     val poster = series.images.orEmpty().firstOrNull { it.coverType == MediaCoverTypes.POSTER }
     val localPath = poster?.url
         ?.takeIf { it.isNotBlank() && !it.startsWith("http", ignoreCase = true) }
-        ?.let { ArrImages.sonarrCover(seriesId.toLong(), CoverType.POSTER) }
+        // Row thumbs only, so request the resized poster-500 variant.
+        ?.let {
+            ArrImages.sonarrCover(seriesId.toLong(), CoverType.POSTER, CALENDAR_THUMB_SIZE_PX)
+        }
     val absolutePath = poster?.url?.takeIf { it.startsWith("http", ignoreCase = true) }
     return SonarrCalendarEntry(
         episodeId = episode.id,

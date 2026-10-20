@@ -80,6 +80,7 @@ import dev.appolon.homelab.arr.ui.components.SortMenu
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The series library screen body: saved filters, filter chips, poster grid or
@@ -314,9 +315,9 @@ private fun LibraryTopBar(
                     },
                     contentDescription = stringResource(
                         if (state.view == LibraryView.POSTERS) {
-                            R.string.arr_sonarr_cd_view_table
+                            ArrUiR.string.arr_common_library_cd_view_table
                         } else {
-                            R.string.arr_sonarr_cd_view_posters
+                            ArrUiR.string.arr_common_library_cd_view_posters
                         },
                     ),
                 )
@@ -331,19 +332,19 @@ private fun LibraryTopBar(
             IconButton(onClick = onToggleSortDescending) {
                 Icon(
                     imageVector = Icons.Filled.SortByAlpha,
-                    contentDescription = stringResource(R.string.arr_sonarr_cd_toggle_descending),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_library_cd_sort_descending),
                 )
             }
             var menuOpen by remember { mutableStateOf(false) }
             IconButton(onClick = { menuOpen = true }) {
                 Icon(
                     imageVector = Icons.Filled.MoreVert,
-                    contentDescription = stringResource(R.string.arr_sonarr_cd_more_options),
+                    contentDescription = stringResource(R.string.arr_sonarr_detail_cd_more),
                 )
             }
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.arr_sonarr_menu_refresh)) },
+                    text = { Text(stringResource(ArrUiR.string.arr_common_library_cd_refresh_metadata)) },
                     onClick = {
                         menuOpen = false
                         onRefreshMetadata()
@@ -381,7 +382,7 @@ private fun SelectionTopBar(
     onDelete: () -> Unit,
 ) {
     TopAppBar(
-        title = { Text(stringResource(R.string.arr_sonarr_selected_count, state.selection.size)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_import_flow_selected, state.selection.size)) },
         navigationIcon = {
             IconButton(onClick = onExit) {
                 Icon(
@@ -445,7 +446,7 @@ private fun SavedFilterRow(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
             modifier = Modifier.weight(1f, fill = false),
         ) {
-            items(state.savedFilters, key = { it.id }) { filter ->
+            items(state.savedFilters, key = { it.id }, contentType = { "saved-filter" }) { filter ->
                 FilterChip(
                     selected = state.activeSavedFilterId == filter.id,
                     onClick = { onApply(filter.id) },
@@ -483,7 +484,7 @@ private fun FilterChipBar(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
     ) {
-        items(specs, key = { it.id }) { spec ->
+        items(specs, key = { it.id }, contentType = { "filter-spec" }) { spec ->
             FilterChip(
                 selected = state.filterState.isActive(spec.id),
                 onClick = { onOpenFilter(spec.id) },
@@ -503,7 +504,7 @@ private fun FilterChipBar(
                 FilterChip(
                     selected = false,
                     onClick = onClear,
-                    label = { Text(stringResource(R.string.arr_sonarr_filter_clear)) },
+                    label = { Text(stringResource(ArrUiR.string.arr_common_wanted_filter_clear)) },
                 )
             }
         }
@@ -515,9 +516,9 @@ private fun FilterChipBar(
 private fun activeSummary(state: SeriesLibraryUiState, spec: FilterSpec): String = when (spec.id) {
     SeriesLibraryFilters.MONITORED, SeriesLibraryFilters.MISSING -> {
         when ((state.filterState.values[spec.id] as? FilterValue.Toggle)?.on) {
-            true -> stringResource(R.string.arr_sonarr_filter_toggle_on)
-            false -> stringResource(R.string.arr_sonarr_filter_toggle_off)
-            else -> stringResource(R.string.arr_sonarr_filter_toggle_any)
+            true -> stringResource(ArrUiR.string.arr_common_yes)
+            false -> stringResource(ArrUiR.string.arr_common_no)
+            else -> stringResource(ArrUiR.string.arr_common_quality_language_any)
         }
     }
 
@@ -556,7 +557,7 @@ private fun QueuedBanner(count: Int) {
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = stringResource(R.string.arr_sonarr_queued_banner, count),
+            text = stringResource(ArrUiR.string.arr_common_system_pending_banner, count),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.tertiary,
         )
@@ -597,7 +598,7 @@ private fun PosterGrid(
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
-        items(state.presentation.visible, key = { it.id }) { series ->
+        items(state.presentation.visible, key = { it.id }, contentType = { "series" }) { series ->
             val title = series.title.orEmpty().ifEmpty { "#" + series.id }
             Box(
                 modifier = Modifier.combinedClickable(
@@ -682,7 +683,7 @@ private fun SeriesTableRow(
     onToggleSelected: (Int) -> Unit,
 ) {
     val title = series.title.orEmpty().ifEmpty { "#" + series.id }
-    val bannerDescription = stringResource(R.string.arr_sonarr_cd_series_banner, title)
+    val bannerDescription = stringResource(R.string.arr_sonarr_detail_cd_series_banner, title)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -886,15 +887,15 @@ private fun pluralMissing(count: Int): String =
 @Composable
 private fun libraryMessageText(message: LibraryMessage?): String? = when (message) {
     null -> null
-    LibraryMessage.EditSynced -> stringResource(R.string.arr_sonarr_message_edit_synced)
+    LibraryMessage.EditSynced -> stringResource(R.string.arr_sonarr_detail_message_synced)
     LibraryMessage.EditQueued -> stringResource(R.string.arr_sonarr_message_edit_queued)
     LibraryMessage.SeasonPassSynced -> stringResource(R.string.arr_sonarr_message_season_pass_synced)
     LibraryMessage.SeasonPassQueued -> stringResource(R.string.arr_sonarr_message_season_pass_queued)
-    LibraryMessage.DeleteSynced -> stringResource(R.string.arr_sonarr_message_delete_synced)
-    LibraryMessage.DeleteQueued -> stringResource(R.string.arr_sonarr_message_delete_queued)
+    LibraryMessage.DeleteSynced -> stringResource(R.string.arr_sonarr_detail_message_delete_synced)
+    LibraryMessage.DeleteQueued -> stringResource(R.string.arr_sonarr_detail_message_delete_queued)
     LibraryMessage.CommandStarted -> stringResource(R.string.arr_sonarr_message_command_started)
     LibraryMessage.CommandQueued -> stringResource(R.string.arr_sonarr_message_command_queued)
-    is LibraryMessage.WriteFailed -> stringResource(R.string.arr_sonarr_message_write_failed)
+    is LibraryMessage.WriteFailed -> stringResource(ArrUiR.string.arr_common_msg_write_failed)
 }
 
 /** Resolves the spec for a filter id against the state's current options. */
@@ -904,15 +905,15 @@ private fun specOf(state: SeriesLibraryUiState, id: String): FilterSpec? =
 @Composable
 private fun filterTitleOf(id: String): String = stringResource(
     when (id) {
-        SeriesLibraryFilters.MONITORED -> R.string.arr_sonarr_filter_monitored
-        SeriesLibraryFilters.MISSING -> R.string.arr_sonarr_filter_missing
-        SeriesLibraryFilters.QUALITY -> R.string.arr_sonarr_filter_quality
-        SeriesLibraryFilters.GENRE -> R.string.arr_sonarr_filter_genre
+        SeriesLibraryFilters.MONITORED -> ArrUiR.string.arr_common_monitored
+        SeriesLibraryFilters.MISSING -> R.string.arr_sonarr_add_strategy_missing
+        SeriesLibraryFilters.QUALITY -> ArrUiR.string.arr_common_wanted_filter_quality
+        SeriesLibraryFilters.GENRE -> ArrUiR.string.arr_common_filter_genre
         SeriesLibraryFilters.NETWORK -> R.string.arr_sonarr_filter_network
         SeriesLibraryFilters.SEASONS -> R.string.arr_sonarr_filter_seasons
-        SeriesLibraryFilters.YEAR -> R.string.arr_sonarr_filter_year
-        SeriesLibraryFilters.FOLDER -> R.string.arr_sonarr_filter_folder
-        else -> R.string.arr_sonarr_filter_tags
+        SeriesLibraryFilters.YEAR -> ArrUiR.string.arr_common_exclusions_year_label
+        SeriesLibraryFilters.FOLDER -> ArrUiR.string.arr_common_filter_folder
+        else -> ArrUiR.string.arr_common_tags_title
     },
 )
 
@@ -933,10 +934,10 @@ private fun emptyValueFor(spec: FilterSpec): FilterValue = when (spec) {
 @Composable
 private fun sortLabelOf(id: String): String = stringResource(
     when (id) {
-        SeriesLibrarySorts.YEAR -> R.string.arr_sonarr_sort_year
-        SeriesLibrarySorts.SEASONS -> R.string.arr_sonarr_sort_seasons
-        SeriesLibrarySorts.ADDED -> R.string.arr_sonarr_sort_added
-        SeriesLibrarySorts.SIZE -> R.string.arr_sonarr_sort_size
-        else -> R.string.arr_sonarr_sort_title
+        SeriesLibrarySorts.YEAR -> ArrUiR.string.arr_common_exclusions_year_label
+        SeriesLibrarySorts.SEASONS -> R.string.arr_sonarr_detail_tab_seasons
+        SeriesLibrarySorts.ADDED -> ArrUiR.string.arr_common_sort_added
+        SeriesLibrarySorts.SIZE -> ArrUiR.string.arr_common_size
+        else -> ArrUiR.string.arr_common_quality_definitions_title_field
     },
 )

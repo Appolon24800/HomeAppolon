@@ -1,6 +1,7 @@
 package dev.appolon.homelab.arr.feature.radarr.settings.quality
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.appolon.homelab.arr.core.ServerId
@@ -207,7 +208,7 @@ fun RadarrSettingsQualityFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -218,10 +219,10 @@ fun RadarrSettingsQualityFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
-                onOpenProfile = { profileId ->
+                onBack = remember(navigator) { { navigator.back() } },
+                onOpenProfile = remember(navigator, serverId) { { profileId ->
                     RadarrSettingsQualityFeature.openQualityProfileEditor(navigator, serverId, profileId)
-                },
+                } },
                 modifier = modifier,
             )
         }
@@ -233,7 +234,7 @@ fun RadarrSettingsQualityFeatureSlot(
                 profileId = profileEditor.getValue("profileId").toIntOrNull(),
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -244,10 +245,10 @@ fun RadarrSettingsQualityFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
-                onOpenFormat = { formatId ->
+                onBack = remember(navigator) { { navigator.back() } },
+                onOpenFormat = remember(navigator, serverId) { { formatId ->
                     RadarrSettingsQualityFeature.openCustomFormatEditor(navigator, serverId, formatId)
-                },
+                } },
                 modifier = modifier,
             )
         }
@@ -259,7 +260,7 @@ fun RadarrSettingsQualityFeatureSlot(
                 formatId = formatEditor.getValue("formatId").toIntOrNull(),
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -270,7 +271,7 @@ fun RadarrSettingsQualityFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -281,7 +282,7 @@ fun RadarrSettingsQualityFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -292,7 +293,7 @@ fun RadarrSettingsQualityFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }

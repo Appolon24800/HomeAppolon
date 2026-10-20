@@ -64,6 +64,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Interactive search screen: one scope's releases with quality, custom
@@ -113,7 +114,7 @@ fun ReleaseListScreen(
     }
     Box(modifier) {
         ArrScaffold(
-            title = stringResource(R.string.arr_sonarr_releases_title),
+            title = stringResource(ArrUiR.string.arr_common_indexers_mode_interactive),
             onBack = onBack,
             actions = {
                 IconButton(onClick = onPushExternal) {
@@ -128,7 +129,7 @@ fun ReleaseListScreen(
                     Icon(
                         imageVector = Icons.Filled.Refresh,
                         contentDescription = stringResource(
-                            R.string.arr_sonarr_releases_cd_refresh,
+                            ArrUiR.string.arr_common_releases_cd_refresh,
                         ),
                     )
                 }
@@ -156,10 +157,10 @@ fun ReleaseListScreen(
                     .padding(padding),
             ) {
                 if (queued) {
-                    Banner(stringResource(R.string.arr_sonarr_releases_pending_banner))
+                    Banner(stringResource(ArrUiR.string.arr_common_releases_pending_banner))
                 }
                 if (state.stale) {
-                    Banner(stringResource(R.string.arr_sonarr_releases_stale_banner))
+                    Banner(stringResource(ArrUiR.string.arr_common_releases_stale_banner))
                 }
                 ArrPullToRefreshBox(
                     isRefreshing = (state.releases as? LceState.Content)?.refreshing == true,
@@ -169,7 +170,7 @@ fun ReleaseListScreen(
                     ArrLceBox(
                         state = state.releases,
                         onRetry = onRetry,
-                        emptyTitle = stringResource(R.string.arr_sonarr_releases_empty_title),
+                        emptyTitle = stringResource(ArrUiR.string.arr_common_releases_empty_title),
                         emptyMessage = stringResource(R.string.arr_sonarr_releases_empty_message),
                         modifier = Modifier.fillMaxSize(),
                     ) { rows ->
@@ -200,10 +201,10 @@ fun ReleaseListScreen(
 
 private val ReleaseSort.labelRes: Int
     get() = when (this) {
-        ReleaseSort.QUALITY_SCORE -> R.string.arr_sonarr_releases_sort_quality
-        ReleaseSort.SEEDERS -> R.string.arr_sonarr_releases_sort_seeders
-        ReleaseSort.AGE -> R.string.arr_sonarr_releases_sort_age
-        ReleaseSort.SIZE -> R.string.arr_sonarr_releases_sort_size
+        ReleaseSort.QUALITY_SCORE -> ArrUiR.string.arr_common_releases_sort_quality
+        ReleaseSort.SEEDERS -> ArrUiR.string.arr_common_releases_sort_seeders
+        ReleaseSort.AGE -> ArrUiR.string.arr_common_releases_sort_age
+        ReleaseSort.SIZE -> ArrUiR.string.arr_common_size
     }
 
 private val ReleaseGroupFilter.labelRes: Int
@@ -217,8 +218,8 @@ private val ReleaseGroupFilter.labelRes: Int
 @Composable
 private fun releaseMessageText(message: ReleaseMessage?): String? = when (message) {
     null -> null
-    ReleaseMessage.Grabbed -> stringResource(R.string.arr_sonarr_releases_notice_grabbed)
-    ReleaseMessage.GrabQueued -> stringResource(R.string.arr_sonarr_releases_notice_grab_queued)
+    ReleaseMessage.Grabbed -> stringResource(ArrUiR.string.arr_common_releases_notice_grabbed)
+    ReleaseMessage.GrabQueued -> stringResource(ArrUiR.string.arr_common_releases_notice_grab_queued)
     is ReleaseMessage.GrabFailed -> arrErrorMessage(message.error)
     ReleaseMessage.Pushed -> stringResource(R.string.arr_sonarr_releases_notice_pushed)
     ReleaseMessage.PushQueued -> stringResource(R.string.arr_sonarr_releases_notice_push_queued)
@@ -287,7 +288,7 @@ private fun ReleaseList(
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(modifier = modifier) {
-        items(rows, key = { it.release.guid ?: it.title }) { row ->
+        items(rows, key = { it.release.guid ?: it.title }, contentType = { "release" }) { row ->
             ReleaseRow(
                 row = row,
                 expanded = row.release.guid != null && row.release.guid in expandedGuids,
@@ -307,7 +308,7 @@ private fun ReleaseRow(
     onGrab: (ReleaseRowUi) -> Unit,
 ) {
     val showRejectionsCd = stringResource(
-        R.string.arr_sonarr_releases_cd_rejections,
+        ArrUiR.string.arr_common_releases_cd_rejections,
         row.title,
     )
     Column(
@@ -336,7 +337,7 @@ private fun ReleaseRow(
                 Icon(
                     imageVector = Icons.Filled.Download,
                     contentDescription = stringResource(
-                        R.string.arr_sonarr_releases_cd_grab,
+                        ArrUiR.string.arr_common_releases_cd_grab,
                         row.title,
                     ),
                 )
@@ -381,7 +382,7 @@ private fun ReleaseRow(
             }
             Spacer(Modifier.width(8.dp))
             Text(
-                text = stringResource(R.string.arr_sonarr_releases_score, row.qualityScore),
+                text = stringResource(ArrUiR.string.arr_common_quality_format_score_row_support, row.qualityScore),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -447,7 +448,7 @@ private fun ReleaseRow(
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = stringResource(
-                        R.string.arr_sonarr_releases_rejections_count,
+                        ArrUiR.string.arr_common_releases_rejections_count,
                         row.rejections.size,
                     ),
                     style = MaterialTheme.typography.labelMedium,
@@ -470,9 +471,9 @@ private fun ReleaseRow(
 
 @Composable
 private fun ageText(row: ReleaseRowUi): String = if (row.ageDays > 0) {
-    stringResource(R.string.arr_sonarr_releases_age_days, row.ageDays)
+    stringResource(ArrUiR.string.arr_common_releases_age_days, row.ageDays)
 } else {
-    stringResource(R.string.arr_sonarr_releases_age_hours, row.ageHoursRounded)
+    stringResource(ArrUiR.string.arr_common_releases_age_hours, row.ageHoursRounded)
 }
 
 @Composable
@@ -480,9 +481,9 @@ private fun peersText(row: ReleaseRowUi): String {
     val seeders = row.seeders
     val leechers = row.leechers
     return when {
-        seeders == null -> stringResource(R.string.arr_sonarr_releases_no_seeders)
-        leechers == null -> stringResource(R.string.arr_sonarr_releases_seeders, seeders)
-        else -> stringResource(R.string.arr_sonarr_releases_seeders_leechers, seeders, leechers)
+        seeders == null -> stringResource(ArrUiR.string.arr_common_releases_no_seeders)
+        leechers == null -> stringResource(ArrUiR.string.arr_common_releases_seeders, seeders)
+        else -> stringResource(ArrUiR.string.arr_common_releases_seeders_leechers, seeders, leechers)
     }
 }
 
@@ -495,8 +496,8 @@ private fun ReleaseDetailsPane(
 ) {
     if (row == null) {
         EmptyState(
-            title = stringResource(R.string.arr_sonarr_releases_details_pane_hint_title),
-            message = stringResource(R.string.arr_sonarr_releases_details_pane_hint_message),
+            title = stringResource(ArrUiR.string.arr_common_releases_details_pane_hint_title),
+            message = stringResource(ArrUiR.string.arr_common_releases_details_pane_hint_message),
             modifier = modifier,
         )
         return
@@ -509,7 +510,7 @@ private fun ReleaseDetailsPane(
         )
         Spacer(Modifier.padding(top = 12.dp))
         DetailLine(
-            label = stringResource(R.string.arr_sonarr_releases_details_quality),
+            label = stringResource(ArrUiR.string.arr_common_quality),
             value = row.qualityName,
         )
         DetailLine(
@@ -521,23 +522,23 @@ private fun ReleaseDetailsPane(
             },
         )
         DetailLine(
-            label = stringResource(R.string.arr_sonarr_releases_details_custom_formats),
+            label = stringResource(ArrUiR.string.arr_common_quality_custom_formats_title),
             value = row.customFormats,
         )
         DetailLine(
-            label = stringResource(R.string.arr_sonarr_releases_details_languages),
+            label = stringResource(ArrUiR.string.arr_common_quality_languages_title),
             value = row.languageNames,
         )
         DetailLine(
-            label = stringResource(R.string.arr_sonarr_releases_details_indexer),
+            label = stringResource(ArrUiR.string.arr_common_releases_details_indexer),
             value = row.indexer,
         )
         DetailLine(
-            label = stringResource(R.string.arr_sonarr_releases_details_size),
+            label = stringResource(ArrUiR.string.arr_common_size),
             value = row.sizeText,
         )
         DetailLine(
-            label = stringResource(R.string.arr_sonarr_releases_details_age),
+            label = stringResource(ArrUiR.string.arr_common_releases_sort_age),
             value = ageText(row),
         )
         DetailLine(
@@ -553,7 +554,7 @@ private fun ReleaseDetailsPane(
         if (row.hasRejections) {
             Spacer(Modifier.padding(top = 8.dp))
             Text(
-                text = stringResource(R.string.arr_sonarr_releases_details_rejections),
+                text = stringResource(ArrUiR.string.arr_common_releases_details_rejections),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.error,
             )
@@ -570,7 +571,7 @@ private fun ReleaseDetailsPane(
             Icon(
                 imageVector = Icons.Filled.Download,
                 contentDescription = stringResource(
-                    R.string.arr_sonarr_releases_cd_grab,
+                    ArrUiR.string.arr_common_releases_cd_grab,
                     row.title,
                 ),
             )
@@ -611,8 +612,8 @@ private fun PushReleaseDialog(
     var indexer by remember { mutableStateOf("") }
     var protocol by remember { mutableStateOf(DownloadProtocol.TORRENT) }
     val protocolLabels = listOf(
-        DownloadProtocol.TORRENT to stringResource(R.string.arr_sonarr_push_protocol_torrent),
-        DownloadProtocol.USENET to stringResource(R.string.arr_sonarr_push_protocol_usenet),
+        DownloadProtocol.TORRENT to stringResource(ArrUiR.string.arr_common_quality_delay_torrent),
+        DownloadProtocol.USENET to stringResource(ArrUiR.string.arr_common_quality_delay_usenet),
     )
     val canPush = title.isNotBlank() && url.isNotBlank() && !busy
     AlertDialog(
@@ -678,7 +679,7 @@ private fun PushReleaseDialog(
                 enabled = !busy,
                 modifier = Modifier.heightIn(min = 48.dp),
             ) {
-                Text(stringResource(R.string.arr_sonarr_push_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )

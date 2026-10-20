@@ -57,7 +57,7 @@ class RadarrCalendarModelsTest {
                 images = listOf(MediaCover(coverType = MediaCoverTypes.POSTER, url = "/radarr-cover")),
             ),
         ).single()
-        assertEquals("api/v3/mediacover/5/poster.jpg", local.posterPath)
+        assertEquals("api/v3/mediacover/5/poster-500.jpg", local.posterPath)
 
         val absolute = calendarEntriesOf(
             movie(

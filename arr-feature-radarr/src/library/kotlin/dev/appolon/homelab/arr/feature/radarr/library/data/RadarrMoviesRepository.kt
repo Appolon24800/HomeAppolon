@@ -274,7 +274,9 @@ class RadarrMoviesRepository(
 
     private fun action(method: String, path: String, bodyJson: String?, description: String) =
         QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.RADARR,
             method = method,
@@ -308,10 +310,10 @@ class RadarrMoviesRepository(
         internal val PROFILE_TYPE = EntityType("radarr.qualityprofile")
         internal val EDITOR_PATH = "api/v3/movie/editor"
 
-        /** Ten minutes; the web library polls no faster either. */
-        const val MOVIE_TTL_MILLIS: Long = 10 * 60 * 1000
+        /** Shared library freshness limit. */
+        const val MOVIE_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.LIBRARY
 
-        /** One hour; profiles change rarely. */
-        const val PROFILE_TTL_MILLIS: Long = 60 * 60 * 1000
+        /** Shared settings freshness limit. */
+        const val PROFILE_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
     }
 }

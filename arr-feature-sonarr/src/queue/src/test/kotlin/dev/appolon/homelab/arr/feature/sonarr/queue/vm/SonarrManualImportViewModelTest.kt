@@ -1,5 +1,7 @@
 package dev.appolon.homelab.arr.feature.sonarr.queue.vm
 
+import dev.appolon.homelab.arr.api.sonarr.model.EpisodeResource
+import dev.appolon.homelab.arr.api.sonarr.model.SeriesResource
 import dev.appolon.homelab.arr.api.sonarr.FakeSonarrQueue
 import dev.appolon.homelab.arr.api.sonarr.model.ManualImportResource
 import dev.appolon.homelab.arr.core.ServerId
@@ -60,12 +62,8 @@ class SonarrManualImportViewModelTest {
     private fun item(
         id: Int,
         seriesId: Int = id + 10,
-        episodes: List<JsonObject>? = listOf(
-            buildJsonObject {
-                put("id", id + 100)
-                put("seasonNumber", 1)
-                put("episodeNumber", id)
-            },
+        episodes: List<EpisodeResource>? = listOf(
+            EpisodeResource(id = id + 100, seasonNumber = 1, episodeNumber = id),
         ),
         downloadId: String? = "dl-1",
     ) = ManualImportResource(
@@ -73,10 +71,7 @@ class SonarrManualImportViewModelTest {
         path = "/tv/$id.mkv",
         relativePath = "$id.mkv",
         downloadId = downloadId,
-        series = buildJsonObject {
-            put("id", seriesId)
-            put("title", "Show $seriesId")
-        },
+        series = SeriesResource(id = seriesId),
         seasonNumber = 1,
         episodes = episodes,
     )

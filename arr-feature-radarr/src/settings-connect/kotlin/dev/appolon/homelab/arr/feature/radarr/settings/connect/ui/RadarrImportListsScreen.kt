@@ -62,6 +62,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the import lists route. */
 @Composable
@@ -142,25 +143,25 @@ fun RadarrImportListsScreen(
     NoticeHost(
         noticeMessage = when (state.notice) {
             ImportListsNotice.DELETED ->
-                stringResource(R.string.arr_radarr_connect_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             ImportListsNotice.DELETED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_deleted_queued)
+                stringResource(ArrUiR.string.arr_common_backup_notice_deleted_queued)
 
             ImportListsNotice.TEST_ALL_DONE ->
-                stringResource(R.string.arr_radarr_connect_notice_test_all_done)
+                stringResource(ArrUiR.string.arr_common_connect_notice_test_all_done)
 
             ImportListsNotice.SYNC_STARTED ->
-                stringResource(R.string.arr_radarr_lists_notice_sync_started)
+                stringResource(ArrUiR.string.arr_common_lists_notice_sync_started)
 
             ImportListsNotice.SYNC_FAILED ->
-                stringResource(R.string.arr_radarr_lists_notice_sync_failed)
+                stringResource(ArrUiR.string.arr_common_lists_notice_sync_failed)
 
             ImportListsNotice.OPTIONS_SAVED ->
-                stringResource(R.string.arr_radarr_connect_notice_saved)
+                stringResource(ArrUiR.string.arr_common_connect_notice_saved)
 
             ImportListsNotice.OPTIONS_SAVED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
             null -> null
         },
@@ -171,14 +172,14 @@ fun RadarrImportListsScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_lists_title),
+        title = stringResource(ArrUiR.string.arr_common_lists_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onOpenExclusions) {
                 Icon(
                     imageVector = Icons.Filled.Block,
-                    contentDescription = stringResource(R.string.arr_radarr_lists_cd_exclusions),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_lists_cd_exclusions),
                 )
             }
             IconButton(onClick = onOpenPreview) {
@@ -190,25 +191,25 @@ fun RadarrImportListsScreen(
             IconButton(onClick = onSync, enabled = !state.syncing) {
                 Icon(
                     imageVector = Icons.Filled.Sync,
-                    contentDescription = stringResource(R.string.arr_radarr_lists_cd_sync),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_lists_cd_sync),
                 )
             }
             IconButton(onClick = onTestAll, enabled = !state.testingAll && content != null) {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = stringResource(R.string.arr_radarr_lists_cd_test_all),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_lists_cd_test_all),
                 )
             }
             IconButton(onClick = { showOptions = true }) {
                 Icon(
                     imageVector = Icons.Filled.Tune,
-                    contentDescription = stringResource(R.string.arr_radarr_lists_cd_options),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_lists_cd_options),
                 )
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_lists_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_lists_cd_refresh),
                 )
             }
         },
@@ -225,7 +226,7 @@ fun RadarrImportListsScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_radarr_lists_empty_title),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_lists_empty_title),
                     emptyMessage = stringResource(R.string.arr_radarr_lists_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
@@ -239,10 +240,10 @@ fun RadarrImportListsScreen(
                         }
                         item {
                             SectionHeader(
-                                title = stringResource(R.string.arr_radarr_lists_section_lists),
+                                title = stringResource(ArrUiR.string.arr_common_lists_title),
                             )
                         }
-                        items(data.lists, key = { it.id }) { list ->
+                        items(data.lists, key = { it.id }, contentType = { "list" }) { list ->
                             ImportListRow(
                                 list = list,
                                 tags = data.tags,
@@ -258,7 +259,7 @@ fun RadarrImportListsScreen(
             ExtendedFloatingActionButton(
                 onClick = onAdd,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.arr_radarr_lists_add)) },
+                text = { Text(stringResource(ArrUiR.string.arr_common_lists_add)) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
@@ -273,23 +274,23 @@ fun RadarrImportListsScreen(
     state.confirmDeleteFor?.let { target ->
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_radarr_connect_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_delete)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.arr_radarr_connect_delete_message,
+                        ArrUiR.string.arr_common_connect_delete_message,
                         target.name ?: target.id.toString(),
                     ),
                 )
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -305,7 +306,7 @@ fun RadarrImportListsScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
-                    stringResource(R.string.arr_radarr_lists_preview_title),
+                    stringResource(ArrUiR.string.arr_common_lists_preview_title),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 when {
@@ -354,7 +355,7 @@ fun RadarrImportListsScreen(
                                     )
 
                                     movie.isExisting -> stringResource(
-                                        R.string.arr_radarr_lists_preview_existing,
+                                        ArrUiR.string.arr_common_lists_preview_existing,
                                     )
 
                                     else -> stringResource(R.string.arr_radarr_lists_preview_addable)
@@ -369,7 +370,7 @@ fun RadarrImportListsScreen(
                         if (preview.movies.size > PREVIEW_ROW_LIMIT) {
                             Text(
                                 stringResource(
-                                    R.string.arr_radarr_lists_preview_more,
+                                    ArrUiR.string.arr_common_lists_preview_more,
                                     preview.movies.size - PREVIEW_ROW_LIMIT,
                                 ),
                                 style = MaterialTheme.typography.bodySmall,
@@ -403,7 +404,7 @@ private fun ImportListRow(
     onOpen: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val openCd = stringResource(R.string.arr_radarr_lists_cd_open, list.name.orEmpty())
+    val openCd = stringResource(ArrUiR.string.arr_common_lists_cd_open, list.name.orEmpty())
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -429,7 +430,7 @@ private fun ImportListRow(
                 Text(
                     text = listOfNotNull(
                         if (list.enabled) {
-                            stringResource(R.string.arr_radarr_lists_enabled)
+                            stringResource(ArrUiR.string.arr_common_general_cert_validation_enabled)
                         } else {
                             null
                         },
@@ -439,7 +440,7 @@ private fun ImportListRow(
                             null
                         },
                         if (list.searchOnAdd) {
-                            stringResource(R.string.arr_radarr_lists_search_on_add)
+                            stringResource(ArrUiR.string.arr_common_lists_search_on_add)
                         } else {
                             null
                         },
@@ -456,7 +457,7 @@ private fun ImportListRow(
                 }
                 testResult?.let { TestResultBadge(it) }
             }
-            val deleteCd = stringResource(R.string.arr_radarr_lists_cd_delete, list.name.orEmpty())
+            val deleteCd = stringResource(ArrUiR.string.arr_common_lists_cd_delete, list.name.orEmpty())
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
@@ -478,13 +479,13 @@ private fun ImportListOptionsDialog(
     var syncLevel by remember { mutableStateOf(initial.listSyncLevel.orEmpty()) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.arr_radarr_lists_options_title)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_lists_cd_options)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = syncLevel,
                     onValueChange = { syncLevel = it },
-                    label = { Text(stringResource(R.string.arr_radarr_lists_option_sync_level)) },
+                    label = { Text(stringResource(ArrUiR.string.arr_common_lists_option_sync_level)) },
                     supportingText = {
                         Text(stringResource(R.string.arr_radarr_lists_option_sync_level_support))
                     },
@@ -498,12 +499,12 @@ private fun ImportListOptionsDialog(
                 onClick = { onSave(initial.copy(listSyncLevel = syncLevel)) },
                 enabled = !busy,
             ) {
-                Text(stringResource(R.string.arr_radarr_connect_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_radarr_connect_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )

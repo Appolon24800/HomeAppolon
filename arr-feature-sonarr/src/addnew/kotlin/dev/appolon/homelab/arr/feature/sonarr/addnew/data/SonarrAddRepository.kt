@@ -410,7 +410,9 @@ class SonarrAddRepository(
 
     private fun action(method: String, path: String, bodyJson: String?, description: String) =
         QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.SONARR,
             method = method,
@@ -444,10 +446,10 @@ class SonarrAddRepository(
         internal const val LIST_SYNC_ACTION = "sync"
 
         /** Ten minutes, matching the library screen's series TTL. */
-        internal const val SERIES_TTL_MILLIS: Long = 10 * 60 * 1000
+        internal const val SERIES_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.LIBRARY
 
         /** One hour; folders, profiles, tags, lists, and exclusions change rarely. */
-        internal const val LOOKUP_TTL_MILLIS: Long = 60 * 60 * 1000
+        internal const val LOOKUP_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         private val SERIES_SER = SeriesResource.serializer()
         private val IMPORT_LIST_SER = ImportListResource.serializer()

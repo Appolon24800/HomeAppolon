@@ -213,7 +213,7 @@ class RadarrSettingsSystemRepository(
                     HostConfigResource.serializer(),
                 )
 
-                is ArrResult.Err -> Unit // schedule rows stay cached
+            is ArrResult.Err -> return@withContext r
             }
         }
         ArrResult.ok(Unit)
@@ -233,7 +233,7 @@ class RadarrSettingsSystemRepository(
             is ArrResult.Ok -> r.value
         }
         val logFiles = when (val r = fetch { updateLogFileApi.updateLogFiles() }) {
-            is ArrResult.Err -> emptyList() // log files stay optional
+            is ArrResult.Err -> return@withContext r
             is ArrResult.Ok -> r.value
         }
         val stamp = now()
@@ -281,7 +281,7 @@ class RadarrSettingsSystemRepository(
             is ArrResult.Ok -> r.value
         }
         val details = when (val r = fetch { tagDetailsApi.tagDetails() }) {
-            is ArrResult.Err -> emptyList() // usage rows stay optional
+            is ArrResult.Err -> return@withContext r
             is ArrResult.Ok -> r.value
         }
         val stamp = now()
@@ -316,10 +316,7 @@ class RadarrSettingsSystemRepository(
                 return@withContext ArrResult.ok(cachedAutoTaggingSchema())
             }
             val schema = when (val r = fetch { autoTaggingApi.autoTaggingSchema() }) {
-                is ArrResult.Err -> {
-                    val cached = cachedAutoTaggingSchema()
-                    return@withContext if (cached.isNotEmpty()) ArrResult.ok(cached) else r
-                }
+                is ArrResult.Err -> return@withContext r
 
                 is ArrResult.Ok -> r.value
             }
@@ -671,7 +668,9 @@ class RadarrSettingsSystemRepository(
 
     private fun action(method: String, path: String, bodyJson: String?, description: String) =
         QueuedAction(
-            actionId = ActionId(UUID.randomUUID().toString()),
+            actionId = ActionId(UUID.nameUUIDFromBytes(
+                "$serverId:$method:$path:$bodyJson".toByteArray(Charsets.UTF_8),
+            ).toString()),
             serverId = serverId,
             appType = AppType.RADARR,
             method = method,
@@ -818,10 +817,10 @@ class RadarrSettingsSystemRepository(
         internal const val SINGLE_ID = "config"
 
         /** Five minutes; settings screens also re-read on pull-to-refresh. */
-        const val SYSTEM_TTL_MILLIS: Long = 5 * 60 * 1000
+        const val SYSTEM_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** A day; the condition schema changes only on server upgrades. */
-        const val SCHEMA_TTL_MILLIS: Long = 24 * 60 * 60 * 1000
+        const val SCHEMA_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.SETTINGS
 
         /** Optimistic creates render under ids far below any server-assigned id. */
         internal const val TEMP_ID_BASE = -1_000_000_000L

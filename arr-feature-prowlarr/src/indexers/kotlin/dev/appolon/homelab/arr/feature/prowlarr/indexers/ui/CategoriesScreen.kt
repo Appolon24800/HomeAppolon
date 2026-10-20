@@ -32,6 +32,7 @@ import dev.appolon.homelab.arr.ui.components.SectionHeader
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Categories manager: the server's default category tree with the number of
@@ -49,7 +50,7 @@ fun CategoriesScreen(
     modifier: Modifier = Modifier,
 ) {
     dev.appolon.homelab.arr.ui.shell.ArrScaffold(
-        title = stringResource(R.string.arr_prowlarr_categories_title),
+        title = stringResource(R.string.arr_prowlarr_editor_categories),
         subtitle = stringResource(R.string.arr_prowlarr_categories_subtitle, state.totalIndexers),
         onBack = onBack,
         modifier = modifier,
@@ -104,7 +105,11 @@ private fun CategoryManagerRow(
     ) {
         Column(Modifier.weight(1f)) {
             Text(
-                "${row.category.id} · ${row.category.name.orEmpty()}",
+                    stringResource(
+                        ArrUiR.string.arr_common_metadata_pair,
+                        row.category.id.toString(),
+                        row.category.name.orEmpty(),
+                    ),
                 style = MaterialTheme.typography.bodyLarge,
             )
             row.category.description?.let { description ->
@@ -121,7 +126,7 @@ private fun CategoryManagerRow(
             label = {
                 Text(
                     stringResource(
-                        R.string.arr_prowlarr_categories_supported,
+                        ArrUiR.string.arr_common_tags_usage_indexers,
                         row.supportingIndexers,
                     ),
                 )

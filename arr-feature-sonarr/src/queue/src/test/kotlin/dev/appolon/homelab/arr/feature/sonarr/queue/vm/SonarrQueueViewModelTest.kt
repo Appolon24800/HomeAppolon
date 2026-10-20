@@ -1,5 +1,7 @@
 package dev.appolon.homelab.arr.feature.sonarr.queue.vm
 
+import dev.appolon.homelab.arr.api.sonarr.model.EpisodeResource
+import dev.appolon.homelab.arr.api.sonarr.model.SeriesResource
 import dev.appolon.homelab.arr.api.sonarr.FakeSonarrQueue
 import dev.appolon.homelab.arr.api.sonarr.model.QueueResource
 import dev.appolon.homelab.arr.api.sonarr.model.QueueStatus
@@ -65,16 +67,8 @@ class SonarrQueueViewModelTest {
         seriesId = id,
         episodeId = id + 100,
         seasonNumber = 1,
-        series = buildJsonObject {
-            put("id", id)
-            put("title", "Show $id")
-        },
-        episode = buildJsonObject {
-            put("id", id + 100)
-            put("seasonNumber", 1)
-            put("episodeNumber", id)
-            put("title", "Episode $id")
-        },
+        series = SeriesResource(id = id, title = "Show $id"),
+        episode = EpisodeResource(id = id + 100, seasonNumber = 1, episodeNumber = id),
         title = "Release.$id",
         status = QueueStatus.DOWNLOADING,
         downloadId = "dl-$id",

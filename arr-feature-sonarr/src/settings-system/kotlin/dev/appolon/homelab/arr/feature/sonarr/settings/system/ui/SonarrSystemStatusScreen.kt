@@ -51,6 +51,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the system status route. */
 @Composable
@@ -96,14 +97,14 @@ fun SonarrSystemStatusScreen(
     modifier: Modifier = Modifier,
 ) {
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_status_title),
+        title = stringResource(ArrUiR.string.arr_common_status_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_system_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_refresh),
                 )
             }
         },
@@ -172,69 +173,69 @@ private fun StatusHostCard(data: SonarrSystemStatusContent) {
     val status = data.status
     SystemCard {
         Column {
-            SystemSectionHeader(stringResource(R.string.arr_sonarr_status_section_host))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_general_section_host))
             SystemValueRow(
-                label = stringResource(R.string.arr_sonarr_status_version),
-                value = status.version ?: stringResource(R.string.arr_sonarr_status_unknown),
+                label = stringResource(ArrUiR.string.arr_common_status_version),
+                value = status.version ?: stringResource(ArrUiR.string.arr_common_status_unknown),
             )
             SystemValueRow(
-                label = stringResource(R.string.arr_sonarr_status_branch),
-                value = status.branch ?: stringResource(R.string.arr_sonarr_status_not_set),
+                label = stringResource(ArrUiR.string.arr_common_status_branch),
+                value = status.branch ?: stringResource(ArrUiR.string.arr_common_general_ssl_unset),
             )
             SystemValueRow(
-                label = stringResource(R.string.arr_sonarr_status_runtime),
+                label = stringResource(ArrUiR.string.arr_common_status_runtime),
                 formatPair(
-                    stringResource(R.string.arr_sonarr_status_unknown),
+                    stringResource(ArrUiR.string.arr_common_status_unknown),
                     status.runtimeName,
                 ) + " " + (status.runtimeVersion ?: "").trim(),
             )
             SystemValueRow(
-                label = stringResource(R.string.arr_sonarr_status_os),
+                label = stringResource(ArrUiR.string.arr_common_status_os),
                 value = listOfNotNull(
                     status.osName,
                     status.osVersion?.takeIf { it.isNotBlank() },
-                ).joinToString(" ").ifBlank { stringResource(R.string.arr_sonarr_status_unknown) },
+                ).joinToString(" ").ifBlank { stringResource(ArrUiR.string.arr_common_status_unknown) },
             )
             SystemValueRow(
-                label = stringResource(R.string.arr_sonarr_status_mode),
+                label = stringResource(ArrUiR.string.arr_common_status_mode),
                 value = status.mode.display(),
             )
             if (status.isDocker || status.isContainerized) {
                 Text(
-                    text = stringResource(R.string.arr_sonarr_status_docker),
+                    text = stringResource(ArrUiR.string.arr_common_status_docker),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             ArrTime.parse(status.startTime)?.let { started ->
                 SystemValueRow(
-                    label = stringResource(R.string.arr_sonarr_status_start_time),
+                    label = stringResource(ArrUiR.string.arr_common_status_start_time),
                     value = ArrTime.dateTimeFull(started),
                 )
             }
             ArrTime.parse(status.buildTime)?.let { built ->
                 SystemValueRow(
-                    label = stringResource(R.string.arr_sonarr_status_build_time),
+                    label = stringResource(ArrUiR.string.arr_common_status_build_time),
                     value = ArrTime.dateTimeFull(built),
                 )
             }
             status.appData?.let { appData ->
                 SystemValueRow(
-                    label = stringResource(R.string.arr_sonarr_status_app_data),
+                    label = stringResource(ArrUiR.string.arr_common_status_app_data),
                     value = appData,
                 )
             }
-            SystemSectionHeader(stringResource(R.string.arr_sonarr_status_section_database))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_status_section_database))
             SystemValueRow(
-                label = stringResource(R.string.arr_sonarr_status_database_type),
+                label = stringResource(ArrUiR.string.arr_common_status_database_type),
                 value = status.databaseType.display(),
             )
             SystemValueRow(
-                label = stringResource(R.string.arr_sonarr_status_database_version),
-                value = status.databaseVersion ?: stringResource(R.string.arr_sonarr_status_unknown),
+                label = stringResource(ArrUiR.string.arr_common_status_version),
+                value = status.databaseVersion ?: stringResource(ArrUiR.string.arr_common_status_unknown),
             )
             SystemValueRow(
-                label = stringResource(R.string.arr_sonarr_status_database_migration),
+                label = stringResource(ArrUiR.string.arr_common_status_database_migration),
                 value = status.migrationVersion.toString(),
             )
         }
@@ -248,15 +249,15 @@ private fun HealthCard(
 ) {
     SystemCard {
         Column {
-            SystemSectionHeader(stringResource(R.string.arr_sonarr_status_section_health))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_status_section_health))
             if (health.isEmpty()) {
                 Text(
-                    text = stringResource(R.string.arr_sonarr_status_health_ok),
+                    text = stringResource(ArrUiR.string.arr_common_status_health_ok),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
                 Text(
-                    text = stringResource(R.string.arr_sonarr_status_health_ok_message),
+                    text = stringResource(ArrUiR.string.arr_common_status_health_ok_message),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -283,7 +284,7 @@ private fun HealthCard(
                     if (wikiUrl != null) {
                         SystemExternalLinkButton(
                             contentDescription = stringResource(
-                                R.string.arr_sonarr_status_cd_health_more_info,
+                                ArrUiR.string.arr_common_status_cd_health_more_info,
                             ),
                             onOpenLink = onOpenLink?.let { open -> { open(wikiUrl) } },
                         )
@@ -300,10 +301,10 @@ private fun DiskSpaceCard(
 ) {
     SystemCard {
         Column {
-            SystemSectionHeader(stringResource(R.string.arr_sonarr_status_section_disk))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_status_section_disk))
             if (diskSpace.isEmpty()) {
                 Text(
-                    text = stringResource(R.string.arr_sonarr_status_not_set),
+                    text = stringResource(ArrUiR.string.arr_common_general_ssl_unset),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -321,7 +322,7 @@ private fun DiskSpaceCard(
                         )
                         Text(
                             text = stringResource(
-                                R.string.arr_sonarr_status_disk_free_of,
+                                ArrUiR.string.arr_common_status_disk_free_of,
                                 Humanize.bytes(free),
                                 Humanize.bytes(total),
                             ),
@@ -329,7 +330,7 @@ private fun DiskSpaceCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    val barDescription = stringResource(R.string.arr_sonarr_status_cd_disk_bar, label)
+                    val barDescription = stringResource(ArrUiR.string.arr_common_status_cd_disk_bar, label)
                     LinearProgressIndicator(
                         progress = { 1f - (free.toFloat() / total) },
                         modifier = Modifier
@@ -349,10 +350,10 @@ private fun TasksCard(
 ) {
     SystemCard {
         Column {
-            SystemSectionHeader(stringResource(R.string.arr_sonarr_status_section_tasks))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_status_section_tasks))
             if (tasks.isEmpty()) {
                 Text(
-                    text = stringResource(R.string.arr_sonarr_status_not_set),
+                    text = stringResource(ArrUiR.string.arr_common_general_ssl_unset),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -365,7 +366,7 @@ private fun TasksCard(
                     )
                     Text(
                         text = stringResource(
-                            R.string.arr_sonarr_status_task_interval,
+                            ArrUiR.string.arr_common_status_task_interval,
                             SystemText.intervalMinutes(row.intervalMinutes),
                         ),
                         style = MaterialTheme.typography.bodySmall,
@@ -375,18 +376,18 @@ private fun TasksCard(
                     val duration = row.lastDurationSeconds
                     val line = when {
                         lastRun != null && duration != null -> stringResource(
-                            R.string.arr_sonarr_status_task_last_run,
+                            ArrUiR.string.arr_common_status_task_last_run,
                             lastRun,
                             Humanize.duration(duration),
                         )
 
                         lastRun != null -> stringResource(
-                            R.string.arr_sonarr_status_task_last_run,
+                            ArrUiR.string.arr_common_status_task_last_run,
                             lastRun,
                             "",
                         )
 
-                        else -> stringResource(R.string.arr_sonarr_status_task_never_run)
+                        else -> stringResource(ArrUiR.string.arr_common_status_task_never_run)
                     }
                     Text(
                         text = line,
@@ -396,7 +397,7 @@ private fun TasksCard(
                     row.nextExecutionEpochMs?.let { next ->
                         Text(
                             text = stringResource(
-                                R.string.arr_sonarr_status_task_next_run,
+                                ArrUiR.string.arr_common_status_task_next_run,
                                 ArrTime.relative(next),
                             ),
                             style = MaterialTheme.typography.bodySmall,
@@ -412,14 +413,14 @@ private fun TasksCard(
 @Composable
 private fun RuntimeMode?.display(): String = when (this) {
     RuntimeMode.CONSOLE, RuntimeMode.SERVICE, RuntimeMode.TRAY -> this.toString()
-    null -> stringResource(R.string.arr_sonarr_status_unknown)
+    null -> stringResource(ArrUiR.string.arr_common_status_unknown)
 }
 
 @Composable
 private fun DatabaseType?.display(): String = when (this) {
     DatabaseType.SQLITE -> "SQLite"
     DatabaseType.POSTGRESQL -> "PostgreSQL"
-    null -> stringResource(R.string.arr_sonarr_status_unknown)
+    null -> stringResource(ArrUiR.string.arr_common_status_unknown)
 }
 
 @Composable
@@ -428,7 +429,7 @@ private fun HealthCheckResult?.display(): String = when (this) {
     HealthCheckResult.NOTICE -> this.toString()
     HealthCheckResult.WARNING -> this.toString()
     HealthCheckResult.ERROR -> this.toString()
-    null -> stringResource(R.string.arr_sonarr_status_unknown)
+    null -> stringResource(ArrUiR.string.arr_common_status_unknown)
 }
 
 @Composable

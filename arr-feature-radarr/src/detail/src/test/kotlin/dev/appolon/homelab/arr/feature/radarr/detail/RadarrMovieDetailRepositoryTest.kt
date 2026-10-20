@@ -97,12 +97,18 @@ class RadarrMovieDetailRepositoryTest {
     }
 
     @Test
-    fun `stale cache is served when the network fails`() = runTest {
+    fun `stale read reports offline without deleting the cached movie`() = runTest {
         assertTrue(repository.movie(serverId, 1) is ArrResult.Ok)
         connection.networkUp = false
         now += RadarrMovieDetailRepository.DEFAULT_TTL_MILLIS + 1
         val result = repository.movie(serverId, 1)
-        assertEquals("Sunshine", (result as ArrResult.Ok).value.title)
+        assertTrue(result is ArrResult.Err)
+        assertEquals(
+            "Sunshine",
+            store.get(
+                serverId, RadarrMovieDetailRepository.MOVIE, "1", MovieResource.serializer(),
+            )?.title,
+        )
     }
 
     @Test

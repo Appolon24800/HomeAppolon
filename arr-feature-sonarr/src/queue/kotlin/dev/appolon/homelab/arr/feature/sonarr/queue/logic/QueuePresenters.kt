@@ -9,8 +9,6 @@ import dev.appolon.homelab.arr.api.sonarr.model.TrackedDownloadStatus
 import dev.appolon.homelab.arr.api.sonarr.model.TrackedDownloadStatusMessage
 import dev.appolon.homelab.arr.core.Humanize
 import dev.appolon.homelab.arr.ui.components.QueueRowStatus
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import java.util.Locale
 import kotlin.math.roundToLong
 
@@ -71,9 +69,10 @@ data class SonarrQueueOverview(
 
 /**
  * Pure presentation for the Sonarr queue: wire items in, episode-level row
- * models and aggregates out. The committed DTOs embed series and episode as
- * raw JSON objects, so the label extraction lives here, free of framework
- * types and directly unit-testable per the architecture doc.
+ * models and aggregates out. Series and episode arrive as typed DTOs with
+ * empty defaults (id = 0, null titles) meaning "unmatched", so the label
+ * extraction lives here, free of framework types and directly unit-testable
+ * per the architecture doc.
  */
 object SonarrQueuePresenters {
 
@@ -115,21 +114,22 @@ object SonarrQueuePresenters {
     /** Interactive import needs an output path to browse. */
     fun canManualImport(item: QueueResource): Boolean = !item.outputPath.isNullOrEmpty()
 
-    /** Matched series title from the embedded series object, when present. */
-    fun seriesTitleOf(item: QueueResource): String? = item.series.stringOf("title")
+    /** Matched series title; null when the embedded series is the empty unmatched default. */
+    fun seriesTitleOf(item: QueueResource): String? = item.series.title
 
     /** Row title: the series when Sonarr matched one, else the release title. */
     fun titleOf(item: QueueResource): String =
         seriesTitleOf(item) ?: item.title.orEmpty().ifEmpty { UNKNOWN_TITLE }
 
     /** Season of the row: the top-level field first, then the embedded episode. */
-    fun seasonOf(item: QueueResource): Int? = item.seasonNumber ?: item.episode.intOf("seasonNumber")
+    fun seasonOf(item: QueueResource): Int? =
+        item.seasonNumber?.takeIf { it > 0 } ?: item.episode.seasonNumber?.takeIf { it > 0 }
 
     /** Episode number from the embedded episode object, when present. */
-    fun episodeNumberOf(item: QueueResource): Int? = item.episode.intOf("episodeNumber")
+    fun episodeNumberOf(item: QueueResource): Int? = item.episode.episodeNumber?.takeIf { it > 0 }
 
     /** Episode title from the embedded episode object, when present. */
-    fun episodeTitleOf(item: QueueResource): String? = item.episode.stringOf("title")
+    fun episodeTitleOf(item: QueueResource): String? = item.episode.title
 
     /** "S02E05" when both parts are known; null for unknown-series rows. */
     fun episodeLabelOf(item: QueueResource): String? {
@@ -244,14 +244,6 @@ object SonarrQueuePresenters {
                 null
             },
         )
-    }
-
-    private fun JsonObject.stringOf(key: String): String? =
-        (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.content?.takeIf { it.isNotEmpty() }
-
-    private fun JsonObject.intOf(key: String): Int? = when (val element = this[key]) {
-        is JsonPrimitive -> element.content.toIntOrNull()
-        else -> null
     }
 
     private const val UNKNOWN_TITLE = "—"

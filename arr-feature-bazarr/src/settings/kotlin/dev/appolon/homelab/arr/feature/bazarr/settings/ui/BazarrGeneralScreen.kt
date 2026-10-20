@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.feature.bazarr.R
@@ -91,7 +92,10 @@ fun BazarrGeneralScreen(
                                     title = stringResource(
                                         R.string.arr_bazarr_settings_general_reported,
                                     ),
-                                    modifier = Modifier.fillMaxWidth().widthIn(max = contentWidth),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .widthIn(max = contentWidth)
+                                        .semantics { heading() },
                                 )
                             }
                             items(general, key = { "g_${it.key}" }) { row ->
@@ -109,7 +113,10 @@ fun BazarrGeneralScreen(
                                     title = stringResource(
                                         R.string.arr_bazarr_settings_general_all_fields,
                                     ),
-                                    modifier = Modifier.fillMaxWidth().widthIn(max = contentWidth),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .widthIn(max = contentWidth)
+                                        .semantics { heading() },
                                 )
                             }
                             items(other, key = { "o_${it.key}" }) { row ->

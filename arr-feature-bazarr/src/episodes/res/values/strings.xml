@@ -69,4 +69,6 @@
     <string name="arr_bazarr_cd_refresh">Refresh</string>
     <string name="arr_bazarr_cd_movie_event">Movie subtitle event</string>
     <string name="arr_bazarr_cd_episode_event">Episode subtitle event</string>
+    <string name="arr_bazarr_cd_loading">Loading</string>
+    <string name="arr_bazarr_cd_testing">Testing</string>
 </resources>

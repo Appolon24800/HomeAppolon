@@ -168,9 +168,9 @@ fun RadarrCalendarDestination(
         onViewModeChange = vm::setViewMode,
         onIncludeUnmonitoredChange = vm::setIncludeUnmonitored,
         onSelectDate = vm::selectDate,
-        onMovieActivate = { movieId ->
+        onMovieActivate = remember(navigator, serverId) { { movieId: Int ->
             navigator.open(ArrRoute.Detail(serverId, AppType.RADARR, movieId.toString()))
-        },
+        } },
         modifier = modifier,
     )
 }

@@ -12,7 +12,6 @@
     <string name="arr_prowlarr_stats_grab_ratio">Grab ratio</string>
     <string name="arr_prowlarr_stats_avg_response">Avg response</string>
     <string name="arr_prowlarr_stats_ratio_value">%1$.1f%%</string>
-    <string name="arr_prowlarr_stats_ms_value">%1$d ms</string>
     <string name="arr_prowlarr_stats_queries">queries</string>
     <string name="arr_prowlarr_stats_grabs">grabs</string>
     <string name="arr_prowlarr_stats_response">response</string>
@@ -23,7 +22,6 @@
     <string name="arr_prowlarr_stats_per_indexer">Per indexer</string>
     <string name="arr_prowlarr_stats_chart_queries_title">Queries and grabs</string>
     <string name="arr_prowlarr_stats_chart_response_title">Average response time</string>
-    <string name="arr_prowlarr_stats_user_agents">User agents</string>
     <string name="arr_prowlarr_stats_hosts">Hosts</string>
     <string name="arr_prowlarr_stats_unknown_agent">Unknown user agent</string>
     <string name="arr_prowlarr_stats_unknown_host">Unknown host</string>

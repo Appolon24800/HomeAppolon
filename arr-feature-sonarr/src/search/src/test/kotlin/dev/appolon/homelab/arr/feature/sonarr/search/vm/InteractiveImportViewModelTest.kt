@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.feature.sonarr.search.vm
 
+import dev.appolon.homelab.arr.api.sonarr.model.EpisodeResource
 import dev.appolon.homelab.arr.api.sonarr.FakeSonarrQueue
 import dev.appolon.homelab.arr.api.sonarr.model.Language
 import dev.appolon.homelab.arr.api.sonarr.model.LanguageResource
@@ -97,16 +98,13 @@ class InteractiveImportViewModelTest {
         path = "/media/tv/Target Series/season-02/$name",
         relativePath = name,
         size = 1_400_000_000L,
-        series = buildJsonObject {
-            put("id", matchedSeriesId)
-            put("title", if (matchedSeriesId == 5) "Target Series" else "Other Series")
-        },
+        series = SeriesResource(
+            id = matchedSeriesId,
+            title = if (matchedSeriesId == series.id) series.title else "Other Series",
+        ),
         seasonNumber = 2,
         episodes = episodeIds.map { episodeId ->
-            buildJsonObject {
-                put("id", episodeId)
-                put("episodeNumber", 5)
-            }
+            EpisodeResource(id = episodeId, episodeNumber = 5)
         },
         quality = QualityModel(quality = Quality(id = 7, name = "WEBDL-1080p")),
         languages = listOf(Language(id = 1, name = "English")),

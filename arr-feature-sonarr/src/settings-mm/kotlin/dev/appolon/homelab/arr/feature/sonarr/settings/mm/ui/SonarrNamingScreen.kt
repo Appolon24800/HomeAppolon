@@ -61,6 +61,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** One editable format: chip set plus where its preview values come from. */
 private class FormatSpec(
@@ -154,7 +155,7 @@ fun SonarrNamingScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_naming_title),
+        title = stringResource(R.string.arr_sonarr_mm_link_naming),
         subtitle = serverName,
         onBack = onBack,
         actions = {
@@ -162,14 +163,14 @@ fun SonarrNamingScreen(
                 IconButton(onClick = onSave, enabled = !state.saving) {
                     Icon(
                         imageVector = Icons.Filled.Save,
-                        contentDescription = stringResource(R.string.arr_sonarr_naming_cd_save),
+                        contentDescription = stringResource(ArrUiR.string.arr_common_naming_cd_save),
                     )
                 }
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_naming_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_naming_cd_refresh),
                 )
             }
         },
@@ -336,13 +337,13 @@ private fun NamingToggles(
             onCheckedChange = { value -> onEdit { it.copy(renameEpisodes = value) } },
         )
         LabeledSwitch(
-            label = stringResource(R.string.arr_sonarr_naming_replace_illegal),
-            supportingText = stringResource(R.string.arr_sonarr_naming_replace_illegal_support),
+            label = stringResource(ArrUiR.string.arr_common_naming_replace_illegal),
+            supportingText = stringResource(ArrUiR.string.arr_common_naming_replace_illegal_support),
             checked = draft.replaceIllegalCharacters,
             onCheckedChange = { value -> onEdit { it.copy(replaceIllegalCharacters = value) } },
         )
         IntDropdown(
-            label = stringResource(R.string.arr_sonarr_naming_colon_replacement),
+            label = stringResource(ArrUiR.string.arr_common_naming_colon_replacement),
             selected = draft.colonReplacementFormat,
             entries = ColonReplacementChoices,
             onSelect = { choice -> onEdit { it.copy(colonReplacementFormat = choice) } },
@@ -406,11 +407,11 @@ private fun FormatEditor(
                 lastSyncedFormat = next.text
                 onNewFormat(next.text)
             },
-            label = { Text(stringResource(R.string.arr_sonarr_naming_format_hint)) },
+            label = { Text(stringResource(ArrUiR.string.arr_common_naming_format_hint)) },
             modifier = Modifier.fillMaxWidth(),
         )
         Text(
-            text = stringResource(R.string.arr_sonarr_naming_token_hint),
+            text = stringResource(ArrUiR.string.arr_common_naming_token_hint),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
@@ -460,7 +461,7 @@ private fun PreviewCard(
             val example = serverExample ?: localPreview
             Text(
                 text = example.ifBlank {
-                    stringResource(R.string.arr_sonarr_naming_preview_empty)
+                    stringResource(ArrUiR.string.arr_common_naming_preview_empty)
                 },
                 style = MaterialTheme.typography.titleMedium,
                 overflow = TextOverflow.Ellipsis,
@@ -468,14 +469,14 @@ private fun PreviewCard(
             )
             if (serverExample != null) {
                 Text(
-                    text = stringResource(R.string.arr_sonarr_naming_preview_server_source),
+                    text = stringResource(ArrUiR.string.arr_common_naming_preview_server_source),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp),
                 )
             } else {
                 Text(
-                    text = stringResource(R.string.arr_sonarr_naming_preview_local_source),
+                    text = stringResource(ArrUiR.string.arr_common_naming_preview_local_source),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp),
@@ -534,8 +535,8 @@ private fun NoticeHost(
     onConsumeWriteError: () -> Unit,
 ) {
     val message = when (notice) {
-        NamingNotice.SAVED -> stringResource(R.string.arr_sonarr_naming_notice_saved)
-        NamingNotice.SAVED_QUEUED -> stringResource(R.string.arr_sonarr_naming_notice_saved_queued)
+        NamingNotice.SAVED -> stringResource(ArrUiR.string.arr_common_naming_notice_saved)
+        NamingNotice.SAVED_QUEUED -> stringResource(ArrUiR.string.arr_common_naming_notice_saved_queued)
         null -> null
     }
     LaunchedEffect(message) {
@@ -555,7 +556,7 @@ private fun NoticeHost(
 
 /** Colon replacement choices: wire value to label resource. */
 private val ColonReplacementChoices = listOf(
-    NamingDraft.COLON_DELETE to R.string.arr_sonarr_naming_colon_delete,
+    NamingDraft.COLON_DELETE to ArrUiR.string.arr_common_delete,
     NamingDraft.COLON_DASH to R.string.arr_sonarr_naming_colon_dash,
     NamingDraft.COLON_SPACE_DASH to R.string.arr_sonarr_naming_colon_space_dash,
     NamingDraft.COLON_SPACE_DASH_SPACE to R.string.arr_sonarr_naming_colon_space_dash_space,

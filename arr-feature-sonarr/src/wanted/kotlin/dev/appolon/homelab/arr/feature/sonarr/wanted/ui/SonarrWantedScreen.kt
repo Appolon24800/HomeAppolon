@@ -87,6 +87,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The Sonarr Wanted screen: missing and cutoff-unmet tabs over the same
@@ -130,12 +131,12 @@ fun SonarrWantedScreen(
     }
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_wanted_title),
+        title = stringResource(ArrUiR.string.arr_common_wanted_title),
         modifier = modifier,
         actions = {
             if (state.queuedForServer > 0) {
                 val queuedDescription =
-                    stringResource(R.string.arr_sonarr_wanted_cd_queued, state.queuedForServer)
+                    stringResource(ArrUiR.string.arr_common_system_pending_banner, state.queuedForServer)
                 BadgedBox(
                     badge = { Badge { Text(state.queuedForServer.coerceAtMost(99).toString()) } },
                     modifier = Modifier.semantics { contentDescription = queuedDescription },
@@ -190,9 +191,9 @@ fun SonarrWantedScreen(
                         state = lce,
                         onRetry = onRefresh,
                         emptyTitle = if (state.tab == WantedTab.MISSING) {
-                            stringResource(R.string.arr_sonarr_wanted_empty_missing_title)
+                            stringResource(ArrUiR.string.arr_common_wanted_empty_missing_title)
                         } else {
-                            stringResource(R.string.arr_sonarr_wanted_empty_cutoff_title)
+                            stringResource(ArrUiR.string.arr_common_wanted_empty_cutoff_title)
                         },
                         emptyMessage = if (state.tab == WantedTab.MISSING) {
                             stringResource(R.string.arr_sonarr_wanted_empty_missing_message)
@@ -231,8 +232,8 @@ private fun WantedTabRow(
     TabRow(selectedTabIndex = state.tab.ordinal) {
         WantedTab.entries.forEach { tab ->
             val label = when (tab) {
-                WantedTab.MISSING -> stringResource(R.string.arr_sonarr_wanted_tab_missing)
-                WantedTab.CUTOFF -> stringResource(R.string.arr_sonarr_wanted_tab_cutoff)
+                WantedTab.MISSING -> stringResource(ArrUiR.string.arr_common_wanted_tab_missing)
+                WantedTab.CUTOFF -> stringResource(ArrUiR.string.arr_common_wanted_tab_cutoff)
             }
             val total = when (tab) {
                 WantedTab.MISSING -> counts.missing
@@ -271,7 +272,7 @@ private fun WantedFilterBar(
         FilterChip(
             selected = state.filterState.isActive(WantedFilters.MONITORED),
             onClick = onToggleMonitored,
-            label = { Text(stringResource(R.string.arr_sonarr_wanted_filter_monitored)) },
+            label = { Text(stringResource(ArrUiR.string.arr_common_monitored)) },
         )
         Box {
             FilterChip(
@@ -287,7 +288,7 @@ private fun WantedFilterBar(
                     DropdownMenuItem(
                         text = {
                             Text(
-                                stringResource(R.string.arr_sonarr_wanted_filter_empty_options),
+                                stringResource(ArrUiR.string.arr_common_wanted_filter_empty_options),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         },
@@ -326,7 +327,7 @@ private fun WantedFilterBar(
         ) {
             AssistChip(
                 onClick = onClear,
-                label = { Text(stringResource(R.string.arr_sonarr_wanted_filter_clear)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_wanted_filter_clear)) },
             )
         }
     }
@@ -361,7 +362,7 @@ private fun WantedList(
                 state = gridState,
                 modifier = Modifier.fillMaxSize(),
             ) {
-                items(episodes, key = { it.id }) { episode ->
+                items(episodes, key = { it.id }, contentType = { "episode" }) { episode ->
                     WantedEpisodeRow(
                         episode = episode,
                         state = state,
@@ -387,7 +388,7 @@ private fun WantedList(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.fillMaxSize(),
             ) {
-                items(episodes, key = { it.id }) { episode ->
+                items(episodes, key = { it.id }, contentType = { "episode" }) { episode ->
                     WantedEpisodeRow(
                         episode = episode,
                         state = state,
@@ -430,7 +431,7 @@ private fun WantedEpisodeRow(
     val seriesTitle = seriesTitleOf(episode)
     val code = episodeCode(episode)
     val openDescription =
-        stringResource(R.string.arr_sonarr_wanted_cd_open_series, seriesTitle)
+        stringResource(ArrUiR.string.arr_common_mm_browser_cd_open, seriesTitle)
     val searchEpisodeDescription =
         stringResource(R.string.arr_sonarr_wanted_cd_search_episode, seriesTitle, code)
     val searchSeriesDescription =
@@ -486,7 +487,7 @@ private fun WantedEpisodeRow(
             }
             if (queued) {
                 Text(
-                    text = stringResource(R.string.arr_sonarr_wanted_badge_queued),
+                    text = stringResource(ArrUiR.string.arr_common_connect_badge_queued),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.padding(end = 8.dp),
@@ -495,9 +496,9 @@ private fun WantedEpisodeRow(
             Icon(
                 imageVector = Icons.Filled.Done,
                 contentDescription = if (episode.monitored) {
-                    stringResource(R.string.arr_sonarr_wanted_cd_monitored)
+                    stringResource(ArrUiR.string.arr_common_monitored)
                 } else {
-                    stringResource(R.string.arr_sonarr_wanted_cd_unmonitored)
+                    stringResource(ArrUiR.string.arr_common_wanted_cd_unmonitored)
                 },
                 tint = if (episode.monitored) {
                     MaterialTheme.colorScheme.primary
@@ -597,7 +598,7 @@ private fun LoadingMoreRow() {
     ) {
         CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
         Text(
-            text = stringResource(R.string.arr_sonarr_wanted_loading_more),
+            text = stringResource(ArrUiR.string.arr_common_loading_more),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 12.dp),
@@ -659,7 +660,7 @@ private fun airDateText(episode: EpisodeResource): String {
 @Composable
 private fun wantedMessageText(message: WantedMessage): String = when (message) {
     is WantedMessage.EpisodeSearchStarted -> if (message.count == 1) {
-        stringResource(R.string.arr_sonarr_wanted_msg_episode_search_started_one)
+        stringResource(ArrUiR.string.arr_common_detail_msg_search_started)
     } else {
         stringResource(R.string.arr_sonarr_wanted_msg_episode_search_started_many, message.count)
     }
@@ -668,10 +669,10 @@ private fun wantedMessageText(message: WantedMessage): String = when (message) {
         stringResource(R.string.arr_sonarr_wanted_msg_series_search_started)
 
     is WantedMessage.SearchQueued -> if (message.count == 1) {
-        stringResource(R.string.arr_sonarr_wanted_msg_search_queued_one)
+        stringResource(ArrUiR.string.arr_common_wanted_msg_search_queued_one)
     } else {
         stringResource(R.string.arr_sonarr_wanted_msg_search_queued_many, message.count)
     }
 
-    WantedMessage.SearchFailed -> stringResource(R.string.arr_sonarr_wanted_msg_search_failed)
+    WantedMessage.SearchFailed -> stringResource(ArrUiR.string.arr_common_wanted_msg_search_failed)
 }

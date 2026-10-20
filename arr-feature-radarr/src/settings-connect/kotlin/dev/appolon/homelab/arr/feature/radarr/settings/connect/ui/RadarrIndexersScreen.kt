@@ -63,6 +63,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the indexers route: repository plus ViewModel wiring. */
 @Composable
@@ -134,18 +135,18 @@ fun RadarrIndexersScreen(
 
     NoticeHost(
         noticeMessage = when (state.notice) {
-            IndexersNotice.DELETED -> stringResource(R.string.arr_radarr_connect_notice_deleted)
+            IndexersNotice.DELETED -> stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
             IndexersNotice.DELETED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_deleted_queued)
+                stringResource(ArrUiR.string.arr_common_backup_notice_deleted_queued)
 
             IndexersNotice.TEST_ALL_DONE ->
-                stringResource(R.string.arr_radarr_connect_notice_test_all_done)
+                stringResource(ArrUiR.string.arr_common_connect_notice_test_all_done)
 
             IndexersNotice.OPTIONS_SAVED ->
-                stringResource(R.string.arr_radarr_connect_notice_saved)
+                stringResource(ArrUiR.string.arr_common_connect_notice_saved)
 
             IndexersNotice.OPTIONS_SAVED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
             null -> null
         },
@@ -156,26 +157,26 @@ fun RadarrIndexersScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_indexers_title),
+        title = stringResource(ArrUiR.string.arr_common_indexers_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onTestAll, enabled = !state.testingAll && content != null) {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = stringResource(R.string.arr_radarr_indexers_cd_test_all),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_indexers_cd_test_all),
                 )
             }
             IconButton(onClick = { showOptions = true }) {
                 Icon(
                     imageVector = Icons.Filled.Tune,
-                    contentDescription = stringResource(R.string.arr_radarr_indexers_cd_options),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_indexers_cd_options),
                 )
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_indexers_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_indexers_cd_refresh),
                 )
             }
         },
@@ -192,8 +193,8 @@ fun RadarrIndexersScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_radarr_indexers_empty_title),
-                    emptyMessage = stringResource(R.string.arr_radarr_indexers_empty_message),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_indexers_empty_title),
+                    emptyMessage = stringResource(ArrUiR.string.arr_common_indexers_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
                     LazyColumn(
@@ -206,10 +207,14 @@ fun RadarrIndexersScreen(
                         }
                         item {
                             SectionHeader(
-                                title = stringResource(R.string.arr_radarr_indexers_section_indexers),
+                                title = stringResource(ArrUiR.string.arr_common_indexers_title),
                             )
                         }
-                        items(data.indexers, key = { it.id }) { indexer ->
+                        items(
+                            data.indexers,
+                            key = { it.id },
+                            contentType = { "indexer" },
+                        ) { indexer ->
                             IndexerRow(
                                 indexer = indexer,
                                 tags = data.tags,
@@ -225,7 +230,7 @@ fun RadarrIndexersScreen(
             ExtendedFloatingActionButton(
                 onClick = onAdd,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text(stringResource(R.string.arr_radarr_indexers_add)) },
+                text = { Text(stringResource(ArrUiR.string.arr_common_indexers_add)) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
@@ -240,23 +245,23 @@ fun RadarrIndexersScreen(
     state.confirmDeleteFor?.let { target ->
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_radarr_connect_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_delete)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.arr_radarr_connect_delete_message,
+                        ArrUiR.string.arr_common_connect_delete_message,
                         target.name ?: target.id.toString(),
                     ),
                 )
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -284,7 +289,7 @@ private fun IndexerRow(
     onOpen: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val openCd = stringResource(R.string.arr_radarr_indexers_cd_open, indexer.name.orEmpty())
+    val openCd = stringResource(ArrUiR.string.arr_common_indexers_cd_open, indexer.name.orEmpty())
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -305,18 +310,18 @@ private fun IndexerRow(
                 Text(
                     text = listOfNotNull(
                         indexer.implementationName,
-                        stringResource(R.string.arr_radarr_indexers_priority, indexer.priority),
+                        stringResource(ArrUiR.string.arr_common_connect_priority, indexer.priority),
                     ).joinToString(" · "),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 val modes = buildList {
-                    if (indexer.enableRss) add(stringResource(R.string.arr_radarr_indexers_mode_rss))
+                    if (indexer.enableRss) add(stringResource(ArrUiR.string.arr_common_indexers_mode_rss))
                     if (indexer.enableAutomaticSearch) {
-                        add(stringResource(R.string.arr_radarr_indexers_mode_automatic))
+                        add(stringResource(ArrUiR.string.arr_common_indexers_mode_automatic))
                     }
                     if (indexer.enableInteractiveSearch) {
-                        add(stringResource(R.string.arr_radarr_indexers_mode_interactive))
+                        add(stringResource(ArrUiR.string.arr_common_indexers_mode_interactive))
                     }
                 }
                 if (modes.isNotEmpty()) {
@@ -332,7 +337,7 @@ private fun IndexerRow(
                     Text(
                         text = listOfNotNull(
                             seedRatio?.let {
-                                stringResource(R.string.arr_radarr_indexers_seed_ratio, it)
+                                stringResource(ArrUiR.string.arr_common_indexers_seed_ratio, it)
                             },
                             seedTime?.let {
                                 stringResource(R.string.arr_radarr_indexers_seed_time, it)
@@ -352,7 +357,7 @@ private fun IndexerRow(
                 testResult?.let { TestResultBadge(it) }
             }
             val deleteCd = stringResource(
-                R.string.arr_radarr_indexers_cd_delete,
+                ArrUiR.string.arr_common_indexers_cd_delete,
                 indexer.name.orEmpty(),
             )
             IconButton(onClick = onDelete, modifier = Modifier.semantics { contentDescription = deleteCd }) {
@@ -383,26 +388,26 @@ private fun IndexerOptionsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.arr_radarr_indexers_options_title)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_indexers_cd_options)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedNumberField(
-                    label = stringResource(R.string.arr_radarr_indexers_option_minimum_age),
+                    label = stringResource(ArrUiR.string.arr_common_indexers_option_minimum_age),
                     value = minimumAge,
                     onChange = { minimumAge = it },
                 )
                 OutlinedNumberField(
-                    label = stringResource(R.string.arr_radarr_indexers_option_maximum_size),
+                    label = stringResource(ArrUiR.string.arr_common_indexers_option_maximum_size),
                     value = maximumSize,
                     onChange = { maximumSize = it },
                 )
                 OutlinedNumberField(
-                    label = stringResource(R.string.arr_radarr_indexers_option_retention),
+                    label = stringResource(ArrUiR.string.arr_common_indexers_option_retention),
                     value = retention,
                     onChange = { retention = it },
                 )
                 OutlinedNumberField(
-                    label = stringResource(R.string.arr_radarr_indexers_option_rss_interval),
+                    label = stringResource(ArrUiR.string.arr_common_indexers_option_rss_interval),
                     value = rssSyncInterval,
                     onChange = { rssSyncInterval = it },
                 )
@@ -435,12 +440,12 @@ private fun IndexerOptionsDialog(
                 },
                 enabled = !busy,
             ) {
-                Text(stringResource(R.string.arr_radarr_connect_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_radarr_connect_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )
@@ -471,7 +476,7 @@ internal fun PendingBanner(pending: Int) {
     AssistChip(
         onClick = {},
         enabled = false,
-        label = { Text(stringResource(R.string.arr_radarr_connect_pending_banner, pending)) },
+        label = { Text(stringResource(ArrUiR.string.arr_common_system_pending_banner, pending)) },
     )
 }
 

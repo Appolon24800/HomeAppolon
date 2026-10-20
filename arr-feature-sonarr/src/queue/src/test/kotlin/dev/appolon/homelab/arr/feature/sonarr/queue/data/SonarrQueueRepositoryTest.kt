@@ -1,5 +1,7 @@
 package dev.appolon.homelab.arr.feature.sonarr.queue.data
 
+import dev.appolon.homelab.arr.api.sonarr.model.EpisodeResource
+import dev.appolon.homelab.arr.api.sonarr.model.SeriesResource
 import dev.appolon.homelab.arr.api.sonarr.FakeSonarrQueue
 import dev.appolon.homelab.arr.api.sonarr.model.QueueResource
 import dev.appolon.homelab.arr.api.sonarr.model.QueueStatus
@@ -66,11 +68,11 @@ class SonarrQueueRepositoryTest {
         seriesId = seriesId,
         episodeId = if (seriesId != null) id + 100 else null,
         seasonNumber = if (seriesId != null) 1 else null,
-        series = if (seriesId != null) seriesJson(seriesId, title) else JsonObject(emptyMap()),
+        series = if (seriesId != null) seriesJson(seriesId, title) else SeriesResource(),
         episode = if (seriesId != null) {
             episodeJson(id + 100, 1, id, "Episode $id")
         } else {
-            JsonObject(emptyMap())
+            EpisodeResource()
         },
         title = "Release.$id",
         status = status,
@@ -80,17 +82,9 @@ class SonarrQueueRepositoryTest {
         sizeleft = 5.0,
     )
 
-    private fun seriesJson(id: Int, title: String): JsonObject = buildJsonObject {
-        put("id", id)
-        put("title", title)
-    }
+    private fun seriesJson(id: Int, title: String): SeriesResource = SeriesResource(id = id, title = title)
 
-    private fun episodeJson(id: Int, season: Int, number: Int, title: String): JsonObject = buildJsonObject {
-        put("id", id)
-        put("seasonNumber", season)
-        put("episodeNumber", number)
-        put("title", title)
-    }
+    private fun episodeJson(id: Int, season: Int, number: Int, title: String): EpisodeResource = EpisodeResource(id = id, seasonNumber = season, episodeNumber = number)
 
     @Before
     fun setUp() {

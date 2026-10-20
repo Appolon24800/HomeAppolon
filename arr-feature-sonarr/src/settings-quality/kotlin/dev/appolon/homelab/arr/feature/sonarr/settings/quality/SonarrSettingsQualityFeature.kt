@@ -1,6 +1,7 @@
 package dev.appolon.homelab.arr.feature.sonarr.settings.quality
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.appolon.homelab.arr.core.ServerId
@@ -239,7 +240,7 @@ fun SonarrSettingsQualityFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -250,10 +251,10 @@ fun SonarrSettingsQualityFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
-                onOpenProfile = { profileId ->
+                onBack = remember(navigator) { { navigator.back() } },
+                onOpenProfile = remember(navigator, serverId) { { profileId ->
                     SonarrSettingsQualityFeature.openQualityProfileEditor(navigator, serverId, profileId)
-                },
+                } },
                 modifier = modifier,
             )
         }
@@ -265,7 +266,7 @@ fun SonarrSettingsQualityFeatureSlot(
                 profileId = profileEditor.getValue("profileId").toIntOrNull(),
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -276,10 +277,10 @@ fun SonarrSettingsQualityFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
-                onOpenProfile = { profileId ->
+                onBack = remember(navigator) { { navigator.back() } },
+                onOpenProfile = remember(navigator, serverId) { { profileId ->
                     SonarrSettingsQualityFeature.openLanguageProfileEditor(navigator, serverId, profileId)
-                },
+                } },
                 modifier = modifier,
             )
         }
@@ -291,7 +292,7 @@ fun SonarrSettingsQualityFeatureSlot(
                 profileId = languageProfileEditor.getValue("profileId").toIntOrNull(),
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -302,10 +303,10 @@ fun SonarrSettingsQualityFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
-                onOpenFormat = { formatId ->
+                onBack = remember(navigator) { { navigator.back() } },
+                onOpenFormat = remember(navigator, serverId) { { formatId ->
                     SonarrSettingsQualityFeature.openCustomFormatEditor(navigator, serverId, formatId)
-                },
+                } },
                 modifier = modifier,
             )
         }
@@ -317,7 +318,7 @@ fun SonarrSettingsQualityFeatureSlot(
                 formatId = formatEditor.getValue("formatId").toIntOrNull(),
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -328,7 +329,7 @@ fun SonarrSettingsQualityFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -339,7 +340,7 @@ fun SonarrSettingsQualityFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -350,7 +351,7 @@ fun SonarrSettingsQualityFeatureSlot(
                 serverId = serverId,
                 clients = clients(serverId),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }

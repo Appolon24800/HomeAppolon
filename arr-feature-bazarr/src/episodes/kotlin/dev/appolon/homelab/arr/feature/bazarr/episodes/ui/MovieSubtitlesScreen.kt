@@ -2,6 +2,7 @@ package dev.appolon.homelab.arr.feature.bazarr.episodes.ui
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -44,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.feature.bazarr.R
@@ -115,7 +117,13 @@ fun MovieSubtitlesScreen(
         actions = {
             if (state.queued) QueuedBadge(modifier = Modifier.padding(end = 8.dp))
             if (state.busy) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                val busyCd = stringResource(R.string.arr_bazarr_cd_loading)
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .semantics { contentDescription = busyCd },
+                    strokeWidth = 2.dp,
+                )
                 Spacer(Modifier.size(8.dp))
             }
             val uploadCd = stringResource(R.string.arr_bazarr_cd_upload)
@@ -160,6 +168,7 @@ fun MovieSubtitlesScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
+                            .focusGroup()
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                     ) {
                         Card(modifier = Modifier.fillMaxWidth().widthIn(max = contentWidth)) {
@@ -170,6 +179,7 @@ fun MovieSubtitlesScreen(
                                 Text(
                                     text = stringResource(R.string.arr_bazarr_subtitles_section),
                                     style = MaterialTheme.typography.titleSmall,
+                                    modifier = Modifier.semantics { heading() },
                                 )
                                 if (state.subtitles.isEmpty()) {
                                     Text(
@@ -227,6 +237,7 @@ fun MovieSubtitlesScreen(
                                     text = stringResource(R.string.arr_bazarr_missing_section),
                                     style = MaterialTheme.typography.titleSmall,
                                     color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.semantics { heading() },
                                 )
                                 if (state.missingLanguages.isEmpty()) {
                                     Text(

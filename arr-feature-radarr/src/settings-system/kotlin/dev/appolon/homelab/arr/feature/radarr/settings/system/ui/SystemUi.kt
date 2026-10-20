@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Section heading shared by every screen in this group. */
 @Composable
@@ -176,13 +177,13 @@ internal fun SystemPendingSyncBanner(pending: Int) {
     ) {
         Icon(
             imageVector = Icons.Filled.CloudUpload,
-            contentDescription = stringResource(R.string.arr_radarr_system_cd_queued_indicator),
+            contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_queued_indicator),
             tint = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.size(20.dp),
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = stringResource(R.string.arr_radarr_system_pending_banner, pending),
+            text = stringResource(ArrUiR.string.arr_common_system_pending_banner, pending),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.tertiary,
         )

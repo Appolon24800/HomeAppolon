@@ -1,6 +1,7 @@
 package dev.appolon.homelab.arr.feature.sonarr.queue
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import dev.appolon.homelab.arr.api.sonarr.FileSystemApi
@@ -145,7 +146,7 @@ fun SonarrQueueFeatureSlot(
                 clients = clients(serverId),
                 downloadId = downloadMatch.getValue("downloadId"),
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }
@@ -157,7 +158,7 @@ fun SonarrQueueFeatureSlot(
                 clients = clients(serverId),
                 downloadId = null,
                 serverName = serverNames(serverId),
-                onBack = { navigator.back() },
+                onBack = remember(navigator) { { navigator.back() } },
                 modifier = modifier,
             )
         }

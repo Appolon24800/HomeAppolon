@@ -1,5 +1,7 @@
 package dev.appolon.homelab.arr.feature.sonarr.activity.vm
 
+import dev.appolon.homelab.arr.api.sonarr.model.EpisodeResource
+import dev.appolon.homelab.arr.api.sonarr.model.SeriesResource
 import dev.appolon.homelab.arr.api.sonarr.FakeSonarrQueue
 import dev.appolon.homelab.arr.api.sonarr.model.BlocklistResource
 import dev.appolon.homelab.arr.core.ArrError
@@ -61,7 +63,7 @@ class SonarrBlocklistViewModelTest {
         sourceTitle = "Release.$id",
         date = Instant.ofEpochSecond(1_800_000_000L - id * 3_600L).toString(),
         message = "Rejected $id",
-        series = buildJsonObject { put("title", "Series $id") },
+        series = SeriesResource(title = "Series $id"),
     )
 
     @Before

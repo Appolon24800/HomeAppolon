@@ -139,9 +139,9 @@ fun RadarrWantedDestination(
         onToggleMonitored = vm::toggleMonitored,
         onQualityToggle = vm::toggleQuality,
         onClearFilters = vm::clearFilters,
-        onMovieOpen = { movieId ->
+        onMovieOpen = remember(navigator, serverId) { { movieId: Int ->
             navigator.open(ArrRoute.Detail(serverId, AppType.RADARR, movieId.toString()))
-        },
+        } },
         onSearchMovie = vm::searchMovie,
         onSearchAll = vm::searchAll,
         onConsumeMessage = vm::consumeMessage,

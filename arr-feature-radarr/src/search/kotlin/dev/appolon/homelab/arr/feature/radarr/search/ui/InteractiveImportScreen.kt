@@ -58,6 +58,7 @@ import dev.appolon.homelab.arr.feature.radarr.search.vm.InteractiveImportUiState
 import dev.appolon.homelab.arr.ui.components.EmptyState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The interactive import decision flow for one movie: a folder browser, the
@@ -100,7 +101,7 @@ fun InteractiveImportScreen(
     }
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_import_flow_title),
+        title = stringResource(ArrUiR.string.arr_common_import_flow_title),
         subtitle = state.movie?.title,
         onBack = onBack,
         modifier = modifier,
@@ -128,7 +129,7 @@ fun InteractiveImportScreen(
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Button(onClick = onRetryMovie) {
-                        Text(stringResource(dev.appolon.homelab.arr.ui.R.string.arr_retry))
+                        Text(stringResource(ArrUiR.string.arr_retry))
                     }
                 }
 
@@ -140,7 +141,7 @@ fun InteractiveImportScreen(
                         state.folder?.let { folder ->
                             Text(
                                 text = stringResource(
-                                    R.string.arr_radarr_import_flow_current_folder,
+                                    ArrUiR.string.arr_common_import_flow_current_folder,
                                     folder,
                                 ),
                                 style = MaterialTheme.typography.labelMedium,
@@ -234,12 +235,12 @@ private fun importNoticeText(notice: ImportFlowMessage?, approvedCount: Int): St
     when (notice) {
         null -> null
         ImportFlowMessage.Imported -> stringResource(
-            R.string.arr_radarr_import_flow_notice_imported,
+            ArrUiR.string.arr_common_import_flow_notice_imported,
             approvedCount,
         )
 
         ImportFlowMessage.ImportQueued ->
-            stringResource(R.string.arr_radarr_import_flow_notice_queued)
+            stringResource(ArrUiR.string.arr_common_import_flow_notice_queued)
 
         is ImportFlowMessage.ImportFailed -> arrErrorMessage(notice.error)
     }
@@ -253,7 +254,7 @@ private fun FolderPane(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
-        PaneHeader(stringResource(R.string.arr_radarr_import_flow_folders_label))
+        PaneHeader(stringResource(ArrUiR.string.arr_common_import_flow_folders_label))
         when (val load = state.foldersLoad) {
             ImportFlowLoad.Loading -> Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -267,17 +268,17 @@ private fun FolderPane(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 EmptyState(
-                    title = stringResource(R.string.arr_radarr_import_flow_folders_error_title),
+                    title = stringResource(ArrUiR.string.arr_common_import_flow_folders_error_title),
                     message = arrErrorMessage(load.error),
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Button(onClick = onRetryFolders) {
-                    Text(stringResource(dev.appolon.homelab.arr.ui.R.string.arr_retry))
+                    Text(stringResource(ArrUiR.string.arr_retry))
                 }
             }
 
             ImportFlowLoad.Ready -> LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(state.folders, key = { it.path }) { folder ->
+                items(state.folders, key = { it.path }, contentType = { "folder" }) { folder ->
                     FolderRow(
                         folder = folder,
                         current = folder.path == state.folder,
@@ -298,12 +299,12 @@ private fun FolderRow(
     onPickFolder: (String) -> Unit,
 ) {
     val openCd = if (folder.isParent) {
-        stringResource(R.string.arr_radarr_import_flow_cd_parent)
+        stringResource(ArrUiR.string.arr_common_import_flow_cd_parent)
     } else {
-        stringResource(R.string.arr_radarr_import_flow_cd_folder, folder.name)
+        stringResource(ArrUiR.string.arr_common_import_flow_cd_folder, folder.name)
     }
     val pickCd = stringResource(
-        R.string.arr_radarr_import_flow_cd_pick_folder,
+        ArrUiR.string.arr_common_import_flow_cd_pick_folder,
         folder.name,
     )
     Row(
@@ -357,7 +358,7 @@ private fun FilesPane(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
-        PaneHeader(stringResource(R.string.arr_radarr_import_flow_files_label))
+        PaneHeader(stringResource(ArrUiR.string.arr_common_import_flow_files_label))
         when (val load = state.filesLoad) {
             ImportFlowLoad.Loading -> Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -371,29 +372,29 @@ private fun FilesPane(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 EmptyState(
-                    title = stringResource(R.string.arr_radarr_import_flow_files_error_title),
+                    title = stringResource(ArrUiR.string.arr_common_import_flow_files_error_title),
                     message = arrErrorMessage(load.error),
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Button(onClick = onRetryFiles) {
-                    Text(stringResource(dev.appolon.homelab.arr.ui.R.string.arr_retry))
+                    Text(stringResource(ArrUiR.string.arr_retry))
                 }
             }
 
             ImportFlowLoad.Ready -> {
                 if (state.files.isEmpty()) {
                     val hint = state.folder?.let {
-                        stringResource(R.string.arr_radarr_import_flow_no_files_message)
+                        stringResource(ArrUiR.string.arr_common_import_flow_no_files_message)
                     }
                     EmptyState(
-                        title = stringResource(R.string.arr_radarr_import_flow_no_files_title),
+                        title = stringResource(ArrUiR.string.arr_common_import_flow_no_files_title),
                         message = hint
-                            ?: stringResource(R.string.arr_radarr_import_flow_pick_folder_hint),
+                            ?: stringResource(ArrUiR.string.arr_common_import_flow_pick_folder_hint),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(state.files, key = { it.id }) { file ->
+                        items(state.files, key = { it.id }, contentType = { "file" }) { file ->
                             FileRow(
                                 file = file,
                                 movieTitle = state.movie?.title,
@@ -415,9 +416,9 @@ private fun FileRow(
     onToggleFile: (Int) -> Unit,
     onOpenEditor: (Int) -> Unit,
 ) {
-    val toggleCd = stringResource(R.string.arr_radarr_import_flow_cd_file, file.name)
+    val toggleCd = stringResource(ArrUiR.string.arr_common_import_flow_cd_file, file.name)
     val editCd = stringResource(
-        R.string.arr_radarr_import_flow_cd_edit_decision,
+        ArrUiR.string.arr_common_import_flow_cd_edit_decision,
         file.name,
     )
     Row(
@@ -443,7 +444,7 @@ private fun FileRow(
             if (serverMatch != null && serverMatch != movieTitle) {
                 Text(
                     text = stringResource(
-                        R.string.arr_radarr_import_flow_server_match,
+                        ArrUiR.string.arr_common_import_flow_server_match,
                         serverMatch,
                     ),
                     style = MaterialTheme.typography.labelSmall,
@@ -453,10 +454,10 @@ private fun FileRow(
             Text(
                 text = listOfNotNull(
                     file.qualityName?.let {
-                        stringResource(R.string.arr_radarr_import_flow_quality_line, it)
+                        stringResource(ArrUiR.string.arr_common_import_flow_quality_line, it)
                     },
                     file.languageName?.let {
-                        stringResource(R.string.arr_radarr_import_flow_language_line, it)
+                        stringResource(ArrUiR.string.arr_common_import_flow_language_line, it)
                     },
                 ).joinToString(" · "),
                 style = MaterialTheme.typography.labelSmall,
@@ -472,7 +473,7 @@ private fun FileRow(
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = stringResource(
-                            R.string.arr_radarr_import_flow_rejections,
+                            ArrUiR.string.arr_common_releases_rejections_count,
                             file.rejections.size,
                         ),
                         style = MaterialTheme.typography.labelSmall,
@@ -507,7 +508,7 @@ private fun SelectionBar(
             .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Text(
-            text = stringResource(R.string.arr_radarr_import_flow_selected, state.selectedCount),
+            text = stringResource(ArrUiR.string.arr_common_import_flow_selected, state.selectedCount),
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.weight(1f),
         )
@@ -517,14 +518,14 @@ private fun SelectionBar(
                     onClick = { onSelectAll(false) },
                     modifier = Modifier.heightIn(min = 48.dp),
                 ) {
-                    Text(stringResource(R.string.arr_radarr_import_flow_clear_selection))
+                    Text(stringResource(ArrUiR.string.arr_common_import_flow_clear_selection))
                 }
             } else {
                 OutlinedButton(
                     onClick = { onSelectAll(true) },
                     modifier = Modifier.heightIn(min = 48.dp),
                 ) {
-                    Text(stringResource(R.string.arr_radarr_import_flow_select_all))
+                    Text(stringResource(ArrUiR.string.arr_common_import_flow_select_all))
                 }
             }
             Spacer(Modifier.width(8.dp))
@@ -534,7 +535,7 @@ private fun SelectionBar(
             enabled = state.canApprove,
             modifier = Modifier.heightIn(min = 48.dp),
         ) {
-            Text(stringResource(R.string.arr_radarr_import_flow_approve))
+            Text(stringResource(ArrUiR.string.arr_common_import_flow_approve))
         }
     }
 }
@@ -552,7 +553,7 @@ private fun DecisionEditorDialog(
     var language by remember(file.id) { mutableStateOf<Language?>(null) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.arr_radarr_import_flow_editor_title)) },
+        title = { Text(stringResource(ArrUiR.string.arr_common_import_flow_editor_title)) },
         text = {
             Column {
                 Text(
@@ -563,14 +564,14 @@ private fun DecisionEditorDialog(
                     overflow = TextOverflow.Ellipsis,
                 )
                 DecisionDropdown(
-                    label = stringResource(R.string.arr_radarr_import_flow_editor_quality),
+                    label = stringResource(ArrUiR.string.arr_common_quality),
                     parsedName = file.qualityName,
                     optionNames = qualityOptions.mapNotNull { it.name },
                     selectedName = quality?.name,
                     onSelect = { name -> quality = qualityOptions.firstOrNull { it.name == name } },
                 )
                 DecisionDropdown(
-                    label = stringResource(R.string.arr_radarr_import_flow_editor_language),
+                    label = stringResource(ArrUiR.string.arr_common_language),
                     parsedName = file.languageName,
                     optionNames = languageOptions.mapNotNull { it.name },
                     selectedName = language?.name,
@@ -582,12 +583,12 @@ private fun DecisionEditorDialog(
         },
         confirmButton = {
             TextButton(onClick = { onSave(file.id, quality, language) }) {
-                Text(stringResource(R.string.arr_radarr_import_flow_editor_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_radarr_import_flow_editor_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )
@@ -617,9 +618,9 @@ private fun DecisionDropdown(
             Text(
                 text = selectedName
                     ?: parsedName?.let {
-                        stringResource(R.string.arr_radarr_import_flow_editor_as_parsed, it)
+                        stringResource(ArrUiR.string.arr_common_import_flow_editor_as_parsed, it)
                     }
-                    ?: stringResource(R.string.arr_radarr_grab_sheet_as_parsed),
+                    ?: stringResource(ArrUiR.string.arr_common_grab_sheet_as_parsed),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false),

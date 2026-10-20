@@ -66,6 +66,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The Sonarr episode calendar: month and agenda views at episode granularity,
@@ -102,7 +103,7 @@ fun SonarrCalendarScreen(
         ArrLceBox(
             state = lce,
             onRetry = onRefresh,
-            emptyTitle = stringResource(R.string.arr_sonarr_calendar_empty_title),
+            emptyTitle = stringResource(ArrUiR.string.arr_common_calendar_empty_title),
             emptyMessage = stringResource(R.string.arr_sonarr_calendar_empty_message),
             modifier = Modifier.weight(1f),
         ) { content ->
@@ -153,7 +154,7 @@ private fun CalendarToolbar(
             IconButton(onClick = onPreviousMonth) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    contentDescription = stringResource(R.string.arr_sonarr_calendar_cd_previous_month),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_calendar_cd_previous_month),
                 )
             }
             Text(
@@ -165,13 +166,13 @@ private fun CalendarToolbar(
             IconButton(onClick = onGoToToday) {
                 Icon(
                     imageVector = Icons.Filled.Today,
-                    contentDescription = stringResource(R.string.arr_sonarr_calendar_cd_today),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_calendar_cd_today),
                 )
             }
             IconButton(onClick = onNextMonth) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = stringResource(R.string.arr_sonarr_calendar_cd_next_month),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_calendar_cd_next_month),
                 )
             }
         }
@@ -187,7 +188,7 @@ private fun CalendarToolbar(
                     selected = state.viewMode == CalendarViewMode.MONTH,
                     onClick = { onViewModeChange(CalendarViewMode.MONTH) },
                     shape = SegmentedButtonDefaults.itemShape(0, 2),
-                    label = { Text(stringResource(R.string.arr_sonarr_calendar_view_month)) },
+                    label = { Text(stringResource(ArrUiR.string.arr_common_calendar_view_month)) },
                     icon = {
                         SegmentedButtonDefaults.Icon(active = state.viewMode == CalendarViewMode.MONTH)
                     },
@@ -196,7 +197,7 @@ private fun CalendarToolbar(
                     selected = state.viewMode == CalendarViewMode.AGENDA,
                     onClick = { onViewModeChange(CalendarViewMode.AGENDA) },
                     shape = SegmentedButtonDefaults.itemShape(1, 2),
-                    label = { Text(stringResource(R.string.arr_sonarr_calendar_view_agenda)) },
+                    label = { Text(stringResource(ArrUiR.string.arr_common_calendar_view_agenda)) },
                     icon = {
                         SegmentedButtonDefaults.Icon(active = state.viewMode == CalendarViewMode.AGENDA)
                     },
@@ -206,7 +207,7 @@ private fun CalendarToolbar(
             FilterChip(
                 selected = state.includeUnmonitored,
                 onClick = { onIncludeUnmonitoredChange(!state.includeUnmonitored) },
-                label = { Text(stringResource(R.string.arr_sonarr_calendar_unmonitored)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_calendar_unmonitored)) },
                 leadingIcon = if (state.includeUnmonitored) {
                     {
                         Icon(
@@ -345,7 +346,7 @@ private fun DayCell(
         cell.entries.size,
         cell.entries.size,
     )
-    val description = stringResource(R.string.arr_sonarr_calendar_cd_day, fullDate, episodes)
+    val description = stringResource(ArrUiR.string.arr_common_calendar_cd_day, fullDate, episodes)
     Box(
         contentAlignment = Alignment.TopStart,
         modifier = modifier
@@ -487,7 +488,11 @@ private fun AgendaView(
                     isToday = day.isToday,
                 )
             }
-            items(day.entries, key = { "e-" + it.episodeId }) { entry ->
+            items(
+                day.entries,
+                key = { "e-" + it.episodeId },
+                contentType = { "calendar-entry" },
+            ) { entry ->
                 CalendarEntryRow(
                     entry = entry,
                     today = state.today,
@@ -531,7 +536,7 @@ private fun CalendarEntryRow(
     ) {
         PosterThumb(
             posterUrl = posterUrlOf(entry, baseUrl),
-            contentDescription = stringResource(R.string.arr_sonarr_calendar_cd_poster, title),
+            contentDescription = stringResource(ArrUiR.string.arr_common_addnew_cd_poster, title),
             imageLoader = imageLoader,
         )
         Spacer(Modifier.width(12.dp))
@@ -544,7 +549,7 @@ private fun CalendarEntryRow(
             )
             Text(
                 text = stringResource(
-                    R.string.arr_sonarr_calendar_entry_subtitle,
+                    ArrUiR.string.arr_common_calendar_entry_subtitle,
                     entry.episodeCode,
                     airStateLabel(airState),
                     entry.title ?: "",
@@ -559,7 +564,7 @@ private fun CalendarEntryRow(
         if (entry.monitored) {
             Icon(
                 imageVector = Icons.Filled.Visibility,
-                contentDescription = stringResource(R.string.arr_sonarr_calendar_cd_monitored),
+                contentDescription = stringResource(ArrUiR.string.arr_common_monitored),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(20.dp),
             )
@@ -568,7 +573,7 @@ private fun CalendarEntryRow(
             Spacer(Modifier.width(4.dp))
             Icon(
                 imageVector = Icons.Filled.CheckCircle,
-                contentDescription = stringResource(R.string.arr_sonarr_calendar_cd_downloaded),
+                contentDescription = stringResource(ArrUiR.string.arr_common_calendar_cd_downloaded),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp),
             )

@@ -71,6 +71,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Destination for the root folders route: wires the root folder
@@ -164,14 +165,14 @@ fun RadarrRootFoldersScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_roots_title),
+        title = stringResource(ArrUiR.string.arr_common_mm_link_root_folders),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_roots_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_roots_cd_refresh),
                 )
             }
         },
@@ -244,7 +245,7 @@ fun RadarrRootFoldersScreen(
                             contentDescription = null,
                         )
                     },
-                    text = { Text(stringResource(R.string.arr_radarr_roots_add)) },
+                    text = { Text(stringResource(ArrUiR.string.arr_common_roots_add)) },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(16.dp),
@@ -255,10 +256,10 @@ fun RadarrRootFoldersScreen(
 
     if (showAdd) {
         FolderPathDialog(
-            title = stringResource(R.string.arr_radarr_roots_add_title),
+            title = stringResource(ArrUiR.string.arr_common_roots_add),
             initialPath = "",
             fileSystemRepository = fileSystemRepository,
-            confirmLabel = stringResource(R.string.arr_radarr_roots_add_confirm),
+            confirmLabel = stringResource(ArrUiR.string.arr_common_roots_add_confirm),
             onConfirm = { path ->
                 showAdd = false
                 onAdd(path)
@@ -269,11 +270,11 @@ fun RadarrRootFoldersScreen(
 
     showMoveFor?.let { target ->
         FolderPathDialog(
-            title = stringResource(R.string.arr_radarr_roots_move_title, target.folder.path ?: ""),
+            title = stringResource(ArrUiR.string.arr_common_roots_move_title, target.folder.path ?: ""),
             initialPath = target.folder.path ?: "",
             fileSystemRepository = fileSystemRepository,
-            confirmLabel = stringResource(R.string.arr_radarr_roots_move_confirm),
-            supporting = stringResource(R.string.arr_radarr_roots_move_hint),
+            confirmLabel = stringResource(ArrUiR.string.arr_common_roots_move_confirm),
+            supporting = stringResource(ArrUiR.string.arr_common_roots_move_hint),
             onConfirm = { path ->
                 val folder = target.folder
                 showMoveFor = null
@@ -286,7 +287,7 @@ fun RadarrRootFoldersScreen(
     confirmDeleteFor?.let { target ->
         AlertDialog(
             onDismissRequest = { confirmDeleteFor = null },
-            title = { Text(stringResource(R.string.arr_radarr_roots_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_roots_delete_title)) },
             text = {
                 Text(
                     stringResource(
@@ -303,12 +304,12 @@ fun RadarrRootFoldersScreen(
                         onRemove(id)
                     },
                 ) {
-                    Text(stringResource(R.string.arr_radarr_roots_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { confirmDeleteFor = null }) {
-                    Text(stringResource(R.string.arr_radarr_roots_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -333,7 +334,7 @@ private fun FolderList(
         if (content.pendingActions > 0) {
             item(key = PendingBannerKey) { PendingSyncBanner(content.pendingActions) }
         }
-        items(content.folders, key = { it.folder.id }) { entry ->
+        items(content.folders, key = { it.folder.id }, contentType = { "folder" }) { entry ->
             FolderRow(
                 entry = entry,
                 selected = entry.folder.id == state.selectedFolderId,
@@ -370,7 +371,7 @@ private fun FolderRow(
                 .heightIn(min = 48.dp)
                 .clickable(
                     onClickLabel = stringResource(
-                        R.string.arr_radarr_roots_cd_open,
+                        ArrUiR.string.arr_common_roots_cd_open,
                         path,
                     ),
                     onClick = onClick,
@@ -394,14 +395,14 @@ private fun FolderRow(
                 if (queued) {
                     Icon(
                         imageVector = Icons.Filled.CloudUpload,
-                        contentDescription = stringResource(R.string.arr_radarr_roots_cd_queued_indicator),
+                        contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_queued_indicator),
                         tint = MaterialTheme.colorScheme.tertiary,
                     )
                 }
             }
             if (entry.unmappedCount > 0) {
                 Text(
-                    text = stringResource(R.string.arr_radarr_roots_unmapped, entry.unmappedCount),
+                    text = stringResource(ArrUiR.string.arr_common_roots_unmapped, entry.unmappedCount),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp),
@@ -416,7 +417,7 @@ private fun FolderRow(
                 )
                 Text(
                     text = stringResource(
-                        R.string.arr_radarr_roots_free_of_total,
+                        ArrUiR.string.arr_common_status_disk_free_of,
                         Humanize.bytes(disk.freeSpace),
                         Humanize.bytes(disk.totalSpace),
                     ),
@@ -426,7 +427,7 @@ private fun FolderRow(
                 )
             } ?: entry.folder.freeSpace?.let { free ->
                 Text(
-                    text = stringResource(R.string.arr_radarr_roots_free_only, Humanize.bytes(free)),
+                    text = stringResource(ArrUiR.string.arr_common_roots_free_only, Humanize.bytes(free)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp),
@@ -457,14 +458,14 @@ private fun FolderDetailPane(
             if (queued) {
                 Icon(
                     imageVector = Icons.Filled.CloudUpload,
-                    contentDescription = stringResource(R.string.arr_radarr_roots_cd_queued_indicator),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_queued_indicator),
                     tint = MaterialTheme.colorScheme.tertiary,
                 )
             }
         }
         if (queued) {
             Text(
-                text = stringResource(R.string.arr_radarr_roots_queued_row),
+                text = stringResource(ArrUiR.string.arr_common_roots_queued_row),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.padding(top = 4.dp),
@@ -473,7 +474,7 @@ private fun FolderDetailPane(
         folder.disk?.let { disk ->
             Text(
                 text = stringResource(
-                    R.string.arr_radarr_roots_free_of_total,
+                    ArrUiR.string.arr_common_status_disk_free_of,
                     Humanize.bytes(disk.freeSpace),
                     Humanize.bytes(disk.totalSpace),
                 ),
@@ -485,7 +486,7 @@ private fun FolderDetailPane(
         val unmapped = folder.folder.unmappedFolders.orEmpty()
         if (unmapped.isNotEmpty()) {
             Text(
-                text = stringResource(R.string.arr_radarr_roots_detail_unmapped),
+                text = stringResource(ArrUiR.string.arr_common_roots_detail_unmapped),
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(top = 16.dp),
             )
@@ -502,7 +503,7 @@ private fun FolderDetailPane(
             if (unmapped.size > UnmappedPreviewCount) {
                 Text(
                     text = stringResource(
-                        R.string.arr_radarr_roots_detail_unmapped_more,
+                        ArrUiR.string.arr_common_lists_preview_more,
                         unmapped.size - UnmappedPreviewCount,
                     ),
                     style = MaterialTheme.typography.bodySmall,
@@ -517,7 +518,7 @@ private fun FolderDetailPane(
         ) {
             AssistChip(
                 onClick = onMove,
-                label = { Text(stringResource(R.string.arr_radarr_roots_action_move)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_roots_action_move)) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.DriveFileMove,
@@ -528,7 +529,7 @@ private fun FolderDetailPane(
             )
             AssistChip(
                 onClick = onDelete,
-                label = { Text(stringResource(R.string.arr_radarr_roots_action_delete)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_delete)) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Delete,
@@ -583,12 +584,12 @@ private fun FolderPathDialog(
                     value = path,
                     onValueChange = { path = it },
                     singleLine = true,
-                    label = { Text(stringResource(R.string.arr_radarr_roots_path_label)) },
+                    label = { Text(stringResource(ArrUiR.string.arr_common_roots_path_label)) },
                     trailingIcon = {
                         IconButton(onClick = { browsing = true }) {
                             Icon(
                                 imageVector = Icons.Filled.FolderOpen,
-                                contentDescription = stringResource(R.string.arr_radarr_roots_cd_browse),
+                                contentDescription = stringResource(ArrUiR.string.arr_common_roots_cd_browse),
                             )
                         }
                     },
@@ -606,7 +607,7 @@ private fun FolderPathDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_radarr_roots_dialog_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )
@@ -622,12 +623,12 @@ private fun PendingSyncBanner(pending: Int) {
     ) {
         Icon(
             imageVector = Icons.Filled.CloudUpload,
-            contentDescription = stringResource(R.string.arr_radarr_roots_cd_queued_indicator),
+            contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_queued_indicator),
             tint = MaterialTheme.colorScheme.tertiary,
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = stringResource(R.string.arr_radarr_roots_pending_banner, pending),
+            text = stringResource(ArrUiR.string.arr_common_system_pending_banner, pending),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.tertiary,
         )
@@ -643,15 +644,15 @@ private fun NoticeHost(
     onConsumeWriteError: () -> Unit,
 ) {
     val message = when (notice) {
-        RootFolderNotice.ADDED -> stringResource(R.string.arr_radarr_roots_notice_added)
+        RootFolderNotice.ADDED -> stringResource(ArrUiR.string.arr_common_roots_notice_added)
         RootFolderNotice.ADDED_QUEUED ->
-            stringResource(R.string.arr_radarr_roots_notice_added_queued)
-        RootFolderNotice.REMOVED -> stringResource(R.string.arr_radarr_roots_notice_removed)
+            stringResource(ArrUiR.string.arr_common_roots_notice_added_queued)
+        RootFolderNotice.REMOVED -> stringResource(ArrUiR.string.arr_common_roots_notice_removed)
         RootFolderNotice.REMOVED_QUEUED ->
-            stringResource(R.string.arr_radarr_roots_notice_removed_queued)
-        RootFolderNotice.MOVED -> stringResource(R.string.arr_radarr_roots_notice_moved)
+            stringResource(ArrUiR.string.arr_common_roots_notice_removed_queued)
+        RootFolderNotice.MOVED -> stringResource(ArrUiR.string.arr_common_roots_notice_moved)
         RootFolderNotice.MOVED_QUEUED ->
-            stringResource(R.string.arr_radarr_roots_notice_moved_queued)
+            stringResource(ArrUiR.string.arr_common_roots_notice_moved_queued)
         null -> null
     }
     LaunchedEffect(message) {

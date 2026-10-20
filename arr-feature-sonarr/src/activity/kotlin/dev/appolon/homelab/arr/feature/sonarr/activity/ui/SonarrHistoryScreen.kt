@@ -80,6 +80,7 @@ import dev.appolon.homelab.arr.ui.shell.ArrScaffold
 import dev.appolon.homelab.arr.ui.shell.LocalArrShellNavigator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Destination for the history route: wires the repository and ViewModel for
@@ -180,20 +181,20 @@ fun SonarrHistoryScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_history_title),
+        title = stringResource(ArrUiR.string.arr_common_history_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onOpenBlocklist) {
                 Icon(
                     imageVector = Icons.Filled.Block,
-                    contentDescription = stringResource(R.string.arr_sonarr_history_cd_blocklist),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_history_cd_blocklist),
                 )
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_history_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_history_cd_refresh),
                 )
             }
         },
@@ -317,8 +318,8 @@ private fun HistoryList(
     ArrLceBox(
         state = lce,
         onRetry = onRefresh,
-        emptyTitle = stringResource(R.string.arr_sonarr_history_empty_title),
-        emptyMessage = stringResource(R.string.arr_sonarr_history_empty_message),
+        emptyTitle = stringResource(ArrUiR.string.arr_common_history_empty_title),
+        emptyMessage = stringResource(ArrUiR.string.arr_common_history_empty_message),
         modifier = modifier,
     ) { shown ->
         LazyColumn(
@@ -329,7 +330,7 @@ private fun HistoryList(
             if (shown.pendingActions > 0) {
                 item(key = PendingBannerKey) { PendingSyncBanner(shown.pendingActions) }
             }
-            items(shown.events, key = { it.id }) { event ->
+            items(shown.events, key = { it.id }, contentType = { "event" }) { event ->
                 HistoryEventRow(
                     event = event,
                     onClick = { onSelectEvent(event.id) },
@@ -373,7 +374,7 @@ private fun HistoryEventRow(
     event: SonarrHistoryEventUi,
     onClick: () -> Unit,
 ) {
-    val clickLabel = stringResource(R.string.arr_sonarr_history_cd_event_details, event.title)
+    val clickLabel = stringResource(ArrUiR.string.arr_common_roots_cd_open, event.title)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -384,7 +385,7 @@ private fun HistoryEventRow(
         Icon(
             imageVector = event.eventType.icon(),
             contentDescription = stringResource(
-                R.string.arr_sonarr_history_cd_event_type,
+                ArrUiR.string.arr_common_history_cd_event_type,
                 eventTypeLabel(event.eventType),
             ),
             tint = when (event.eventType) {
@@ -418,7 +419,7 @@ private fun HistoryEventRow(
                     Icon(
                         imageVector = Icons.Filled.CloudUpload,
                         contentDescription = stringResource(
-                            R.string.arr_sonarr_history_cd_queued_indicator,
+                            ArrUiR.string.arr_common_system_cd_queued_indicator,
                         ),
                         tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.padding(start = 8.dp),
@@ -464,7 +465,7 @@ private fun EventDetailContent(
     Column(modifier = modifier.widthIn(max = 640.dp)) {
         Text(
             text = stringResource(
-                R.string.arr_sonarr_history_details_title,
+                ArrUiR.string.arr_common_history_cd_event_type,
                 eventTypeLabel(event.eventType),
             ),
             style = MaterialTheme.typography.titleMedium,
@@ -483,47 +484,47 @@ private fun EventDetailContent(
         }
         event.fullDate?.let { DetailLine(label = null, value = it) }
         event.qualityName?.let {
-            DetailLine(label = stringResource(R.string.arr_sonarr_history_details_quality), value = it)
+            DetailLine(label = stringResource(ArrUiR.string.arr_common_quality), value = it)
         }
         event.source?.let {
-            DetailLine(label = stringResource(R.string.arr_sonarr_history_details_source), value = it)
+            DetailLine(label = stringResource(ArrUiR.string.arr_common_history_details_source), value = it)
         }
         event.ageText?.let {
-            DetailLine(label = stringResource(R.string.arr_sonarr_history_details_age), value = it)
+            DetailLine(label = stringResource(ArrUiR.string.arr_common_releases_sort_age), value = it)
         }
         event.indexer?.let {
-            DetailLine(label = stringResource(R.string.arr_sonarr_history_details_indexer), value = it)
+            DetailLine(label = stringResource(ArrUiR.string.arr_common_releases_details_indexer), value = it)
         }
         event.downloadClient?.let {
             DetailLine(
-                label = stringResource(R.string.arr_sonarr_history_details_download_client),
+                label = stringResource(ArrUiR.string.arr_common_history_details_download_client),
                 value = it,
             )
         }
         event.sizeText?.let {
-            DetailLine(label = stringResource(R.string.arr_sonarr_history_details_size), value = it)
+            DetailLine(label = stringResource(ArrUiR.string.arr_common_size), value = it)
         }
         event.releaseGroup?.let {
             DetailLine(
-                label = stringResource(R.string.arr_sonarr_history_details_release_group),
+                label = stringResource(ArrUiR.string.arr_common_history_details_release_group),
                 value = it,
             )
         }
         if (event.customFormatNames.isNotEmpty()) {
             DetailLine(
-                label = stringResource(R.string.arr_sonarr_history_details_custom_formats),
+                label = stringResource(ArrUiR.string.arr_common_quality_custom_formats_title),
                 value = event.customFormatNames.joinToString(", "),
             )
         }
         if (event.customFormatScore != 0) {
             DetailLine(
-                label = stringResource(R.string.arr_sonarr_history_details_score),
-                value = stringResource(R.string.arr_sonarr_history_score_value, event.customFormatScore),
+                label = stringResource(ArrUiR.string.arr_common_releases_sort_quality),
+                value = stringResource(ArrUiR.string.arr_common_history_score_value, event.customFormatScore),
             )
         }
         event.message?.let { message ->
             Text(
-                text = stringResource(R.string.arr_sonarr_history_details_message),
+                text = stringResource(ArrUiR.string.arr_common_history_details_message),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(top = 8.dp),
@@ -542,7 +543,7 @@ private fun EventDetailContent(
                         modifier = Modifier.size(18.dp),
                     )
                     Spacer(Modifier.width(4.dp))
-                    Text(stringResource(R.string.arr_sonarr_history_details_action_manual_import))
+                    Text(stringResource(ArrUiR.string.arr_common_history_details_action_manual_import))
                 }
             }
             if (event.canMarkFailed) {
@@ -553,7 +554,7 @@ private fun EventDetailContent(
                         modifier = Modifier.size(18.dp),
                     )
                     Spacer(Modifier.width(4.dp))
-                    Text(stringResource(R.string.arr_sonarr_history_details_action_mark_failed))
+                    Text(stringResource(ArrUiR.string.arr_common_history_details_action_mark_failed))
                 }
             }
         }
@@ -565,7 +566,7 @@ private fun DetailLine(label: String?, value: String) {
     val text = if (label == null) {
         value
     } else {
-        stringResource(R.string.arr_sonarr_history_details_line, label, value)
+        stringResource(ArrUiR.string.arr_common_history_details_line, label, value)
     }
     Text(
         text = text,
@@ -611,7 +612,7 @@ private fun PendingSyncBanner(pending: Int) {
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = stringResource(R.string.arr_sonarr_history_pending_banner, pending),
+            text = stringResource(ArrUiR.string.arr_common_system_pending_banner, pending),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.tertiary,
         )
@@ -639,7 +640,7 @@ private fun LoadMoreFailedRow(onRetry: () -> Unit) {
             .padding(8.dp),
     ) {
         TextButton(onClick = onRetry) {
-            Text(stringResource(R.string.arr_sonarr_history_load_more_retry))
+            Text(stringResource(ArrUiR.string.arr_common_history_load_more_retry))
         }
     }
 }
@@ -653,9 +654,9 @@ private fun NoticeHost(
     onConsumeWriteError: () -> Unit,
 ) {
     val message = when (notice) {
-        HistoryNotice.MARKED_FAILED -> stringResource(R.string.arr_sonarr_history_notice_marked_failed)
+        HistoryNotice.MARKED_FAILED -> stringResource(ArrUiR.string.arr_common_history_notice_marked_failed)
         HistoryNotice.MARK_FAIL_QUEUED ->
-            stringResource(R.string.arr_sonarr_history_notice_mark_failed_queued)
+            stringResource(ArrUiR.string.arr_common_history_notice_mark_failed_queued)
         null -> null
     }
     LaunchedEffect(message) {
@@ -677,14 +678,14 @@ private fun NoticeHost(
 @Composable
 internal fun eventTypeLabel(type: EpisodeHistoryEventType): String = stringResource(
     when (type) {
-        EpisodeHistoryEventType.UNKNOWN -> R.string.arr_sonarr_history_type_unknown
-        EpisodeHistoryEventType.GRABBED -> R.string.arr_sonarr_history_type_grabbed
-        EpisodeHistoryEventType.DOWNLOAD_FOLDER_IMPORTED -> R.string.arr_sonarr_history_type_imported
-        EpisodeHistoryEventType.SERIES_FOLDER_IMPORTED -> R.string.arr_sonarr_history_type_imported
-        EpisodeHistoryEventType.DOWNLOAD_FAILED -> R.string.arr_sonarr_history_type_failed
-        EpisodeHistoryEventType.EPISODE_FILE_DELETED -> R.string.arr_sonarr_history_type_deleted
-        EpisodeHistoryEventType.EPISODE_FILE_RENAMED -> R.string.arr_sonarr_history_type_renamed
-        EpisodeHistoryEventType.DOWNLOAD_IGNORED -> R.string.arr_sonarr_history_type_ignored
+        EpisodeHistoryEventType.UNKNOWN -> ArrUiR.string.arr_common_status_unknown
+        EpisodeHistoryEventType.GRABBED -> ArrUiR.string.arr_common_history_filter_grabbed
+        EpisodeHistoryEventType.DOWNLOAD_FOLDER_IMPORTED -> ArrUiR.string.arr_common_history_filter_imported
+        EpisodeHistoryEventType.SERIES_FOLDER_IMPORTED -> ArrUiR.string.arr_common_history_filter_imported
+        EpisodeHistoryEventType.DOWNLOAD_FAILED -> ArrUiR.string.arr_common_history_filter_failed
+        EpisodeHistoryEventType.EPISODE_FILE_DELETED -> ArrUiR.string.arr_common_connect_notice_deleted
+        EpisodeHistoryEventType.EPISODE_FILE_RENAMED -> ArrUiR.string.arr_common_history_filter_renamed
+        EpisodeHistoryEventType.DOWNLOAD_IGNORED -> ArrUiR.string.arr_common_history_type_ignored
     },
 )
 
@@ -701,20 +702,20 @@ private fun EpisodeHistoryEventType.icon(): ImageVector = when (this) {
 
 @Composable
 private fun typeFilterLabels(): Map<HistoryEventTypeFilter, String> = mapOf(
-    HistoryEventTypeFilter.ALL to stringResource(R.string.arr_sonarr_history_filter_all),
-    HistoryEventTypeFilter.GRABBED to stringResource(R.string.arr_sonarr_history_filter_grabbed),
-    HistoryEventTypeFilter.IMPORTED to stringResource(R.string.arr_sonarr_history_filter_imported),
-    HistoryEventTypeFilter.FAILED to stringResource(R.string.arr_sonarr_history_filter_failed),
-    HistoryEventTypeFilter.DELETED to stringResource(R.string.arr_sonarr_history_filter_deleted),
-    HistoryEventTypeFilter.RENAMED to stringResource(R.string.arr_sonarr_history_filter_renamed),
+    HistoryEventTypeFilter.ALL to stringResource(ArrUiR.string.arr_common_history_filter_all),
+    HistoryEventTypeFilter.GRABBED to stringResource(ArrUiR.string.arr_common_history_filter_grabbed),
+    HistoryEventTypeFilter.IMPORTED to stringResource(ArrUiR.string.arr_common_history_filter_imported),
+    HistoryEventTypeFilter.FAILED to stringResource(ArrUiR.string.arr_common_history_filter_failed),
+    HistoryEventTypeFilter.DELETED to stringResource(ArrUiR.string.arr_common_connect_notice_deleted),
+    HistoryEventTypeFilter.RENAMED to stringResource(ArrUiR.string.arr_common_history_filter_renamed),
 )
 
 @Composable
 private fun dateWindowLabels(): Map<HistoryDateWindow, String> = mapOf(
-    HistoryDateWindow.ALL_TIME to stringResource(R.string.arr_sonarr_history_window_all),
-    HistoryDateWindow.LAST_24_HOURS to stringResource(R.string.arr_sonarr_history_window_24h),
-    HistoryDateWindow.LAST_7_DAYS to stringResource(R.string.arr_sonarr_history_window_7d),
-    HistoryDateWindow.LAST_30_DAYS to stringResource(R.string.arr_sonarr_history_window_30d),
+    HistoryDateWindow.ALL_TIME to stringResource(ArrUiR.string.arr_common_history_window_all),
+    HistoryDateWindow.LAST_24_HOURS to stringResource(ArrUiR.string.arr_common_history_window_24h),
+    HistoryDateWindow.LAST_7_DAYS to stringResource(ArrUiR.string.arr_common_history_window_7d),
+    HistoryDateWindow.LAST_30_DAYS to stringResource(ArrUiR.string.arr_common_history_window_30d),
 )
 
 private const val PendingBannerKey = "__sonarr_history_pending"

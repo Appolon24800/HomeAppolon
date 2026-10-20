@@ -68,6 +68,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Destination for the media management route: wires the repository and
@@ -162,7 +163,7 @@ fun SonarrMediaManagementScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_mm_title),
+        title = stringResource(ArrUiR.string.arr_common_mm_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
@@ -170,14 +171,14 @@ fun SonarrMediaManagementScreen(
                 IconButton(onClick = onSave, enabled = !state.saving) {
                     Icon(
                         imageVector = Icons.Filled.Save,
-                        contentDescription = stringResource(R.string.arr_sonarr_mm_cd_save),
+                        contentDescription = stringResource(ArrUiR.string.arr_common_mm_cd_save),
                     )
                 }
             }
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_mm_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_mm_cd_refresh),
                 )
             }
         },
@@ -275,7 +276,7 @@ private fun LinksSection(
     onOpenNaming: () -> Unit,
     onOpenRootFolders: () -> Unit,
 ) {
-    SectionHeader(stringResource(R.string.arr_sonarr_mm_section_media_management))
+    SectionHeader(stringResource(ArrUiR.string.arr_common_mm_title))
     LinkRow(
         title = stringResource(R.string.arr_sonarr_mm_link_naming),
         supporting = stringResource(R.string.arr_sonarr_mm_link_naming_support),
@@ -283,8 +284,8 @@ private fun LinksSection(
         onClick = onOpenNaming,
     )
     LinkRow(
-        title = stringResource(R.string.arr_sonarr_mm_link_root_folders),
-        supporting = stringResource(R.string.arr_sonarr_mm_link_root_folders_support),
+        title = stringResource(ArrUiR.string.arr_common_mm_link_root_folders),
+        supporting = stringResource(ArrUiR.string.arr_common_mm_link_root_folders_support),
         icon = Icons.Filled.CreateNewFolder,
         onClick = onOpenRootFolders,
     )
@@ -295,10 +296,10 @@ private fun ImportingSection(
     draft: MediaManagementDraft,
     onEdit: (transform: (MediaManagementDraft) -> MediaManagementDraft) -> Unit,
 ) {
-    SectionHeader(stringResource(R.string.arr_sonarr_mm_section_importing))
+    SectionHeader(stringResource(ArrUiR.string.arr_common_mm_section_importing))
     LabeledSwitch(
-        label = stringResource(R.string.arr_sonarr_mm_skip_free_space),
-        supportingText = stringResource(R.string.arr_sonarr_mm_skip_free_space_support),
+        label = stringResource(ArrUiR.string.arr_common_mm_skip_free_space),
+        supportingText = stringResource(ArrUiR.string.arr_common_mm_skip_free_space_support),
         checked = draft.skipFreeSpaceCheckWhenImporting,
         onCheckedChange = { value ->
             onEdit { it.copy(skipFreeSpaceCheckWhenImporting = value) }
@@ -307,27 +308,27 @@ private fun ImportingSection(
     TextField(
         value = draft.minimumFreeSpaceWhenImporting,
         label = stringResource(R.string.arr_sonarr_mm_minimum_free_space),
-        supporting = stringResource(R.string.arr_sonarr_mm_minimum_free_space_support),
+        supporting = stringResource(ArrUiR.string.arr_common_mm_minimum_free_space_support),
         onValue = { text -> onEdit { it.copy(minimumFreeSpaceWhenImporting = text) } },
     )
     LabeledSwitch(
-        label = stringResource(R.string.arr_sonarr_mm_hardlinks),
-        supportingText = stringResource(R.string.arr_sonarr_mm_hardlinks_support),
+        label = stringResource(ArrUiR.string.arr_common_mm_hardlinks),
+        supportingText = stringResource(ArrUiR.string.arr_common_mm_hardlinks_support),
         checked = draft.copyUsingHardlinks,
         onCheckedChange = { value ->
             onEdit { it.copy(copyUsingHardlinks = value) }
         },
     )
     LabeledSwitch(
-        label = stringResource(R.string.arr_sonarr_mm_import_extra_files),
+        label = stringResource(ArrUiR.string.arr_common_mm_import_extra_files),
         checked = draft.importExtraFiles,
         onCheckedChange = { value -> onEdit { it.copy(importExtraFiles = value) } },
     )
     if (draft.importExtraFiles) {
         TextField(
             value = draft.extraFileExtensions,
-            label = stringResource(R.string.arr_sonarr_mm_extra_extensions),
-            supporting = stringResource(R.string.arr_sonarr_mm_extra_extensions_support),
+            label = stringResource(ArrUiR.string.arr_common_mm_extra_extensions),
+            supporting = stringResource(ArrUiR.string.arr_common_mm_extra_extensions_support),
             onValue = { text -> onEdit { it.copy(extraFileExtensions = text) } },
         )
     }
@@ -338,7 +339,7 @@ private fun ImportingSection(
         onValue = { text -> onEdit { it.copy(userRejectedExtensions = text) } },
     )
     EnumDropdown(
-        label = stringResource(R.string.arr_sonarr_mm_propers),
+        label = stringResource(ArrUiR.string.arr_common_mm_propers),
         selected = draft.downloadPropersAndRepacks,
         entries = ProperDownloadTypes.entries,
         labelOf = { it.wireLabel() },
@@ -352,7 +353,7 @@ private fun FileManagementSection(
     onEdit: (transform: (MediaManagementDraft) -> MediaManagementDraft) -> Unit,
     onPickField: (String?) -> Unit,
 ) {
-    SectionHeader(stringResource(R.string.arr_sonarr_mm_section_file_management))
+    SectionHeader(stringResource(ArrUiR.string.arr_common_mm_section_file_management))
     LabeledSwitch(
         label = stringResource(R.string.arr_sonarr_mm_auto_unmonitor),
         checked = draft.autoUnmonitorPreviouslyDownloadedEpisodes,
@@ -366,19 +367,19 @@ private fun FileManagementSection(
         onCheckedChange = { value -> onEdit { it.copy(createEmptySeriesFolders = value) } },
     )
     LabeledSwitch(
-        label = stringResource(R.string.arr_sonarr_mm_delete_empty_folders),
+        label = stringResource(ArrUiR.string.arr_common_mm_delete_empty_folders),
         checked = draft.deleteEmptyFolders,
         onCheckedChange = { value -> onEdit { it.copy(deleteEmptyFolders = value) } },
     )
     EnumDropdown(
-        label = stringResource(R.string.arr_sonarr_mm_file_date),
+        label = stringResource(ArrUiR.string.arr_common_mm_file_date),
         selected = draft.fileDate,
         entries = FileDateType.entries,
         labelOf = { it.wireLabel() },
         onSelect = { choice -> onEdit { it.copy(fileDate = choice) } },
     )
     EnumDropdown(
-        label = stringResource(R.string.arr_sonarr_mm_rescan_after_refresh),
+        label = stringResource(ArrUiR.string.arr_common_mm_rescan_after_refresh),
         selected = draft.rescanAfterRefresh,
         entries = RescanAfterRefreshType.entries,
         labelOf = { it.wireLabel() },
@@ -408,16 +409,16 @@ private fun FileManagementSection(
     }
     TextField(
         value = draft.recycleBin,
-        label = stringResource(R.string.arr_sonarr_mm_recycle_bin),
-        supporting = stringResource(R.string.arr_sonarr_mm_recycle_bin_support),
+        label = stringResource(ArrUiR.string.arr_common_mm_recycle_bin),
+        supporting = stringResource(ArrUiR.string.arr_common_mm_recycle_bin_support),
         onValue = { text -> onEdit { it.copy(recycleBin = text) } },
         browseField = SonarrMediaManagementViewModel.FIELD_RECYCLE_BIN,
         onBrowse = onPickField,
     )
     TextField(
         value = draft.recycleBinCleanupDays,
-        label = stringResource(R.string.arr_sonarr_mm_recycle_bin_days),
-        supporting = stringResource(R.string.arr_sonarr_mm_recycle_bin_days_support),
+        label = stringResource(ArrUiR.string.arr_common_mm_recycle_bin_days),
+        supporting = stringResource(ArrUiR.string.arr_common_mm_recycle_bin_days_support),
         onValue = { text -> onEdit { it.copy(recycleBinCleanupDays = text) } },
     )
 }
@@ -427,24 +428,24 @@ private fun PermissionsSection(
     draft: MediaManagementDraft,
     onEdit: (transform: (MediaManagementDraft) -> MediaManagementDraft) -> Unit,
 ) {
-    SectionHeader(stringResource(R.string.arr_sonarr_mm_section_permissions))
+    SectionHeader(stringResource(ArrUiR.string.arr_common_mm_section_permissions))
     LabeledSwitch(
-        label = stringResource(R.string.arr_sonarr_mm_set_permissions),
-        supportingText = stringResource(R.string.arr_sonarr_mm_set_permissions_support),
+        label = stringResource(ArrUiR.string.arr_common_mm_set_permissions),
+        supportingText = stringResource(ArrUiR.string.arr_common_mm_set_permissions_support),
         checked = draft.setPermissionsLinux,
         onCheckedChange = { value -> onEdit { it.copy(setPermissionsLinux = value) } },
     )
     if (draft.setPermissionsLinux) {
         TextField(
             value = draft.chmodFolder,
-            label = stringResource(R.string.arr_sonarr_mm_chmod_folder),
-            supporting = stringResource(R.string.arr_sonarr_mm_chmod_folder_support),
+            label = stringResource(ArrUiR.string.arr_common_mm_chmod_folder),
+            supporting = stringResource(ArrUiR.string.arr_common_mm_chmod_folder_support),
             onValue = { text -> onEdit { it.copy(chmodFolder = text) } },
         )
         TextField(
             value = draft.chownGroup,
-            label = stringResource(R.string.arr_sonarr_mm_chown_group),
-            supporting = stringResource(R.string.arr_sonarr_mm_chown_group_support),
+            label = stringResource(ArrUiR.string.arr_common_mm_chown_group),
+            supporting = stringResource(ArrUiR.string.arr_common_mm_chown_group_support),
             onValue = { text -> onEdit { it.copy(chownGroup = text) } },
         )
     }
@@ -456,17 +457,17 @@ private fun ScriptImportSection(
     onEdit: (transform: (MediaManagementDraft) -> MediaManagementDraft) -> Unit,
     onPickField: (String?) -> Unit,
 ) {
-    SectionHeader(stringResource(R.string.arr_sonarr_mm_section_script_import))
+    SectionHeader(stringResource(ArrUiR.string.arr_common_mm_section_script_import))
     LabeledSwitch(
-        label = stringResource(R.string.arr_sonarr_mm_use_script_import),
+        label = stringResource(ArrUiR.string.arr_common_mm_use_script_import),
         checked = draft.useScriptImport,
         onCheckedChange = { value -> onEdit { it.copy(useScriptImport = value) } },
     )
     if (draft.useScriptImport) {
         TextField(
             value = draft.scriptImportPath,
-            label = stringResource(R.string.arr_sonarr_mm_script_path),
-            supporting = stringResource(R.string.arr_sonarr_mm_script_path_support),
+            label = stringResource(ArrUiR.string.arr_common_mm_script_path),
+            supporting = stringResource(ArrUiR.string.arr_common_mm_script_path_support),
             onValue = { text -> onEdit { it.copy(scriptImportPath = text) } },
             browseField = SonarrMediaManagementViewModel.FIELD_SCRIPT_IMPORT,
             onBrowse = onPickField,
@@ -479,10 +480,10 @@ private fun MediaInfoSection(
     draft: MediaManagementDraft,
     onEdit: (transform: (MediaManagementDraft) -> MediaManagementDraft) -> Unit,
 ) {
-    SectionHeader(stringResource(R.string.arr_sonarr_mm_section_media_info))
+    SectionHeader(stringResource(ArrUiR.string.arr_common_mm_section_media_info))
     LabeledSwitch(
-        label = stringResource(R.string.arr_sonarr_mm_media_info),
-        supportingText = stringResource(R.string.arr_sonarr_mm_media_info_support),
+        label = stringResource(ArrUiR.string.arr_common_mm_media_info),
+        supportingText = stringResource(ArrUiR.string.arr_common_mm_media_info_support),
         checked = draft.enableMediaInfo,
         onCheckedChange = { value -> onEdit { it.copy(enableMediaInfo = value) } },
     )
@@ -554,7 +555,7 @@ private fun TextField(
                     Icon(
                         imageVector = Icons.Filled.FolderOpen,
                         contentDescription = stringResource(
-                            R.string.arr_sonarr_mm_cd_browse,
+                            ArrUiR.string.arr_common_mm_cd_browse,
                             label,
                         ),
                     )
@@ -615,12 +616,12 @@ private fun PendingSyncBanner(pending: Int) {
     ) {
         Icon(
             imageVector = Icons.Filled.CloudUpload,
-            contentDescription = stringResource(R.string.arr_sonarr_mm_cd_queued_indicator),
+            contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_queued_indicator),
             tint = MaterialTheme.colorScheme.tertiary,
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = stringResource(R.string.arr_sonarr_mm_pending_banner, pending),
+            text = stringResource(ArrUiR.string.arr_common_system_pending_banner, pending),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.tertiary,
         )
@@ -636,8 +637,8 @@ private fun NoticeHost(
     onConsumeWriteError: () -> Unit,
 ) {
     val message = when (notice) {
-        MediaManagementNotice.SAVED -> stringResource(R.string.arr_sonarr_mm_notice_saved)
-        MediaManagementNotice.SAVED_QUEUED -> stringResource(R.string.arr_sonarr_mm_notice_saved_queued)
+        MediaManagementNotice.SAVED -> stringResource(ArrUiR.string.arr_common_mm_notice_saved)
+        MediaManagementNotice.SAVED_QUEUED -> stringResource(ArrUiR.string.arr_common_mm_notice_saved_queued)
         null -> null
     }
     LaunchedEffect(message) {

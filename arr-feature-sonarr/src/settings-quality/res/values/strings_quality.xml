@@ -1,60 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Shared across the quality settings group -->
-    <string name="arr_sonarr_quality_cd_save">Save changes</string>
-    <string name="arr_sonarr_quality_cd_refresh">Refresh quality settings</string>
-    <string name="arr_sonarr_quality_cd_queued_indicator">Change queued to sync</string>
-    <string name="arr_sonarr_quality_pending_banner">%1$d changes waiting to sync</string>
-    <string name="arr_sonarr_quality_action_delete">Delete</string>
-    <string name="arr_sonarr_quality_action_cancel">Cancel</string>
-    <string name="arr_sonarr_quality_action_save_row">Save</string>
-    <string name="arr_sonarr_quality_notice_saved">Changes saved</string>
-    <string name="arr_sonarr_quality_notice_created">Created</string>
-    <string name="arr_sonarr_quality_notice_deleted">Deleted</string>
-    <string name="arr_sonarr_quality_notice_moved">Order updated</string>
-    <string name="arr_sonarr_quality_notice_saved_queued">Offline: the change will sync when the connection returns</string>
-    <string name="arr_sonarr_quality_cd_discard_draft">Discard this draft</string>
 
     <!-- Quality definitions editor -->
-    <string name="arr_sonarr_quality_definitions_title">Quality definitions</string>
-    <string name="arr_sonarr_quality_definitions_hint">Weights set the order qualities upgrade through. Size bounds are megabits per minute.</string>
-    <string name="arr_sonarr_quality_definitions_title_field">Title</string>
-    <string name="arr_sonarr_quality_definitions_weight">Weight</string>
-    <string name="arr_sonarr_quality_definitions_min">Min</string>
-    <string name="arr_sonarr_quality_definitions_max">Max</string>
-    <string name="arr_sonarr_quality_definitions_preferred">Preferred</string>
-    <string name="arr_sonarr_quality_definitions_preferred_support">Leave blank for no preference</string>
-    <string name="arr_sonarr_quality_definitions_size_unit">Sizes are megabits per minute</string>
-    <string name="arr_sonarr_quality_definitions_error_number">Enter a number</string>
-    <string name="arr_sonarr_quality_definitions_error_negative">Must be zero or more</string>
-    <string name="arr_sonarr_quality_definitions_error_min_above_max">Min must not exceed max</string>
-    <string name="arr_sonarr_quality_definitions_error_preferred_above_max">Preferred must not exceed max</string>
 
     <!-- Quality profiles -->
-    <string name="arr_sonarr_quality_profiles_title">Quality profiles</string>
-    <string name="arr_sonarr_quality_profiles_empty_title">No quality profiles</string>
     <string name="arr_sonarr_quality_profiles_empty_message">Add a profile to choose which qualities Sonarr grabs.</string>
-    <string name="arr_sonarr_quality_profiles_row_support">%1$d scored custom formats</string>
-    <string name="arr_sonarr_quality_cd_add_profile">Add a quality profile</string>
-    <string name="arr_sonarr_quality_cd_delete_profile">Delete the quality profile %1$s</string>
-    <string name="arr_sonarr_quality_delete_profile_title">Delete quality profile?</string>
     <string name="arr_sonarr_quality_delete_profile_message">Series using this profile must be moved to another one first.</string>
-    <string name="arr_sonarr_quality_profile_editor_title_new">New quality profile</string>
-    <string name="arr_sonarr_quality_profile_editor_title_edit">Edit quality profile</string>
-    <string name="arr_sonarr_quality_profile_name">Name</string>
-    <string name="arr_sonarr_quality_profile_upgrade_allowed">Allow upgrades</string>
-    <string name="arr_sonarr_quality_profile_upgrade_allowed_support">Upgrade to better qualities as they become available</string>
-    <string name="arr_sonarr_quality_profile_section_qualities">Qualities</string>
-    <string name="arr_sonarr_quality_profile_section_upgrade">Upgrade until</string>
-    <string name="arr_sonarr_quality_profile_upgrade_until">Upgrade until quality</string>
-    <string name="arr_sonarr_quality_profile_upgrade_until_row">Stop upgrading at this quality</string>
-    <string name="arr_sonarr_quality_profile_cd_upgrade_until">Stop upgrading at %1$s</string>
-    <string name="arr_sonarr_quality_profile_section_scores">Minimum scores</string>
-    <string name="arr_sonarr_quality_profile_min_score">Minimum score</string>
-    <string name="arr_sonarr_quality_profile_cutoff_score">Score until</string>
-    <string name="arr_sonarr_quality_profile_min_upgrade_score">Minimum upgrade score</string>
-    <string name="arr_sonarr_quality_profile_section_format_scores">Custom format scores</string>
-    <string name="arr_sonarr_quality_profile_score_label">Score</string>
 
     <!-- Language profiles (Sonarr only) -->
     <string name="arr_sonarr_quality_language_profiles_title">Language profiles</string>
@@ -64,94 +16,17 @@
     <string name="arr_sonarr_quality_cd_add_language_profile">Add a language profile</string>
     <string name="arr_sonarr_quality_cd_delete_language_profile">Delete the language profile %1$s</string>
     <string name="arr_sonarr_quality_delete_language_profile_title">Delete language profile?</string>
-    <string name="arr_sonarr_quality_delete_language_profile_message">Series using this profile must be moved to another one first.</string>
     <string name="arr_sonarr_quality_language_profile_editor_title_new">New language profile</string>
     <string name="arr_sonarr_quality_language_profile_editor_title_edit">Edit language profile</string>
     <string name="arr_sonarr_quality_language_profile_upgrade_allowed">Allow language upgrades</string>
     <string name="arr_sonarr_quality_language_profile_upgrade_allowed_support">Upgrade to better languages as they become available</string>
-    <string name="arr_sonarr_quality_language_profile_section_languages">Languages</string>
     <string name="arr_sonarr_quality_language_profile_cutoff_row">Stop upgrading at this language</string>
-    <string name="arr_sonarr_quality_language_profile_cd_cutoff">Stop upgrading at %1$s</string>
 
     <!-- Custom formats -->
-    <string name="arr_sonarr_quality_custom_formats_title">Custom formats</string>
-    <string name="arr_sonarr_quality_formats_empty_title">No custom formats</string>
-    <string name="arr_sonarr_quality_formats_empty_message">Add a custom format to score releases against conditions.</string>
-    <string name="arr_sonarr_quality_formats_row_support">%1$d conditions</string>
-    <string name="arr_sonarr_quality_cd_add_format">Add a custom format</string>
-    <string name="arr_sonarr_quality_cd_delete_format">Delete the custom format %1$s</string>
-    <string name="arr_sonarr_quality_delete_format_title">Delete custom format?</string>
-    <string name="arr_sonarr_quality_delete_format_message">Scores using this format stop applying immediately.</string>
-    <string name="arr_sonarr_quality_format_editor_title_new">New custom format</string>
-    <string name="arr_sonarr_quality_format_editor_title_edit">Edit custom format</string>
-    <string name="arr_sonarr_quality_format_name">Name</string>
-    <string name="arr_sonarr_quality_format_rename">Include when renaming</string>
-    <string name="arr_sonarr_quality_format_rename_support">Add this format\'s name to renamed files</string>
-    <string name="arr_sonarr_quality_format_section_conditions">Conditions</string>
-    <string name="arr_sonarr_quality_format_passthrough">%1$d conditions from the server are kept but not editable here</string>
-    <string name="arr_sonarr_quality_format_section_scores">Scores in quality profiles</string>
-    <string name="arr_sonarr_quality_format_score_row_support">Score %1$d</string>
-    <string name="arr_sonarr_quality_cd_remove_condition">Remove the condition %1$s</string>
-    <string name="arr_sonarr_quality_condition_negate">Negate</string>
-    <string name="arr_sonarr_quality_condition_required">Required</string>
-    <string name="arr_sonarr_quality_condition_add">Add a condition</string>
-    <string name="arr_sonarr_quality_condition_release_name">Release name matches</string>
-    <string name="arr_sonarr_quality_condition_regex">Regular expression</string>
-    <string name="arr_sonarr_quality_condition_regex_support">Case-insensitive regular expression matched against the release name</string>
-    <string name="arr_sonarr_quality_condition_language">Language id</string>
-    <string name="arr_sonarr_quality_condition_indexer_flag">Indexer flag id</string>
-    <string name="arr_sonarr_quality_condition_size_range">Size range</string>
-    <string name="arr_sonarr_quality_condition_size_unit">Sizes are gigabytes</string>
-    <string name="arr_sonarr_quality_condition_id_support">Enter the numeric id from the server</string>
-    <string name="arr_sonarr_quality_regex_tester_sample">Test a release name</string>
-    <string name="arr_sonarr_quality_regex_tester_idle">Enter a pattern and a sample release name to test</string>
-    <string name="arr_sonarr_quality_regex_tester_match">Matches the sample</string>
-    <string name="arr_sonarr_quality_regex_tester_no_match">Does not match the sample</string>
-    <string name="arr_sonarr_quality_regex_tester_invalid">Invalid regular expression</string>
 
     <!-- Delay profiles -->
-    <string name="arr_sonarr_quality_delay_title">Delay profiles</string>
-    <string name="arr_sonarr_quality_delay_empty_title">No delay profiles</string>
-    <string name="arr_sonarr_quality_delay_empty_message">Add a profile to hold releases before they are grabbed.</string>
-    <string name="arr_sonarr_quality_delay_profile_title">Profile %1$d</string>
-    <string name="arr_sonarr_quality_cd_add_delay">Add a delay profile</string>
-    <string name="arr_sonarr_quality_cd_delete_delay">Delete profile %1$d</string>
-    <string name="arr_sonarr_quality_cd_delay_move_up">Move profile %1$d up</string>
-    <string name="arr_sonarr_quality_cd_delay_move_down">Move profile %1$d down</string>
-    <string name="arr_sonarr_quality_delay_usenet">Usenet</string>
-    <string name="arr_sonarr_quality_delay_torrent">Torrent</string>
-    <string name="arr_sonarr_quality_delay_usenet_minutes">Usenet delay in minutes</string>
-    <string name="arr_sonarr_quality_delay_torrent_minutes">Torrent delay in minutes</string>
-    <string name="arr_sonarr_quality_delay_preferred_protocol">Preferred protocol</string>
-    <string name="arr_sonarr_quality_delay_bypass_highest">Bypass for highest quality</string>
-    <string name="arr_sonarr_quality_delay_bypass_highest_support">Grab immediately when the release has the highest allowed quality</string>
-    <string name="arr_sonarr_quality_delay_bypass_score">Bypass above custom format score</string>
-    <string name="arr_sonarr_quality_delay_minimum_score">Minimum custom format score</string>
-    <string name="arr_sonarr_quality_delete_delay_title">Delete delay profile?</string>
-    <string name="arr_sonarr_quality_delete_delay_message">Releases matching this profile follow the next one in the list.</string>
 
     <!-- Release profiles -->
-    <string name="arr_sonarr_quality_release_title">Release profiles</string>
-    <string name="arr_sonarr_quality_release_empty_title">No release profiles</string>
-    <string name="arr_sonarr_quality_release_empty_message">Add a profile to require or reject terms in release names.</string>
-    <string name="arr_sonarr_quality_release_editor_title">Release profile</string>
-    <string name="arr_sonarr_quality_release_name">Name</string>
-    <string name="arr_sonarr_quality_release_must_contain">Must contain</string>
-    <string name="arr_sonarr_quality_release_must_not_contain">Must not contain</string>
-    <string name="arr_sonarr_quality_release_terms_support">One term per line</string>
-    <string name="arr_sonarr_quality_release_indexer">Indexer id</string>
-    <string name="arr_sonarr_quality_release_indexer_support">Zero applies to every indexer</string>
-    <string name="arr_sonarr_quality_release_enabled">Enabled</string>
-    <string name="arr_sonarr_quality_release_disabled">Disabled</string>
-    <string name="arr_sonarr_quality_release_enabled_toggle">Enabled</string>
-    <string name="arr_sonarr_quality_cd_add_release">Add a release profile</string>
-    <string name="arr_sonarr_quality_cd_edit_release">Edit the release profile %1$s</string>
-    <string name="arr_sonarr_quality_cd_delete_release">Delete the release profile %1$s</string>
-    <string name="arr_sonarr_quality_delete_release_title">Delete release profile?</string>
-    <string name="arr_sonarr_quality_delete_release_message">The must-contain and must-not-contain terms stop applying.</string>
 
     <!-- Languages -->
-    <string name="arr_sonarr_quality_languages_title">Languages</string>
-    <string name="arr_sonarr_quality_languages_empty_title">No languages</string>
-    <string name="arr_sonarr_quality_languages_empty_message">The server did not return a language table.</string>
 </resources>

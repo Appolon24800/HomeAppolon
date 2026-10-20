@@ -14,6 +14,10 @@ import kotlinx.serialization.Serializable
  * cinema, physical, and digital dates produces one event per date, matching
  * the Radarr web calendar.
  */
+
+/** Resized local poster variant requested for calendar row thumbnails. */
+private const val CALENDAR_THUMB_SIZE_PX = 500
+
 @Serializable
 enum class CalendarEventKind {
     IN_CINEMAS,
@@ -104,7 +108,8 @@ fun calendarEntriesOf(movie: MovieResource): List<RadarrCalendarEntry> {
     val poster = movie.images.orEmpty().firstOrNull { it.coverType == MediaCoverTypes.POSTER }
     val localPath = poster?.url
         ?.takeIf { it.isNotBlank() && !it.startsWith("http", ignoreCase = true) }
-        ?.let { RadarrMediaCovers.path(movie.id, MediaCoverTypes.POSTER) }
+        // Row thumbs only, so request the resized poster-500 variant.
+        ?.let { RadarrMediaCovers.path(movie.id, MediaCoverTypes.POSTER, CALENDAR_THUMB_SIZE_PX) }
     val absolutePath = poster?.url?.takeIf { it.startsWith("http", ignoreCase = true) }
     val base = RadarrCalendarEntry(
         movieId = movie.id,

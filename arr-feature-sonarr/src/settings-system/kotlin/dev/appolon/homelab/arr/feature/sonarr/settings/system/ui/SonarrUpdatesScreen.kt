@@ -52,6 +52,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the updates route. */
 @Composable
@@ -71,12 +72,12 @@ fun SonarrUpdatesDestination(
     val uiState by vm.state.collectAsState()
     val noticeMessage = uiState.notice?.let { notice ->
         when (notice) {
-            UpdatesNotice.CHECKED -> stringResource(R.string.arr_sonarr_updates_notice_checking)
+            UpdatesNotice.CHECKED -> stringResource(ArrUiR.string.arr_common_updates_notice_checking)
             UpdatesNotice.INSTALL_STARTED ->
                 stringResource(R.string.arr_sonarr_updates_notice_install_started)
 
             UpdatesNotice.INSTALL_QUEUED ->
-                stringResource(R.string.arr_sonarr_updates_notice_install_queued)
+                stringResource(ArrUiR.string.arr_common_updates_notice_install_queued)
         }
     }
 
@@ -134,14 +135,14 @@ fun SonarrUpdatesScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_updates_title),
+        title = stringResource(ArrUiR.string.arr_common_updates_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onCheck) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_updates_cd_check),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_updates_cd_check),
                 )
             }
         },
@@ -158,10 +159,13 @@ fun SonarrUpdatesScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_sonarr_updates_empty_title),
-                    emptyMessage = stringResource(R.string.arr_sonarr_updates_empty_message),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_updates_empty_title),
+                    emptyMessage = stringResource(ArrUiR.string.arr_common_updates_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
+                    val installableUpdates = remember(data.updates) {
+                        data.updates.filter { !it.isCurrent }
+                    }
                     LazyColumn(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -175,8 +179,9 @@ fun SonarrUpdatesScreen(
                             item { UpToDateCard() }
                         }
                         items(
-                            data.updates.filter { !it.isCurrent },
+                            installableUpdates,
                             key = { it.update.id },
+                            contentType = { "update" },
                         ) { row ->
                             UpdateRowCard(row, onInstall)
                         }
@@ -199,15 +204,15 @@ private fun CurrentVersionCard(
 ) {
     SystemCard {
         Column {
-            SystemSectionHeader(stringResource(R.string.arr_sonarr_updates_current_title))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_updates_current_title))
             data.status?.let { status ->
                 SystemValueRow(
-                    label = stringResource(R.string.arr_sonarr_status_version),
-                    value = status.version ?: stringResource(R.string.arr_sonarr_status_unknown),
+                    label = stringResource(ArrUiR.string.arr_common_status_version),
+                    value = status.version ?: stringResource(ArrUiR.string.arr_common_status_unknown),
                 )
                 SystemValueRow(
-                    label = stringResource(R.string.arr_sonarr_status_branch),
-                    value = status.branch ?: stringResource(R.string.arr_sonarr_status_unknown),
+                    label = stringResource(ArrUiR.string.arr_common_status_branch),
+                    value = status.branch ?: stringResource(ArrUiR.string.arr_common_status_unknown),
                 )
                 val mechanism = status.packageUpdateMechanism ?: UpdateMechanism.BUILT_IN
                 if (mechanism == UpdateMechanism.BUILT_IN) {
@@ -233,7 +238,7 @@ private fun CurrentVersionCard(
                     )
                     Text(
                         text = stringResource(
-                            R.string.arr_sonarr_updates_cd_install,
+                            ArrUiR.string.arr_common_updates_cd_install,
                             data.updates.first { it.installable }.update.version ?: "",
                         ),
                         modifier = Modifier.padding(start = 8.dp),
@@ -282,7 +287,7 @@ private fun UpdateRowCard(
                     if (installed != null) {
                         Text(
                             text = stringResource(
-                                R.string.arr_sonarr_updates_installed_on,
+                                ArrUiR.string.arr_common_updates_installed_on,
                                 ArrTime.dateTimeShort(installed),
                             ),
                             style = MaterialTheme.typography.bodySmall,
@@ -295,7 +300,7 @@ private fun UpdateRowCard(
                         Icon(
                             imageVector = Icons.Filled.SystemUpdateAlt,
                             contentDescription = stringResource(
-                                R.string.arr_sonarr_updates_cd_install,
+                                ArrUiR.string.arr_common_updates_cd_install,
                                 row.update.version ?: "",
                             ),
                         )
@@ -315,7 +320,7 @@ private fun UpdateChangesList(row: SonarrUpdateRow) {
     Column {
         if (new.isNotEmpty()) {
             Text(
-                text = stringResource(R.string.arr_sonarr_updates_changes_new),
+                text = stringResource(ArrUiR.string.arr_common_updates_changes_new),
                 style = MaterialTheme.typography.labelLarge,
             )
             new.forEach { change ->
@@ -324,7 +329,7 @@ private fun UpdateChangesList(row: SonarrUpdateRow) {
         }
         if (fixed.isNotEmpty()) {
             Text(
-                text = stringResource(R.string.arr_sonarr_updates_changes_fixed),
+                text = stringResource(ArrUiR.string.arr_common_updates_changes_fixed),
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.padding(top = 8.dp),
             )
@@ -342,10 +347,10 @@ private fun UpdateLogsSection(
 ) {
     SystemCard {
         Column {
-            SystemSectionHeader(stringResource(R.string.arr_sonarr_updates_section_logs))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_updates_section_logs))
             if (logFiles.isEmpty()) {
                 Text(
-                    text = stringResource(R.string.arr_sonarr_updates_logs_empty),
+                    text = stringResource(ArrUiR.string.arr_common_updates_logs_empty),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -379,8 +384,10 @@ private fun UpdateLogDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = stringResource(R.string.arr_sonarr_updates_log_dialog_title) +
-                    " " + (file.filename.orEmpty()),
+                text = stringResource(
+                    ArrUiR.string.arr_common_update_log_file,
+                    file.filename.orEmpty(),
+                ),
             )
         },
         text = {
@@ -394,7 +401,7 @@ private fun UpdateLogDialog(
                     )
 
                     state.logContents.isNullOrEmpty() -> Text(
-                        text = stringResource(R.string.arr_sonarr_updates_log_empty),
+                        text = stringResource(ArrUiR.string.arr_common_updates_log_empty),
                     )
 
                     else -> Text(
@@ -407,7 +414,7 @@ private fun UpdateLogDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.arr_sonarr_system_action_cancel))
+                Text(stringResource(ArrUiR.string.arr_common_cancel))
             }
         },
     )

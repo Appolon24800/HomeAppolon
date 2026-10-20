@@ -42,6 +42,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The general settings page: host fields (bind address, port, URL base),
@@ -78,13 +79,13 @@ fun ProwlarrGeneralSettingsScreen(
     NoticeHost(
         noticeMessage = when (state.notice) {
             GeneralSettingsNotice.HOST_SAVED ->
-                stringResource(R.string.arr_prowlarr_settings_notice_saved)
+                stringResource(ArrUiR.string.arr_common_connect_notice_saved)
 
             GeneralSettingsNotice.HOST_SAVED_QUEUED ->
                 stringResource(R.string.arr_prowlarr_settings_notice_saved_queued)
 
             GeneralSettingsNotice.CULTURE_SAVED ->
-                stringResource(R.string.arr_prowlarr_settings_notice_saved)
+                stringResource(ArrUiR.string.arr_common_connect_notice_saved)
 
             GeneralSettingsNotice.CULTURE_SAVED_QUEUED ->
                 stringResource(R.string.arr_prowlarr_settings_notice_saved_queued)
@@ -105,7 +106,7 @@ fun ProwlarrGeneralSettingsScreen(
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_prowlarr_settings_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_refresh),
                 )
             }
         },
@@ -174,18 +175,18 @@ private fun HostSection(
     dirty: Boolean,
 ) {
     val draft = data.hostDraft
-    SettingsSection(title = stringResource(R.string.arr_prowlarr_settings_host_section)) {
+    SettingsSection(title = stringResource(ArrUiR.string.arr_common_general_section_host)) {
         OutlinedTextField(
             value = draft.instanceName,
             onValueChange = { name -> onEditHost { it.copy(instanceName = name) } },
-            label = { Text(stringResource(R.string.arr_prowlarr_settings_instance_name)) },
+            label = { Text(stringResource(ArrUiR.string.arr_common_general_instance_name)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
         OutlinedTextField(
             value = draft.bindAddress,
             onValueChange = { address -> onEditHost { it.copy(bindAddress = address) } },
-            label = { Text(stringResource(R.string.arr_prowlarr_settings_bind_address)) },
+            label = { Text(stringResource(ArrUiR.string.arr_common_general_bind_address)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -195,7 +196,7 @@ private fun HostSection(
             label = { Text(stringResource(R.string.arr_prowlarr_settings_port)) },
             isError = data.portError,
             supportingText = if (data.portError) {
-                { Text(stringResource(R.string.arr_prowlarr_settings_port_invalid)) }
+                { Text(stringResource(ArrUiR.string.arr_common_general_port_error)) }
             } else {
                 null
             },
@@ -205,12 +206,12 @@ private fun HostSection(
         OutlinedTextField(
             value = draft.urlBase,
             onValueChange = { base -> onEditHost { it.copy(urlBase = base) } },
-            label = { Text(stringResource(R.string.arr_prowlarr_settings_url_base)) },
+            label = { Text(stringResource(ArrUiR.string.arr_common_general_url_base)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
         LabeledSwitch(
-            label = stringResource(R.string.arr_prowlarr_settings_launch_browser),
+            label = stringResource(ArrUiR.string.arr_common_general_launch_browser),
             checked = draft.launchBrowser,
             onCheckedChange = { launch -> onEditHost { it.copy(launchBrowser = launch) } },
         )
@@ -224,9 +225,9 @@ private fun SecuritySection(
     onEditHost: ((HostSettingsDraft) -> HostSettingsDraft) -> Unit,
 ) {
     val draft = data.hostDraft
-    SettingsSection(title = stringResource(R.string.arr_prowlarr_settings_security_section)) {
+    SettingsSection(title = stringResource(ArrUiR.string.arr_common_general_section_security)) {
         StringDropdownField(
-            label = stringResource(R.string.arr_prowlarr_settings_auth_method),
+            label = stringResource(ArrUiR.string.arr_common_general_auth_method),
             options = AUTH_METHODS.keys.toList(),
             selected = AUTH_METHODS.entries.firstOrNull { it.value == draft.authenticationMethod }
                 ?.key,
@@ -240,7 +241,7 @@ private fun SecuritySection(
             draft.authenticationMethod != AuthenticationType.EXTERNAL
         ) {
             StringDropdownField(
-                label = stringResource(R.string.arr_prowlarr_settings_auth_required),
+                label = stringResource(ArrUiR.string.arr_common_general_auth_required),
                 options = AUTH_REQUIRED.keys.toList(),
                 selected = AUTH_REQUIRED.entries
                     .firstOrNull { it.value == draft.authenticationRequired }
@@ -254,16 +255,16 @@ private fun SecuritySection(
             OutlinedTextField(
                 value = draft.username,
                 onValueChange = { user -> onEditHost { it.copy(username = user) } },
-                label = { Text(stringResource(R.string.arr_prowlarr_settings_username)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_general_username)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             OutlinedTextField(
                 value = draft.password,
                 onValueChange = { password -> onEditHost { it.copy(password = password) } },
-                label = { Text(stringResource(R.string.arr_prowlarr_settings_password)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_general_password)) },
                 supportingText = {
-                    Text(stringResource(R.string.arr_prowlarr_settings_password_help))
+                    Text(stringResource(ArrUiR.string.arr_common_general_password_support))
                 },
                 visualTransformation = PasswordVisualTransformation(),
                 singleLine = true,
@@ -277,7 +278,7 @@ private fun SecuritySection(
             )
         }
         StringDropdownField(
-            label = stringResource(R.string.arr_prowlarr_settings_log_level),
+            label = stringResource(ArrUiR.string.arr_common_general_log_level),
             options = HostSettingsDraft.LOG_LEVELS,
             selected = draft.logLevel,
             onSelect = { level -> onEditHost { it.copy(logLevel = level) } },
@@ -374,7 +375,7 @@ private fun SaveFab(onClick: () -> Unit, enabled: Boolean) {
     ExtendedFloatingActionButton(
         onClick = onClick,
         icon = { Icon(Icons.Filled.Save, contentDescription = null) },
-        text = { Text(stringResource(R.string.arr_prowlarr_save)) },
+        text = { Text(stringResource(ArrUiR.string.arr_common_save)) },
         modifier = if (enabled) Modifier else Modifier.alpha(0.5f),
     )
 }

@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -51,13 +52,14 @@ import dev.appolon.homelab.arr.feature.prowlarr.indexers.data.FieldRenderKind
 import dev.appolon.homelab.arr.ui.components.LabeledSwitch
 import dev.appolon.homelab.arr.ui.components.SectionHeader
 import kotlinx.serialization.json.JsonElement
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Protocol label for chips and table cells. */
 @Composable
 fun protocolLabel(protocol: DownloadProtocol): String = when (protocol) {
-    DownloadProtocol.TORRENT -> stringResource(R.string.arr_prowlarr_protocol_torrent)
-    DownloadProtocol.USENET -> stringResource(R.string.arr_prowlarr_protocol_usenet)
-    DownloadProtocol.UNKNOWN -> stringResource(R.string.arr_prowlarr_protocol_unknown)
+    DownloadProtocol.TORRENT -> stringResource(ArrUiR.string.arr_common_quality_delay_torrent)
+    DownloadProtocol.USENET -> stringResource(ArrUiR.string.arr_common_quality_delay_usenet)
+    DownloadProtocol.UNKNOWN -> stringResource(ArrUiR.string.arr_common_status_unknown)
 }
 
 /** Privacy label for chips and table cells. */
@@ -123,7 +125,7 @@ fun QueuedBadge(modifier: Modifier = Modifier) {
         onClick = {},
         enabled = false,
         modifier = modifier.semantics { contentDescription = description },
-        label = { Text(stringResource(R.string.arr_prowlarr_badge_queued)) },
+        label = { Text(stringResource(ArrUiR.string.arr_common_connect_badge_queued)) },
     )
 }
 
@@ -165,7 +167,10 @@ fun FieldEditors(
         }
         sections.keys.filter { it.isNotEmpty() }.sorted().forEach { section ->
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SectionHeader(title = section)
+                SectionHeader(
+                    title = section,
+                    modifier = Modifier.semantics { heading() },
+                )
                 sections.getValue(section).forEach { field ->
                     FieldEditor(field, values, onValueChange, tagOptions)
                 }
@@ -175,8 +180,8 @@ fun FieldEditors(
             TextButton(onClick = onToggleAdvanced) {
                 Text(
                     stringResource(
-                        if (showAdvanced) R.string.arr_prowlarr_fields_hide_advanced
-                        else R.string.arr_prowlarr_fields_show_advanced,
+                        if (showAdvanced) ArrUiR.string.arr_common_connect_fields_hide_advanced
+                        else ArrUiR.string.arr_common_connect_fields_show_advanced,
                     ),
                 )
             }
@@ -419,7 +424,7 @@ fun TagLabelPicker(
     var newText by rememberSaveable { mutableStateOf("") }
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            stringResource(R.string.arr_prowlarr_fields_tags),
+            stringResource(ArrUiR.string.arr_common_tags_title),
             style = MaterialTheme.typography.bodyMedium,
         )
         val chips = (allTags.mapNotNull { it.label } + selected).distinct().sorted()
@@ -436,7 +441,7 @@ fun TagLabelPicker(
             OutlinedTextField(
                 value = newText,
                 onValueChange = { newText = it },
-                label = { Text(stringResource(R.string.arr_prowlarr_fields_new_tag)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_tags_add_title)) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
             )
@@ -450,7 +455,7 @@ fun TagLabelPicker(
                 },
                 enabled = newText.trim().isNotEmpty(),
             ) {
-                Text(stringResource(R.string.arr_prowlarr_fields_add_tag))
+                Text(stringResource(ArrUiR.string.arr_common_roots_add_confirm))
             }
         }
     }

@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Shared -->
-    <string name="arr_prowlarr_test">Test</string>
-    <string name="arr_prowlarr_save">Save</string>
-    <string name="arr_prowlarr_delete">Delete</string>
-    <string name="arr_prowlarr_cancel">Cancel</string>
     <string name="arr_prowlarr_ok">OK</string>
-    <string name="arr_prowlarr_protocol_torrent">Torrent</string>
-    <string name="arr_prowlarr_protocol_usenet">Usenet</string>
-    <string name="arr_prowlarr_protocol_unknown">Unknown</string>
     <string name="arr_prowlarr_privacy_public">Public</string>
     <string name="arr_prowlarr_privacy_semi_private">Semi-private</string>
     <string name="arr_prowlarr_privacy_private">Private</string>
@@ -17,98 +10,52 @@
     <string name="arr_prowlarr_sync_full">Full sync</string>
     <string name="arr_prowlarr_badge_throttled">Paused until %1$s</string>
     <string name="arr_prowlarr_badge_failing">Failing</string>
-    <string name="arr_prowlarr_badge_queued">Queued</string>
     <string name="arr_prowlarr_badge_queued_cd">Changes for this indexer are queued</string>
 
     <!-- Indexers list -->
-    <string name="arr_prowlarr_indexers_title">Indexers</string>
-    <string name="arr_prowlarr_indexers_selected">%1$d selected</string>
-    <string name="arr_prowlarr_indexers_empty_title">No indexers</string>
     <string name="arr_prowlarr_indexers_empty_message">Add an indexer to start searching with Prowlarr.</string>
     <string name="arr_prowlarr_indexers_search">Search indexers</string>
-    <string name="arr_prowlarr_indexers_test_all">Test all indexers</string>
-    <string name="arr_prowlarr_indexers_add">Add indexer</string>
-    <string name="arr_prowlarr_indexers_clear_filters">Clear filters</string>
     <string name="arr_prowlarr_indexers_delete_title">Delete indexers?</string>
     <string name="arr_prowlarr_indexers_delete_message">%1$d indexer(s) will be removed from Prowlarr.</string>
-    <string name="arr_prowlarr_indexer_priority">Priority %1$d</string>
-    <string name="arr_prowlarr_indexer_categories_count">categories</string>
-    <string name="arr_prowlarr_indexer_tags">Tags</string>
     <string name="arr_prowlarr_filter_protocol_all">All protocols</string>
     <string name="arr_prowlarr_filter_privacy_all">Any privacy</string>
     <string name="arr_prowlarr_filter_state_all">Any state</string>
-    <string name="arr_prowlarr_filter_state_enabled">Enabled</string>
-    <string name="arr_prowlarr_filter_state_disabled">Disabled</string>
-    <string name="arr_prowlarr_filter_state_throttled">Paused</string>
-    <string name="arr_prowlarr_sort_name">Name</string>
-    <string name="arr_prowlarr_sort_priority">Priority</string>
     <string name="arr_prowlarr_sort_protocol">Protocol</string>
-    <string name="arr_prowlarr_sort_added">Added</string>
-    <string name="arr_prowlarr_table_priority">Priority</string>
-    <string name="arr_prowlarr_queued_count">%1$d changes waiting to sync</string>
     <string name="arr_prowlarr_cd_view_cards">Switch to card view</string>
-    <string name="arr_prowlarr_cd_view_table">Switch to table view</string>
-    <string name="arr_prowlarr_cd_sort_descending">Reverse sort order</string>
     <string name="arr_prowlarr_cd_more">More actions</string>
     <string name="arr_prowlarr_cd_select_all">Select every indexer shown</string>
     <string name="arr_prowlarr_cd_edit_selected">Edit selected indexers</string>
     <string name="arr_prowlarr_cd_delete_selected">Delete selected indexers</string>
-    <string name="arr_prowlarr_cd_open_indexer">Open %1$s</string>
-    <string name="arr_prowlarr_cd_select_indexer">Select %1$s</string>
 
     <!-- Bulk edit -->
     <string name="arr_prowlarr_bulk_title">Bulk edit indexers</string>
-    <string name="arr_prowlarr_bulk_enable">Enabled</string>
     <string name="arr_prowlarr_bulk_disable">Disable</string>
-    <string name="arr_prowlarr_bulk_unchanged">Unchanged</string>
     <string name="arr_prowlarr_bulk_app_profile">App profile</string>
     <string name="arr_prowlarr_bulk_priority">Priority (blank keeps current)</string>
-    <string name="arr_prowlarr_bulk_tags">Tags</string>
-    <string name="arr_prowlarr_bulk_apply">Apply</string>
     <string name="arr_prowlarr_tags_add">Add tags</string>
     <string name="arr_prowlarr_tags_remove">Remove tags</string>
     <string name="arr_prowlarr_tags_replace">Replace tags</string>
 
     <!-- Editor -->
-    <string name="arr_prowlarr_editor_title_add">Add indexer</string>
-    <string name="arr_prowlarr_editor_title_edit">Edit indexer</string>
     <string name="arr_prowlarr_editor_search_schema">Search definitions</string>
     <string name="arr_prowlarr_editor_no_schemas">No definitions match.</string>
-    <string name="arr_prowlarr_editor_supports_rss">RSS</string>
-    <string name="arr_prowlarr_editor_name">Name</string>
-    <string name="arr_prowlarr_editor_name_missing">Enter a name.</string>
-    <string name="arr_prowlarr_editor_enabled">Enabled</string>
-    <string name="arr_prowlarr_editor_priority">Priority</string>
-    <string name="arr_prowlarr_editor_app_profile">App profile</string>
-    <string name="arr_prowlarr_editor_profile_none">None</string>
     <string name="arr_prowlarr_editor_info_link">Open website</string>
     <string name="arr_prowlarr_editor_presets">Presets</string>
-    <string name="arr_prowlarr_editor_seed_criteria">Seed criteria</string>
     <string name="arr_prowlarr_editor_categories">Categories</string>
-    <string name="arr_prowlarr_editor_result_title">Indexer</string>
-    <string name="arr_prowlarr_cd_pick_schema">Add %1$s</string>
     <string name="arr_prowlarr_cd_toggle_category">Toggle category %1$s</string>
     <string name="arr_prowlarr_cd_expand_category">Expand subcategories</string>
     <string name="arr_prowlarr_cd_collapse_category">Collapse subcategories</string>
 
     <!-- Dynamic fields -->
-    <string name="arr_prowlarr_fields_show_advanced">Show advanced settings</string>
-    <string name="arr_prowlarr_fields_hide_advanced">Hide advanced settings</string>
     <string name="arr_prowlarr_fields_help_link">Open help</string>
     <string name="arr_prowlarr_fields_show_password">Show value</string>
     <string name="arr_prowlarr_fields_hide_password">Hide value</string>
-    <string name="arr_prowlarr_fields_tags">Tags</string>
-    <string name="arr_prowlarr_fields_new_tag">New tag</string>
-    <string name="arr_prowlarr_fields_add_tag">Add</string>
 
     <!-- Categories manager -->
-    <string name="arr_prowlarr_categories_title">Categories</string>
     <string name="arr_prowlarr_categories_subtitle">Standard newznab categories across %1$d indexers</string>
     <string name="arr_prowlarr_categories_empty">No categories found.</string>
-    <string name="arr_prowlarr_categories_supported">%1$d indexers</string>
 
     <!-- Indexer proxies -->
-    <string name="arr_prowlarr_proxies_title">Indexer proxies</string>
     <string name="arr_prowlarr_proxies_empty">No proxies configured.</string>
     <string name="arr_prowlarr_proxies_add">Add proxy</string>
     <string name="arr_prowlarr_proxies_edit">Edit proxy</string>
@@ -158,10 +105,15 @@
     <string name="arr_prowlarr_message_test_failed">Test failed: %1$s</string>
     <string name="arr_prowlarr_message_test_all_started">Testing all indexers. Results appear in the status badges.</string>
     <string name="arr_prowlarr_message_write_failed">Action failed: %1$s</string>
-    <string name="arr_prowlarr_message_saved">Saved.</string>
     <string name="arr_prowlarr_message_saved_queued">Offline. Save queued for sync.</string>
     <string name="arr_prowlarr_message_sync_started">Application sync started.</string>
     <string name="arr_prowlarr_message_sync_queued">Offline. Sync queued.</string>
     <string name="arr_prowlarr_message_profile_saved">App profile saved.</string>
     <string name="arr_prowlarr_message_profile_deleted">App profile deleted.</string>
+    <string name="arr_prowlarr_cd_loading">Loading</string>
+    <string name="arr_prowlarr_cd_testing">Testing</string>
+    <string name="arr_prowlarr_cd_saving">Saving</string>
+    <string name="arr_prowlarr_cd_percent">%1$d percent</string>
+    <string name="arr_prowlarr_sort_state_ascending">Ascending</string>
+    <string name="arr_prowlarr_sort_state_descending">Descending</string>
 </resources>

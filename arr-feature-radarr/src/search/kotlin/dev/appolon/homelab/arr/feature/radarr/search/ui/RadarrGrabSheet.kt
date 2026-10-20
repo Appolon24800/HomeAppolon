@@ -35,6 +35,7 @@ import dev.appolon.homelab.arr.api.radarr.model.Language
 import dev.appolon.homelab.arr.api.radarr.model.Quality
 import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.feature.radarr.search.data.RadarrReleaseResource
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * The reusable grab sheet: shows one release and lets the caller's user
@@ -71,7 +72,7 @@ fun RadarrGrabSheet(
                 .padding(bottom = 24.dp),
         ) {
             Text(
-                text = stringResource(R.string.arr_radarr_grab_sheet_title),
+                text = stringResource(ArrUiR.string.arr_common_grab_sheet_title),
                 style = MaterialTheme.typography.titleMedium,
             )
             Spacer(Modifier.height(4.dp))
@@ -84,11 +85,11 @@ fun RadarrGrabSheet(
             )
             Spacer(Modifier.height(16.dp))
             OptionDropdown(
-                label = stringResource(R.string.arr_radarr_grab_sheet_quality_label),
+                label = stringResource(ArrUiR.string.arr_common_quality),
                 chosenName = quality?.name,
-                fallback = stringResource(R.string.arr_radarr_grab_sheet_as_parsed),
+                fallback = stringResource(ArrUiR.string.arr_common_grab_sheet_as_parsed),
                 contentDescription = stringResource(
-                    R.string.arr_radarr_grab_sheet_cd_quality,
+                    ArrUiR.string.arr_common_grab_sheet_cd_quality,
                 ),
                 optionNames = qualities.mapNotNull { it.name },
                 onSelect = { name ->
@@ -97,11 +98,11 @@ fun RadarrGrabSheet(
             )
             Spacer(Modifier.height(12.dp))
             OptionDropdown(
-                label = stringResource(R.string.arr_radarr_grab_sheet_language_label),
+                label = stringResource(ArrUiR.string.arr_common_language),
                 chosenName = language?.name,
-                fallback = stringResource(R.string.arr_radarr_grab_sheet_as_parsed),
+                fallback = stringResource(ArrUiR.string.arr_common_grab_sheet_as_parsed),
                 contentDescription = stringResource(
-                    R.string.arr_radarr_grab_sheet_cd_language,
+                    ArrUiR.string.arr_common_grab_sheet_cd_language,
                 ),
                 optionNames = languages.mapNotNull { it.name },
                 onSelect = { name ->
@@ -122,7 +123,7 @@ fun RadarrGrabSheet(
                     enabled = !busy,
                     modifier = Modifier.height(48.dp),
                 ) {
-                    Text(stringResource(R.string.arr_radarr_grab_sheet_action))
+                    Text(stringResource(ArrUiR.string.arr_common_grab_sheet_action))
                 }
                 Spacer(Modifier.width(12.dp))
                 OutlinedButton(
@@ -130,7 +131,7 @@ fun RadarrGrabSheet(
                     enabled = !busy,
                     modifier = Modifier.height(48.dp),
                 ) {
-                    Text(stringResource(R.string.arr_radarr_grab_sheet_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             }
         }

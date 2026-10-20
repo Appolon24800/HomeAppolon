@@ -43,7 +43,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.feature.bazarr.R
@@ -269,7 +271,11 @@ private fun WantedBulkBar(
                     stringResource(R.string.arr_bazarr_wanted_selected_count, selectedCount)
                 },
                 style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.weight(1f),
+                // Polite live region: the count and the bulk-run state change
+                // without focus moving here.
+                modifier = Modifier
+                    .weight(1f)
+                    .semantics { liveRegion = LiveRegionMode.Polite },
             )
             val clearCd = stringResource(R.string.arr_bazarr_wanted_cd_clear_selection)
             IconButton(
@@ -353,7 +359,7 @@ private fun WantedEpisodeRow(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (queued) QueuedBadge()
                     if (busy) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        busySpinner()
                     }
                     val cd = stringResource(R.string.arr_bazarr_cd_search_download)
                     IconButton(
@@ -425,7 +431,7 @@ private fun WantedMovieRow(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (queued) QueuedBadge()
                     if (busy) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        busySpinner()
                     }
                     val cd = stringResource(R.string.arr_bazarr_cd_search_download)
                     IconButton(
@@ -447,6 +453,18 @@ private fun WantedMovieRow(
             },
         )
     }
+}
+
+/** Busy-row spinner announcing its state instead of a bare progress bar. */
+@Composable
+private fun busySpinner() {
+    val busyCd = stringResource(R.string.arr_bazarr_cd_loading)
+    CircularProgressIndicator(
+        modifier = Modifier
+            .size(24.dp)
+            .semantics { contentDescription = busyCd },
+        strokeWidth = 2.dp,
+    )
 }
 
 /** Snackbar text for every search outcome the screen reports. */

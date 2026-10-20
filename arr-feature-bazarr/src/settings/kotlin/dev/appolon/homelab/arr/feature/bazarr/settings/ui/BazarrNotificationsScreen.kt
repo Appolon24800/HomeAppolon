@@ -119,9 +119,13 @@ fun BazarrNotificationsScreen(
                                 .semantics { contentDescription = testCd },
                         ) {
                             if (state.testing) {
+                                val testingCd =
+                                    stringResource(R.string.arr_bazarr_cd_testing)
                                 CircularProgressIndicator(
                                     strokeWidth = 2.dp,
-                                    modifier = Modifier.size(18.dp),
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .semantics { contentDescription = testingCd },
                                 )
                             } else {
                                 Icon(Icons.Filled.Bolt, contentDescription = null)

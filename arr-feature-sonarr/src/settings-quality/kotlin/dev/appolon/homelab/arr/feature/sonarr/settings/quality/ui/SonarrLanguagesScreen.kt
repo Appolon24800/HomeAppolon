@@ -39,6 +39,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the read-only languages route. */
 @Composable
@@ -84,14 +85,14 @@ fun SonarrLanguagesScreen(
     val refreshing = content != null && (lce as LceState.Content<SonarrLanguagesContent>).refreshing
 
     ArrScaffold(
-        title = stringResource(R.string.arr_sonarr_quality_languages_title),
+        title = stringResource(ArrUiR.string.arr_common_quality_languages_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_sonarr_quality_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_quality_cd_refresh),
                 )
             }
         },
@@ -108,15 +109,19 @@ fun SonarrLanguagesScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_sonarr_quality_languages_empty_title),
-                    emptyMessage = stringResource(R.string.arr_sonarr_quality_languages_empty_message),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_quality_languages_empty_title),
+                    emptyMessage = stringResource(ArrUiR.string.arr_common_quality_languages_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
                     LazyColumn(
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
                         modifier = Modifier.widthIn(max = SectionMaxWidth + 32.dp),
                     ) {
-                        items(data.languages, key = { it.id }) { language ->
+                        items(
+                            data.languages,
+                            key = { it.id },
+                            contentType = { "language" },
+                        ) { language ->
                             LanguageRow(language)
                         }
                     }

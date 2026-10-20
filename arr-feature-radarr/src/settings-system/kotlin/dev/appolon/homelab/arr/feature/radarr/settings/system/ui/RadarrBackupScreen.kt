@@ -50,6 +50,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the backup route. */
 @Composable
@@ -103,15 +104,15 @@ fun RadarrBackupDestination(
 
 @Composable
 private fun backupNoticeText(notice: BackupNotice): String = when (notice) {
-    BackupNotice.CREATED -> stringResource(R.string.arr_radarr_backup_notice_created)
-    BackupNotice.CREATED_QUEUED -> stringResource(R.string.arr_radarr_backup_notice_created_queued)
+    BackupNotice.CREATED -> stringResource(ArrUiR.string.arr_common_backup_notice_created)
+    BackupNotice.CREATED_QUEUED -> stringResource(ArrUiR.string.arr_common_backup_notice_created_queued)
     BackupNotice.RESTORED -> stringResource(R.string.arr_radarr_backup_notice_restored_no_restart)
     BackupNotice.RESTORED_RESTART -> stringResource(R.string.arr_radarr_backup_notice_restored)
-    BackupNotice.DELETED -> stringResource(R.string.arr_radarr_backup_notice_deleted)
-    BackupNotice.DELETED_QUEUED -> stringResource(R.string.arr_radarr_backup_notice_deleted_queued)
-    BackupNotice.SCHEDULE_SAVED -> stringResource(R.string.arr_radarr_system_notice_saved)
+    BackupNotice.DELETED -> stringResource(ArrUiR.string.arr_common_backup_notice_deleted)
+    BackupNotice.DELETED_QUEUED -> stringResource(ArrUiR.string.arr_common_backup_notice_deleted_queued)
+    BackupNotice.SCHEDULE_SAVED -> stringResource(ArrUiR.string.arr_common_system_notice_saved)
     BackupNotice.SCHEDULE_SAVED_QUEUED ->
-        stringResource(R.string.arr_radarr_system_notice_saved_queued)
+        stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 }
 
 /**
@@ -155,20 +156,20 @@ fun RadarrBackupScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_backup_title),
+        title = stringResource(ArrUiR.string.arr_common_backup_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_system_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_refresh),
                 )
             }
             IconButton(onClick = onCreate) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.arr_radarr_backup_cd_create),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_backup_cd_create),
                 )
             }
         },
@@ -185,7 +186,7 @@ fun RadarrBackupScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_radarr_backup_empty_title),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_backup_empty_title),
                     emptyMessage = stringResource(R.string.arr_radarr_backup_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
@@ -198,7 +199,7 @@ fun RadarrBackupScreen(
                             item { SystemPendingSyncBanner(data.pendingActions) }
                         }
                         item { BackupScheduleCard(data, onEditSchedule, onSaveSchedule) }
-                        items(data.backups, key = { it.id }) { backup ->
+                        items(data.backups, key = { it.id }, contentType = { "backup" }) { backup ->
                             BackupRow(backup, onRestore, onDelete, onDownloadBackup)
                         }
                     }
@@ -220,36 +221,36 @@ private fun BackupScheduleCard(
 ) {
     SystemCard {
         Column {
-            SystemSectionHeader(stringResource(R.string.arr_radarr_backup_section_schedule))
+            SystemSectionHeader(stringResource(ArrUiR.string.arr_common_backup_section_schedule))
             SystemTextField(
                 value = data.schedule.folder,
-                label = stringResource(R.string.arr_radarr_backup_folder),
+                label = stringResource(ArrUiR.string.arr_common_backup_folder),
                 onValue = { value -> onEditSchedule { it.copy(folder = value) } },
-                supporting = stringResource(R.string.arr_radarr_backup_folder_support),
+                supporting = stringResource(ArrUiR.string.arr_common_backup_folder_support),
             )
             SystemTextField(
                 value = data.schedule.intervalDays,
-                label = stringResource(R.string.arr_radarr_backup_interval),
+                label = stringResource(ArrUiR.string.arr_common_backup_interval),
                 onValue = { value ->
                     onEditSchedule { it.copy(intervalDays = value.filter(Char::isDigit)) }
                 },
                 isError = data.scheduleError,
-                errorMessage = stringResource(R.string.arr_radarr_backup_interval_error),
+                errorMessage = stringResource(ArrUiR.string.arr_common_backup_interval_error),
             )
             SystemTextField(
                 value = data.schedule.retentionDays,
-                label = stringResource(R.string.arr_radarr_backup_retention),
+                label = stringResource(ArrUiR.string.arr_common_backup_retention),
                 onValue = { value ->
                     onEditSchedule { it.copy(retentionDays = value.filter(Char::isDigit)) }
                 },
                 isError = data.scheduleError,
-                errorMessage = stringResource(R.string.arr_radarr_backup_retention_error),
+                errorMessage = stringResource(ArrUiR.string.arr_common_backup_interval_error),
             )
             TextButton(
                 onClick = onSaveSchedule,
                 enabled = data.scheduleDirty && !data.scheduleError && !data.scheduleSaving,
             ) {
-                Text(stringResource(R.string.arr_radarr_system_action_save_row))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         }
     }
@@ -282,7 +283,7 @@ private fun BackupRow(
                         Icon(
                             imageVector = Icons.Filled.CloudDownload,
                             contentDescription = stringResource(
-                                R.string.arr_radarr_backup_cd_download,
+                                ArrUiR.string.arr_common_backup_cd_download,
                                 backup.name.orEmpty(),
                             ),
                         )
@@ -292,7 +293,7 @@ private fun BackupRow(
                     Icon(
                         imageVector = Icons.Filled.Restore,
                         contentDescription = stringResource(
-                            R.string.arr_radarr_backup_cd_restore,
+                            ArrUiR.string.arr_common_backup_cd_restore,
                             backup.name.orEmpty(),
                         ),
                     )
@@ -301,7 +302,7 @@ private fun BackupRow(
                     Icon(
                         imageVector = Icons.Filled.Delete,
                         contentDescription = stringResource(
-                            R.string.arr_radarr_backup_cd_delete,
+                            ArrUiR.string.arr_common_backup_cd_delete,
                             backup.name.orEmpty(),
                         ),
                     )
@@ -313,9 +314,9 @@ private fun BackupRow(
 
 @Composable
 private fun BackupType?.typeLabel(): String = when (this) {
-    BackupType.SCHEDULED -> stringResource(R.string.arr_radarr_backup_type_scheduled)
-    BackupType.MANUAL -> stringResource(R.string.arr_radarr_backup_type_manual)
-    BackupType.UPDATE -> stringResource(R.string.arr_radarr_backup_type_update)
+    BackupType.SCHEDULED -> stringResource(ArrUiR.string.arr_common_backup_type_scheduled)
+    BackupType.MANUAL -> stringResource(ArrUiR.string.arr_common_backup_type_manual)
+    BackupType.UPDATE -> stringResource(ArrUiR.string.arr_common_backup_type_update)
     null -> ""
 }
 
@@ -337,16 +338,16 @@ internal fun BackupConfirmDialogs(
     state.confirmRestoreFor?.let { backup ->
         AlertDialog(
             onDismissRequest = onRestoreCancelled,
-            title = { Text(stringResource(R.string.arr_radarr_backup_restore_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_backup_restore_title)) },
             text = { Text(stringResource(R.string.arr_radarr_backup_restore_message)) },
             confirmButton = {
                 TextButton(onClick = onRestoreConfirmed) {
-                    Text(stringResource(R.string.arr_radarr_backup_cd_restore, backup.name.orEmpty()))
+                    Text(stringResource(ArrUiR.string.arr_common_backup_cd_restore, backup.name.orEmpty()))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onRestoreCancelled) {
-                    Text(stringResource(R.string.arr_radarr_system_action_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -354,23 +355,23 @@ internal fun BackupConfirmDialogs(
     state.confirmDeleteFor?.let { backup ->
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_radarr_backup_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_backup_delete_title)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.arr_radarr_backup_delete_message,
+                        ArrUiR.string.arr_common_backup_delete_message,
                         backup.name.orEmpty(),
                     ),
                 )
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_radarr_system_action_delete))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_radarr_system_action_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )

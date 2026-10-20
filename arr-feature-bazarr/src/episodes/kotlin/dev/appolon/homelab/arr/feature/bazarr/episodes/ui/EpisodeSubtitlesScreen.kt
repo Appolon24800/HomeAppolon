@@ -2,6 +2,7 @@ package dev.appolon.homelab.arr.feature.bazarr.episodes.ui
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -163,7 +164,11 @@ fun EpisodeSubtitlesScreen(
                         ),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            // Episode headers and their subtitle details form
+                            // one traversal group per logical list.
+                            .focusGroup(),
                     ) {
                         items(state.presented, key = { it.episodeId }) { episode ->
                             EpisodeRow(
@@ -254,7 +259,13 @@ private fun EpisodeRow(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         if (queued) QueuedBadge()
                         if (busy) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                            val busyCd = stringResource(R.string.arr_bazarr_cd_loading)
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .semantics { contentDescription = busyCd },
+                                strokeWidth = 2.dp,
+                            )
                         }
                         val uploadCd = stringResource(R.string.arr_bazarr_cd_upload)
                         IconButton(

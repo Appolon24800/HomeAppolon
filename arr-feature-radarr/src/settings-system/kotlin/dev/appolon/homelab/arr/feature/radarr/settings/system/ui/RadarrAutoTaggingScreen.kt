@@ -46,6 +46,7 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the auto tagging list route. */
 @Composable
@@ -118,20 +119,20 @@ fun RadarrAutoTaggingScreen(
     )
 
     ArrScaffold(
-        title = stringResource(R.string.arr_radarr_autotag_title),
+        title = stringResource(ArrUiR.string.arr_common_autotag_title),
         subtitle = serverName,
         onBack = onBack,
         actions = {
             IconButton(onClick = onRefresh) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_system_cd_refresh),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_system_cd_refresh),
                 )
             }
             IconButton(onClick = onAdd) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.arr_radarr_autotag_cd_add),
+                    contentDescription = stringResource(ArrUiR.string.arr_common_autotag_cd_add),
                 )
             }
         },
@@ -148,8 +149,8 @@ fun RadarrAutoTaggingScreen(
                 ArrLceBox(
                     state = lce,
                     onRetry = onRefresh,
-                    emptyTitle = stringResource(R.string.arr_radarr_autotag_empty_title),
-                    emptyMessage = stringResource(R.string.arr_radarr_autotag_empty_message),
+                    emptyTitle = stringResource(ArrUiR.string.arr_common_autotag_empty_title),
+                    emptyMessage = stringResource(ArrUiR.string.arr_common_autotag_empty_message),
                     modifier = Modifier.fillMaxSize(),
                 ) { data ->
                     LazyColumn(
@@ -159,7 +160,11 @@ fun RadarrAutoTaggingScreen(
                         if (data.pendingActions > 0) {
                             item { SystemPendingSyncBanner(data.pendingActions) }
                         }
-                        items(data.rows, key = { it.rule.id }) { row ->
+                        items(
+                            data.rows,
+                            key = { it.rule.id },
+                            contentType = { "auto-tagging" },
+                        ) { row ->
                             AutoTaggingRow(
                                 name = row.name,
                                 tagLabels = row.tagLabels,
@@ -204,7 +209,7 @@ private fun AutoTaggingRow(
                     Icon(
                         imageVector = Icons.Filled.Delete,
                         contentDescription = stringResource(
-                            R.string.arr_radarr_autotag_cd_delete_rule,
+                            ArrUiR.string.arr_common_autotag_cd_delete_rule,
                             name,
                         ),
                     )
@@ -220,11 +225,15 @@ private fun tagSupportText(
     conditionCount: Int,
     queuedForRemoval: Boolean,
 ): String {
-    val conditionText = stringResource(R.string.arr_radarr_autotag_row_support, conditionCount)
+    val conditionText = stringResource(ArrUiR.string.arr_common_autotag_row_support, conditionCount)
     val tags = tagLabels.joinToString(", ")
     val base = if (tags.isEmpty()) conditionText else "$tags · $conditionText"
     return if (queuedForRemoval) {
-        stringResource(R.string.arr_radarr_system_cd_queued_indicator) + " · " + base
+        stringResource(
+                    ArrUiR.string.arr_common_metadata_pair,
+                    stringResource(ArrUiR.string.arr_common_system_cd_queued_indicator),
+                    base,
+                )
     } else {
         base
     }
@@ -232,13 +241,13 @@ private fun tagSupportText(
 
 @Composable
 private fun autoTaggingNoticeText(notice: AutoTaggingNotice): String = when (notice) {
-    AutoTaggingNotice.SAVED -> stringResource(R.string.arr_radarr_system_notice_saved)
+    AutoTaggingNotice.SAVED -> stringResource(ArrUiR.string.arr_common_system_notice_saved)
     AutoTaggingNotice.SAVED_QUEUED ->
-        stringResource(R.string.arr_radarr_system_notice_saved_queued)
+        stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
-    AutoTaggingNotice.DELETED -> stringResource(R.string.arr_radarr_tags_notice_deleted)
+    AutoTaggingNotice.DELETED -> stringResource(ArrUiR.string.arr_common_tags_notice_deleted)
     AutoTaggingNotice.DELETED_QUEUED ->
-        stringResource(R.string.arr_radarr_tags_notice_queued)
+        stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 }
 
 @Composable
@@ -250,16 +259,16 @@ private fun AutoTaggingConfirmDialog(
     state.confirmDeleteFor?.let { rule ->
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_radarr_autotag_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_autotag_delete_title)) },
             text = { Text(stringResource(R.string.arr_radarr_autotag_delete_message)) },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_radarr_system_action_delete))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_radarr_system_action_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )

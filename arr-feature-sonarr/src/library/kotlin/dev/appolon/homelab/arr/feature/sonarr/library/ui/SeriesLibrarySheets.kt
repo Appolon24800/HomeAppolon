@@ -31,6 +31,7 @@ import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.feature.sonarr.library.vm.SeasonPassForm
 import dev.appolon.homelab.arr.feature.sonarr.library.vm.SeriesEditorForm
 import dev.appolon.homelab.arr.ui.components.LabeledSwitch
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Bulk series editor sheet. Null form fields mean "leave unchanged"; the
@@ -59,7 +60,7 @@ fun SeriesEditorSheet(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
-                text = stringResource(R.string.arr_sonarr_editor_title),
+                text = stringResource(R.string.arr_sonarr_detail_menu_edit),
                 style = MaterialTheme.typography.titleLarge,
             )
             Text(
@@ -69,15 +70,15 @@ fun SeriesEditorSheet(
                 modifier = Modifier.padding(bottom = 12.dp),
             )
 
-            Text(stringResource(R.string.arr_sonarr_editor_monitored))
+            Text(stringResource(ArrUiR.string.arr_common_monitored))
             TriStateChips(
                 value = form.monitored,
                 onChange = { value -> onUpdate(form.copy(monitored = value)) },
                 labelFor = { option ->
                     stringResource(
                         when (option) {
-                            true -> R.string.arr_sonarr_filter_toggle_on
-                            false -> R.string.arr_sonarr_filter_toggle_off
+                            true -> ArrUiR.string.arr_common_yes
+                            false -> ArrUiR.string.arr_common_no
                             else -> R.string.arr_sonarr_editor_monitored_unset
                         },
                     )
@@ -85,10 +86,10 @@ fun SeriesEditorSheet(
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
             )
 
-            Text(stringResource(R.string.arr_sonarr_editor_quality))
+            Text(stringResource(ArrUiR.string.arr_common_wanted_filter_quality))
             Column(Modifier.padding(bottom = 12.dp)) {
                 SelectableRow(
-                    label = stringResource(R.string.arr_sonarr_editor_quality_unset),
+                    label = stringResource(R.string.arr_sonarr_editor_monitored_unset),
                     selected = form.qualityProfileId == null,
                     onClick = { onUpdate(form.copy(qualityProfileId = null)) },
                 )
@@ -101,7 +102,7 @@ fun SeriesEditorSheet(
                 }
             }
 
-            Text(stringResource(R.string.arr_sonarr_editor_type))
+            Text(stringResource(R.string.arr_sonarr_list_series_type))
             Column(Modifier.padding(bottom = 12.dp)) {
                 seriesTypeOptions().forEach { (type, label) ->
                     SelectableRow(
@@ -116,16 +117,16 @@ fun SeriesEditorSheet(
                 }
             }
 
-            Text(stringResource(R.string.arr_sonarr_editor_season_folder))
+            Text(stringResource(R.string.arr_sonarr_add_season_folder))
             TriStateChips(
                 value = form.seasonFolder,
                 onChange = { value -> onUpdate(form.copy(seasonFolder = value)) },
                 labelFor = { option ->
                     stringResource(
                         when (option) {
-                            true -> R.string.arr_sonarr_filter_toggle_on
-                            false -> R.string.arr_sonarr_filter_toggle_off
-                            else -> R.string.arr_sonarr_editor_season_folder_unset
+                            true -> ArrUiR.string.arr_common_yes
+                            false -> ArrUiR.string.arr_common_no
+                            else -> R.string.arr_sonarr_editor_monitored_unset
                         },
                     )
                 },
@@ -135,7 +136,7 @@ fun SeriesEditorSheet(
             OutlinedTextField(
                 value = form.rootFolderPath,
                 onValueChange = { value -> onUpdate(form.copy(rootFolderPath = value)) },
-                label = { Text(stringResource(R.string.arr_sonarr_editor_root_folder)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_list_root_folder)) },
                 singleLine = true,
                 isError = false,
                 modifier = Modifier
@@ -146,10 +147,10 @@ fun SeriesEditorSheet(
             OutlinedTextField(
                 value = form.tagsText,
                 onValueChange = { value -> onUpdate(form.copy(tagsText = value, tagsError = false)) },
-                label = { Text(stringResource(R.string.arr_sonarr_editor_tags)) },
+                label = { Text(stringResource(R.string.arr_sonarr_detail_edit_tags)) },
                 isError = form.tagsError,
                 supportingText = if (form.tagsError) {
-                    { Text(stringResource(R.string.arr_sonarr_editor_tags_error)) }
+                    { Text(stringResource(R.string.arr_sonarr_detail_edit_tags_error)) }
                 } else {
                     null
                 },
@@ -166,9 +167,9 @@ fun SeriesEditorSheet(
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
             ) {
                 listOf(
-                    ApplyTags.ADD to R.string.arr_sonarr_editor_tags_add,
-                    ApplyTags.REMOVE to R.string.arr_sonarr_editor_tags_remove,
-                    ApplyTags.REPLACE to R.string.arr_sonarr_editor_tags_replace,
+                    ApplyTags.ADD to ArrUiR.string.arr_common_roots_add_confirm,
+                    ApplyTags.REMOVE to ArrUiR.string.arr_common_queue_action_remove,
+                    ApplyTags.REPLACE to ArrUiR.string.arr_common_editor_tags_replace,
                 ).forEach { (mode, labelRes) ->
                     FilterChip(
                         selected = form.applyTags == mode,
@@ -179,7 +180,7 @@ fun SeriesEditorSheet(
             }
 
             LabeledSwitch(
-                label = stringResource(R.string.arr_sonarr_editor_move_files),
+                label = stringResource(ArrUiR.string.arr_common_detail_edit_move),
                 checked = form.moveFiles,
                 onCheckedChange = { checked -> onUpdate(form.copy(moveFiles = checked)) },
             )
@@ -192,7 +193,7 @@ fun SeriesEditorSheet(
                     .padding(vertical = 16.dp),
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.arr_sonarr_editor_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
                 Button(onClick = onSubmit) {
                     Text(stringResource(R.string.arr_sonarr_editor_submit))
@@ -205,9 +206,9 @@ fun SeriesEditorSheet(
 /** The series types Sonarr's editor can bulk-assign, with display labels. */
 @Composable
 private fun seriesTypeOptions(): List<Pair<SeriesTypes, String>> = listOf(
-    SeriesTypes.STANDARD to stringResource(R.string.arr_sonarr_type_standard),
-    SeriesTypes.ANIME to stringResource(R.string.arr_sonarr_type_anime),
-    SeriesTypes.DAILY to stringResource(R.string.arr_sonarr_type_daily),
+    SeriesTypes.STANDARD to stringResource(R.string.arr_sonarr_add_type_standard),
+    SeriesTypes.ANIME to stringResource(R.string.arr_sonarr_add_type_anime),
+    SeriesTypes.DAILY to stringResource(R.string.arr_sonarr_add_type_daily),
 )
 
 /**
@@ -245,13 +246,13 @@ fun SeasonPassSheet(
             )
 
             LabeledSwitch(
-                label = stringResource(R.string.arr_sonarr_season_pass_monitored),
+                label = stringResource(R.string.arr_sonarr_add_monitored),
                 checked = form.monitored,
                 onCheckedChange = { checked -> onUpdate(form.copy(monitored = checked)) },
             )
 
             Text(
-                text = stringResource(R.string.arr_sonarr_season_pass_strategy),
+                text = stringResource(R.string.arr_sonarr_list_monitor),
                 modifier = Modifier.padding(top = 8.dp),
             )
             Column {
@@ -265,14 +266,14 @@ fun SeasonPassSheet(
             }
 
             LabeledSwitch(
-                label = stringResource(R.string.arr_sonarr_season_pass_ignore_with_files),
+                label = stringResource(R.string.arr_sonarr_detail_season_pass_ignore_with_files),
                 checked = form.ignoreEpisodesWithFiles,
                 onCheckedChange = { checked ->
                     onUpdate(form.copy(ignoreEpisodesWithFiles = checked))
                 },
             )
             LabeledSwitch(
-                label = stringResource(R.string.arr_sonarr_season_pass_ignore_without_files),
+                label = stringResource(R.string.arr_sonarr_detail_season_pass_ignore_without_files),
                 checked = form.ignoreEpisodesWithoutFiles,
                 onCheckedChange = { checked ->
                     onUpdate(form.copy(ignoreEpisodesWithoutFiles = checked))
@@ -287,10 +288,10 @@ fun SeasonPassSheet(
                     .padding(vertical = 16.dp),
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.arr_sonarr_season_pass_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
                 Button(onClick = onSubmit) {
-                    Text(stringResource(R.string.arr_sonarr_season_pass_submit))
+                    Text(stringResource(R.string.arr_sonarr_detail_season_pass_submit))
                 }
             }
         }
@@ -300,16 +301,16 @@ fun SeasonPassSheet(
 /** Monitor strategies exposed by the sheet, wire order preserved. */
 @Composable
 private fun monitorStrategyOptions(): List<Pair<MonitorTypes, String>> = listOf(
-    MonitorTypes.ALL to stringResource(R.string.arr_sonarr_strategy_all),
-    MonitorTypes.FUTURE to stringResource(R.string.arr_sonarr_strategy_future),
-    MonitorTypes.MISSING to stringResource(R.string.arr_sonarr_strategy_missing),
-    MonitorTypes.EXISTING to stringResource(R.string.arr_sonarr_strategy_existing),
-    MonitorTypes.FIRSTSEASON to stringResource(R.string.arr_sonarr_strategy_first_season),
-    MonitorTypes.LASTSEASON to stringResource(R.string.arr_sonarr_strategy_last_season),
-    MonitorTypes.LATESTSEASON to stringResource(R.string.arr_sonarr_strategy_latest_season),
-    MonitorTypes.PILOT to stringResource(R.string.arr_sonarr_strategy_pilot),
-    MonitorTypes.RECENT to stringResource(R.string.arr_sonarr_strategy_recent),
-    MonitorTypes.MONITORSPECIALS to stringResource(R.string.arr_sonarr_strategy_monitor_specials),
-    MonitorTypes.UNMONITORSPECIALS to stringResource(R.string.arr_sonarr_strategy_unmonitor_specials),
-    MonitorTypes.NONE to stringResource(R.string.arr_sonarr_strategy_none),
+    MonitorTypes.ALL to stringResource(R.string.arr_sonarr_add_strategy_all),
+    MonitorTypes.FUTURE to stringResource(R.string.arr_sonarr_add_strategy_future),
+    MonitorTypes.MISSING to stringResource(R.string.arr_sonarr_add_strategy_missing),
+    MonitorTypes.EXISTING to stringResource(R.string.arr_sonarr_add_strategy_existing),
+    MonitorTypes.FIRSTSEASON to stringResource(R.string.arr_sonarr_add_strategy_first_season),
+    MonitorTypes.LASTSEASON to stringResource(R.string.arr_sonarr_add_strategy_last_season),
+    MonitorTypes.LATESTSEASON to stringResource(R.string.arr_sonarr_add_strategy_latest_season),
+    MonitorTypes.PILOT to stringResource(R.string.arr_sonarr_add_strategy_pilot),
+    MonitorTypes.RECENT to stringResource(R.string.arr_sonarr_add_strategy_recent),
+    MonitorTypes.MONITORSPECIALS to stringResource(R.string.arr_sonarr_add_strategy_monitor_specials),
+    MonitorTypes.UNMONITORSPECIALS to stringResource(R.string.arr_sonarr_add_strategy_unmonitor_specials),
+    MonitorTypes.NONE to stringResource(R.string.arr_sonarr_add_strategy_none),
 )

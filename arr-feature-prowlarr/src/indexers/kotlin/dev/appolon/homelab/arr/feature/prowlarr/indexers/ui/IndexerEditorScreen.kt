@@ -1,6 +1,7 @@
 package dev.appolon.homelab.arr.feature.prowlarr.indexers.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.api.prowlarr.model.AppProfileResource
@@ -65,6 +67,7 @@ import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
 import kotlinx.serialization.json.JsonElement
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /**
  * Add and edit indexer screen. Add mode starts at the prescreened
@@ -98,24 +101,34 @@ fun IndexerEditorScreen(
 ) {
     ArrScaffold(
         title = stringResource(
-            if (state.editing != null) R.string.arr_prowlarr_editor_title_edit
-            else R.string.arr_prowlarr_editor_title_add,
+            if (state.editing != null) ArrUiR.string.arr_common_indexer_editor_title
+            else ArrUiR.string.arr_common_indexers_add,
         ),
         onBack = if (state.editing == null && !state.pickingSchema) onBackToPicker else onBack,
         actions = {
             if (!state.pickingSchema && !state.loading && state.loadError == null) {
+                val testingCd = stringResource(R.string.arr_prowlarr_cd_testing)
                 TextButton(onClick = onTest, enabled = !state.testing) {
                     if (state.testing) {
-                        CircularProgressIndicator(Modifier.heightIn(max = 16.dp))
+                        CircularProgressIndicator(
+                            Modifier
+                                .heightIn(max = 16.dp)
+                                .semantics { contentDescription = testingCd },
+                        )
                     } else {
-                        Text(stringResource(R.string.arr_prowlarr_test))
+                        Text(stringResource(ArrUiR.string.arr_common_connect_test))
                     }
                 }
+                val savingCd = stringResource(R.string.arr_prowlarr_cd_saving)
                 TextButton(onClick = onSave, enabled = !state.saving) {
                     if (state.saving) {
-                        CircularProgressIndicator(Modifier.heightIn(max = 16.dp))
+                        CircularProgressIndicator(
+                            Modifier
+                                .heightIn(max = 16.dp)
+                                .semantics { contentDescription = savingCd },
+                        )
                     } else {
-                        Text(stringResource(R.string.arr_prowlarr_save))
+                        Text(stringResource(ArrUiR.string.arr_common_save))
                     }
                 }
             }
@@ -128,7 +141,12 @@ fun IndexerEditorScreen(
                     .fillMaxSize()
                     .padding(padding),
                 contentAlignment = Alignment.Center,
-            ) { CircularProgressIndicator() }
+            ) {
+                val loadingCd = stringResource(R.string.arr_prowlarr_cd_loading)
+                CircularProgressIndicator(
+                    Modifier.semantics { contentDescription = loadingCd },
+                )
+            }
 
             state.loadError != null -> ArrLceBox(
                 state = LceState.Error(state.loadError),
@@ -175,7 +193,7 @@ fun IndexerEditorScreen(
     if (messageText != null && !state.saving && !state.testing) {
         AlertDialog(
             onDismissRequest = onConsumeMessage,
-            title = { Text(stringResource(R.string.arr_prowlarr_editor_result_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_releases_details_indexer)) },
             text = { Text(messageText) },
             confirmButton = {
                 TextButton(onClick = onConsumeMessage) {
@@ -242,7 +260,7 @@ private fun SchemaCard(
     onPick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val cd = stringResource(R.string.arr_prowlarr_cd_pick_schema, schema.name.orEmpty())
+    val cd = stringResource(ArrUiR.string.arr_common_add_cd_open_add, schema.name.orEmpty())
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
@@ -274,7 +292,7 @@ private fun SchemaCard(
                     AssistChip(
                         onClick = {},
                         enabled = false,
-                        label = { Text(stringResource(R.string.arr_prowlarr_editor_supports_rss)) },
+                        label = { Text(stringResource(ArrUiR.string.arr_common_indexers_mode_rss)) },
                     )
                 }
             }
@@ -299,7 +317,7 @@ private fun EditorForm(
     BoxWithConstraints(modifier) {
         val twoPane = maxWidth >= 840.dp
         if (twoPane) {
-            Row(Modifier.fillMaxSize()) {
+            Row(Modifier.fillMaxSize().focusGroup()) {
                 Column(
                     Modifier
                         .weight(1f)
@@ -337,6 +355,7 @@ private fun EditorForm(
         } else {
             Column(
                 Modifier
+                    .focusGroup()
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -379,10 +398,10 @@ private fun BasicsSection(
         OutlinedTextField(
             value = state.name,
             onValueChange = onNameChange,
-            label = { Text(stringResource(R.string.arr_prowlarr_editor_name)) },
+            label = { Text(stringResource(ArrUiR.string.arr_common_autotag_name)) },
             isError = state.nameMissing,
             supportingText = if (state.nameMissing) {
-                { Text(stringResource(R.string.arr_prowlarr_editor_name_missing)) }
+                { Text(stringResource(ArrUiR.string.arr_common_tags_label_error)) }
             } else {
                 null
             },
@@ -390,7 +409,7 @@ private fun BasicsSection(
             modifier = Modifier.fillMaxWidth(),
         )
         LabeledSwitch(
-            label = stringResource(R.string.arr_prowlarr_editor_enabled),
+            label = stringResource(ArrUiR.string.arr_common_general_cert_validation_enabled),
             checked = state.enable,
             onCheckedChange = onEnableChange,
         )
@@ -403,7 +422,7 @@ private fun BasicsSection(
                 priorityText = text
                 text.trim().toIntOrNull()?.let(onPriorityChange)
             },
-            label = { Text(stringResource(R.string.arr_prowlarr_editor_priority)) },
+            label = { Text(stringResource(ArrUiR.string.arr_common_connect_priority_label)) },
             isError = priorityText.toIntOrNull() == null,
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
@@ -429,7 +448,10 @@ private fun BasicsSection(
             }
         }
         if (state.presets.isNotEmpty()) {
-            SectionHeader(title = stringResource(R.string.arr_prowlarr_editor_presets))
+            SectionHeader(
+                title = stringResource(R.string.arr_prowlarr_editor_presets),
+                modifier = Modifier.semantics { heading() },
+            )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 state.presets.forEachIndexed { index, preset ->
                     FilterChip(
@@ -440,7 +462,10 @@ private fun BasicsSection(
                 }
             }
         }
-        SectionHeader(title = state.implementationName)
+        SectionHeader(
+            title = state.implementationName,
+            modifier = Modifier.semantics { heading() },
+        )
     }
 }
 
@@ -460,7 +485,10 @@ private fun DynamicSection(
             onToggleAdvanced = onToggleAdvanced,
         )
         if (state.seedCriteriaFields.isNotEmpty()) {
-            SectionHeader(title = stringResource(R.string.arr_prowlarr_editor_seed_criteria))
+            SectionHeader(
+                title = stringResource(ArrUiR.string.arr_common_connect_section_seed_criteria),
+                modifier = Modifier.semantics { heading() },
+            )
             FieldEditors(
                 fields = state.seedCriteriaFields,
                 values = state.values,
@@ -482,6 +510,7 @@ private fun CategoriesSection(
     Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         SectionHeader(
             title = stringResource(R.string.arr_prowlarr_editor_categories),
+            modifier = Modifier.semantics { heading() },
         )
         state.defaultCategories.forEach { category ->
             CategoryNode(
@@ -519,7 +548,11 @@ private fun CategoryNode(
             onCheckedChange = { onToggleCategory(category.id) },
         )
         Text(
-            "${category.id} · ${category.name.orEmpty()}",
+                            stringResource(
+                                ArrUiR.string.arr_common_metadata_pair,
+                                category.id.toString(),
+                                category.name.orEmpty(),
+                            ),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .weight(1f)
@@ -573,7 +606,7 @@ private fun AppProfileSelect(
             value = selectedLabel,
             onValueChange = {},
             readOnly = true,
-            label = { Text(stringResource(R.string.arr_prowlarr_editor_app_profile)) },
+            label = { Text(stringResource(R.string.arr_prowlarr_bulk_app_profile)) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
@@ -586,7 +619,7 @@ private fun AppProfileSelect(
             onDismissRequest = { expanded = false },
         ) {
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.arr_prowlarr_editor_profile_none)) },
+                text = { Text(stringResource(ArrUiR.string.arr_common_general_auth_method_none)) },
                 onClick = {
                     expanded = false
                     onSelect(null)
@@ -608,7 +641,7 @@ private fun AppProfileSelect(
 /** Dialog text for an editor message. */
 @Composable
 internal fun editorMessageText(message: IndexerEditorMessage): String = when (message) {
-    IndexerEditorMessage.Saved -> stringResource(R.string.arr_prowlarr_message_saved)
+    IndexerEditorMessage.Saved -> stringResource(ArrUiR.string.arr_common_connect_notice_saved)
     IndexerEditorMessage.SavedQueued ->
         stringResource(R.string.arr_prowlarr_message_saved_queued)
 
@@ -622,5 +655,5 @@ internal fun editorMessageText(message: IndexerEditorMessage): String = when (me
         stringResource(R.string.arr_prowlarr_message_write_failed, arrErrorMessage(message.error))
 
     IndexerEditorMessage.NameMissing ->
-        stringResource(R.string.arr_prowlarr_editor_name_missing)
+        stringResource(ArrUiR.string.arr_common_tags_label_error)
 }

@@ -54,6 +54,7 @@ import dev.appolon.homelab.arr.ui.components.SectionHeader
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
+import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the download client editor route (clientId null creates). */
 @Composable
@@ -137,19 +138,19 @@ fun RadarrDownloadClientEditorScreen(
     NoticeHost(
         noticeMessage = when (state.notice) {
             DownloadClientEditorNotice.SAVED ->
-                stringResource(R.string.arr_radarr_connect_notice_saved)
+                stringResource(ArrUiR.string.arr_common_connect_notice_saved)
 
             DownloadClientEditorNotice.SAVED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_saved_queued)
+                stringResource(ArrUiR.string.arr_common_system_notice_saved_queued)
 
             DownloadClientEditorNotice.DELETED ->
-                stringResource(R.string.arr_radarr_connect_notice_deleted)
+                stringResource(ArrUiR.string.arr_common_connect_notice_deleted)
 
             DownloadClientEditorNotice.DELETED_QUEUED ->
-                stringResource(R.string.arr_radarr_connect_notice_deleted_queued)
+                stringResource(ArrUiR.string.arr_common_backup_notice_deleted_queued)
 
             DownloadClientEditorNotice.TEST_PASSED ->
-                stringResource(R.string.arr_radarr_connect_notice_test_passed)
+                stringResource(ArrUiR.string.arr_common_connect_notice_test_passed)
 
             null -> null
         },
@@ -161,8 +162,8 @@ fun RadarrDownloadClientEditorScreen(
 
     ArrScaffold(
         title = stringResource(
-            if (state.isNew) R.string.arr_radarr_client_editor_title_new
-            else R.string.arr_radarr_client_editor_title,
+            if (state.isNew) ArrUiR.string.arr_common_clients_add
+            else ArrUiR.string.arr_common_client_editor_title,
         ),
         subtitle = serverName,
         onBack = onBack,
@@ -171,11 +172,11 @@ fun RadarrDownloadClientEditorScreen(
                 IconButton(onClick = onTest, enabled = !state.testing) {
                     Icon(
                         imageVector = Icons.Filled.Science,
-                        contentDescription = stringResource(R.string.arr_radarr_connect_cd_test),
+                        contentDescription = stringResource(ArrUiR.string.arr_common_connect_cd_test),
                     )
                 }
                 if (!state.isNew) {
-                    val deleteCd = stringResource(R.string.arr_radarr_connect_cd_delete)
+                    val deleteCd = stringResource(ArrUiR.string.arr_common_connect_cd_delete)
                     IconButton(
                         onClick = onDeleteRequest,
                         modifier = Modifier.semantics { contentDescription = deleteCd },
@@ -195,8 +196,8 @@ fun RadarrDownloadClientEditorScreen(
             ArrLceBox(
                 state = lce,
                 onRetry = onBack,
-                emptyTitle = stringResource(R.string.arr_radarr_connect_picker_empty_title),
-                emptyMessage = stringResource(R.string.arr_radarr_connect_picker_empty_message),
+                emptyTitle = stringResource(ArrUiR.string.arr_common_connect_picker_empty_title),
+                emptyMessage = stringResource(ArrUiR.string.arr_common_connect_picker_empty_message),
                 modifier = Modifier.fillMaxSize(),
             ) { data ->
                 when {
@@ -229,23 +230,23 @@ fun RadarrDownloadClientEditorScreen(
     if (state.confirmDelete) {
         AlertDialog(
             onDismissRequest = onDeleteCancelled,
-            title = { Text(stringResource(R.string.arr_radarr_connect_delete_title)) },
+            title = { Text(stringResource(ArrUiR.string.arr_common_delete)) },
             text = {
                 Text(
                     stringResource(
-                        R.string.arr_radarr_connect_delete_message,
+                        ArrUiR.string.arr_common_connect_delete_message,
                         state.draft?.name.orEmpty(),
                     ),
                 )
             },
             confirmButton = {
                 TextButton(onClick = onDeleteConfirmed) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_confirm))
+                    Text(stringResource(ArrUiR.string.arr_common_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDeleteCancelled) {
-                    Text(stringResource(R.string.arr_radarr_connect_delete_cancel))
+                    Text(stringResource(ArrUiR.string.arr_common_cancel))
                 }
             },
         )
@@ -264,14 +265,18 @@ private fun ClientSchemaPicker(
     ) {
         item {
             Text(
-                stringResource(R.string.arr_radarr_connect_picker_hint),
+                stringResource(ArrUiR.string.arr_common_connect_picker_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        items(schemas, key = { it.implementation ?: it.id.toString() }) { schema ->
+        items(
+            schemas,
+            key = { it.implementation ?: it.id.toString() },
+            contentType = { "schema" },
+        ) { schema ->
             val cd = stringResource(
-                R.string.arr_radarr_connect_picker_cd_pick,
+                ArrUiR.string.arr_common_connect_picker_cd_pick,
                 schema.implementationName.orEmpty(),
             )
             Card(
@@ -319,26 +324,26 @@ private fun ClientForm(
             OutlinedTextField(
                 value = draft.name,
                 onValueChange = onNameChange,
-                label = { Text(stringResource(R.string.arr_radarr_connect_name_label)) },
+                label = { Text(stringResource(ArrUiR.string.arr_common_autotag_name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
         item {
             Column {
-                SectionHeader(title = stringResource(R.string.arr_radarr_client_section_client))
+                SectionHeader(title = stringResource(ArrUiR.string.arr_common_client_section_client))
                 LabeledSwitch(
-                    label = stringResource(R.string.arr_radarr_client_enable),
+                    label = stringResource(ArrUiR.string.arr_common_general_cert_validation_enabled),
                     checked = draft.enable,
                     onCheckedChange = { onToggleEnabled() },
                 )
                 LabeledSwitch(
-                    label = stringResource(R.string.arr_radarr_client_remove_completed),
+                    label = stringResource(ArrUiR.string.arr_common_client_remove_completed),
                     checked = draft.removeCompletedDownloads,
                     onCheckedChange = { onToggleRemoveCompleted() },
                 )
                 LabeledSwitch(
-                    label = stringResource(R.string.arr_radarr_client_remove_failed),
+                    label = stringResource(ArrUiR.string.arr_common_client_remove_failed),
                     checked = draft.removeFailedDownloads,
                     onCheckedChange = { onToggleRemoveFailed() },
                 )
@@ -346,7 +351,7 @@ private fun ClientForm(
         }
         item {
             OutlinedNumberField(
-                label = stringResource(R.string.arr_radarr_connect_priority_label),
+                label = stringResource(ArrUiR.string.arr_common_connect_priority_label),
                 value = priorityText,
                 onChange = { text ->
                     priorityText = text
@@ -380,7 +385,7 @@ private fun ClientForm(
                     Modifier
                 },
             ) {
-                Text(stringResource(R.string.arr_radarr_connect_save))
+                Text(stringResource(ArrUiR.string.arr_common_save))
             }
         }
     }

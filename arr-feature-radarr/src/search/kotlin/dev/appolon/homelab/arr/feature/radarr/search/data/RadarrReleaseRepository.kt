@@ -68,9 +68,7 @@ class RadarrReleaseRepository(
             if (!isStale(movieId)) return@withContext ArrResult.ok(cached)
             when (val refreshed = refresh(movieId)) {
                 is ArrResult.Ok -> ArrResult.ok(refreshed.value)
-                is ArrResult.Err -> {
-                    if (cached.isNotEmpty()) ArrResult.ok(cached) else refreshed
-                }
+                is ArrResult.Err -> refreshed
             }
         }
 
@@ -166,7 +164,9 @@ class RadarrReleaseRepository(
             failure == null -> ArrResult.ok(WriteOutcome.Synced)
 
             failure is ArrError.Offline || failure is ArrError.Network -> {
-                val actionId = ActionId(UUID.randomUUID().toString())
+                val actionId = ActionId(UUID.nameUUIDFromBytes(
+                    "$serverId:POST:$path:$body".toByteArray(Charsets.UTF_8),
+                ).toString())
                 actionQueue.enqueue(
                     QueuedAction(
                         actionId = actionId,
@@ -196,7 +196,7 @@ class RadarrReleaseRepository(
 
     companion object {
         /** Five minutes; indexer results go stale as grabs land. */
-        const val RELEASE_TTL_MILLIS: Long = 5 * 60 * 1000
+        const val RELEASE_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.LIBRARY
 
         internal val RELEASE_TYPE = EntityType("radarr.search.releases")
         internal const val GRAB_PATH = "api/v3/release"

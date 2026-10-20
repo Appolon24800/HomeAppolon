@@ -103,7 +103,7 @@ class MoviePosterUrlsTest {
             ),
         )
         assertEquals(
-            "http://host:30025/radarr/api/v3/mediacover/12/poster.jpg",
+            "http://host:30025/radarr/api/v3/mediacover/12/poster-500.jpg",
             MoviePosterUrls.posterUrlOf(movie, "http://host:30025/radarr/"),
         )
     }

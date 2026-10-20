@@ -84,7 +84,7 @@ class ProwlarrStatsRepositoryTest {
     }
 
     @Test
-    fun `stale cache returns when a refresh fails`() = runTest(dispatcher) {
+    fun `stale read reports the refresh error`() = runTest(dispatcher) {
         seed(IndexerStatsResource(indexers = listOf(IndexerStatistics(indexerId = 7))))
         val repo = repository()
         repo.stats(StatsPeriod.MONTH)
@@ -92,8 +92,8 @@ class ProwlarrStatsRepositoryTest {
         time += ProwlarrStatsRepository.STATS_TTL_MILLIS + 1
 
         val result = repo.stats(StatsPeriod.MONTH)
-        assertTrue(result is ArrResult.Ok)
-        assertEquals(7, (result as ArrResult.Ok).value.indexers?.first()?.indexerId)
+        assertTrue(result is ArrResult.Err)
+        assertTrue((result as ArrResult.Err).error is dev.appolon.homelab.arr.core.ArrError.Http)
     }
 
     @Test
