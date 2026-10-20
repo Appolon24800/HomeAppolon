@@ -16,6 +16,16 @@ android {
     }
 }
 
+android {
+    sourceSets {
+        getByName("main") { kotlin.srcDirs("src/library/kotlin", "src/discovery/kotlin", "src/queue/kotlin", "src/release/kotlin", "src/calendar/kotlin", "src/quality/kotlin", "src/connect/kotlin", "src/system/kotlin", "src/settings/kotlin") }
+        getByName("test") {
+            kotlin.srcDirs("src/library/src/test/kotlin", "src/discovery/src/test/kotlin", "src/queue/src/test/kotlin", "src/release/src/test/kotlin", "src/calendar/src/test/kotlin", "src/quality/src/test/kotlin", "src/connect/src/test/kotlin", "src/system/src/test/kotlin", "src/settings/src/test/kotlin")
+            resources.srcDirs("src/library/src/test/resources", "src/discovery/src/test/resources", "src/queue/src/test/resources", "src/release/src/test/resources", "src/calendar/src/test/resources", "src/quality/src/test/resources", "src/connect/src/test/resources", "src/system/src/test/resources", "src/settings/src/test/resources")
+        }
+    }
+}
+
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)

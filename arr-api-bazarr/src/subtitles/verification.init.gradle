@@ -1,0 +1,11 @@
+// Keeps isolated verification inside this agent's ownership until the module owner wires sources.
+gradle.beforeProject { project ->
+    if (project.path == ':arr-api-bazarr') {
+        project.afterEvaluate {
+            def android = project.extensions.getByName('android')
+            android.sourceSets.getByName('main').kotlin.srcDir('src/subtitles/main/kotlin')
+            android.sourceSets.getByName('test').kotlin.srcDir('src/subtitles/test/kotlin')
+            android.sourceSets.getByName('test').resources.srcDir('src/subtitles/test/resources')
+        }
+    }
+}

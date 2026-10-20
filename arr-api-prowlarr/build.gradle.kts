@@ -16,6 +16,16 @@ android {
     }
 }
 
+android {
+    sourceSets {
+        getByName("main") { kotlin.srcDirs("src/indexers/kotlin", "src/search/kotlin", "src/settings/kotlin", "src/system/kotlin") }
+        getByName("test") {
+            kotlin.srcDirs("src/indexers/src/test/kotlin", "src/search/src/test/kotlin", "src/settings/src/test/kotlin", "src/system/src/test/kotlin")
+            resources.srcDirs("src/indexers/src/test/resources", "src/search/src/test/resources", "src/settings/src/test/resources", "src/system/src/test/resources")
+        }
+    }
+}
+
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
