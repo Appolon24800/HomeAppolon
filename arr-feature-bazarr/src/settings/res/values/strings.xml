@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings home -->
+    <string name="arr_bazarr_settings_title">Settings</string>
+    <string name="arr_bazarr_settings_home_languages_title">Languages</string>
+    <string name="arr_bazarr_settings_home_languages_message">Enabled languages, hearing impaired and forced support.</string>
+    <string name="arr_bazarr_settings_home_profiles_title">Language profiles</string>
+    <string name="arr_bazarr_settings_home_profiles_message">Cutoff, language slots, and must-contain rules.</string>
+    <string name="arr_bazarr_settings_home_providers_title">Providers</string>
+    <string name="arr_bazarr_settings_home_providers_message">Subtitle provider status and reset.</string>
+    <string name="arr_bazarr_settings_home_notifications_title">Notifications</string>
+    <string name="arr_bazarr_settings_home_notifications_message">Inbound webhooks and connection tests.</string>
+    <string name="arr_bazarr_settings_home_scheduler_title">Scheduler</string>
+    <string name="arr_bazarr_settings_home_scheduler_message">Task intervals, next runs, and run now.</string>
+    <string name="arr_bazarr_settings_home_general_title">General</string>
+    <string name="arr_bazarr_settings_home_general_message">Folder mappings, provider limits, and captcha options the server reports.</string>
+    <string name="arr_bazarr_settings_home_system_title">System</string>
+    <string name="arr_bazarr_settings_home_system_message">Status, job queue, backups, and logs.</string>
+
+    <!-- Languages -->
+    <string name="arr_bazarr_settings_languages_empty_title">No languages</string>
+    <string name="arr_bazarr_settings_languages_empty_message">The server did not report any languages.</string>
+    <string name="arr_bazarr_settings_languages_enabled">Enabled</string>
+    <string name="arr_bazarr_settings_languages_disabled">Not enabled</string>
+    <string name="arr_bazarr_settings_languages_default">Default</string>
+
+    <!-- Language profiles -->
+    <string name="arr_bazarr_settings_profiles_empty_title">No profiles</string>
+    <string name="arr_bazarr_settings_profiles_empty_message">Language profiles will appear here after the first sync.</string>
+    <string name="arr_bazarr_settings_profiles_cutoff">Cutoff: %1$s</string>
+    <string name="arr_bazarr_settings_profiles_slots">Languages</string>
+    <string name="arr_bazarr_settings_profiles_must_contain">Must contain</string>
+    <string name="arr_bazarr_settings_profiles_must_not_contain">Must not contain</string>
+    <string name="arr_bazarr_settings_profiles_original_format">Original format</string>
+    <string name="arr_bazarr_settings_profiles_no_rules">No rules</string>
+
+    <!-- Providers -->
+    <string name="arr_bazarr_settings_providers_empty_title">No providers</string>
+    <string name="arr_bazarr_settings_providers_empty_message">Provider status will appear here after the first sync.</string>
+    <string name="arr_bazarr_settings_providers_reset">Reset providers</string>
+    <string name="arr_bazarr_settings_providers_reset_confirm_title">Reset every provider?</string>
+    <string name="arr_bazarr_settings_providers_reset_confirm_message">Bazarr will drop every provider counter and retry state.</string>
+    <string name="arr_bazarr_settings_providers_reset_synced">Provider reset requested</string>
+    <string name="arr_bazarr_settings_providers_reset_queued">Reset will retry when online</string>
+    <string name="arr_bazarr_settings_providers_cd_reset">Reset provider status</string>
+
+    <!-- Notifications -->
+    <string name="arr_bazarr_settings_notifications_intro">Bazarr searches for subtitles when these services send webhook events. Point each service at your Bazarr server, then test the external webhook connection.</string>
+    <string name="arr_bazarr_settings_notifications_plex_title">Plex</string>
+    <string name="arr_bazarr_settings_notifications_plex_message">Search subtitles when a Plex play event arrives.</string>
+    <string name="arr_bazarr_settings_notifications_radarr_title">Radarr</string>
+    <string name="arr_bazarr_settings_notifications_radarr_message">Search missing subtitles when Radarr imports a movie.</string>
+    <string name="arr_bazarr_settings_notifications_sonarr_title">Sonarr</string>
+    <string name="arr_bazarr_settings_notifications_sonarr_message">Search missing subtitles when Sonarr imports an episode.</string>
+    <string name="arr_bazarr_settings_notifications_test">Test webhook connection</string>
+    <string name="arr_bazarr_settings_notifications_test_synced">Webhook test succeeded</string>
+    <string name="arr_bazarr_settings_notifications_cd_test">Test the external webhook connection</string>
+
+    <!-- Scheduler -->
+    <string name="arr_bazarr_settings_scheduler_empty_title">No tasks</string>
+    <string name="arr_bazarr_settings_scheduler_empty_message">Scheduled tasks will appear here.</string>
+    <string name="arr_bazarr_settings_scheduler_interval">Interval: %1$s</string>
+    <string name="arr_bazarr_settings_scheduler_next_run">Next run: %1$s</string>
+    <string name="arr_bazarr_settings_scheduler_never">never</string>
+    <string name="arr_bazarr_settings_scheduler_running">Running</string>
+    <string name="arr_bazarr_settings_scheduler_run_synced">Task started</string>
+    <string name="arr_bazarr_settings_scheduler_run_queued">Task will run when online</string>
+    <string name="arr_bazarr_settings_scheduler_cd_run">Run %1$s now</string>
+
+    <!-- General -->
+    <string name="arr_bazarr_settings_general_empty_title">No settings reported</string>
+    <string name="arr_bazarr_settings_general_empty_message">The server status payload carries no settings fields.</string>
+    <string name="arr_bazarr_settings_general_reported">Reported settings</string>
+    <string name="arr_bazarr_settings_general_all_fields">All reported fields</string>
+
+    <!-- System: tabs and feeds -->
+    <string name="arr_bazarr_settings_system_tab_status">Status</string>
+    <string name="arr_bazarr_settings_system_tab_jobs">Jobs</string>
+    <string name="arr_bazarr_settings_system_tab_backups">Backups</string>
+    <string name="arr_bazarr_settings_system_tab_logs">Logs</string>
+    <string name="arr_bazarr_settings_system_empty_title">Nothing to show</string>
+    <string name="arr_bazarr_settings_system_status_empty_message">Status fields will appear here after the first sync.</string>
+    <string name="arr_bazarr_settings_system_jobs_empty_message">The job queue is empty.</string>
+    <string name="arr_bazarr_settings_system_backups_empty_message">Backup files will appear here.</string>
+    <string name="arr_bazarr_settings_system_logs_empty_message">Log entries will appear here.</string>
+
+    <!-- System: jobs -->
+    <string name="arr_bazarr_settings_system_job_force_start">Force start</string>
+    <string name="arr_bazarr_settings_system_job_move_top">Move to top</string>
+    <string name="arr_bazarr_settings_system_job_move_bottom">Move to bottom</string>
+    <string name="arr_bazarr_settings_system_job_empty_queue">Empty this queue</string>
+    <string name="arr_bazarr_settings_system_job_delete">Delete job</string>
+    <string name="arr_bazarr_settings_system_job_confirm_delete_title">Delete this job?</string>
+    <string name="arr_bazarr_settings_system_job_confirm_delete_message">The job will be removed from the queue.</string>
+    <string name="arr_bazarr_settings_system_empty_queue_confirm_title">Empty this queue?</string>
+    <string name="arr_bazarr_settings_system_empty_queue_confirm_message">Every pending job in this queue will be removed.</string>
+    <string name="arr_bazarr_settings_system_job_cd_actions">Job actions</string>
+    <string name="arr_bazarr_settings_system_job_updated_synced">Job updated</string>
+    <string name="arr_bazarr_settings_system_job_updated_queued">Job change will retry when online</string>
+    <string name="arr_bazarr_settings_system_job_deleted_synced">Job deleted</string>
+    <string name="arr_bazarr_settings_system_job_deleted_queued">Deletion will retry when online</string>
+    <string name="arr_bazarr_settings_system_queue_emptied_synced">Queue emptied</string>
+    <string name="arr_bazarr_settings_system_queue_emptied_queued">Emptying will retry when online</string>
+
+    <!-- System: backups -->
+    <string name="arr_bazarr_settings_system_backup_create">Create backup</string>
+    <string name="arr_bazarr_settings_system_backup_restore">Restore</string>
+    <string name="arr_bazarr_settings_system_backup_delete">Delete</string>
+    <string name="arr_bazarr_settings_system_backup_confirm_restore_title">Restore this backup?</string>
+    <string name="arr_bazarr_settings_system_backup_confirm_restore_message">Bazarr will restart while applying the selected backup.</string>
+    <string name="arr_bazarr_settings_system_backup_confirm_delete_title">Delete this backup?</string>
+    <string name="arr_bazarr_settings_system_backup_confirm_delete_message">The backup file will be deleted from disk.</string>
+    <string name="arr_bazarr_settings_system_backup_cd_restore">Restore backup %1$s</string>
+    <string name="arr_bazarr_settings_system_backup_cd_delete">Delete backup %1$s</string>
+    <string name="arr_bazarr_settings_system_backup_created_synced">Backup started</string>
+    <string name="arr_bazarr_settings_system_backup_created_queued">Backup will retry when online</string>
+    <string name="arr_bazarr_settings_system_backup_restored_synced">Restore started</string>
+    <string name="arr_bazarr_settings_system_backup_restored_queued">Restore will retry when online</string>
+    <string name="arr_bazarr_settings_system_backup_deleted_synced">Backup deleted</string>
+    <string name="arr_bazarr_settings_system_backup_deleted_queued">Deletion will retry when online</string>
+
+    <!-- System: logs -->
+    <string name="arr_bazarr_settings_system_logs_rotate">Rotate logs</string>
+    <string name="arr_bazarr_settings_system_logs_rotate_confirm_title">Rotate logs?</string>
+    <string name="arr_bazarr_settings_system_logs_rotate_confirm_message">Bazarr will close the current log file and start a new one.</string>
+    <string name="arr_bazarr_settings_system_logs_filter_all">All</string>
+    <string name="arr_bazarr_settings_system_logs_rotated_synced">Log rotation requested</string>
+    <string name="arr_bazarr_settings_system_logs_rotated_queued">Rotation will retry when online</string>
+</resources>
