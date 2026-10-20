@@ -1,0 +1,20 @@
+{
+  "id": 1,
+  "name": "Surround",
+  "includeCustomFormatWhenRenaming": false,
+  "specifications": [
+    {
+      "id": 1,
+      "name": "TrueHD",
+      "implementation": "ReleaseGroupSpecification",
+      "implementationName": "Release Group",
+      "infoLink": "https://wiki.servarr.com/radarr/settings#custom-formats",
+      "negate": false,
+      "required": false,
+      "fields": [
+        { "order": 0, "label": "Regular Expression", "value": "truehd" }
+      ],
+      "presets": []
+    }
+  ]
+}
