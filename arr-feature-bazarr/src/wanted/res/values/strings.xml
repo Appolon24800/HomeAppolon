@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Wanted: selection and bulk search -->
+    <string name="arr_bazarr_wanted_badges_line">Episodes missing: %1$d · Movies missing: %2$d</string>
+    <string name="arr_bazarr_wanted_selected_count">%1$d selected</string>
+    <string name="arr_bazarr_wanted_bulk_running">Searching missing subtitles…</string>
+    <string name="arr_bazarr_wanted_search_selected">Search selected</string>
+    <string name="arr_bazarr_wanted_search_all">Search all</string>
+    <string name="arr_bazarr_wanted_bulk_synced">Searches started for %1$d items</string>
+    <string name="arr_bazarr_wanted_bulk_queued">%1$d items queued to search when online</string>
+    <string name="arr_bazarr_wanted_bulk_mixed">%1$d started, %2$d queued, %3$d failed</string>
+    <string name="arr_bazarr_wanted_cd_select">Select for bulk search</string>
+    <string name="arr_bazarr_wanted_cd_select_all">Select all rows</string>
+    <string name="arr_bazarr_wanted_cd_clear_selection">Clear selection</string>
+</resources>

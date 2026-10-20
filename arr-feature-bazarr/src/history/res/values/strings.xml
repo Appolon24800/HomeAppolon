@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- History filters and paging -->
+    <string name="arr_bazarr_history_filter_all">All</string>
+    <string name="arr_bazarr_history_filter_series">Series</string>
+    <string name="arr_bazarr_history_filter_movies">Movies</string>
+    <string name="arr_bazarr_history_load_more">Load more</string>
+    <string name="arr_bazarr_history_loading_more">Loading more history</string>
+    <string name="arr_bazarr_history_end">You have reached the end of the history</string>
+    <string name="arr_bazarr_history_cd_open_blacklist">Open the provider blacklist</string>
+
+    <!-- Blacklist -->
+    <string name="arr_bazarr_blacklist_title">Blacklist</string>
+    <string name="arr_bazarr_blacklist_empty_title">Nothing blacklisted</string>
+    <string name="arr_bazarr_blacklist_empty_message">Blacklisted subtitle providers will appear here.</string>
+    <string name="arr_bazarr_blacklist_tab_episodes">Episodes</string>
+    <string name="arr_bazarr_blacklist_tab_movies">Movies</string>
+    <string name="arr_bazarr_blacklist_remove_cd">Remove blacklist entry</string>
+    <string name="arr_bazarr_blacklist_clear">Remove all</string>
+    <string name="arr_bazarr_blacklist_clear_confirm_title">Remove every entry?</string>
+    <string name="arr_bazarr_blacklist_clear_confirm_message">Every blacklisted subtitle on this tab will be removed from the blacklist.</string>
+    <string name="arr_bazarr_blacklist_confirm">Remove</string>
+    <string name="arr_bazarr_action_cancel">Cancel</string>
+    <string name="arr_bazarr_blacklist_removed_synced">Blacklist entry removed</string>
+    <string name="arr_bazarr_blacklist_removed_queued">Removal will retry when online</string>
+    <string name="arr_bazarr_blacklist_cleared_synced">Blacklist cleared</string>
+    <string name="arr_bazarr_blacklist_cleared_queued">Clearing will retry when online</string>
+</resources>
