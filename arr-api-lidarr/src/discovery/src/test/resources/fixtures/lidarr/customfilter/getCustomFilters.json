@@ -1,0 +1,16 @@
+[{
+  "id": 1,
+  "type": "artist",
+  "label": "Monitored Artists",
+  "filters": [
+    { "key": "monitored", "value": ["true"], "type": "equal" }
+  ]
+}, {
+  "id": 2,
+  "type": "album",
+  "label": "Missing Albums",
+  "filters": [
+    { "key": "monitored", "value": ["true"], "type": "equal" },
+    { "key": "trackFileCount", "value": ["0"], "type": "lessThan" }
+  ]
+}]

@@ -1,0 +1,39 @@
+[{
+  "id": 0,
+  "name": "Example Import",
+  "fields": [{
+    "order": 0,
+    "name": "baseUrl",
+    "label": "Base URL",
+    "helpText": "Root URL of the list API",
+    "type": "url",
+    "advanced": false,
+    "privacy": "normal"
+  }],
+  "implementationName": "Example Import",
+  "implementation": "ExampleImport",
+  "configContract": "ExampleImportSettings",
+  "infoLink": "https://wiki.servarr.com/lidarr#import-lists",
+  "tags": [],
+  "enableAutomaticAdd": false,
+  "shouldMonitor": "none",
+  "monitorNewItems": "all",
+  "qualityProfileId": 0,
+  "metadataProfileId": 0,
+  "listType": "advanced",
+  "listOrder": 0,
+  "minRefreshInterval": "01:00:00",
+  "presets": [{
+    "id": 0,
+    "name": "Example Preset",
+    "implementationName": "Example Import",
+    "implementation": "ExampleImport",
+    "configContract": "ExampleImportSettings",
+    "enableAutomaticAdd": false,
+    "monitorNewItems": "none",
+    "listType": "advanced",
+    "listOrder": 0,
+    "minRefreshInterval": "01:00:00",
+    "presets": []
+  }]
+}]

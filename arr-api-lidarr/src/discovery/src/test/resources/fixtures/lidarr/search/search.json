@@ -1,0 +1,33 @@
+[{
+  "id": 1,
+  "foreignId": "b10bbbfc-cf9e-42e0-be17-e2c3e1edf222",
+  "artist": {
+    "id": 2,
+    "status": "continuing",
+    "ended": false,
+    "artistName": "Example Artist",
+    "foreignArtistId": "b10bbbfc-cf9e-42e0-be17-e2c3e1edf222",
+    "monitored": true
+  },
+  "album": null
+}, {
+  "id": 2,
+  "foreignId": "9b8f7e6d-1234-4abc-9def-a1b2c3d4e5f6",
+  "artist": null,
+  "album": {
+    "id": 3,
+    "title": "Example Album",
+    "artistId": 2,
+    "foreignAlbumId": "9b8f7e6d-1234-4abc-9def-a1b2c3d4e5f6",
+    "monitored": true,
+    "anyReleaseOk": false,
+    "profileId": 1,
+    "duration": 2400000,
+    "albumType": "Album",
+    "secondaryTypes": [],
+    "mediumCount": 1,
+    "ratings": { "votes": 12, "value": 4.2 },
+    "releaseDate": "2026-03-13T00:00:00Z",
+    "genres": ["Rock"]
+  }
+}]
