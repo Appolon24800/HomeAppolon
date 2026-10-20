@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Calendar screen -->
+    <string name="arr_lidarr_calendar_cd_previous_month">Previous month</string>
+    <string name="arr_lidarr_calendar_cd_next_month">Next month</string>
+    <string name="arr_lidarr_calendar_cd_today">Jump to today</string>
+    <string name="arr_lidarr_calendar_view_month">Month</string>
+    <string name="arr_lidarr_calendar_view_agenda">Agenda</string>
+    <string name="arr_lidarr_calendar_unmonitored">Unmonitored</string>
+    <string name="arr_lidarr_calendar_empty_title">Nothing on the calendar</string>
+    <string name="arr_lidarr_calendar_empty_message">Albums of artists you add to Lidarr will show their releases here.</string>
+    <string name="arr_lidarr_calendar_month_empty">No album releases this month.</string>
+    <string name="arr_lidarr_calendar_day_empty">No album releases on this day.</string>
+    <string name="arr_lidarr_calendar_day_hint">Tap a day to see its releases.</string>
+    <string name="arr_lidarr_calendar_agenda_empty">No upcoming releases.</string>
+    <string name="arr_lidarr_calendar_cd_day">%1$s, %2$s</string>
+    <string name="arr_lidarr_calendar_release_state_released">Released</string>
+    <string name="arr_lidarr_calendar_release_state_upcoming">Upcoming</string>
+    <string name="arr_lidarr_calendar_entry_subtitle">%1$s · %2$s · %3$s</string>
+    <string name="arr_lidarr_calendar_cd_entry">%1$s, %2$s, %3$s</string>
+    <string name="arr_lidarr_calendar_cd_monitored">Monitored</string>
+    <string name="arr_lidarr_calendar_cd_downloaded">Fully imported</string>
+    <string name="arr_lidarr_calendar_cd_cover">Album cover of %1$s</string>
+    <plurals name="arr_lidarr_calendar_albums_count">
+        <item quantity="one">%d album</item>
+        <item quantity="other">%d albums</item>
+    </plurals>
+</resources>
