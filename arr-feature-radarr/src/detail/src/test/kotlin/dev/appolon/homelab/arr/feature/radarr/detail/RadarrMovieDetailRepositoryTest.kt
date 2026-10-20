@@ -23,6 +23,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 
 /**
  * Repository behavior: cache-first reads with TTL, stale-fallback on
@@ -33,7 +34,7 @@ class RadarrMovieDetailRepositoryTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var connection: FakeRadarrDetailConnection
-    private lateinit var store: FakeDetailEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: ActionQueueImpl
     private lateinit var repository: RadarrMovieDetailRepository
     private var now: Long = 100_000L
@@ -54,7 +55,7 @@ class RadarrMovieDetailRepositoryTest {
     @Before
     fun setUp() {
         connection = FakeRadarrDetailConnection()
-        store = FakeDetailEntityStore(clock = { now })
+        store = FakeEntityStore().apply { clock = { now } }
         queue = ActionQueueImpl(store)
         repository = RadarrMovieDetailRepository(
             connection = connection,
@@ -166,8 +167,8 @@ class RadarrMovieDetailRepositoryTest {
         assertNull(
             store.get(serverId, RadarrMovieDetailRepository.MOVIE, "1", MovieResource.serializer()),
         )
-        assertEquals(0, store.count(serverId, RadarrMovieDetailRepository.MOVIE_FILE))
-        assertEquals(0, store.count(serverId, RadarrMovieDetailRepository.EXTRA_FILE))
+        assertEquals(0, store.getAll(serverId, RadarrMovieDetailRepository.MOVIE_FILE, MovieFileResource.serializer()).size)
+        assertEquals(0, store.getAll(serverId, RadarrMovieDetailRepository.EXTRA_FILE, ExtraFileResource.serializer()).size)
     }
 
     @Test

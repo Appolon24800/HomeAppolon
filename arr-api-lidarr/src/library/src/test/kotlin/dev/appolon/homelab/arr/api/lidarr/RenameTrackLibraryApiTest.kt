@@ -3,7 +3,6 @@ package dev.appolon.homelab.arr.api.lidarr
 import dev.appolon.homelab.arr.api.lidarr.model.RenameTrackResource
 import dev.appolon.homelab.arr.net.ArrJson
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.JsonObject
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After

@@ -12,7 +12,7 @@ import dev.appolon.homelab.arr.api.radarr.model.Quality
 import dev.appolon.homelab.arr.api.radarr.model.QualityModel
 import dev.appolon.homelab.arr.api.radarr.model.QualityProfileQualityItemResource
 import dev.appolon.homelab.arr.api.radarr.model.QualityProfileResource
-import dev.appolon.homelab.arr.feature.radarr.search.FakeSearchEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.radarr.search.data.RadarrInteractiveImportRepository
 import dev.appolon.homelab.arr.feature.radarr.search.RecordingManualImport
 import dev.appolon.homelab.arr.core.ServerId
@@ -35,7 +35,7 @@ class InteractiveImportViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
     private val queue = FakeRadarrQueue()
     private val manualImport = RecordingManualImport(queue)
-    private val store = FakeSearchEntityStore()
+    private val store = FakeEntityStore()
     private val actionQueue = ActionQueueImpl(store)
 
     private val repository = RadarrInteractiveImportRepository(

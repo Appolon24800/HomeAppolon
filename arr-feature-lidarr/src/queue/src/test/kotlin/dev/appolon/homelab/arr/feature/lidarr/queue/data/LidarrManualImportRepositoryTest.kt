@@ -8,7 +8,7 @@ import dev.appolon.homelab.arr.api.lidarr.model.TrackResource
 import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.lidarr.queue.FakeEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import java.io.IOException
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject

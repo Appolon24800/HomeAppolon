@@ -11,7 +11,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
 import dev.appolon.homelab.arr.feature.sonarr.library.data.WriteOutcome
-import dev.appolon.homelab.arr.feature.sonarr.search.FakeSearchEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -29,7 +29,7 @@ class SonarrReleaseRepositoryTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeSonarrQueue
-    private lateinit var store: FakeSearchEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var actionQueue: ActionQueueImpl
     private var nowMillis = 1_000L
     private var listCalls = 0
@@ -77,7 +77,7 @@ class SonarrReleaseRepositoryTest {
     fun setUp() {
         fake = FakeSonarrQueue()
         fake.latency = { operation -> if (operation == "Release.list") listCalls += 1 }
-        store = FakeSearchEntityStore()
+        store = FakeEntityStore()
         store.clock = { nowMillis }
         actionQueue = ActionQueueImpl(store)
     }

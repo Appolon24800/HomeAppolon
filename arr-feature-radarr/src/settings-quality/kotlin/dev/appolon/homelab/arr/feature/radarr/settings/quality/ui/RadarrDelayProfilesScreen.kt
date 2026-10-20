@@ -39,7 +39,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.api.radarr.model.DelayProfileResource
 import dev.appolon.homelab.arr.api.radarr.model.DownloadProtocol
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.RadarrQualityClients
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.vm.DelayProfilesNotice
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.vm.RadarrDelayProfilesContent

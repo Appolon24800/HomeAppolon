@@ -1,7 +1,6 @@
 package dev.appolon.homelab.arr.feature.lidarr.search
 
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.ui.nav.ArrRoute
 import dev.appolon.homelab.arr.ui.nav.ArrRouteRegistry
 import dev.appolon.homelab.arr.ui.nav.ArrRoutes
 import org.junit.Assert.assertEquals

@@ -45,7 +45,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.core.FilterSpec
-import dev.appolon.homelab.arr.core.FilterState
 import dev.appolon.homelab.arr.core.FilterValue
 import dev.appolon.homelab.arr.feature.bazarr.R
 import dev.appolon.homelab.arr.feature.bazarr.series.data.BazarrLanguage

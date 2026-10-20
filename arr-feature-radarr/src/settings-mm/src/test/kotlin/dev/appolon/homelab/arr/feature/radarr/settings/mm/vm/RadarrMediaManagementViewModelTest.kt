@@ -1,11 +1,10 @@
 package dev.appolon.homelab.arr.feature.radarr.settings.mm.vm
 
-import androidx.lifecycle.ViewModel
 import dev.appolon.homelab.arr.api.radarr.FakeRadarrSystem
 import dev.appolon.homelab.arr.api.radarr.model.MediaManagementConfigResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.radarr.settings.mm.FakeSettingsMmEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.radarr.settings.mm.data.RadarrMediaManagementRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
@@ -32,7 +31,7 @@ class RadarrMediaManagementViewModelTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeRadarrSystem
-    private lateinit var store: FakeSettingsMmEntityStore
+    private lateinit var store: FakeEntityStore
 
     @Before
     fun setUp() {
@@ -44,7 +43,7 @@ class RadarrMediaManagementViewModelTest {
             setPermissionsLinux = true,
             chmodFolder = "775",
         )
-        store = FakeSettingsMmEntityStore()
+        store = FakeEntityStore()
     }
 
     @After

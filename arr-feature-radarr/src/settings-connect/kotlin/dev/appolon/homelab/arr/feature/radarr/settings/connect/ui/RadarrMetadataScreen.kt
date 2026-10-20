@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.api.radarr.model.MetadataResource
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.RadarrConnectClients
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.vm.MetadataNotice
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.vm.RadarrMetadataContent

@@ -14,7 +14,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
 import dev.appolon.homelab.arr.feature.lidarr.library.data.WriteOutcome
-import dev.appolon.homelab.arr.feature.lidarr.search.FakeSearchEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -33,7 +33,7 @@ class LidarrInteractiveImportRepositoryTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var queue: FakeLidarrQueue
-    private lateinit var store: FakeSearchEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var actionQueue: ActionQueueImpl
     private var artistFetches = 0
     private var albumFetches = 0
@@ -107,7 +107,7 @@ class LidarrInteractiveImportRepositoryTest {
     @Before
     fun setUp() {
         queue = FakeLidarrQueue()
-        store = FakeSearchEntityStore()
+        store = FakeEntityStore()
         actionQueue = ActionQueueImpl(store)
         artistsById[5] = ArtistResource(
             id = 5,

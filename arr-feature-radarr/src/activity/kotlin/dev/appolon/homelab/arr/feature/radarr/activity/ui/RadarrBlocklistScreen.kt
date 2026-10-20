@@ -47,14 +47,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.api.radarr.model.DownloadProtocol
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.feature.radarr.activity.RadarrActivityClients
 import dev.appolon.homelab.arr.feature.radarr.activity.data.RadarrBlocklistRepository
 import dev.appolon.homelab.arr.feature.radarr.activity.logic.RadarrBlocklistEntryUi
 import dev.appolon.homelab.arr.feature.radarr.activity.vm.BlocklistNotice
 import dev.appolon.homelab.arr.feature.radarr.activity.vm.RadarrBlocklistContent
 import dev.appolon.homelab.arr.feature.radarr.activity.vm.RadarrBlocklistViewModel
-import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage

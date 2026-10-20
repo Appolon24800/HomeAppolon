@@ -25,7 +25,6 @@ import dev.appolon.homelab.arr.ui.nav.fillPattern
 import dev.appolon.homelab.arr.ui.nav.matchRoutePattern
 import dev.appolon.homelab.arr.ui.shell.ArrShellContent
 import dev.appolon.homelab.arr.ui.shell.ArrShellNavigator
-import dev.appolon.homelab.arr.ui.shell.LocalArrShellNavigator
 
 /**
  * Shell integration for the Prowlarr stats feature: the route it owns, the

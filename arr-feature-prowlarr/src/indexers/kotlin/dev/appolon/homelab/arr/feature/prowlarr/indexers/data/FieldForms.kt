@@ -11,7 +11,6 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonPrimitive
 
 /** How one dynamic provider field renders in the editor form. */
 enum class FieldRenderKind { TEXT, NUMBER, CHECKBOX, PASSWORD, SELECT, TAG_SELECT }

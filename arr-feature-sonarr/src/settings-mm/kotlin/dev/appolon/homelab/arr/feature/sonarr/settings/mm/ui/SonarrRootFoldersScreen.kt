@@ -66,7 +66,6 @@ import dev.appolon.homelab.arr.feature.sonarr.settings.mm.data.SonarrRootFolderR
 import dev.appolon.homelab.arr.feature.sonarr.settings.mm.vm.RootFolderNotice
 import dev.appolon.homelab.arr.feature.sonarr.settings.mm.vm.SonarrRootFoldersContent
 import dev.appolon.homelab.arr.feature.sonarr.settings.mm.vm.SonarrRootFoldersViewModel
-import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage

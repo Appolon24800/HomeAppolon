@@ -4,7 +4,7 @@ import dev.appolon.homelab.arr.api.lidarr.FakeLidarrSystem
 import dev.appolon.homelab.arr.api.lidarr.model.RootFolderResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.lidarr.settings.mm.FakeSettingsMmEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.lidarr.settings.mm.data.LidarrRootFolderRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
@@ -28,7 +28,7 @@ class LidarrRootFoldersViewModelTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeLidarrSystem
-    private lateinit var store: FakeSettingsMmEntityStore
+    private lateinit var store: FakeEntityStore
 
     @Before
     fun setUp() {
@@ -47,7 +47,7 @@ class LidarrRootFoldersViewModelTest {
             freeSpace = null,
             totalSpace = null,
         )
-        store = FakeSettingsMmEntityStore()
+        store = FakeEntityStore()
     }
 
     @After

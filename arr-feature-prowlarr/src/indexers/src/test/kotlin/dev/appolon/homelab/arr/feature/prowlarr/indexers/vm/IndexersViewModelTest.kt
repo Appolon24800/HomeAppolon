@@ -6,7 +6,6 @@ import dev.appolon.homelab.arr.api.prowlarr.model.AppProfileResource
 import dev.appolon.homelab.arr.api.prowlarr.model.ApplyTags
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerResource
 import dev.appolon.homelab.arr.api.prowlarr.model.TagResource
-import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.prowlarr.indexers.FakeActionQueue
 import dev.appolon.homelab.arr.feature.prowlarr.indexers.FakeEntityStore

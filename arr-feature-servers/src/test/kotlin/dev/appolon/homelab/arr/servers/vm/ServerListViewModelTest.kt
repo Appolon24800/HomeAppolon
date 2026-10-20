@@ -6,7 +6,6 @@ import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.ArrServer
 import dev.appolon.homelab.arr.data.ServerRegistry
 import dev.appolon.homelab.arr.data.secrets.ArrSecrets
-import dev.appolon.homelab.arr.net.ServerEndpoint
 import dev.appolon.homelab.arr.servers.net.ConnectionOutcome
 import dev.appolon.homelab.arr.servers.net.ConnectionTester
 import dev.appolon.homelab.arr.ui.lce.LceState

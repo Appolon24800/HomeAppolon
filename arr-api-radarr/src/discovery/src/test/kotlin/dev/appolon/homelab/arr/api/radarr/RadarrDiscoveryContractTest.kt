@@ -1,7 +1,5 @@
 package dev.appolon.homelab.arr.api.radarr
 
-import dev.appolon.homelab.arr.api.radarr.model.AlternativeTitle
-import dev.appolon.homelab.arr.api.radarr.model.CollectionMovieResource
 import dev.appolon.homelab.arr.api.radarr.model.CollectionResource
 import dev.appolon.homelab.arr.api.radarr.model.CollectionUpdateResource
 import dev.appolon.homelab.arr.api.radarr.model.CustomFilterResource
@@ -9,19 +7,7 @@ import dev.appolon.homelab.arr.api.radarr.model.ImportListBulkResource
 import dev.appolon.homelab.arr.api.radarr.model.ImportListConfigResource
 import dev.appolon.homelab.arr.api.radarr.model.ImportListExclusionBulkResource
 import dev.appolon.homelab.arr.api.radarr.model.ImportListExclusionResource
-import dev.appolon.homelab.arr.api.radarr.model.ImportListExclusionResourcePagingResource
-import dev.appolon.homelab.arr.api.radarr.model.ImportListMoviesResource
 import dev.appolon.homelab.arr.api.radarr.model.ImportListResource
-import dev.appolon.homelab.arr.api.radarr.model.ImportListType
-import dev.appolon.homelab.arr.api.radarr.model.MovieCollection
-import dev.appolon.homelab.arr.api.radarr.model.MovieMetadata
-import dev.appolon.homelab.arr.api.radarr.model.MovieResourcePagingResource
-import dev.appolon.homelab.arr.api.radarr.model.MovieTranslation
-import dev.appolon.homelab.arr.api.radarr.model.ProviderMessage
-import dev.appolon.homelab.arr.api.radarr.model.ProviderMessageType
-import dev.appolon.homelab.arr.api.radarr.model.ProviderTestAllResult
-import dev.appolon.homelab.arr.api.radarr.model.Severity
-import dev.appolon.homelab.arr.api.radarr.model.ValidationFailure
 import dev.appolon.homelab.arr.api.radarr.model.SortDirection
 import dev.appolon.homelab.arr.net.ArrJson
 import kotlinx.coroutines.test.runTest

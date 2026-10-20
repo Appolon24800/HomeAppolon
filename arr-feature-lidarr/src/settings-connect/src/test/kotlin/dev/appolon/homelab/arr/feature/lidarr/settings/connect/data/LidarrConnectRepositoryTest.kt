@@ -17,7 +17,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.lidarr.library.data.WriteOutcome
 import dev.appolon.homelab.arr.feature.lidarr.settings.connect.FakeConnectActionQueue
-import dev.appolon.homelab.arr.feature.lidarr.settings.connect.FakeConnectEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.lidarr.settings.connect.connectRepository
 import java.io.IOException
 import kotlinx.coroutines.flow.first
@@ -33,7 +33,7 @@ class LidarrConnectRepositoryTest {
     private lateinit var system: FakeLidarrSystem
     private lateinit var discovery: FakeLidarrDiscovery
     private lateinit var commandQueue: FakeLidarrQueue
-    private lateinit var store: FakeConnectEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var actionQueue: FakeConnectActionQueue
 
     @Before
@@ -41,7 +41,7 @@ class LidarrConnectRepositoryTest {
         system = FakeLidarrSystem()
         discovery = FakeLidarrDiscovery()
         commandQueue = FakeLidarrQueue()
-        store = FakeConnectEntityStore()
+        store = FakeEntityStore()
         actionQueue = FakeConnectActionQueue()
     }
 

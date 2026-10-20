@@ -4,7 +4,7 @@ import dev.appolon.homelab.arr.api.lidarr.FakeLidarrCalendar
 import dev.appolon.homelab.arr.api.lidarr.model.DelayProfileResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.lidarr.settings.quality.FakeQualityActionQueue
-import dev.appolon.homelab.arr.feature.lidarr.settings.quality.FakeQualityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.lidarr.settings.quality.data.LidarrQualityRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
 import kotlinx.coroutines.Dispatchers
@@ -26,14 +26,14 @@ import org.junit.Test
 class LidarrDelayProfilesViewModelTest {
 
     private lateinit var api: FakeLidarrCalendar
-    private lateinit var store: FakeQualityEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeQualityActionQueue
     private var now: Long = 1_000_000L
 
     @Before
     fun setUp() {
         api = FakeLidarrCalendar()
-        store = FakeQualityEntityStore()
+        store = FakeEntityStore()
         queue = FakeQualityActionQueue()
     }
 

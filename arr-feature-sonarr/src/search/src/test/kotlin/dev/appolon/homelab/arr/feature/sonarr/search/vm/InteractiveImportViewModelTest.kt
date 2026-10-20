@@ -12,7 +12,7 @@ import dev.appolon.homelab.arr.api.sonarr.model.QualityProfileResource
 import dev.appolon.homelab.arr.api.sonarr.model.SeriesResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.sonarr.search.FakeSearchEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.sonarr.search.data.SonarrInteractiveImportRepository
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +35,7 @@ class InteractiveImportViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
     private val queue = FakeSonarrQueue()
-    private val store = FakeSearchEntityStore()
+    private val store = FakeEntityStore()
     private val actionQueue = ActionQueueImpl(store)
     private val series = SeriesResource(
         id = 5,

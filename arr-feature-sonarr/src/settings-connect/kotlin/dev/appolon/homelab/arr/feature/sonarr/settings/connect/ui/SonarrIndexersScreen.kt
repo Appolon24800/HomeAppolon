@@ -54,7 +54,6 @@ import dev.appolon.homelab.arr.feature.sonarr.settings.connect.data.SonarrConnec
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.vm.IndexersNotice
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.vm.SonarrIndexersContent
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.vm.SonarrIndexersViewModel
-import dev.appolon.homelab.arr.ui.components.LabeledSwitch
 import dev.appolon.homelab.arr.ui.components.SectionHeader
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox

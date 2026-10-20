@@ -7,7 +7,7 @@ import dev.appolon.homelab.arr.api.radarr.model.MovieResource
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.radarr.activity.FakeActivityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.radarr.activity.data.ACTIVITY_PAGE_SIZE
 import dev.appolon.homelab.arr.feature.radarr.activity.data.RadarrHistoryRepository
 import dev.appolon.homelab.arr.feature.radarr.activity.logic.HistoryDateWindow
@@ -42,7 +42,7 @@ class RadarrHistoryViewModelTest {
     private val otherServer = ServerId("server-2")
     private val now: Instant = Instant.parse("2026-10-20T12:00:00Z")
     private lateinit var fake: FakeRadarrQueue
-    private lateinit var store: FakeActivityEntityStore
+    private lateinit var store: FakeEntityStore
     private val signals = MutableSharedFlow<ServerId>(extraBufferCapacity = 8)
 
     private fun viewModel(scheduler: kotlinx.coroutines.test.TestCoroutineScheduler): RadarrHistoryViewModel =
@@ -76,7 +76,7 @@ class RadarrHistoryViewModelTest {
     @Before
     fun setUp() {
         fake = FakeRadarrQueue()
-        store = FakeActivityEntityStore()
+        store = FakeEntityStore()
     }
 
     @After

@@ -8,9 +8,6 @@ import dev.appolon.homelab.arr.api.sonarr.model.QueueStatusResource
 import dev.appolon.homelab.arr.api.sonarr.model.TrackedDownloadState
 import dev.appolon.homelab.arr.api.sonarr.model.TrackedDownloadStatus
 import dev.appolon.homelab.arr.ui.components.QueueRowStatus
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull

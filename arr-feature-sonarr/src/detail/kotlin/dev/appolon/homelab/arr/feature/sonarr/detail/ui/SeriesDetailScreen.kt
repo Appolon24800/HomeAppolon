@@ -67,7 +67,6 @@ import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.feature.sonarr.detail.vm.DetailMessage
 import dev.appolon.homelab.arr.feature.sonarr.detail.vm.DetailTab
 import dev.appolon.homelab.arr.feature.sonarr.detail.vm.EpisodeFileForm
-import dev.appolon.homelab.arr.feature.sonarr.detail.vm.SearchTarget
 import dev.appolon.homelab.arr.feature.sonarr.detail.vm.SeasonPassForm
 import dev.appolon.homelab.arr.feature.sonarr.detail.vm.SeriesDetailUiState
 import dev.appolon.homelab.arr.feature.sonarr.detail.vm.SeriesEditForm

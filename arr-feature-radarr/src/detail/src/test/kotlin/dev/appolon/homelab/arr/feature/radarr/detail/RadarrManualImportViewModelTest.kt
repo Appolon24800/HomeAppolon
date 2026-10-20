@@ -19,6 +19,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RadarrManualImportViewModelTest {
@@ -26,7 +27,7 @@ class RadarrManualImportViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val serverId = ServerId("server-1")
     private lateinit var connection: FakeRadarrDetailConnection
-    private lateinit var store: FakeDetailEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: ActionQueueImpl
     private lateinit var repository: RadarrMovieDetailRepository
 
@@ -40,7 +41,7 @@ class RadarrManualImportViewModelTest {
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         connection = FakeRadarrDetailConnection()
-        store = FakeDetailEntityStore(clock = { 0L })
+        store = FakeEntityStore().apply { clock = { 0L } }
         queue = ActionQueueImpl(store)
         repository = RadarrMovieDetailRepository(connection, store, queue, nowMillis = { 0L })
         connection.library.movies += movie

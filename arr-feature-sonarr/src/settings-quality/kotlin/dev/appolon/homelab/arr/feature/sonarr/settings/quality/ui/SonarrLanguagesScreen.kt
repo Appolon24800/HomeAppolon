@@ -1,6 +1,5 @@
 package dev.appolon.homelab.arr.feature.sonarr.settings.quality.ui
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.api.sonarr.model.LanguageResource
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.feature.sonarr.settings.quality.SonarrQualityClients
 import dev.appolon.homelab.arr.feature.sonarr.settings.quality.vm.SonarrLanguagesContent
 import dev.appolon.homelab.arr.feature.sonarr.settings.quality.vm.SonarrLanguagesViewModel

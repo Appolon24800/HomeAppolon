@@ -72,7 +72,6 @@ import dev.appolon.homelab.arr.feature.radarr.activity.vm.RadarrHistoryContent
 import dev.appolon.homelab.arr.feature.radarr.activity.vm.RadarrHistoryViewModel
 import dev.appolon.homelab.arr.feature.radarr.queue.RadarrQueueFeature
 import dev.appolon.homelab.arr.ui.components.FilterChipRow
-import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage

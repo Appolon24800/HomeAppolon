@@ -33,7 +33,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
-import dev.appolon.homelab.arr.api.lidarr.model.AlbumResource
 import dev.appolon.homelab.arr.feature.lidarr.R
 import dev.appolon.homelab.arr.feature.lidarr.addnew.data.AddNewLogic
 import dev.appolon.homelab.arr.feature.lidarr.addnew.vm.AlbumAddSheetUiState

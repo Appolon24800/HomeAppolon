@@ -16,7 +16,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
 import dev.appolon.homelab.arr.feature.radarr.library.data.WriteOutcome
-import dev.appolon.homelab.arr.feature.radarr.search.FakeSearchEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.radarr.search.RecordingManualImport
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +31,7 @@ class RadarrInteractiveImportRepositoryTest {
     private val serverId = ServerId("server-1")
     private lateinit var queue: FakeRadarrQueue
     private lateinit var manualImport: RecordingManualImport
-    private lateinit var store: FakeSearchEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var actionQueue: ActionQueueImpl
     private var movieFetches = 0
     private val movies = mutableMapOf<Int, MovieResource>()
@@ -75,7 +75,7 @@ class RadarrInteractiveImportRepositoryTest {
     fun setUp() {
         queue = FakeRadarrQueue()
         manualImport = RecordingManualImport(queue)
-        store = FakeSearchEntityStore()
+        store = FakeEntityStore()
         actionQueue = ActionQueueImpl(store)
         movies[5] = MovieResource(
             id = 5,

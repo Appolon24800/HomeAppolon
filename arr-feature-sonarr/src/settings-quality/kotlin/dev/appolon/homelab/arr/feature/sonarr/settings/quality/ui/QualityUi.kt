@@ -36,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.core.ArrError
-import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage
 import dev.appolon.homelab.arr.ui.R as ArrUiR
 

@@ -8,14 +8,11 @@ import dev.appolon.homelab.arr.api.sonarr.model.QueueStatus
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.sonarr.queue.FakeEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.sonarr.queue.data.QueueRemoveOptions
 import dev.appolon.homelab.arr.feature.sonarr.queue.data.SonarrQueueRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow

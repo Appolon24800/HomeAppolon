@@ -11,7 +11,6 @@ import dev.appolon.homelab.arr.feature.radarr.wanted.FakeWantedActionQueue
 import dev.appolon.homelab.arr.feature.radarr.wanted.FakeWantedEntityStore
 import dev.appolon.homelab.arr.feature.radarr.wanted.data.RadarrWantedRepository
 import dev.appolon.homelab.arr.feature.radarr.wanted.data.WantedCounts
-import dev.appolon.homelab.arr.feature.radarr.wanted.data.WantedFilters
 import dev.appolon.homelab.arr.feature.radarr.wanted.data.WantedTab
 import dev.appolon.homelab.arr.ui.lce.LceState
 import kotlinx.coroutines.Dispatchers

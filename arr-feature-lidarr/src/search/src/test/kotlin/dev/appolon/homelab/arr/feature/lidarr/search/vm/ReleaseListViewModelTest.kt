@@ -8,7 +8,7 @@ import dev.appolon.homelab.arr.api.lidarr.model.QualityModel
 import dev.appolon.homelab.arr.api.lidarr.model.ReleaseResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.lidarr.search.FakeSearchEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.lidarr.search.data.ReleaseGroupFilter
 import dev.appolon.homelab.arr.feature.lidarr.search.data.ReleaseScope
 import dev.appolon.homelab.arr.feature.lidarr.search.data.ReleaseSort
@@ -33,7 +33,7 @@ class ReleaseListViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
     private val fake = FakeLidarrQueue()
-    private val store = FakeSearchEntityStore()
+    private val store = FakeEntityStore()
     private val actionQueue = ActionQueueImpl(store)
     private var nowMillis = 1_000L
     private val repository = LidarrReleaseRepository(

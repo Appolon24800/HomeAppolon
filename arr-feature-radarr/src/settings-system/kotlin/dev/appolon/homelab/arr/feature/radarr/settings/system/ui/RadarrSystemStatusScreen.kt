@@ -19,8 +19,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,12 +35,10 @@ import dev.appolon.homelab.arr.api.radarr.model.RuntimeMode
 import dev.appolon.homelab.arr.core.ArrTime
 import dev.appolon.homelab.arr.core.Humanize
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.feature.radarr.settings.system.RadarrSettingsSystemClients
 import dev.appolon.homelab.arr.feature.radarr.settings.system.data.SystemText
 import dev.appolon.homelab.arr.feature.radarr.settings.system.vm.RadarrSystemStatusContent
 import dev.appolon.homelab.arr.feature.radarr.settings.system.vm.RadarrSystemStatusViewModel
-import dev.appolon.homelab.arr.ui.components.EmptyState
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState

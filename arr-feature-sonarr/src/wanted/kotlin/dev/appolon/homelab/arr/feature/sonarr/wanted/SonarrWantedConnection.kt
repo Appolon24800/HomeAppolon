@@ -14,11 +14,11 @@ import dev.appolon.homelab.arr.data.ServerRegistry
 import dev.appolon.homelab.arr.data.secrets.ArrSecrets
 import dev.appolon.homelab.arr.feature.sonarr.wanted.data.WantedCommandRunner
 import dev.appolon.homelab.arr.net.ArrClientFactory
+import dev.appolon.homelab.arr.net.ArrCommandRunner
 import dev.appolon.homelab.arr.net.ArrJson
 import dev.appolon.homelab.arr.net.DefaultArrClientFactory
 import dev.appolon.homelab.arr.net.ServerEndpoint
 import dev.appolon.homelab.arr.net.TrustSpec
-import dev.appolon.homelab.arr.net.arrError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
@@ -26,10 +26,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
@@ -103,19 +100,22 @@ class SonarrWantedApis(
  * Runs wanted commands over a raw POST instead of the Retrofit
  * `CommandApi`: command payloads put the selection fields `seriesId` and
  * `episodeIds` at the JSON root, a shape the committed `CommandResource`
- * DTO cannot express, and Sonarr rejects ids nested inside `body`. Wire
- * path, auth, and prefix handling are identical to every other call.
+ * DTO cannot express, and Sonarr rejects ids nested inside `body`. The body
+ * is built here; the wire path, auth, and prefix handling are
+ * [ArrCommandRunner].
  */
 class OkHttpWantedCommandRunner(
-    private val client: OkHttpClient,
-    private val baseUrl: String,
+    client: OkHttpClient,
+    baseUrl: String,
 ) : WantedCommandRunner {
+
+    private val runner = ArrCommandRunner(client, baseUrl)
 
     override suspend fun run(
         name: String,
         seriesId: Int?,
         episodeIds: List<Int>?,
-    ): ArrResult<Unit> = withContext(Dispatchers.IO) {
+    ): ArrResult<Unit> {
         val body = buildJsonObject {
             put("name", name)
             seriesId?.let { put("seriesId", it) }
@@ -123,25 +123,7 @@ class OkHttpWantedCommandRunner(
                 put("episodeIds", JsonArray(ids.map { id -> JsonPrimitive(id) }))
             }
         }.toString()
-        val request = try {
-            Request.Builder()
-                .url(baseUrl.trimEnd('/') + "/" + COMMAND_PATH)
-                .post(body.toRequestBody("application/json".toMediaTypeOrNull()))
-                .build()
-        } catch (t: Throwable) {
-            return@withContext ArrResult.err(t.arrError())
-        }
-        try {
-            client.newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
-                    ArrResult.ok(Unit)
-                } else {
-                    ArrResult.err(response.arrError())
-                }
-            }
-        } catch (t: Throwable) {
-            ArrResult.err(t.arrError())
-        }
+        return withContext(Dispatchers.IO) { runner.post(COMMAND_PATH, body) }
     }
 
     private companion object {

@@ -6,7 +6,7 @@ import dev.appolon.homelab.arr.api.radarr.model.LogFileResource
 import dev.appolon.homelab.arr.api.radarr.model.UpdateResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.radarr.settings.system.FakeSystemActionQueue
-import dev.appolon.homelab.arr.feature.radarr.settings.system.FakeSystemEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.radarr.settings.system.data.RadarrSettingsSystemRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
@@ -31,7 +31,7 @@ class RadarrUpdatesViewModelTest {
 
     private lateinit var api: FakeRadarrSystem
     private lateinit var commands: FakeRadarrQueue
-    private lateinit var store: FakeSystemEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeSystemActionQueue
     private var now: Long = 1_000_000L
 
@@ -39,7 +39,7 @@ class RadarrUpdatesViewModelTest {
     fun setUp() {
         api = FakeRadarrSystem()
         commands = FakeRadarrQueue()
-        store = FakeSystemEntityStore()
+        store = FakeEntityStore()
         queue = FakeSystemActionQueue()
         store.clock = { now }
     }

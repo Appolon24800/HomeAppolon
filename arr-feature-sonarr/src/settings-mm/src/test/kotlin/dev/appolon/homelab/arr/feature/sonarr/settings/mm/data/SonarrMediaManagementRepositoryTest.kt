@@ -8,7 +8,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
 import dev.appolon.homelab.arr.feature.sonarr.library.data.WriteOutcome
-import dev.appolon.homelab.arr.feature.sonarr.settings.mm.FakeSettingsMmEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import java.io.IOException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -25,7 +25,7 @@ class SonarrMediaManagementRepositoryTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeSonarrSystem
-    private lateinit var store: FakeSettingsMmEntityStore
+    private lateinit var store: FakeEntityStore
 
     @Before
     fun setUp() {
@@ -41,7 +41,7 @@ class SonarrMediaManagementRepositoryTest {
             renameEpisodes = true,
             standardEpisodeFormat = "{Series Title} - S{season:00}E{episode:00} - {Episode Title}",
         )
-        store = FakeSettingsMmEntityStore()
+        store = FakeEntityStore()
     }
 
     private fun TestScope.repository() = SonarrMediaManagementRepository(

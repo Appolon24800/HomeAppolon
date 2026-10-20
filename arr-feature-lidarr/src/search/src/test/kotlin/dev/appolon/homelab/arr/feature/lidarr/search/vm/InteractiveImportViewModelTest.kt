@@ -11,7 +11,7 @@ import dev.appolon.homelab.arr.api.lidarr.model.QualityProfileResource
 import dev.appolon.homelab.arr.api.lidarr.model.TrackResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.lidarr.search.FakeSearchEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.lidarr.search.data.LidarrInteractiveImportRepository
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +36,7 @@ class InteractiveImportViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
     private val fake = FakeLidarrQueue()
-    private val store = FakeSearchEntityStore()
+    private val store = FakeEntityStore()
     private val actionQueue = ActionQueueImpl(store)
     private val artist = ArtistResource(
         id = 5,

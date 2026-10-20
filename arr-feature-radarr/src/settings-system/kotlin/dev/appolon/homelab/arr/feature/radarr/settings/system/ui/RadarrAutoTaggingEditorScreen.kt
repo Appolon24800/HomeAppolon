@@ -38,7 +38,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.api.radarr.model.AutoTaggingSpecificationSchema
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.data.ConnectFieldForms
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.data.ConnectFieldRenderKind
 import dev.appolon.homelab.arr.feature.radarr.settings.system.RadarrSettingsSystemClients

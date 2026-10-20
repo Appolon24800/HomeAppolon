@@ -34,7 +34,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
-import dev.appolon.homelab.arr.api.lidarr.model.ArtistResource
 import dev.appolon.homelab.arr.api.lidarr.model.MetadataProfileResource
 import dev.appolon.homelab.arr.api.lidarr.model.MonitorTypes
 import dev.appolon.homelab.arr.api.lidarr.model.QualityProfileResource

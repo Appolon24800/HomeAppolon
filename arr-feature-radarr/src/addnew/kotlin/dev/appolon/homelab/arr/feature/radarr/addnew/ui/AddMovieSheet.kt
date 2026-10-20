@@ -42,7 +42,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import dev.appolon.homelab.arr.api.radarr.model.MovieResource
 import dev.appolon.homelab.arr.api.radarr.model.MonitorTypes
 import dev.appolon.homelab.arr.api.radarr.model.MovieStatusType
 import dev.appolon.homelab.arr.api.radarr.model.QualityProfileResource

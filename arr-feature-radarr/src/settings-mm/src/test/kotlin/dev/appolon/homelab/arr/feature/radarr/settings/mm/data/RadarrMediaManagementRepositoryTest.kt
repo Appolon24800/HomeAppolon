@@ -9,7 +9,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
 import dev.appolon.homelab.arr.feature.radarr.library.data.WriteOutcome
-import dev.appolon.homelab.arr.feature.radarr.settings.mm.FakeSettingsMmEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import java.io.IOException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -26,7 +26,7 @@ class RadarrMediaManagementRepositoryTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeRadarrSystem
-    private lateinit var store: FakeSettingsMmEntityStore
+    private lateinit var store: FakeEntityStore
 
     @Before
     fun setUp() {
@@ -42,7 +42,7 @@ class RadarrMediaManagementRepositoryTest {
             renameMovies = true,
             standardMovieFormat = "{Movie Title} ({Year})",
         )
-        store = FakeSettingsMmEntityStore()
+        store = FakeEntityStore()
     }
 
     private fun TestScope.repository() = RadarrMediaManagementRepository(

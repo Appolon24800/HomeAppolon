@@ -7,7 +7,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
 import dev.appolon.homelab.arr.feature.lidarr.library.data.WriteOutcome
-import dev.appolon.homelab.arr.feature.lidarr.settings.mm.FakeSettingsMmEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import java.io.IOException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -25,7 +25,7 @@ class LidarrRootFolderRepositoryTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeLidarrSystem
-    private lateinit var store: FakeSettingsMmEntityStore
+    private lateinit var store: FakeEntityStore
 
     @Before
     fun setUp() {
@@ -46,7 +46,7 @@ class LidarrRootFolderRepositoryTest {
             totalSpace = null,
         )
         fake.diskSpace += DiskSpaceResource(path = "/data", freeSpace = 500L, totalSpace = 2_000L)
-        store = FakeSettingsMmEntityStore()
+        store = FakeEntityStore()
     }
 
     private fun TestScope.repository() = LidarrRootFolderRepository(

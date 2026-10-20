@@ -7,11 +7,10 @@ import dev.appolon.homelab.arr.api.radarr.model.NotificationResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.FakeConnectActionQueue
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.FakeConnectCommandApi
-import dev.appolon.homelab.arr.feature.radarr.settings.connect.FakeConnectEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.FakeConnectMetadataApi
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.FakeConnectTagApi
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.data.RadarrConnectRepository
-import dev.appolon.homelab.arr.ui.lce.LceState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -31,14 +30,14 @@ class RadarrConnectEditorsViewModelTest {
 
     private lateinit var connect: FakeRadarrConnect
     private lateinit var discovery: FakeRadarrDiscovery
-    private lateinit var store: FakeConnectEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeConnectActionQueue
 
     @Before
     fun setUp() {
         connect = FakeRadarrConnect()
         discovery = FakeRadarrDiscovery()
-        store = FakeConnectEntityStore()
+        store = FakeEntityStore()
         queue = FakeConnectActionQueue()
     }
 

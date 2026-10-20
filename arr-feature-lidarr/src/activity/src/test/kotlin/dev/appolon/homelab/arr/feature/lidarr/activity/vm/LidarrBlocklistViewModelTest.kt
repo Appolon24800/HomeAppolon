@@ -4,7 +4,7 @@ import dev.appolon.homelab.arr.api.lidarr.FakeLidarrQueue
 import dev.appolon.homelab.arr.api.lidarr.model.BlocklistResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.lidarr.activity.FakeActivityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.lidarr.activity.data.LidarrBlocklistRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
@@ -34,7 +34,7 @@ class LidarrBlocklistViewModelTest {
     private val serverId = ServerId("server-1")
     private val otherServer = ServerId("server-2")
     private lateinit var fake: FakeLidarrQueue
-    private lateinit var store: FakeActivityEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var actionQueue: ActionQueueImpl
     private val signals = MutableSharedFlow<ServerId>(extraBufferCapacity = 8)
 
@@ -63,7 +63,7 @@ class LidarrBlocklistViewModelTest {
     @Before
     fun setUp() {
         fake = FakeLidarrQueue()
-        store = FakeActivityEntityStore()
+        store = FakeEntityStore()
         actionQueue = ActionQueueImpl(store)
     }
 

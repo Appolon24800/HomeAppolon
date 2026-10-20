@@ -11,9 +11,6 @@ import dev.appolon.homelab.arr.api.sonarr.model.Language
 import dev.appolon.homelab.arr.api.sonarr.model.Quality
 import dev.appolon.homelab.arr.api.sonarr.model.QualityModel
 import java.time.Instant
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull

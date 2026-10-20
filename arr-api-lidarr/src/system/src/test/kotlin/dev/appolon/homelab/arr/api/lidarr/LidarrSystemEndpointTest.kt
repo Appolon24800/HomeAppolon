@@ -13,7 +13,6 @@ import dev.appolon.homelab.arr.api.lidarr.model.UpdateResource
 import dev.appolon.homelab.arr.net.ArrJson
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.encodeToJsonElement
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.mockwebserver.MockResponse

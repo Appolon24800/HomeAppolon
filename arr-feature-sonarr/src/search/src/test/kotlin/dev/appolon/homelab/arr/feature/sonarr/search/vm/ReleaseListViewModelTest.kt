@@ -9,7 +9,7 @@ import dev.appolon.homelab.arr.api.sonarr.model.QualityModel
 import dev.appolon.homelab.arr.api.sonarr.model.ReleaseResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.sonarr.search.FakeSearchEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.sonarr.search.data.ReleaseGroupFilter
 import dev.appolon.homelab.arr.feature.sonarr.search.data.ReleaseScope
 import dev.appolon.homelab.arr.feature.sonarr.search.data.ReleaseSort
@@ -34,7 +34,7 @@ class ReleaseListViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
     private val fake = FakeSonarrQueue()
-    private val store = FakeSearchEntityStore()
+    private val store = FakeEntityStore()
     private val actionQueue = ActionQueueImpl(store)
     private val repository = SonarrReleaseRepository(
         serverId = ServerId("server-1"),

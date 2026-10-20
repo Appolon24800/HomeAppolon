@@ -80,14 +80,6 @@ class FakeProwlarrSearch(
         gate(operation, *arguments)?.let(::httpError)
     }
 
-    /** Gate for Response-returning calls: injected statuses ride the Response. */
-    private suspend fun respond(
-        operation: String,
-        vararg arguments: Pair<String, Any?>,
-    ): Response<Unit> = gate(operation, *arguments)
-        ?.let { Response.error(it, "{}".toResponseBody()) }
-        ?: Response.success(200, Unit)
-
     private fun httpError(status: Int): Nothing =
         throw HttpException(Response.error<Unit>(status, "{}".toResponseBody()))
 

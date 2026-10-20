@@ -5,7 +5,7 @@ import dev.appolon.homelab.arr.api.radarr.model.IndexerResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.FakeConnectActionQueue
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.FakeConnectCommandApi
-import dev.appolon.homelab.arr.feature.radarr.settings.connect.FakeConnectEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.FakeConnectMetadataApi
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.FakeConnectTagApi
 import dev.appolon.homelab.arr.api.radarr.FakeRadarrDiscovery
@@ -33,13 +33,13 @@ import org.junit.Test
 class RadarrIndexersViewModelTest {
 
     private lateinit var api: FakeRadarrConnect
-    private lateinit var store: FakeConnectEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeConnectActionQueue
 
     @Before
     fun setUp() {
         api = FakeRadarrConnect()
-        store = FakeConnectEntityStore()
+        store = FakeEntityStore()
         queue = FakeConnectActionQueue()
     }
 

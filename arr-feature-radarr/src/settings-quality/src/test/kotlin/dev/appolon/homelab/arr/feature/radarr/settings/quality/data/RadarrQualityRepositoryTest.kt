@@ -14,7 +14,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.radarr.library.data.WriteOutcome
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.FakeQualityActionQueue
-import dev.appolon.homelab.arr.feature.radarr.settings.quality.FakeQualityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import java.io.IOException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -27,7 +27,7 @@ import org.junit.Test
 class RadarrQualityRepositoryTest {
 
     private val serverId = ServerId("s1")
-    private lateinit var store: FakeQualityEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeQualityActionQueue
     private lateinit var api: FakeRadarrCalendar
     private lateinit var repository: RadarrQualityRepository
@@ -35,7 +35,7 @@ class RadarrQualityRepositoryTest {
 
     @Before
     fun setUp() {
-        store = FakeQualityEntityStore()
+        store = FakeEntityStore()
         queue = FakeQualityActionQueue()
         api = FakeRadarrCalendar()
         repository = repository()

@@ -28,7 +28,6 @@ import dev.appolon.homelab.arr.servers.R
 import dev.appolon.homelab.arr.servers.notify.NotificationPreview
 import dev.appolon.homelab.arr.servers.vm.NotificationPrefsViewModel
 import dev.appolon.homelab.arr.ui.components.LabeledSwitch
-import dev.appolon.homelab.arr.ui.components.SectionHeader
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold

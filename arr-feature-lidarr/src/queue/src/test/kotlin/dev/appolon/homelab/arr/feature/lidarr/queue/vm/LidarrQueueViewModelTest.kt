@@ -8,7 +8,7 @@ import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.lidarr.queue.FakeEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.lidarr.queue.data.QueueRemoveOptions
 import dev.appolon.homelab.arr.feature.lidarr.queue.data.LidarrQueueRepository
 import dev.appolon.homelab.arr.ui.lce.LceState

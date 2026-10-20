@@ -1,4 +1,4 @@
-package dev.appolon.homelab.arr.feature.lidarr.settings.mm
+package dev.appolon.homelab.arr.data.testing
 
 import dev.appolon.homelab.arr.core.EntityType
 import dev.appolon.homelab.arr.core.ServerId
@@ -13,12 +13,17 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 
 /**
- * In-memory [EntityStore] mirroring the SQLite semantics the settings
- * repositories rely on: one row per (server, type, id), a fetchedAt stamp
- * per row, `lastFetchedAt` as the max over the scope, and observe()
- * re-reading after every write tick.
+ * TESTING SUPPORT, NOT APP CODE. This class lives in main source only so
+ * every module's test tree can see it without a new dependency or Gradle
+ * fixture plugin, the same mechanism :arr-core uses for its ArrTestServers
+ * smoke-test helper. Nothing outside test trees may reference it.
+ *
+ * In-memory [EntityStore] mirroring the SQLite semantics the repositories
+ * rely on: one row per (server, type, id), a fetchedAt stamp per row,
+ * `lastFetchedAt` as the max over the scope, and observe() re-reading after
+ * every write tick, deduplicated like [dev.appolon.homelab.arr.data.store.SqliteEntityStore].
  */
-class FakeSettingsMmEntityStore(
+class FakeEntityStore(
     private val json: Json = Json {
         ignoreUnknownKeys = true
         explicitNulls = false

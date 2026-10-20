@@ -1,7 +1,6 @@
 package dev.appolon.homelab.arr.feature.radarr.addnew
 
 import dev.appolon.homelab.arr.core.ActionId
-import dev.appolon.homelab.arr.core.AppType
 import dev.appolon.homelab.arr.core.EntityType
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.ActionQueue

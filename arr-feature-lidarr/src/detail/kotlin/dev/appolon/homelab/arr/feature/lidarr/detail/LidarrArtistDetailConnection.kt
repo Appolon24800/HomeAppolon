@@ -26,18 +26,15 @@ import dev.appolon.homelab.arr.data.ArrServer
 import dev.appolon.homelab.arr.data.ServerRegistry
 import dev.appolon.homelab.arr.data.secrets.ArrSecrets
 import dev.appolon.homelab.arr.net.ArrClientFactory
+import dev.appolon.homelab.arr.net.ArrCommandRunner
 import dev.appolon.homelab.arr.net.ArrJson
 import dev.appolon.homelab.arr.net.DefaultArrClientFactory
 import dev.appolon.homelab.arr.net.ServerEndpoint
 import dev.appolon.homelab.arr.net.TrustSpec
-import dev.appolon.homelab.arr.net.arrError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
@@ -147,29 +144,12 @@ fun interface LidarrCommandPoster {
 
 /** [LidarrCommandPoster] over the shared OkHttp client. */
 class OkHttpLidarrCommandPoster(
-    private val client: OkHttpClient,
-    private val baseUrl: String,
+    client: OkHttpClient,
+    baseUrl: String,
 ) : LidarrCommandPoster {
 
-    override suspend fun post(bodyJson: String): ArrResult<Unit> = withContext(Dispatchers.IO) {
-        val request = try {
-            Request.Builder()
-                .url(baseUrl.trimEnd('/') + "/api/v1/command")
-                .post(bodyJson.toRequestBody("application/json".toMediaTypeOrNull()))
-                .build()
-        } catch (t: Throwable) {
-            return@withContext ArrResult.err(t.arrError())
-        }
-        try {
-            client.newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
-                    ArrResult.ok(Unit)
-                } else {
-                    ArrResult.err(response.arrError())
-                }
-            }
-        } catch (t: Throwable) {
-            ArrResult.err(t.arrError())
-        }
-    }
+    private val runner = ArrCommandRunner(client, baseUrl)
+
+    override suspend fun post(bodyJson: String): ArrResult<Unit> =
+        withContext(Dispatchers.IO) { runner.post("/api/v1/command", bodyJson) }
 }

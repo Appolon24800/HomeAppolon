@@ -37,7 +37,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.api.radarr.model.FileSystemEntityType
 import dev.appolon.homelab.arr.core.ArrResult
-import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.feature.radarr.settings.mm.data.FileSystemListing
 import dev.appolon.homelab.arr.feature.radarr.settings.mm.data.RadarrFileSystemRepository
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage

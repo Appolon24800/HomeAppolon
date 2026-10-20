@@ -1,6 +1,5 @@
 package dev.appolon.homelab.arr.api.sonarr
 
-import dev.appolon.homelab.arr.api.sonarr.model.EpisodeResource
 import dev.appolon.homelab.arr.api.sonarr.model.RenameEpisodeResource
 import retrofit2.http.GET
 import retrofit2.http.Query

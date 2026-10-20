@@ -8,7 +8,6 @@ import dev.appolon.homelab.arr.api.radarr.model.BackupRestoreResource
 import dev.appolon.homelab.arr.api.radarr.model.ColonReplacementFormat
 import dev.appolon.homelab.arr.api.radarr.model.DiskSpaceResource
 import dev.appolon.homelab.arr.api.radarr.model.FileSystemMediaFileResource
-import dev.appolon.homelab.arr.api.radarr.model.FileSystemModel
 import dev.appolon.homelab.arr.api.radarr.model.FileSystemResult
 import dev.appolon.homelab.arr.api.radarr.model.FileSystemTypeResource
 import dev.appolon.homelab.arr.api.radarr.model.HealthResource

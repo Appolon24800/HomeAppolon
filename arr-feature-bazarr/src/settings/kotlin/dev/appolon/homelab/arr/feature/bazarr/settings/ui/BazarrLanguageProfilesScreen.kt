@@ -28,7 +28,6 @@ import dev.appolon.homelab.arr.feature.bazarr.R
 import dev.appolon.homelab.arr.feature.bazarr.episodes.ui.languageLabel
 import dev.appolon.homelab.arr.feature.bazarr.settings.model.BazarrLanguageProfile
 import dev.appolon.homelab.arr.feature.bazarr.settings.vm.ProfilesUiState
-import dev.appolon.homelab.arr.ui.components.SectionHeader
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState

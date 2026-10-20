@@ -7,7 +7,7 @@ import dev.appolon.homelab.arr.api.sonarr.model.LanguageProfileResource
 import dev.appolon.homelab.arr.api.sonarr.model.LanguageResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.sonarr.settings.quality.FakeQualityActionQueue
-import dev.appolon.homelab.arr.feature.sonarr.settings.quality.FakeQualityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.sonarr.settings.quality.data.SonarrQualityRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
@@ -33,14 +33,14 @@ import org.junit.Test
 class SonarrLanguageProfilesViewModelTest {
 
     private lateinit var api: FakeSonarrCalendar
-    private lateinit var store: FakeQualityEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeQualityActionQueue
     private var now: Long = 1_000_000L
 
     @Before
     fun setUp() {
         api = FakeSonarrCalendar()
-        store = FakeQualityEntityStore()
+        store = FakeEntityStore()
         queue = FakeQualityActionQueue()
     }
 

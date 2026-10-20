@@ -14,7 +14,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
 import dev.appolon.homelab.arr.feature.sonarr.library.data.WriteOutcome
-import dev.appolon.homelab.arr.feature.sonarr.search.FakeSearchEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -32,7 +32,7 @@ class SonarrInteractiveImportRepositoryTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var queue: FakeSonarrQueue
-    private lateinit var store: FakeSearchEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var actionQueue: ActionQueueImpl
     private var seriesFetches = 0
     private val seriesById = mutableMapOf<Int, SeriesResource>()
@@ -103,7 +103,7 @@ class SonarrInteractiveImportRepositoryTest {
     @Before
     fun setUp() {
         queue = FakeSonarrQueue()
-        store = FakeSearchEntityStore()
+        store = FakeEntityStore()
         actionQueue = ActionQueueImpl(store)
         seriesById[5] = SeriesResource(
             id = 5,

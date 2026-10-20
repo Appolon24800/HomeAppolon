@@ -4,7 +4,7 @@ import dev.appolon.homelab.arr.api.sonarr.FakeSonarrSystem
 import dev.appolon.homelab.arr.api.sonarr.model.NamingConfigResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.sonarr.settings.mm.FakeSettingsMmEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.sonarr.settings.mm.data.SonarrMediaManagementRepository
 import dev.appolon.homelab.arr.feature.sonarr.settings.mm.data.SonarrNamingExamples
 import dev.appolon.homelab.arr.ui.lce.LceState
@@ -31,7 +31,7 @@ class SonarrNamingViewModelTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeSonarrSystem
-    private lateinit var store: FakeSettingsMmEntityStore
+    private lateinit var store: FakeEntityStore
 
     @Before
     fun setUp() {
@@ -46,7 +46,7 @@ class SonarrNamingViewModelTest {
             seasonFolderFormat = "Season {season:00}",
             specialsFolderFormat = "Specials",
         )
-        store = FakeSettingsMmEntityStore()
+        store = FakeEntityStore()
     }
 
     @After

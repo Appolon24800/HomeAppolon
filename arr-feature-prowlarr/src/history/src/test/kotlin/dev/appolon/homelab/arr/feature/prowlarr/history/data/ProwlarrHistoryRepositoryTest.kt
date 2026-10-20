@@ -4,7 +4,6 @@ import dev.appolon.homelab.arr.api.prowlarr.FakeProwlarrIndexers
 import dev.appolon.homelab.arr.api.prowlarr.FakeProwlarrSearch
 import dev.appolon.homelab.arr.api.prowlarr.model.HistoryResource
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerResource
-import dev.appolon.homelab.arr.api.prowlarr.model.SortDirection
 import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.prowlarr.indexers.FakeActionQueue

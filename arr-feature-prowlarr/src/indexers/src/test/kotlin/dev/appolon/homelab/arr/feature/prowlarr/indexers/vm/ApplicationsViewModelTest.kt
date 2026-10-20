@@ -5,7 +5,6 @@ import dev.appolon.homelab.arr.api.prowlarr.FakeProwlarrIndexers
 import dev.appolon.homelab.arr.api.prowlarr.model.AppProfileResource
 import dev.appolon.homelab.arr.api.prowlarr.model.ApplicationResource
 import dev.appolon.homelab.arr.api.prowlarr.model.ApplicationSyncLevel
-import dev.appolon.homelab.arr.api.prowlarr.model.IndexerCategory
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerResource
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ArrResult

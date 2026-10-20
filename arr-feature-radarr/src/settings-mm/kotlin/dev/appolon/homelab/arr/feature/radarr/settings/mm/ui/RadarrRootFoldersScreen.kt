@@ -66,7 +66,6 @@ import dev.appolon.homelab.arr.feature.radarr.settings.mm.data.RootFolderWithDis
 import dev.appolon.homelab.arr.feature.radarr.settings.mm.vm.RadarrRootFoldersContent
 import dev.appolon.homelab.arr.feature.radarr.settings.mm.vm.RadarrRootFoldersViewModel
 import dev.appolon.homelab.arr.feature.radarr.settings.mm.vm.RootFolderNotice
-import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage

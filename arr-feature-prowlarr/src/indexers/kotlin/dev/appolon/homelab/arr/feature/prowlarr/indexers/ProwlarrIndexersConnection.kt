@@ -15,19 +15,16 @@ import dev.appolon.homelab.arr.data.ArrServer
 import dev.appolon.homelab.arr.data.ServerRegistry
 import dev.appolon.homelab.arr.data.secrets.ArrSecrets
 import dev.appolon.homelab.arr.net.ArrClientFactory
+import dev.appolon.homelab.arr.net.ArrCommandRunner
 import dev.appolon.homelab.arr.net.DefaultArrClientFactory
 import dev.appolon.homelab.arr.net.ServerEndpoint
 import dev.appolon.homelab.arr.net.TrustSpec
-import dev.appolon.homelab.arr.net.arrError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
@@ -105,34 +102,18 @@ fun interface ProwlarrCommandRunner {
 /**
  * Commands over a raw POST: the command payload is a bare `{"name":...}`
  * object at the JSON root, and the feature only ever needs the name, so a
- * dedicated Retrofit interface would add nothing. Auth, path prefix, and
- * client behavior are identical to every other call.
+ * dedicated Retrofit interface would add nothing. The body is built here;
+ * auth, path prefix, and client behavior are [ArrCommandRunner].
  */
 class OkHttpProwlarrCommandRunner(
-    private val client: OkHttpClient,
-    private val baseUrl: String,
+    client: OkHttpClient,
+    baseUrl: String,
 ) : ProwlarrCommandRunner {
 
-    override suspend fun run(name: String): ArrResult<Unit> = withContext(Dispatchers.IO) {
-        val body = buildJsonObject { put("name", name) }.toString()
-        val request = try {
-            Request.Builder()
-                .url(baseUrl.trimEnd('/') + "/api/v1/command")
-                .post(body.toRequestBody("application/json".toMediaTypeOrNull()))
-                .build()
-        } catch (t: Throwable) {
-            return@withContext ArrResult.err(t.arrError())
-        }
-        try {
-            client.newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
-                    ArrResult.ok(Unit)
-                } else {
-                    ArrResult.err(response.arrError())
-                }
-            }
-        } catch (t: Throwable) {
-            ArrResult.err(t.arrError())
-        }
+    private val runner = ArrCommandRunner(client, baseUrl)
+
+    override suspend fun run(name: String): ArrResult<Unit> =
+        withContext(Dispatchers.IO) {
+        runner.post("/api/v1/command", buildJsonObject { put("name", name) }.toString())
     }
 }

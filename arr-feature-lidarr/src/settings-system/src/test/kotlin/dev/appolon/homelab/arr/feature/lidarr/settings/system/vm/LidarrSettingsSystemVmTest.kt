@@ -5,7 +5,7 @@ import dev.appolon.homelab.arr.api.lidarr.FakeLidarrQueue
 import dev.appolon.homelab.arr.api.lidarr.FakeLidarrSystem
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.lidarr.settings.system.FakeSystemActionQueue
-import dev.appolon.homelab.arr.feature.lidarr.settings.system.FakeSystemEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.lidarr.settings.system.data.LidarrSettingsSystemRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,7 +14,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
@@ -27,7 +26,7 @@ import org.junit.Before
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class LidarrSettingsSystemVmTest {
     protected lateinit var api: FakeLidarrSystem
-    protected lateinit var store: FakeSystemEntityStore
+    protected lateinit var store: FakeEntityStore
     protected lateinit var queue: FakeSystemActionQueue
     protected lateinit var commands: FakeLidarrQueue
     protected var now: Long = 1_000_000L
@@ -35,7 +34,7 @@ abstract class LidarrSettingsSystemVmTest {
     @Before
     fun setUpHarness() {
         api = FakeLidarrSystem()
-        store = FakeSystemEntityStore()
+        store = FakeEntityStore()
         queue = FakeSystemActionQueue()
         commands = FakeLidarrQueue()
         store.clock = { now }

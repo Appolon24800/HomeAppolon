@@ -10,7 +10,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.sonarr.library.data.WriteOutcome
 import dev.appolon.homelab.arr.feature.sonarr.settings.quality.FakeQualityActionQueue
-import dev.appolon.homelab.arr.feature.sonarr.settings.quality.FakeQualityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.sonarr.settings.quality.data.CustomFormatCondition
 import dev.appolon.homelab.arr.feature.sonarr.settings.quality.data.CustomFormatConditionKind
 import dev.appolon.homelab.arr.feature.sonarr.settings.quality.data.SonarrQualityRepository
@@ -40,14 +40,14 @@ import org.junit.Test
 class SonarrCustomFormatsViewModelTest {
 
     private lateinit var api: FakeSonarrCalendar
-    private lateinit var store: FakeQualityEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeQualityActionQueue
     private var now: Long = 1_000_000L
 
     @Before
     fun setUp() {
         api = FakeSonarrCalendar()
-        store = FakeQualityEntityStore()
+        store = FakeEntityStore()
         queue = FakeQualityActionQueue()
     }
 

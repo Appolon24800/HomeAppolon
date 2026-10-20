@@ -7,8 +7,7 @@ import dev.appolon.homelab.arr.api.radarr.model.ProfileFormatItemResource
 import dev.appolon.homelab.arr.api.radarr.model.QualityProfileResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.FakeQualityActionQueue
-import dev.appolon.homelab.arr.feature.radarr.settings.quality.FakeQualityEntityStore
-import dev.appolon.homelab.arr.feature.radarr.settings.quality.data.CustomFormatCondition
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.data.CustomFormatConditionKind
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.data.RadarrQualityRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
@@ -36,13 +35,13 @@ import org.junit.Test
 class RadarrCustomFormatsViewModelTest {
 
     private lateinit var api: FakeRadarrCalendar
-    private lateinit var store: FakeQualityEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeQualityActionQueue
 
     @Before
     fun setUp() {
         api = FakeRadarrCalendar()
-        store = FakeQualityEntityStore()
+        store = FakeEntityStore()
         queue = FakeQualityActionQueue()
     }
 

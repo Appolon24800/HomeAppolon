@@ -5,7 +5,7 @@ import dev.appolon.homelab.arr.api.radarr.model.NamingConfigResource
 import dev.appolon.homelab.arr.api.radarr.model.NamingExampleResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.radarr.settings.mm.FakeSettingsMmEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.radarr.settings.mm.data.RadarrMediaManagementRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
@@ -31,7 +31,7 @@ class RadarrNamingViewModelTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeRadarrSystem
-    private lateinit var store: FakeSettingsMmEntityStore
+    private lateinit var store: FakeEntityStore
 
     @Before
     fun setUp() {
@@ -42,7 +42,7 @@ class RadarrNamingViewModelTest {
             standardMovieFormat = "{Movie Title} ({Year})",
             movieFolderFormat = "{Movie Title}",
         )
-        store = FakeSettingsMmEntityStore()
+        store = FakeEntityStore()
     }
 
     @After

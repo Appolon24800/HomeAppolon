@@ -2,7 +2,6 @@ package dev.appolon.homelab.arr.api.sonarr
 
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
 import okhttp3.MediaType.Companion.toMediaType
 import dev.appolon.homelab.arr.net.ArrJson
 import okhttp3.mockwebserver.MockResponse

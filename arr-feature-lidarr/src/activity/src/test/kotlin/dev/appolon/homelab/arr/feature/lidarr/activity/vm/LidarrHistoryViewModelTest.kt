@@ -5,7 +5,7 @@ import dev.appolon.homelab.arr.api.lidarr.model.EntityHistoryEventType
 import dev.appolon.homelab.arr.api.lidarr.model.HistoryResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.lidarr.activity.FakeActivityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.lidarr.activity.data.LIDARR_ACTIVITY_PAGE_SIZE
 import dev.appolon.homelab.arr.feature.lidarr.activity.data.LidarrHistoryRepository
 import dev.appolon.homelab.arr.feature.lidarr.activity.logic.LidarrHistoryDateWindow
@@ -39,7 +39,7 @@ class LidarrHistoryViewModelTest {
     private val otherServer = ServerId("server-2")
     private val now: Instant = Instant.parse("2026-10-20T12:00:00Z")
     private lateinit var fake: FakeLidarrQueue
-    private lateinit var store: FakeActivityEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var actionQueue: ActionQueueImpl
     private val signals = MutableSharedFlow<ServerId>(extraBufferCapacity = 8)
 
@@ -75,7 +75,7 @@ class LidarrHistoryViewModelTest {
     @Before
     fun setUp() {
         fake = FakeLidarrQueue()
-        store = FakeActivityEntityStore()
+        store = FakeEntityStore()
         actionQueue = ActionQueueImpl(store)
     }
 

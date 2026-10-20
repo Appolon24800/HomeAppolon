@@ -22,7 +22,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.lidarr.library.data.WriteOutcome
 import dev.appolon.homelab.arr.feature.lidarr.settings.quality.FakeQualityActionQueue
-import dev.appolon.homelab.arr.feature.lidarr.settings.quality.FakeQualityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import java.io.IOException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -34,7 +34,7 @@ import org.junit.Test
 class LidarrQualityRepositoryTest {
 
     private val serverId = ServerId("s1")
-    private lateinit var store: FakeQualityEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeQualityActionQueue
     private lateinit var api: FakeLidarrCalendar
     private lateinit var repository: LidarrQualityRepository
@@ -42,7 +42,7 @@ class LidarrQualityRepositoryTest {
 
     @Before
     fun setUp() {
-        store = FakeQualityEntityStore()
+        store = FakeEntityStore()
         queue = FakeQualityActionQueue()
         api = FakeLidarrCalendar()
         repository = repository()

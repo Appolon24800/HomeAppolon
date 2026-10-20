@@ -8,7 +8,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.QueuedAction
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.radarr.activity.FakeActivityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.radarr.library.data.WriteOutcome
 import java.io.IOException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,7 +29,7 @@ class RadarrBlocklistRepositoryTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeRadarrQueue
-    private lateinit var store: FakeActivityEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var actionQueue: ActionQueueImpl
     private var fakeNow: () -> Long = { 1_000L }
 
@@ -56,7 +56,7 @@ class RadarrBlocklistRepositoryTest {
     @Before
     fun setUp() {
         fake = FakeRadarrQueue()
-        store = FakeActivityEntityStore()
+        store = FakeEntityStore()
         actionQueue = ActionQueueImpl(store)
         fakeNow = { 1_000L }
     }

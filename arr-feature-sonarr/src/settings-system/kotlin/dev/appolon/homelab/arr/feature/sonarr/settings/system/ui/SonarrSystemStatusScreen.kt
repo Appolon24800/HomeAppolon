@@ -19,8 +19,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,7 +39,6 @@ import dev.appolon.homelab.arr.api.sonarr.model.RuntimeMode
 import dev.appolon.homelab.arr.core.ArrTime
 import dev.appolon.homelab.arr.core.Humanize
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.feature.sonarr.settings.system.SonarrSettingsSystemClients
 import dev.appolon.homelab.arr.feature.sonarr.settings.system.data.SystemText
 import dev.appolon.homelab.arr.feature.sonarr.settings.system.vm.SonarrSystemStatusContent

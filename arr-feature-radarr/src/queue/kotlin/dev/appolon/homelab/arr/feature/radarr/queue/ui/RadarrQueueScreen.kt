@@ -43,7 +43,6 @@ import dev.appolon.homelab.arr.core.AppType
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.Humanize
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.feature.radarr.queue.RadarrQueueClients
 import dev.appolon.homelab.arr.feature.radarr.queue.RadarrQueueFeature
 import dev.appolon.homelab.arr.feature.radarr.queue.data.QueueRemoveOptions

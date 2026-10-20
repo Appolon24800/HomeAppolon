@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.api.sonarr.model.DownloadClientResource
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.SonarrConnectClients
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.vm.DownloadClientDraft
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.vm.DownloadClientEditorNotice

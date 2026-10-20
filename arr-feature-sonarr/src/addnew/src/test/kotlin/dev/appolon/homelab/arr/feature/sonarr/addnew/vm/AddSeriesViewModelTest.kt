@@ -4,7 +4,6 @@ import dev.appolon.homelab.arr.api.sonarr.FakeSonarrCalendar
 import dev.appolon.homelab.arr.api.sonarr.FakeSonarrDiscovery
 import dev.appolon.homelab.arr.api.sonarr.FakeSonarrLibrary
 import dev.appolon.homelab.arr.api.sonarr.FakeSonarrSystem
-import dev.appolon.homelab.arr.api.sonarr.model.ImportListExclusionResource
 import dev.appolon.homelab.arr.api.sonarr.model.ImportListResource
 import dev.appolon.homelab.arr.api.sonarr.model.LanguageProfileResource
 import dev.appolon.homelab.arr.api.sonarr.model.MonitorTypes

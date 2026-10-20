@@ -30,11 +30,11 @@ import dev.appolon.homelab.arr.feature.lidarr.queue.ui.LidarrQueueScreen
 import dev.appolon.homelab.arr.feature.lidarr.queue.vm.LidarrManualImportViewModel
 import dev.appolon.homelab.arr.feature.lidarr.queue.vm.LidarrQueueViewModel
 import dev.appolon.homelab.arr.net.ArrClientFactory
+import dev.appolon.homelab.arr.net.ArrCommandRunner
 import dev.appolon.homelab.arr.net.ArrJson
 import dev.appolon.homelab.arr.net.DefaultArrClientFactory
 import dev.appolon.homelab.arr.net.ServerEndpoint
 import dev.appolon.homelab.arr.net.TrustSpec
-import dev.appolon.homelab.arr.net.arrError
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.nav.ArrRoute
@@ -48,8 +48,6 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
@@ -342,44 +340,28 @@ fun LidarrManualImport(
  * Runs queue commands over a raw POST instead of the Retrofit `CommandApi`:
  * command payloads put selection fields like `downloadId`, `path`, and
  * `albumIds` at the JSON root, a shape the committed `CommandResource`
- * DTO cannot express. Wire path, auth, and prefix handling are identical to
- * every other call.
+ * DTO cannot express. The body is built here; the wire path, auth, and
+ * prefix handling are [ArrCommandRunner].
  */
 class OkHttpLidarrQueueCommandRunner(
-    private val client: OkHttpClient,
-    private val baseUrl: String,
+    client: OkHttpClient,
+    baseUrl: String,
 ) : QueueCommandRunner {
+
+    private val runner = ArrCommandRunner(client, baseUrl)
 
     override suspend fun run(
         name: String,
         downloadId: String?,
         path: String?,
         albumIds: List<Int>?,
-    ): ArrResult<Unit> = withContext(Dispatchers.IO) {
+    ): ArrResult<Unit> {
         val body = QueueCommandBody(
             name = name,
             downloadId = downloadId,
             path = path,
             albumIds = albumIds,
         ).encode(ArrJson)
-        val request = try {
-            Request.Builder()
-                .url(baseUrl.trimEnd('/') + "/api/v1/command")
-                .post(body.toRequestBody("application/json".toMediaType()))
-                .build()
-        } catch (t: Throwable) {
-            return@withContext ArrResult.err(t.arrError())
-        }
-        try {
-            client.newCall(request).execute().use { response ->
-                if (response.isSuccessful) {
-                    ArrResult.ok(Unit)
-                } else {
-                    ArrResult.err(response.arrError())
-                }
-            }
-        } catch (t: Throwable) {
-            ArrResult.err(t.arrError())
-        }
+        return withContext(Dispatchers.IO) { runner.post("/api/v1/command", body) }
     }
 }

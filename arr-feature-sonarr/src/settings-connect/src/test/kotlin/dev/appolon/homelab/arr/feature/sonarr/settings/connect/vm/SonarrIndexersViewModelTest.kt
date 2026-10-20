@@ -9,7 +9,7 @@ import dev.appolon.homelab.arr.api.sonarr.model.NotificationResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.FakeConnectActionQueue
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.FakeConnectCommandApi
-import dev.appolon.homelab.arr.feature.sonarr.settings.connect.FakeConnectEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.FakeConnectMetadataApi
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.FakeConnectTagApi
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.data.SonarrConnectRepository
@@ -36,7 +36,7 @@ class SonarrIndexersViewModelTest {
     private lateinit var tagApi: FakeConnectTagApi
     private lateinit var metadataApi: FakeConnectMetadataApi
     private lateinit var commandApi: FakeConnectCommandApi
-    private lateinit var store: FakeConnectEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeConnectActionQueue
 
     @Before
@@ -46,7 +46,7 @@ class SonarrIndexersViewModelTest {
         tagApi = FakeConnectTagApi()
         metadataApi = FakeConnectMetadataApi()
         commandApi = FakeConnectCommandApi()
-        store = FakeConnectEntityStore()
+        store = FakeEntityStore()
         queue = FakeConnectActionQueue()
     }
 

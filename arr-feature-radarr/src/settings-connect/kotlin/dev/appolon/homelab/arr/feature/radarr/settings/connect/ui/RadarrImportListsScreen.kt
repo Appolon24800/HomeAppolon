@@ -55,7 +55,6 @@ import dev.appolon.homelab.arr.feature.radarr.settings.connect.RadarrConnectClie
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.vm.ImportListsNotice
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.vm.RadarrImportListsContent
 import dev.appolon.homelab.arr.feature.radarr.settings.connect.vm.RadarrImportListsViewModel
-import dev.appolon.homelab.arr.ui.components.LabeledSwitch
 import dev.appolon.homelab.arr.ui.components.SectionHeader
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox

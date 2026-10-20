@@ -43,7 +43,6 @@ import dev.appolon.homelab.arr.feature.lidarr.settings.connect.data.LidarrConnec
 import dev.appolon.homelab.arr.feature.lidarr.settings.system.LidarrSettingsSystemClients
 import dev.appolon.homelab.arr.feature.lidarr.settings.system.vm.AutoTaggingConditionDraft
 import dev.appolon.homelab.arr.feature.lidarr.settings.system.vm.AutoTaggingDraft
-import dev.appolon.homelab.arr.feature.lidarr.settings.system.vm.AutoTaggingNotice
 import dev.appolon.homelab.arr.feature.lidarr.settings.system.vm.LidarrAutoTaggingEditorViewModel
 import dev.appolon.homelab.arr.ui.components.LabeledSwitch
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox

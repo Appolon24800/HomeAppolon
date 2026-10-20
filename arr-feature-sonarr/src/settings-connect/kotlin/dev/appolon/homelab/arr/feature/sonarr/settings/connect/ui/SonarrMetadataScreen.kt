@@ -17,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -40,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.api.sonarr.model.MetadataResource
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.SonarrConnectClients
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.vm.MetadataNotice
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.vm.SonarrMetadataViewModel

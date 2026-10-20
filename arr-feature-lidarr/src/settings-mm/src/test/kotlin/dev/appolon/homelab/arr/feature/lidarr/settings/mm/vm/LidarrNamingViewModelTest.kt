@@ -4,7 +4,7 @@ import dev.appolon.homelab.arr.api.lidarr.FakeLidarrSystem
 import dev.appolon.homelab.arr.api.lidarr.model.NamingConfigResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.lidarr.settings.mm.FakeSettingsMmEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.lidarr.settings.mm.data.LidarrMediaManagementRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
@@ -32,7 +32,7 @@ class LidarrNamingViewModelTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeLidarrSystem
-    private lateinit var store: FakeSettingsMmEntityStore
+    private lateinit var store: FakeEntityStore
 
     @Before
     fun setUp() {
@@ -44,7 +44,7 @@ class LidarrNamingViewModelTest {
             multiDiscTrackFormat = "{Artist Name} - {Album Title} - {Medium:00} - {Track:00} - {Track Title}",
             artistFolderFormat = "{Artist Name}",
         )
-        store = FakeSettingsMmEntityStore()
+        store = FakeEntityStore()
     }
 
     @After

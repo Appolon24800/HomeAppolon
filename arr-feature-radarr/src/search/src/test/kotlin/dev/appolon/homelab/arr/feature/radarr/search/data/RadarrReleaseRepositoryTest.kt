@@ -10,7 +10,7 @@ import dev.appolon.homelab.arr.api.radarr.model.Revision
 import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.feature.radarr.library.data.WriteOutcome
 import dev.appolon.homelab.arr.feature.radarr.search.FakeRadarrReleases
-import dev.appolon.homelab.arr.feature.radarr.search.FakeSearchEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
 import java.io.IOException
@@ -30,7 +30,7 @@ class RadarrReleaseRepositoryTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeRadarrReleases
-    private lateinit var store: FakeSearchEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var actionQueue: ActionQueueImpl
     private var nowMillis = 1_000L
 
@@ -73,7 +73,7 @@ class RadarrReleaseRepositoryTest {
     @Before
     fun setUp() {
         fake = FakeRadarrReleases()
-        store = FakeSearchEntityStore()
+        store = FakeEntityStore()
         store.clock = { nowMillis }
         actionQueue = ActionQueueImpl(store)
     }

@@ -44,7 +44,6 @@ import dev.appolon.homelab.arr.api.sonarr.model.Field
 import dev.appolon.homelab.arr.api.sonarr.model.SelectOption
 import dev.appolon.homelab.arr.api.sonarr.model.TagResource
 import dev.appolon.homelab.arr.core.ArrError
-import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.data.ConnectFieldRenderKind
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.data.SonarrConnectFieldForms
 import dev.appolon.homelab.arr.ui.components.LabeledSwitch

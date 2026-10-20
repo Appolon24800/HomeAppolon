@@ -8,7 +8,6 @@ import dev.appolon.homelab.arr.api.radarr.model.LogResource
 import dev.appolon.homelab.arr.api.radarr.model.TagDetailsResource
 import dev.appolon.homelab.arr.api.radarr.model.TagResource
 import dev.appolon.homelab.arr.api.radarr.model.TaskResource
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody

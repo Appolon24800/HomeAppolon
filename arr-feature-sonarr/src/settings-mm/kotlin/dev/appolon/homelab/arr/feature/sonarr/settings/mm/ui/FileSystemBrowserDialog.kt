@@ -36,7 +36,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.appolon.homelab.arr.core.ArrResult
-import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.feature.sonarr.settings.mm.data.FileSystemListing
 import dev.appolon.homelab.arr.feature.sonarr.settings.mm.data.SonarrFileSystemRepository
 import dev.appolon.homelab.arr.ui.lce.arrErrorMessage

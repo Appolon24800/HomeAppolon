@@ -2,12 +2,11 @@ package dev.appolon.homelab.arr.feature.lidarr.settings.quality.vm
 
 import dev.appolon.homelab.arr.api.lidarr.FakeLidarrCalendar
 import dev.appolon.homelab.arr.api.lidarr.model.Quality
-import dev.appolon.homelab.arr.api.lidarr.model.QualityDefinitionResource
 import dev.appolon.homelab.arr.api.lidarr.model.QualityProfileQualityItemResource
 import dev.appolon.homelab.arr.api.lidarr.model.QualityProfileResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.lidarr.settings.quality.FakeQualityActionQueue
-import dev.appolon.homelab.arr.feature.lidarr.settings.quality.FakeQualityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.lidarr.settings.quality.data.LidarrQualityRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
@@ -30,14 +29,14 @@ import org.junit.Test
 class LidarrQualityProfilesViewModelTest {
 
     private lateinit var api: FakeLidarrCalendar
-    private lateinit var store: FakeQualityEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeQualityActionQueue
     private var now: Long = 1_000_000L
 
     @Before
     fun setUp() {
         api = FakeLidarrCalendar()
-        store = FakeQualityEntityStore()
+        store = FakeEntityStore()
         queue = FakeQualityActionQueue()
     }
 

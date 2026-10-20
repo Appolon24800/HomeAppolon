@@ -4,9 +4,8 @@ import dev.appolon.homelab.arr.api.radarr.FakeRadarrCalendar
 import dev.appolon.homelab.arr.api.radarr.model.Quality
 import dev.appolon.homelab.arr.api.radarr.model.QualityDefinitionResource
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.radarr.library.data.WriteOutcome
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.FakeQualityActionQueue
-import dev.appolon.homelab.arr.feature.radarr.settings.quality.FakeQualityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.data.RadarrQualityRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
@@ -34,14 +33,14 @@ import org.junit.Test
 class RadarrQualityDefinitionsViewModelTest {
 
     private lateinit var api: FakeRadarrCalendar
-    private lateinit var store: FakeQualityEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeQualityActionQueue
     private var now: Long = 1_000_000L
 
     @Before
     fun setUp() {
         api = FakeRadarrCalendar()
-        store = FakeQualityEntityStore()
+        store = FakeEntityStore()
         queue = FakeQualityActionQueue()
     }
 

@@ -13,7 +13,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.radarr.library.data.WriteOutcome
 import dev.appolon.homelab.arr.feature.radarr.settings.system.FakeSystemActionQueue
-import dev.appolon.homelab.arr.feature.radarr.settings.system.FakeSystemEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import java.io.IOException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -28,7 +28,7 @@ import org.junit.Test
 class RadarrSettingsSystemRepositoryTest {
 
     private val serverId = ServerId("s1")
-    private lateinit var store: FakeSystemEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeSystemActionQueue
     private lateinit var api: FakeRadarrSystem
     private lateinit var commands: FakeRadarrQueue
@@ -37,7 +37,7 @@ class RadarrSettingsSystemRepositoryTest {
 
     @Before
     fun setUp() {
-        store = FakeSystemEntityStore()
+        store = FakeEntityStore()
         queue = FakeSystemActionQueue()
         api = FakeRadarrSystem()
         commands = FakeRadarrQueue()

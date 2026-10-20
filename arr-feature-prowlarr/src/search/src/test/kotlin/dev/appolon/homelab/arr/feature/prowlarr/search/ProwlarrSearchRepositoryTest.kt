@@ -26,11 +26,12 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 
 internal class SearchFixture {
     var now = 1_000_000L
     var io: CoroutineDispatcher = Dispatchers.Unconfined
-    val store = FakeSearchEntityStore().also { it.clock = { now } }
+    val store = FakeEntityStore().also { it.clock = { now } }
     val queue = ActionQueueImpl(store)
     val api = FakeProwlarrSearch()
     val indexers = FakeProwlarrIndexers()

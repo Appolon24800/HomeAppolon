@@ -5,7 +5,7 @@ import dev.appolon.homelab.arr.api.sonarr.FakeSonarrQueue
 import dev.appolon.homelab.arr.api.sonarr.FakeSonarrSystem
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.sonarr.settings.system.FakeSystemActionQueue
-import dev.appolon.homelab.arr.feature.sonarr.settings.system.FakeSystemEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.sonarr.settings.system.data.SonarrSettingsSystemRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,7 +14,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
@@ -27,7 +26,7 @@ import org.junit.Before
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class SonarrSettingsSystemVmTest {
     protected lateinit var api: FakeSonarrSystem
-    protected lateinit var store: FakeSystemEntityStore
+    protected lateinit var store: FakeEntityStore
     protected lateinit var queue: FakeSystemActionQueue
     protected lateinit var commands: FakeSonarrQueue
     protected var now: Long = 1_000_000L
@@ -35,7 +34,7 @@ abstract class SonarrSettingsSystemVmTest {
     @Before
     fun setUpHarness() {
         api = FakeSonarrSystem()
-        store = FakeSystemEntityStore()
+        store = FakeEntityStore()
         queue = FakeSystemActionQueue()
         commands = FakeSonarrQueue()
         store.clock = { now }

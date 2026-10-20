@@ -7,7 +7,7 @@ import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.sonarr.activity.FakeActivityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.sonarr.library.data.WriteOutcome
 import java.io.IOException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,7 +28,7 @@ class SonarrHistoryRepositoryTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeSonarrQueue
-    private lateinit var store: FakeActivityEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var actionQueue: ActionQueueImpl
     private var fakeNow: () -> Long = { 1_000L }
 
@@ -55,7 +55,7 @@ class SonarrHistoryRepositoryTest {
     @Before
     fun setUp() {
         fake = FakeSonarrQueue()
-        store = FakeActivityEntityStore()
+        store = FakeEntityStore()
         actionQueue = ActionQueueImpl(store)
         fakeNow = { 1_000L }
     }

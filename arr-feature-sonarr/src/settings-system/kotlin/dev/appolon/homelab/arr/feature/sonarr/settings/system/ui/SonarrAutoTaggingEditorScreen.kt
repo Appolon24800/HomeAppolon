@@ -38,14 +38,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.api.sonarr.model.AutoTaggingSpecificationSchema
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.data.ConnectFieldRenderKind
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.data.SonarrConnectFieldForms
 import dev.appolon.homelab.arr.feature.sonarr.settings.system.SonarrSettingsSystemClients
 import dev.appolon.homelab.arr.feature.sonarr.settings.system.data.SonarrAutoTaggingConditions
 import dev.appolon.homelab.arr.feature.sonarr.settings.system.vm.AutoTaggingConditionDraft
 import dev.appolon.homelab.arr.feature.sonarr.settings.system.vm.AutoTaggingDraft
-import dev.appolon.homelab.arr.feature.sonarr.settings.system.vm.AutoTaggingNotice
 import dev.appolon.homelab.arr.feature.sonarr.settings.system.vm.SonarrAutoTaggingEditorViewModel
 import dev.appolon.homelab.arr.ui.components.LabeledSwitch
 import dev.appolon.homelab.arr.ui.lce.ArrLceBox

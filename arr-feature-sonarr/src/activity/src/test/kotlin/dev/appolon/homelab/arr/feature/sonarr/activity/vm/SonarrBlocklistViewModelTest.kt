@@ -1,13 +1,12 @@
 package dev.appolon.homelab.arr.feature.sonarr.activity.vm
 
-import dev.appolon.homelab.arr.api.sonarr.model.EpisodeResource
 import dev.appolon.homelab.arr.api.sonarr.model.SeriesResource
 import dev.appolon.homelab.arr.api.sonarr.FakeSonarrQueue
 import dev.appolon.homelab.arr.api.sonarr.model.BlocklistResource
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.sonarr.activity.FakeActivityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.sonarr.activity.data.ACTIVITY_PAGE_SIZE
 import dev.appolon.homelab.arr.feature.sonarr.activity.data.SonarrBlocklistRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
@@ -26,8 +25,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -41,7 +38,7 @@ class SonarrBlocklistViewModelTest {
     private val serverId = ServerId("server-1")
     private val otherServer = ServerId("server-2")
     private lateinit var fake: FakeSonarrQueue
-    private lateinit var store: FakeActivityEntityStore
+    private lateinit var store: FakeEntityStore
     private val signals = MutableSharedFlow<ServerId>(extraBufferCapacity = 8)
 
     private fun viewModel(scheduler: kotlinx.coroutines.test.TestCoroutineScheduler): SonarrBlocklistViewModel =
@@ -69,7 +66,7 @@ class SonarrBlocklistViewModelTest {
     @Before
     fun setUp() {
         fake = FakeSonarrQueue()
-        store = FakeActivityEntityStore()
+        store = FakeEntityStore()
     }
 
     @After

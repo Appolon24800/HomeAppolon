@@ -1,6 +1,5 @@
 package dev.appolon.homelab.arr.feature.radarr.settings.quality.ui
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.api.radarr.model.LanguageResource
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.RadarrQualityClients
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.vm.RadarrLanguagesContent
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.vm.RadarrLanguagesViewModel

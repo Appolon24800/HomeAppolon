@@ -7,7 +7,7 @@ import dev.appolon.homelab.arr.api.radarr.model.QueueStatus
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.radarr.queue.FakeEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.radarr.queue.data.QueueRemoveOptions
 import dev.appolon.homelab.arr.feature.radarr.queue.data.RadarrQueueRepository
 import dev.appolon.homelab.arr.ui.lce.LceState

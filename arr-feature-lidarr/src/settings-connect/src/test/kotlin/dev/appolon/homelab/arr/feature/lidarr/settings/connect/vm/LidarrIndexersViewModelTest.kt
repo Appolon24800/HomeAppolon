@@ -9,7 +9,7 @@ import dev.appolon.homelab.arr.api.lidarr.model.IndexerResource
 import dev.appolon.homelab.arr.api.lidarr.model.RemotePathMappingResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.lidarr.settings.connect.FakeConnectActionQueue
-import dev.appolon.homelab.arr.feature.lidarr.settings.connect.FakeConnectEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.lidarr.settings.connect.connectRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,7 +31,7 @@ class LidarrIndexersViewModelTest {
     private lateinit var system: FakeLidarrSystem
     private lateinit var discovery: FakeLidarrDiscovery
     private lateinit var commandQueue: FakeLidarrQueue
-    private lateinit var store: FakeConnectEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var actionQueue: FakeConnectActionQueue
 
     @Before
@@ -39,7 +39,7 @@ class LidarrIndexersViewModelTest {
         system = FakeLidarrSystem()
         discovery = FakeLidarrDiscovery()
         commandQueue = FakeLidarrQueue()
-        store = FakeConnectEntityStore()
+        store = FakeEntityStore()
         actionQueue = FakeConnectActionQueue()
     }
 

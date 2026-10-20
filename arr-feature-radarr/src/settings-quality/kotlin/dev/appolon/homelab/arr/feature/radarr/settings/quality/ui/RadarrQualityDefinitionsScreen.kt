@@ -30,7 +30,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.radarr.R
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.RadarrQualityClients
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.data.RadarrQualityRepository
 import dev.appolon.homelab.arr.feature.radarr.settings.quality.vm.QualityDefinitionDraft

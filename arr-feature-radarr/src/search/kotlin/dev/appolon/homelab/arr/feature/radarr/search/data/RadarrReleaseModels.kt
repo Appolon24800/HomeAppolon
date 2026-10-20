@@ -3,7 +3,6 @@ package dev.appolon.homelab.arr.feature.radarr.search.data
 import dev.appolon.homelab.arr.api.radarr.model.CustomFormatResource
 import dev.appolon.homelab.arr.api.radarr.model.DownloadProtocol
 import dev.appolon.homelab.arr.api.radarr.model.Language
-import dev.appolon.homelab.arr.api.radarr.model.Quality
 import dev.appolon.homelab.arr.api.radarr.model.QualityModel
 import kotlinx.serialization.Serializable
 import retrofit2.http.Body

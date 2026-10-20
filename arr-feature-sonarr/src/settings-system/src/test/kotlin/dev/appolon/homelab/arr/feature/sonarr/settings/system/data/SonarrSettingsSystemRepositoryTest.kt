@@ -13,7 +13,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.sonarr.library.data.WriteOutcome
 import dev.appolon.homelab.arr.feature.sonarr.settings.system.FakeSystemActionQueue
-import dev.appolon.homelab.arr.feature.sonarr.settings.system.FakeSystemEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import java.io.IOException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -31,7 +31,7 @@ import retrofit2.HttpException
 class SonarrSettingsSystemRepositoryTest {
 
     private val serverId = ServerId("s1")
-    private lateinit var store: FakeSystemEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeSystemActionQueue
     private lateinit var api: FakeSonarrSystem
     private lateinit var commands: FakeSonarrQueue
@@ -40,7 +40,7 @@ class SonarrSettingsSystemRepositoryTest {
 
     @Before
     fun setUp() {
-        store = FakeSystemEntityStore()
+        store = FakeEntityStore()
         queue = FakeSystemActionQueue()
         api = FakeSonarrSystem()
         commands = FakeSonarrQueue()

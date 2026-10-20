@@ -6,7 +6,7 @@ import dev.appolon.homelab.arr.api.sonarr.model.RootFolderResource
 import dev.appolon.homelab.arr.api.sonarr.model.UnmappedFolder
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.sonarr.settings.mm.FakeSettingsMmEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.sonarr.settings.mm.data.SonarrRootFolderRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
@@ -31,7 +31,7 @@ class SonarrRootFoldersViewModelTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeSonarrSystem
-    private lateinit var store: FakeSettingsMmEntityStore
+    private lateinit var store: FakeEntityStore
 
     @Before
     fun setUp() {
@@ -48,7 +48,7 @@ class SonarrRootFoldersViewModelTest {
             ),
         )
         fake.diskSpace += DiskSpaceResource(path = "/tv", freeSpace = 25L, totalSpace = 100L)
-        store = FakeSettingsMmEntityStore()
+        store = FakeEntityStore()
     }
 
     @After

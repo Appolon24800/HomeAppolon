@@ -10,7 +10,7 @@ import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
 import dev.appolon.homelab.arr.feature.lidarr.library.data.WriteOutcome
-import dev.appolon.homelab.arr.feature.lidarr.search.FakeSearchEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -28,7 +28,7 @@ class LidarrReleaseRepositoryTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeLidarrQueue
-    private lateinit var store: FakeSearchEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var actionQueue: ActionQueueImpl
     private var nowMillis = 1_000L
     private var listCalls = 0
@@ -79,7 +79,7 @@ class LidarrReleaseRepositoryTest {
     fun setUp() {
         fake = FakeLidarrQueue()
         fake.latency = { operation -> if (operation == "getReleases") listCalls += 1 }
-        store = FakeSearchEntityStore()
+        store = FakeEntityStore()
         store.clock = { nowMillis }
         actionQueue = ActionQueueImpl(store)
     }

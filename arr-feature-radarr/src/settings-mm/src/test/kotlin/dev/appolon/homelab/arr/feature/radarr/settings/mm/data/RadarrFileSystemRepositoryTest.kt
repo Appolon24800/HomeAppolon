@@ -6,7 +6,6 @@ import dev.appolon.homelab.arr.api.radarr.model.FileSystemModel
 import dev.appolon.homelab.arr.api.radarr.model.FileSystemResult
 import dev.appolon.homelab.arr.core.ArrResult
 import java.io.IOException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest

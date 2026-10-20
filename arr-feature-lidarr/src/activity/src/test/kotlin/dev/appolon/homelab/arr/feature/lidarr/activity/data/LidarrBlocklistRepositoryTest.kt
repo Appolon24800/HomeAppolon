@@ -3,11 +3,10 @@ package dev.appolon.homelab.arr.feature.lidarr.activity.data
 import dev.appolon.homelab.arr.api.lidarr.FakeLidarrQueue
 import dev.appolon.homelab.arr.api.lidarr.model.BlocklistBulkResource
 import dev.appolon.homelab.arr.api.lidarr.model.BlocklistResource
-import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.lidarr.activity.FakeActivityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.lidarr.library.data.WriteOutcome
 import dev.appolon.homelab.arr.net.ArrJson
 import java.io.IOException
@@ -30,7 +29,7 @@ class LidarrBlocklistRepositoryTest {
 
     private val serverId = ServerId("server-1")
     private lateinit var fake: FakeLidarrQueue
-    private lateinit var store: FakeActivityEntityStore
+    private lateinit var store: FakeEntityStore
     private lateinit var actionQueue: ActionQueueImpl
     private var fakeNow: () -> Long = { 1_000L }
 
@@ -56,7 +55,7 @@ class LidarrBlocklistRepositoryTest {
     @Before
     fun setUp() {
         fake = FakeLidarrQueue()
-        store = FakeActivityEntityStore()
+        store = FakeEntityStore()
         actionQueue = ActionQueueImpl(store)
         fakeNow = { 1_000L }
     }

@@ -5,7 +5,7 @@ import dev.appolon.homelab.arr.api.radarr.model.Language
 import dev.appolon.homelab.arr.api.radarr.model.Quality
 import dev.appolon.homelab.arr.api.radarr.model.QualityModel
 import dev.appolon.homelab.arr.feature.radarr.search.FakeRadarrReleases
-import dev.appolon.homelab.arr.feature.radarr.search.FakeSearchEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.radarr.search.data.RadarrReleaseRepository
 import dev.appolon.homelab.arr.feature.radarr.search.data.RadarrReleaseResource
 import dev.appolon.homelab.arr.feature.radarr.search.data.ReleaseSort
@@ -30,7 +30,7 @@ class ReleaseListViewModelTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
     private val fake = FakeRadarrReleases()
-    private val store = FakeSearchEntityStore()
+    private val store = FakeEntityStore()
     private val actionQueue = ActionQueueImpl(store)
     private val repository = RadarrReleaseRepository(
         serverId = ServerId("server-1"),

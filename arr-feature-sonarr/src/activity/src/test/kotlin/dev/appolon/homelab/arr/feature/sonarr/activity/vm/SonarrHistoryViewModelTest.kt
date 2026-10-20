@@ -8,7 +8,7 @@ import dev.appolon.homelab.arr.api.sonarr.model.HistoryResource
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.store.ActionQueueImpl
-import dev.appolon.homelab.arr.feature.sonarr.activity.FakeActivityEntityStore
+import dev.appolon.homelab.arr.data.testing.FakeEntityStore
 import dev.appolon.homelab.arr.feature.sonarr.activity.data.ACTIVITY_PAGE_SIZE
 import dev.appolon.homelab.arr.feature.sonarr.activity.data.SonarrHistoryRepository
 import dev.appolon.homelab.arr.feature.sonarr.activity.logic.HistoryDateWindow
@@ -29,8 +29,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -45,7 +43,7 @@ class SonarrHistoryViewModelTest {
     private val otherServer = ServerId("server-2")
     private val now: Instant = Instant.parse("2026-10-20T12:00:00Z")
     private lateinit var fake: FakeSonarrQueue
-    private lateinit var store: FakeActivityEntityStore
+    private lateinit var store: FakeEntityStore
     private val signals = MutableSharedFlow<ServerId>(extraBufferCapacity = 8)
 
     private fun viewModel(scheduler: kotlinx.coroutines.test.TestCoroutineScheduler): SonarrHistoryViewModel =
@@ -81,7 +79,7 @@ class SonarrHistoryViewModelTest {
     @Before
     fun setUp() {
         fake = FakeSonarrQueue()
-        store = FakeActivityEntityStore()
+        store = FakeEntityStore()
     }
 
     @After

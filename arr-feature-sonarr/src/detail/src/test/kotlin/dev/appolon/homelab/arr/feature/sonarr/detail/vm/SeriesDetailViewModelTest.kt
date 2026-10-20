@@ -21,7 +21,6 @@ import dev.appolon.homelab.arr.api.sonarr.model.TagResource
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.sonarr.detail.data.SonarrCommandBodies
 import dev.appolon.homelab.arr.feature.sonarr.detail.data.SonarrSeriesDetailRepository
 import dev.appolon.homelab.arr.feature.sonarr.library.FakeActionQueue
 import dev.appolon.homelab.arr.feature.sonarr.library.FakeEntityStore
@@ -37,8 +36,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

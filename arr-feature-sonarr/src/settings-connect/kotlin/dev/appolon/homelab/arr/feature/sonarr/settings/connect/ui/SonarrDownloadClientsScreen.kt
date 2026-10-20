@@ -48,7 +48,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.api.sonarr.model.DownloadClientConfigResource
 import dev.appolon.homelab.arr.api.sonarr.model.DownloadClientResource
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.feature.sonarr.R
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.SonarrConnectClients
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.vm.DownloadClientsNotice
 import dev.appolon.homelab.arr.feature.sonarr.settings.connect.vm.SonarrDownloadClientsContent
