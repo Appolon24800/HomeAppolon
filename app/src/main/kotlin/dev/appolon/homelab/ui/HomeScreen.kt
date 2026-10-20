@@ -43,6 +43,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -58,6 +59,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.appolon.homelab.arr.ArrHost
+import dev.appolon.homelab.arr.ArrIntegration
+import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.data.HomeUiState
 import dev.appolon.homelab.data.Favorites
 import dev.appolon.homelab.data.ServiceItem
@@ -80,6 +84,7 @@ import dev.appolon.homelab.ui.theme.ThemeSource
 import dev.appolon.homelab.ui.theme.contrastOn
 import dev.appolon.homelab.ui.theme.homerHeaderTextColor
 import dev.appolon.homelab.ui.theme.parseHexColor
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -92,6 +97,21 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
         val root = dev.appolon.homelab.data.Homer.BASE_URL.trimEnd('/')
         if (!externalUrl.isNullOrBlank() && externalUrl.trimEnd('/') != root) {
             vm.openWeb(externalUrl, null)
+        }
+    }
+
+    // Arr notification channels and the arr data graph exist from the first
+    // frame so a service tap resolves without a cold registry read.
+    LaunchedEffect(Unit) { ArrIntegration.onAppStart(context) }
+
+    // Native *arr screens: a service that maps to a configured server opens
+    // the arr shell; every other URL keeps the WebView path unchanged.
+    var arrServer by remember { mutableStateOf<ServerId?>(null) }
+    val arrScope = rememberCoroutineScope()
+    val openService: (String, String?) -> Unit = { url, name ->
+        arrScope.launch {
+            val serverId = ArrIntegration.openFor(context, url)
+            if (serverId != null) arrServer = serverId else vm.openWeb(url, name)
         }
     }
 
@@ -117,7 +137,12 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
         // Full-screen overlays animate: pages slide horizontally (forward in
         // from the right, back out to the right), the sign-in sheet slides up.
         Box(Modifier.fillMaxSize()) {
-            HomeScreenBody(state = state, vm = vm, homerBarActive = homerBarActive)
+            HomeScreenBody(
+                state = state,
+                vm = vm,
+                homerBarActive = homerBarActive,
+                onServiceClick = openService,
+            )
             if (state.accountSheetOpen) {
                 AccountSheet(state = state, vm = vm)
             }
@@ -170,13 +195,33 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
                     )
                 }
             }
+
+            // Native arr shell overlay. Back at the shell's root exits here;
+            // the last-target dance mirrors the WebView overlay above so the
+            // exit animation still has a screen to slide out.
+            var lastArrServer by remember { mutableStateOf<ServerId?>(null) }
+            androidx.compose.runtime.SideEffect { arrServer?.let { lastArrServer = it } }
+            AnimatedVisibility(
+                visible = arrServer != null,
+                enter = slideInHorizontally(tween(enterMillis)) { it } + fadeIn(tween(enterMillis)),
+                exit = slideOutHorizontally(tween(exitMillis)) { it } + fadeOut(tween(exitMillis)),
+            ) {
+                lastArrServer?.let { serverId ->
+                    ArrHost(serverId = serverId, onExit = { arrServer = null })
+                }
+            }
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-private fun HomeScreenBody(state: HomeUiState, vm: HomeViewModel, homerBarActive: Boolean) {
+private fun HomeScreenBody(
+    state: HomeUiState,
+    vm: HomeViewModel,
+    homerBarActive: Boolean,
+    onServiceClick: (String, String?) -> Unit,
+) {
     val context = LocalContext.current
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -220,7 +265,7 @@ private fun HomeScreenBody(state: HomeUiState, vm: HomeViewModel, homerBarActive
                 state = state,
                 contentPadding = padding,
                 onRefresh = { vm.load(showSpinner = true) },
-                onServiceClick = { url, name -> vm.openWeb(url, name) },
+                onServiceClick = onServiceClick,
                 onToggleFavorite = vm::toggleFavorite,
             )
         }

@@ -90,6 +90,20 @@ dependencies {
     implementation(libs.coil.svg)
     implementation(libs.zxing.core)
 
+    // Native *arr client: dashboard integration hosts the arr shell and its
+    // shared data/network/sync modules plus the five app feature bundles.
+    implementation(project(":arr-core"))
+    implementation(project(":arr-net"))
+    implementation(project(":arr-data"))
+    implementation(project(":arr-ui-core"))
+    implementation(project(":arr-feature-servers"))
+    implementation(project(":arr-feature-radarr"))
+    implementation(project(":arr-feature-sonarr"))
+    implementation(project(":arr-feature-lidarr"))
+    implementation(project(":arr-feature-prowlarr"))
+    implementation(project(":arr-feature-bazarr"))
+    implementation(project(":arr-sync"))
+
     testImplementation(libs.junit)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
