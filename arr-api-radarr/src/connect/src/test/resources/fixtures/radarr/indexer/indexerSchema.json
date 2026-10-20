@@ -1,0 +1,103 @@
+[
+  {
+    "id": 0,
+    "name": "Prowlarr",
+    "fields": [
+      {
+        "order": 1,
+        "name": "host",
+        "label": "Host",
+        "unit": null,
+        "helpText": "Host of the download client",
+        "helpTextWarning": null,
+        "helpLink": null,
+        "value": "string",
+        "type": "textbox",
+        "advanced": false,
+        "selectOptions": null,
+        "selectOptionsProviderAction": null,
+        "section": null,
+        "hidden": null,
+        "privacy": "normal",
+        "placeholder": null,
+        "isFloat": false
+      },
+      {
+        "order": 2,
+        "name": "category",
+        "label": "Category",
+        "unit": null,
+        "helpText": "Category to use",
+        "helpTextWarning": null,
+        "helpLink": null,
+        "value": 0,
+        "type": "select",
+        "advanced": false,
+        "selectOptions": [
+          {
+            "value": 0,
+            "name": "string",
+            "order": 1,
+            "hint": null,
+            "dividerAfter": false
+          },
+          {
+            "value": 1,
+            "name": "movies",
+            "order": 2,
+            "hint": null,
+            "dividerAfter": false
+          }
+        ],
+        "selectOptionsProviderAction": null,
+        "section": null,
+        "hidden": "visible",
+        "privacy": "normal",
+        "placeholder": null,
+        "isFloat": false
+      }
+    ],
+    "implementationName": "Prowlarr",
+    "implementation": "ProwlarrProxy",
+    "configContract": "ProwlarrSettings",
+    "infoLink": "string",
+    "message": {
+      "message": null,
+      "type": "info"
+    },
+    "tags": [],
+    "presets": [
+      {
+        "id": 0,
+        "name": "Prowlarr",
+        "fields": null,
+        "implementationName": null,
+        "implementation": null,
+        "configContract": null,
+        "infoLink": null,
+        "message": {
+          "message": null,
+          "type": "info"
+        },
+        "tags": null,
+        "presets": null,
+        "enableRss": false,
+        "enableAutomaticSearch": false,
+        "enableInteractiveSearch": false,
+        "supportsRss": false,
+        "supportsSearch": false,
+        "protocol": "unknown",
+        "priority": 0,
+        "downloadClientId": 0
+      }
+    ],
+    "enableRss": false,
+    "enableAutomaticSearch": false,
+    "enableInteractiveSearch": false,
+    "supportsRss": true,
+    "supportsSearch": true,
+    "protocol": "torrent",
+    "priority": 0,
+    "downloadClientId": 0
+  }
+]

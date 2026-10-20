@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "Sabnzbd",
+    "fields": null,
+    "implementationName": null,
+    "implementation": null,
+    "configContract": null,
+    "infoLink": null,
+    "message": {
+      "message": null,
+      "type": "info"
+    },
+    "tags": null,
+    "presets": null,
+    "enable": false,
+    "protocol": "unknown",
+    "priority": 2,
+    "removeCompletedDownloads": false,
+    "removeFailedDownloads": false
+  }
+]
