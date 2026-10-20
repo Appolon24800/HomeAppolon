@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Calendar screen -->
+    <string name="arr_radarr_calendar_title">Calendar</string>
+    <string name="arr_radarr_calendar_cd_previous_month">Previous month</string>
+    <string name="arr_radarr_calendar_cd_next_month">Next month</string>
+    <string name="arr_radarr_calendar_cd_today">Jump to today</string>
+    <string name="arr_radarr_calendar_view_month">Month</string>
+    <string name="arr_radarr_calendar_view_agenda">Agenda</string>
+    <string name="arr_radarr_calendar_unmonitored">Unmonitored</string>
+    <string name="arr_radarr_calendar_empty_title">Nothing on the calendar</string>
+    <string name="arr_radarr_calendar_empty_message">Movies you add to Radarr will show their releases here.</string>
+    <string name="arr_radarr_calendar_month_empty">No releases this month.</string>
+    <string name="arr_radarr_calendar_day_empty">No releases on this day.</string>
+    <string name="arr_radarr_calendar_day_hint">Tap a day to see its releases.</string>
+    <string name="arr_radarr_calendar_agenda_empty">No upcoming releases.</string>
+    <string name="arr_radarr_calendar_cd_day">%1$s, %2$s</string>
+    <string name="arr_radarr_calendar_availability_announced">Announced</string>
+    <string name="arr_radarr_calendar_availability_in_cinemas">In cinemas</string>
+    <string name="arr_radarr_calendar_availability_released">Released</string>
+    <string name="arr_radarr_calendar_event_in_cinemas">In cinemas</string>
+    <string name="arr_radarr_calendar_event_physical">Physical release</string>
+    <string name="arr_radarr_calendar_event_digital">Digital release</string>
+    <string name="arr_radarr_calendar_event_release">Release</string>
+    <string name="arr_radarr_calendar_entry_subtitle">%1$s · %2$s · %3$s</string>
+    <string name="arr_radarr_calendar_cd_monitored">Monitored</string>
+    <string name="arr_radarr_calendar_cd_downloaded">Downloaded</string>
+    <string name="arr_radarr_calendar_cd_poster">Poster of %1$s</string>
+    <string name="arr_radarr_calendar_upcoming_count">%1$d upcoming this week</string>
+    <plurals name="arr_radarr_calendar_releases_count">
+        <item quantity="one">%d release</item>
+        <item quantity="other">%d releases</item>
+    </plurals>
+</resources>
