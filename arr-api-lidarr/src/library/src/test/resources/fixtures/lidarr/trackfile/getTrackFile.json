@@ -1,0 +1,132 @@
+{
+  "id": 1,
+  "artistId": 1,
+  "albumId": 1,
+  "path": null,
+  "size": 1,
+  "dateAdded": "2026-01-01T00:00:00Z",
+  "sceneName": null,
+  "releaseGroup": null,
+  "quality": {
+    "quality": {
+      "id": 1,
+      "name": null
+    },
+    "revision": {
+      "version": 1,
+      "real": 1,
+      "isRepack": false
+    }
+  },
+  "qualityWeight": 1,
+  "customFormats": [
+    {
+      "id": 1,
+      "name": null,
+      "includeCustomFormatWhenRenaming": null,
+      "specifications": [
+        {
+          "id": 1,
+          "name": null,
+          "implementation": null,
+          "implementationName": null,
+          "infoLink": null,
+          "negate": false,
+          "required": false,
+          "fields": [
+            {
+              "order": 1,
+              "name": null,
+              "label": null,
+              "unit": null,
+              "helpText": null,
+              "helpTextWarning": null,
+              "helpLink": null,
+              "value": null,
+              "type": null,
+              "advanced": false,
+              "selectOptions": [
+                {
+                  "value": 1,
+                  "name": null,
+                  "order": 1,
+                  "hint": null
+                }
+              ],
+              "selectOptionsProviderAction": null,
+              "section": null,
+              "hidden": null,
+              "privacy": "normal",
+              "placeholder": null,
+              "isFloat": false
+            }
+          ],
+          "presets": [
+            {}
+          ]
+        }
+      ]
+    }
+  ],
+  "customFormatScore": 1,
+  "indexerFlags": null,
+  "mediaInfo": {
+    "id": 1,
+    "audioChannels": 1.0,
+    "audioBitRate": null,
+    "audioCodec": null,
+    "audioBits": null,
+    "audioSampleRate": null
+  },
+  "qualityCutoffNotMet": false,
+  "audioTags": {
+    "title": null,
+    "cleanTitle": null,
+    "artistTitle": null,
+    "albumTitle": null,
+    "artistTitleInfo": {
+      "title": null,
+      "titleWithoutYear": null,
+      "year": 1
+    },
+    "artistMBId": null,
+    "albumMBId": null,
+    "releaseMBId": null,
+    "recordingMBId": null,
+    "trackMBId": null,
+    "discNumber": 1,
+    "discCount": 1,
+    "country": {
+      "twoLetterCode": null,
+      "name": null
+    },
+    "year": 1,
+    "label": null,
+    "catalogNumber": null,
+    "disambiguation": null,
+    "duration": "00:00:01",
+    "quality": {
+      "quality": {
+        "id": 1,
+        "name": null
+      },
+      "revision": {
+        "version": 1,
+        "real": 1,
+        "isRepack": false
+      }
+    },
+    "mediaInfo": {
+      "audioFormat": null,
+      "audioBitrate": 1,
+      "audioChannels": 1,
+      "audioBits": 1,
+      "audioSampleRate": 1
+    },
+    "trackNumbers": [
+      1
+    ],
+    "releaseGroup": null,
+    "releaseHash": null
+  }
+}
