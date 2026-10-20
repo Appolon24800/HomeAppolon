@@ -1,0 +1,23 @@
+{
+  "page": 1,
+  "pageSize": 10,
+  "sortKey": "title",
+  "sortDirection": "ascending",
+  "totalRecords": 1,
+  "records": [{
+    "id": 1, "artistId": 2, "albumId": 3,
+    "artist": {"id": 2, "artistName": "string"},
+    "album": {"id": 3, "title": "string"},
+    "quality": {"quality": {"id": 1, "name": "string"}},
+    "customFormats": [], "customFormatScore": 0, "size": 1024.5,
+    "title": "string", "sizeleft": 512.25, "timeleft": "00:01:00",
+    "estimatedCompletionTime": "2026-01-01T00:01:00Z",
+    "added": "2026-01-01T00:00:00Z", "status": "downloading",
+    "trackedDownloadStatus": "warning", "trackedDownloadState": "importPending",
+    "statusMessages": [{"title": "string", "messages": ["string"]}],
+    "errorMessage": null, "downloadId": "string", "protocol": "torrent",
+    "downloadClient": "string", "downloadClientHasPostImportCategory": false,
+    "indexer": "string", "outputPath": "string", "trackFileCount": 1,
+    "trackHasFileCount": 0, "downloadForced": false
+  }]
+}

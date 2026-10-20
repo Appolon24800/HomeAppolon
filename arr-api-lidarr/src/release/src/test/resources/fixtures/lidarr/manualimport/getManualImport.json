@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1, "path": "string", "name": "string", "size": 4294967296,
+    "artist": {"id": 2}, "album": {"id": 3}, "albumReleaseId": 4,
+    "tracks": [{"id": 5}], "quality": {}, "releaseGroup": "string",
+    "qualityWeight": 0, "downloadId": "string", "indexerFlags": 0,
+    "rejections": [{"reason": "string", "type": "temporary"}],
+    "audioTags": {}, "additionalFile": false, "replaceExistingFiles": true,
+    "disableReleaseSwitching": false
+  }
+]

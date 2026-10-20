@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1, "artistId": 2, "albumId": 3,
+    "quality": {}, "customFormatScore": 0, "size": 1024.5, "sizeleft": 512.25,
+    "title": "string", "trackedDownloadStatus": "ok",
+    "trackedDownloadState": "downloading", "protocol": "usenet",
+    "downloadClientHasPostImportCategory": false, "trackFileCount": 0,
+    "trackHasFileCount": 0, "downloadForced": false
+  }
+]
