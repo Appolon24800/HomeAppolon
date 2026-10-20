@@ -36,6 +36,6 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(project(":arr-core"))
     testImplementation(libs.junit)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.ui.tooling.preview)
 }
