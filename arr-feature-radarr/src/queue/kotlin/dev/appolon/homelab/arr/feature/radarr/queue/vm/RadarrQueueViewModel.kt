@@ -2,11 +2,14 @@ package dev.appolon.homelab.arr.feature.radarr.queue.vm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.appolon.homelab.arr.api.radarr.model.QueueResource
+import dev.appolon.homelab.arr.api.radarr.model.QueueStatusResource
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.radarr.queue.data.QueueRemoveOptions
 import dev.appolon.homelab.arr.feature.radarr.queue.data.QueueWriteOutcome
+import dev.appolon.homelab.arr.feature.radarr.queue.data.QueuedQueueWrites
 import dev.appolon.homelab.arr.feature.radarr.queue.data.RadarrQueueRepository
 import dev.appolon.homelab.arr.feature.radarr.queue.logic.QueuePresenters
 import dev.appolon.homelab.arr.feature.radarr.queue.logic.RadarrQueueFilter
@@ -18,7 +21,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -72,11 +74,14 @@ class RadarrQueueViewModel(
         val queueEmpty: Boolean get() = allItems.isEmpty()
     }
 
-    private data class ContentSeed(
-        val items: List<RadarrQueueItemUi>,
-        val overview: RadarrQueueOverview,
-        val pending: Int,
+    private data class Snapshots(
+        val items: List<QueueResource> = emptyList(),
+        val status: QueueStatusResource? = null,
+        val writes: QueuedQueueWrites = QueuedQueueWrites(),
+        val pending: Int = 0,
     )
+
+    private var snapshots = Snapshots()
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
@@ -105,27 +110,32 @@ class RadarrQueueViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     init {
+        // Four independent single-flow collectors instead of one combine:
+        // each store-backed flow re-emits reliably on its own, and the folded
+        // snapshot keeps every permutation consistent regardless of the order
+        // the emissions interleave.
         viewModelScope.launch {
-            combine(
-                repository.observeItems(),
-                repository.observeStatus(),
-                repository.queuedWrites(),
-                repository.queuedCount(),
-            ) { items, status, writes, pending ->
-                ContentSeed(
-                    items = QueuePresenters.present(items, writes.queuedItemIds(items)),
-                    overview = QueuePresenters.overviewOf(items, status),
-                    pending = pending,
-                )
-            }.collect { seed ->
-                _state.update { s ->
-                    s.copy(
-                        loaded = true,
-                        allItems = seed.items,
-                        overview = seed.overview,
-                        pendingActions = seed.pending,
-                    )
-                }
+            repository.observeItems().collect {
+                snapshots = snapshots.copy(items = it)
+                publishSnapshots()
+            }
+        }
+        viewModelScope.launch {
+            repository.observeStatus().collect {
+                snapshots = snapshots.copy(status = it)
+                publishSnapshots()
+            }
+        }
+        viewModelScope.launch {
+            repository.queuedWrites().collect {
+                snapshots = snapshots.copy(writes = it)
+                publishSnapshots()
+            }
+        }
+        viewModelScope.launch {
+            repository.queuedCount().collect {
+                snapshots = snapshots.copy(pending = it)
+                publishSnapshots()
             }
         }
         refresh()
@@ -135,6 +145,21 @@ class RadarrQueueViewModel(
                 .filter { it == serverId }
                 .debounce(LIVE_REFRESH_DEBOUNCE_MILLIS)
                 .collect { refresh() }
+        }
+    }
+
+    private fun publishSnapshots() {
+        val current = snapshots
+        _state.update { s ->
+            s.copy(
+                loaded = true,
+                allItems = QueuePresenters.present(
+                    current.items,
+                    current.writes.queuedItemIds(current.items),
+                ),
+                overview = QueuePresenters.overviewOf(current.items, current.status),
+                pendingActions = current.pending,
+            )
         }
     }
 

@@ -106,17 +106,8 @@ class FakeEntityStore(
         type: EntityType,
         serializer: KSerializer<T>,
     ): Flow<List<T>> = tick.onStart { emit(Unit) }
-        .map {
-            if (DEBUG) println("DBG store tick type=${type.value} thread=${Thread.currentThread().name}")
-            getAll(serverId, type, serializer).also {
-                if (DEBUG) println("DBG store read type=${type.value} size=${it.size}")
-            }
-        }
+        .map { getAll(serverId, type, serializer) }
         .distinctUntilChanged()
-
-    companion object {
-        var DEBUG = false
-    }
 
     private fun snapshot(serverId: ServerId, type: EntityType): List<Row> =
         rows.filter { it.serverId == serverId.value && it.type == type.value }.toList()

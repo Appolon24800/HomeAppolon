@@ -60,7 +60,7 @@ class ManualImportViewModelTest {
         downloadId: String? = "dl-1",
     ) = ManualImportResource(
         id = id,
-        path = "/media/$id.mkv",
+        path = "/movies/$id.mkv",
         relativePath = "$id.mkv",
         downloadId = downloadId,
         movie = movie,
@@ -165,7 +165,7 @@ class ManualImportViewModelTest {
         val vm = ManualImportViewModel(repository(testScheduler), downloadId = null, outputPath = null)
         vm.state.collectWhileActive(this)
         advanceUntilIdle()
-        vm.loadFolderItems("/media")
+        vm.loadFolderItems("/movies")
         advanceUntilIdle()
         assertEquals(1, vm.state.value.items.size)
 
