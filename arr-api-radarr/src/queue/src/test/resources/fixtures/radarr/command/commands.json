@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "name": null,
+    "commandName": null,
+    "message": null,
+    "body": {
+      "sendUpdatesToClient": false,
+      "updateScheduledTask": false,
+      "completionMessage": null,
+      "requiresDiskAccess": false,
+      "isExclusive": false,
+      "isTypeExclusive": false,
+      "isLongRunning": false,
+      "name": null,
+      "lastExecutionTime": null,
+      "lastStartTime": null,
+      "trigger": "unspecified",
+      "suppressMessages": false,
+      "clientUserAgent": null
+    },
+    "priority": "normal",
+    "status": "queued",
+    "result": "unknown",
+    "queued": "2026-01-01T00:00:00Z",
+    "started": null,
+    "ended": null,
+    "duration": null,
+    "exception": null,
+    "trigger": "unspecified",
+    "clientUserAgent": null,
+    "stateChangeTime": null,
+    "sendUpdatesToClient": false,
+    "updateScheduledTask": false,
+    "lastExecutionTime": null
+  }
+]
