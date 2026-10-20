@@ -1,0 +1,20 @@
+{
+  "id": 2,
+  "seriesId": 10,
+  "tvdbId": 301234,
+  "episodeFileId": 0,
+  "seasonNumber": 1,
+  "episodeNumber": 5,
+  "title": "Upcoming Episode",
+  "airDate": "2026-01-18",
+  "airDateUtc": "2026-01-18T05:30:00Z",
+  "runtime": 45,
+  "finaleType": null,
+  "overview": "An episode that has not aired yet.",
+  "hasFile": false,
+  "monitored": true,
+  "absoluteEpisodeNumber": 5,
+  "unverifiedSceneNumbering": false,
+  "series": {},
+  "images": null
+}

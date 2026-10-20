@@ -1,0 +1,60 @@
+{
+  "id": 0,
+  "name": null,
+  "upgradeAllowed": true,
+  "cutoff": 0,
+  "items": [
+    {
+      "id": 1,
+      "name": "SDTV",
+      "quality": {
+        "id": 1,
+        "name": "SDTV",
+        "source": "television",
+        "resolution": 480
+      },
+      "items": null,
+      "allowed": false,
+      "minSize": null,
+      "maxSize": null,
+      "preferredSize": null
+    },
+    {
+      "id": 2,
+      "name": "WEB 480p",
+      "quality": null,
+      "items": [
+        {
+          "id": 3,
+          "name": "WEBRip-480p",
+          "quality": {
+            "id": 4,
+            "name": "WEBRip-480p",
+            "source": "webRip",
+            "resolution": 480
+          },
+          "items": null,
+          "allowed": false,
+          "minSize": null,
+          "maxSize": null,
+          "preferredSize": null
+        }
+      ],
+      "allowed": false,
+      "minSize": null,
+      "maxSize": null,
+      "preferredSize": null
+    }
+  ],
+  "minFormatScore": 0,
+  "cutoffFormatScore": 0,
+  "minUpgradeFormatScore": 1,
+  "formatItems": [
+    {
+      "id": 1,
+      "format": 1,
+      "name": "Surround Sound",
+      "score": 0
+    }
+  ]
+}

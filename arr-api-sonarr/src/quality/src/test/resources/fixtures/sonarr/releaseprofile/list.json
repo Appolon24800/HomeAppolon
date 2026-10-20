@@ -1,0 +1,28 @@
+[
+  {
+    "id": 1,
+    "name": "Prefer season packs",
+    "enabled": true,
+    "required": "season,pack",
+    "ignored": "internal",
+    "airDateRestriction": false,
+    "airDateGracePeriod": 0,
+    "allowSeasonPackWithoutAllEpisodesAired": false,
+    "indexerId": 0,
+    "tags": [1],
+    "excludedTags": null
+  },
+  {
+    "id": 2,
+    "name": "Avoid repacks and propers",
+    "enabled": false,
+    "required": null,
+    "ignored": ["repack", "proper"],
+    "airDateRestriction": true,
+    "airDateGracePeriod": 12,
+    "allowSeasonPackWithoutAllEpisodesAired": true,
+    "indexerId": 5,
+    "tags": null,
+    "excludedTags": [2, 3]
+  }
+]

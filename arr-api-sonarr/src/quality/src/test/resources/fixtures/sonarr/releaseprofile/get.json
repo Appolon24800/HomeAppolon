@@ -1,0 +1,13 @@
+{
+  "id": 1,
+  "name": "Prefer season packs",
+  "enabled": true,
+  "required": "season,pack",
+  "ignored": "internal",
+  "airDateRestriction": false,
+  "airDateGracePeriod": 0,
+  "allowSeasonPackWithoutAllEpisodesAired": false,
+  "indexerId": 0,
+  "tags": [1],
+  "excludedTags": null
+}

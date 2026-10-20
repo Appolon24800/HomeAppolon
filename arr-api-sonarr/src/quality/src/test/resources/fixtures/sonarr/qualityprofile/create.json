@@ -1,0 +1,27 @@
+{
+  "id": 7,
+  "name": "1080p Only",
+  "upgradeAllowed": false,
+  "cutoff": 9,
+  "items": [
+    {
+      "id": 1,
+      "name": "HDTV-1080p",
+      "quality": {
+        "id": 9,
+        "name": "HDTV-1080p",
+        "source": "television",
+        "resolution": 1080
+      },
+      "items": null,
+      "allowed": true,
+      "minSize": null,
+      "maxSize": null,
+      "preferredSize": null
+    }
+  ],
+  "minFormatScore": 0,
+  "cutoffFormatScore": 0,
+  "minUpgradeFormatScore": 1,
+  "formatItems": []
+}

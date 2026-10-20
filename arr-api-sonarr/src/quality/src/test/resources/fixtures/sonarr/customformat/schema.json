@@ -1,0 +1,55 @@
+[
+  {
+    "id": 0,
+    "name": null,
+    "implementation": "ReleaseSpecification",
+    "implementationName": "Release",
+    "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats",
+    "negate": false,
+    "required": false,
+    "fields": [
+      {
+        "order": 0,
+        "name": "value",
+        "label": "Regular Expression",
+        "helpText": "Release Token to match against",
+        "value": "",
+        "type": "textbox",
+        "advanced": false,
+        "privacy": "normal",
+        "isFloat": false
+      }
+    ],
+    "presets": []
+  },
+  {
+    "id": 0,
+    "name": null,
+    "implementation": "LanguageSpecification",
+    "implementationName": "Language",
+    "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats",
+    "negate": false,
+    "required": false,
+    "fields": [
+      {
+        "order": 0,
+        "name": "value",
+        "label": "Language",
+        "value": 1,
+        "type": "select",
+        "advanced": false,
+        "selectOptions": [
+          {
+            "value": 1,
+            "name": "English",
+            "order": 1,
+            "hint": null
+          }
+        ],
+        "privacy": "normal",
+        "isFloat": false
+      }
+    ],
+    "presets": []
+  }
+]

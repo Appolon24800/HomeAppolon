@@ -1,0 +1,27 @@
+{
+  "id": 2,
+  "name": "Japanese with English subs",
+  "upgradeAllowed": false,
+  "cutoff": {
+    "id": 2,
+    "name": "Japanese"
+  },
+  "languages": [
+    {
+      "id": 1,
+      "language": {
+        "id": 2,
+        "name": "Japanese"
+      },
+      "allowed": true
+    },
+    {
+      "id": 2,
+      "language": {
+        "id": 1,
+        "name": "English"
+      },
+      "allowed": false
+    }
+  ]
+}
