@@ -15,6 +15,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    sourceSets {
+        getByName("main") {
+            kotlin.srcDirs("src/indexers/kotlin", "src/search/kotlin", "src/stats/kotlin", "src/history/kotlin", "src/settings/kotlin")
+            res.srcDirs("src/indexers/res", "src/search/res", "src/stats/res", "src/history/res", "src/settings/res")
+        }
+        getByName("test") {
+            kotlin.srcDirs("src/indexers/src/test/kotlin", "src/search/src/test/kotlin", "src/stats/src/test/kotlin", "src/history/src/test/kotlin", "src/settings/src/test/kotlin")
+            resources.srcDirs("src/indexers/src/test/resources", "src/search/src/test/resources", "src/stats/src/test/resources", "src/history/src/test/resources", "src/settings/src/test/resources")
+        }
+    }
 }
 
 kotlin {

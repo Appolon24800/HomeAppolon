@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Movie detail: header and common -->
+    <string name="arr_radarr_detail_title_fallback">Movie</string>
+    <string name="arr_radarr_detail_subtitle">%1$d · %2$s</string>
+    <string name="arr_radarr_detail_collection">Part of %1$s</string>
+    <string name="arr_radarr_detail_cd_edit">Edit movie</string>
+    <string name="arr_radarr_detail_cd_delete">Delete movie</string>
+    <string name="arr_radarr_detail_cd_poster">Poster of %1$s</string>
+    <string name="arr_radarr_detail_cd_backdrop">Backdrop of %1$s</string>
+    <string name="arr_radarr_detail_cd_headshot">Photo of %1$s</string>
+    <string name="arr_radarr_detail_invalid_title">Movie not found</string>
+    <string name="arr_radarr_detail_invalid_message">This movie link is not valid.</string>
+    <string name="arr_radarr_detail_foreign_message">The %1$s area is not available here.</string>
+
+    <!-- Facts -->
+    <string name="arr_radarr_detail_rating_imdb">IMDb %1$s</string>
+    <string name="arr_radarr_detail_rating_tmdb">TMDb %1$s</string>
+    <string name="arr_radarr_detail_profile_id">Profile %1$d</string>
+    <string name="arr_radarr_detail_path_value">Folder: %1$s</string>
+    <string name="arr_radarr_detail_in_cinemas">In cinemas</string>
+    <string name="arr_radarr_detail_digital_release">Digital</string>
+    <string name="arr_radarr_detail_physical_release">Physical</string>
+
+    <!-- Monitoring and actions -->
+    <string name="arr_radarr_detail_monitored">Monitored</string>
+    <string name="arr_radarr_detail_monitored_support">Radarr searches for releases of monitored movies.</string>
+    <string name="arr_radarr_detail_search">Search</string>
+    <string name="arr_radarr_detail_rename">Rename</string>
+    <string name="arr_radarr_detail_import">Import</string>
+    <string name="arr_radarr_detail_queued_banner">%1$d changes waiting to sync</string>
+
+    <!-- Overview -->
+    <string name="arr_radarr_detail_overview">Overview</string>
+    <string name="arr_radarr_detail_no_overview">No overview available.</string>
+    <string name="arr_radarr_detail_genres">Genres</string>
+    <string name="arr_radarr_detail_alt_titles">Also known as: %1$s</string>
+
+    <!-- Cast and crew -->
+    <string name="arr_radarr_detail_cast">Cast</string>
+    <string name="arr_radarr_detail_crew">Crew</string>
+
+    <!-- Files -->
+    <string name="arr_radarr_detail_files">Files</string>
+    <string name="arr_radarr_detail_files_none">No files yet. Radarr will add one when a release is imported.</string>
+    <string name="arr_radarr_detail_cutoff_not_met">Cutoff not met</string>
+
+    <!-- Extra files -->
+    <string name="arr_radarr_detail_extra_files">Extra files</string>
+    <string name="arr_radarr_detail_extra_files_none">No extra files, such as subtitles, were found.</string>
+
+    <!-- History -->
+    <string name="arr_radarr_detail_history">History</string>
+    <string name="arr_radarr_detail_history_none">Nothing has happened for this movie yet.</string>
+    <string name="arr_radarr_detail_event_grabbed">Grabbed</string>
+    <string name="arr_radarr_detail_event_folder_imported">Imported from download</string>
+    <string name="arr_radarr_detail_event_movie_imported">Imported from folder</string>
+    <string name="arr_radarr_detail_event_failed">Download failed</string>
+    <string name="arr_radarr_detail_event_file_deleted">File deleted</string>
+    <string name="arr_radarr_detail_event_renamed">Renamed</string>
+    <string name="arr_radarr_detail_event_ignored">Ignored</string>
+    <string name="arr_radarr_detail_event_unknown">Event</string>
+
+    <!-- Edit sheet -->
+    <string name="arr_radarr_detail_edit_title">Edit movie</string>
+    <string name="arr_radarr_detail_edit_quality">Quality profile</string>
+    <string name="arr_radarr_detail_edit_path">Path</string>
+    <string name="arr_radarr_detail_edit_move">Move files to the new path</string>
+    <string name="arr_radarr_detail_edit_move_support">Radarr moves the movie files when the path changes.</string>
+    <string name="arr_radarr_detail_edit_tags">Tags</string>
+    <string name="arr_radarr_detail_edit_save">Save</string>
+    <string name="arr_radarr_detail_cancel">Cancel</string>
+
+    <!-- Delete dialog -->
+    <string name="arr_radarr_detail_delete_title">Delete this movie?</string>
+    <string name="arr_radarr_detail_delete_message">%1$s will be removed from Radarr.</string>
+    <string name="arr_radarr_detail_delete_files">Delete movie files</string>
+    <string name="arr_radarr_detail_delete_files_support">Removes the files from disk. This cannot be undone.</string>
+    <string name="arr_radarr_detail_delete_exclusion">Add import exclusion</string>
+    <string name="arr_radarr_detail_delete_exclusion_support">Prevents Radarr from suggesting this movie again.</string>
+    <string name="arr_radarr_detail_delete_confirm">Delete</string>
+
+    <!-- Rename preview dialog -->
+    <string name="arr_radarr_detail_rename_title">Rename files</string>
+    <string name="arr_radarr_detail_rename_message">These files will be renamed to match Radarr\'s naming settings:</string>
+    <string name="arr_radarr_detail_rename_more">and %1$d more</string>
+    <string name="arr_radarr_detail_rename_confirm">Rename</string>
+
+    <!-- Interactive import -->
+    <string name="arr_radarr_detail_import_title">Import files</string>
+    <string name="arr_radarr_detail_import_folder">Folder: %1$s</string>
+    <string name="arr_radarr_detail_import_select_all">Select all</string>
+    <string name="arr_radarr_detail_import_select_none">Select none</string>
+    <string name="arr_radarr_detail_import_revalidate">Re-check</string>
+    <string name="arr_radarr_detail_import_action">Import %1$d files</string>
+    <string name="arr_radarr_detail_import_cd_select">Select %1$s</string>
+    <string name="arr_radarr_detail_import_empty_title">Nothing to import</string>
+    <string name="arr_radarr_detail_import_empty_message">No unimported files were found in this movie\'s folder.</string>
+    <string name="arr_radarr_detail_import_no_folder">This movie has no folder yet.</string>
+    <string name="arr_radarr_detail_import_started">Import started.</string>
+    <string name="arr_radarr_detail_import_queued">Offline. The import will run when connected.</string>
+
+    <!-- Messages -->
+    <string name="arr_radarr_detail_msg_edit_saved">Changes saved.</string>
+    <string name="arr_radarr_detail_msg_edit_queued">Offline. Your changes will sync later.</string>
+    <string name="arr_radarr_detail_msg_rename_started">Rename started.</string>
+    <string name="arr_radarr_detail_msg_rename_queued">Offline. The rename will run when connected.</string>
+    <string name="arr_radarr_detail_msg_search_started">Search started.</string>
+    <string name="arr_radarr_detail_msg_search_queued">Offline. The search will run when connected.</string>
+    <string name="arr_radarr_detail_msg_delete_queued">Offline. The delete will run when connected.</string>
+</resources>
