@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "filename": "lidarr.txt",
+    "lastWriteTime": "2026-10-01T12:00:00Z",
+    "contentsUrl": "/api/v1/log/file/lidarr.txt",
+    "downloadUrl": "/api/v1/log/file/lidarr.txt?dl=1"
+  },
+  {
+    "id": 2,
+    "filename": "lidarr.update.txt",
+    "lastWriteTime": "2026-10-01T12:30:00Z",
+    "contentsUrl": "/api/v1/log/file/update/lidarr.update.txt",
+    "downloadUrl": "/api/v1/log/file/update/lidarr.update.txt?dl=1"
+  }
+]

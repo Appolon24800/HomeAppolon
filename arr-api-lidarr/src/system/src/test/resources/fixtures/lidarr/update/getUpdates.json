@@ -1,0 +1,19 @@
+[
+  {
+    "id": 1,
+    "version": "2.1.0.2000",
+    "branch": "develop",
+    "releaseDate": "2026-09-15T00:00:00Z",
+    "fileName": "lidarr-develop-2.1.0.2000-linux.tar.gz",
+    "url": "https://github.com/Lidarr/Lidarr/releases/v2.1.0.2000",
+    "installed": false,
+    "installedOn": null,
+    "installable": true,
+    "latest": true,
+    "changes": {
+      "new": ["Added a setting"],
+      "fixed": ["Fixed a bug"]
+    },
+    "hash": "abc123"
+  }
+]

@@ -1,0 +1,15 @@
+[
+  {
+    "id": 1,
+    "name": "Metadata",
+    "fields": [],
+    "implementationName": "Metadata",
+    "implementation": "Metadata",
+    "configContract": "MetadataSettings",
+    "infoLink": "https://wiki.servarr.com/lidarr/metadata",
+    "message": { "message": "string", "type": "info" },
+    "tags": [],
+    "presets": null,
+    "enable": true
+  }
+]

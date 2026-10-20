@@ -1,0 +1,17 @@
+{
+  "id": 1,
+  "firstDayOfWeek": 0,
+  "calendarWeekColumnHeader": "ddd M/D",
+  "shortDateFormat": "MMM D YYYY",
+  "longDateFormat": "dddd, MMMM D YYYY",
+  "timeFormat": "h(:mm)a",
+  "showRelativeDates": true,
+  "enableColorImpairedMode": false,
+  "uiLanguage": 1,
+  "expandAlbumByDefault": false,
+  "expandSingleByDefault": false,
+  "expandEPByDefault": false,
+  "expandBroadcastByDefault": false,
+  "expandOtherByDefault": false,
+  "theme": "auto"
+}

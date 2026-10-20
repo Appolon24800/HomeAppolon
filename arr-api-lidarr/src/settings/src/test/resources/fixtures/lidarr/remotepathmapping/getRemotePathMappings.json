@@ -1,0 +1,8 @@
+[
+  {
+    "id": 1,
+    "host": "seedbox",
+    "remotePath": "/downloads",
+    "localPath": "/media/downloads"
+  }
+]

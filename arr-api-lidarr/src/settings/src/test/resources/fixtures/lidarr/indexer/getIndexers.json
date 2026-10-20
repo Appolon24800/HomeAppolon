@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "Headphones",
+    "fields": [
+      {
+        "order": 0,
+        "name": "baseUrl",
+        "label": "Base URL",
+        "value": "https://example.com/api",
+        "type": "url",
+        "advanced": false,
+        "privacy": "apiKey"
+      }
+    ],
+    "implementationName": "Headphones",
+    "implementation": "Headphones",
+    "configContract": "HeadphonesSettings",
+    "infoLink": "https://wiki.servarr.com/lidarr/supported#indexers",
+    "message": { "message": "string", "type": "info" },
+    "tags": [1],
+    "presets": null,
+    "enableRss": true,
+    "enableAutomaticSearch": true,
+    "enableInteractiveSearch": false,
+    "supportsRss": true,
+    "supportsSearch": true,
+    "protocol": "usenet",
+    "priority": 25,
+    "downloadClientId": 1
+  },
+  {
+    "id": 2,
+    "name": "Example Audio",
+    "fields": [],
+    "implementationName": "Example Audio",
+    "implementation": "ExampleAudio",
+    "configContract": "ExampleAudioSettings",
+    "infoLink": "https://wiki.servarr.com/lidarr/supported#indexers",
+    "tags": [],
+    "enableRss": true,
+    "enableAutomaticSearch": true,
+    "enableInteractiveSearch": true,
+    "supportsRss": true,
+    "supportsSearch": true,
+    "protocol": "torrent",
+    "priority": 50,
+    "downloadClientId": 0
+  }
+]

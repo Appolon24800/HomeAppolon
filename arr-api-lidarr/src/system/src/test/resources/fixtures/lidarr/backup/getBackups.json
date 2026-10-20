@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "name": "lidarr_backup_v1.zip",
+    "path": "/config/Backups/scheduled/lidarr_backup_v1.zip",
+    "type": "scheduled",
+    "size": 20480,
+    "time": "2026-10-01T00:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "lidarr_backup_v2.zip",
+    "path": "/config/Backups/manual/lidarr_backup_v2.zip",
+    "type": "manual",
+    "size": 24576,
+    "time": "2026-10-02T00:00:00Z"
+  }
+]

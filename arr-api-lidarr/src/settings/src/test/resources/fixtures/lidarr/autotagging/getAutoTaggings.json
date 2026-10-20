@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "name": "Fresh Artists",
+    "removeTagsAutomatically": true,
+    "tags": [1],
+    "specifications": [
+      {
+        "id": 1,
+        "name": "Root Folder",
+        "implementation": "RootFolderSpecification",
+        "implementationName": "Root Folder",
+        "negate": false,
+        "required": true,
+        "fields": [
+          {
+            "order": 0,
+            "name": "value",
+            "label": "Root Folder",
+            "value": "/music",
+            "type": "text",
+            "advanced": false,
+            "privacy": "normal"
+          }
+        ]
+      }
+    ]
+  }
+]
