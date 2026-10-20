@@ -1,0 +1,18 @@
+{
+  "id": 77,
+  "personName": "Example Person",
+  "creditTmdbId": "5f8a9b",
+  "personTmdbId": 287,
+  "movieMetadataId": 100,
+  "images": [
+    {
+      "coverType": "headshot",
+      "url": "/api/v3/mediacover/1/headshot.jpg"
+    }
+  ],
+  "department": "Writing",
+  "job": "Screenplay",
+  "character": "",
+  "order": 0,
+  "type": "crew"
+}

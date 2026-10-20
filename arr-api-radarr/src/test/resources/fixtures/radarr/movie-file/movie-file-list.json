@@ -1,0 +1,43 @@
+[
+  {
+    "id": 25,
+    "movieId": 1,
+    "relativePath": "Example Movie (2009).mkv",
+    "path": "/movies/Example Movie (2009)/Example Movie (2009).mkv",
+    "size": 734003200,
+    "dateAdded": "2023-04-05T12:00:00Z",
+    "sceneName": "Example.Movie.2009.1080p.BluRay-EXAMPLE",
+    "releaseGroup": "EXAMPLE",
+    "edition": "",
+    "languages": [{ "id": 1, "name": "English" }],
+    "quality": {
+      "quality": {
+        "id": 7,
+        "name": "Bluray-1080p",
+        "source": "bluray",
+        "resolution": 1080,
+        "modifier": "none"
+      },
+      "revision": { "version": 1, "real": 0, "isRepack": false }
+    },
+    "customFormats": [
+      { "id": 4, "name": "HQ", "includeCustomFormatWhenRenaming": false }
+    ],
+    "customFormatScore": 20,
+    "indexerFlags": 0,
+    "mediaInfo": {
+      "audioBitrate": 640000,
+      "audioChannels": 5.1,
+      "audioCodec": "truehd",
+      "audioStreamCount": 1,
+      "videoBitDepth": 10,
+      "videoBitrate": 25000000,
+      "videoCodec": "h265",
+      "videoFps": 23.976,
+      "resolution": "1920x1080",
+      "runTime": "1:48:00",
+      "scanType": "Progressive"
+    },
+    "qualityCutoffNotMet": false
+  }
+]

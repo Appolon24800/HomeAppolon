@@ -1,0 +1,25 @@
+{
+  "id": 1,
+  "title": "Example Movie",
+  "originalLanguage": { "id": 1, "name": "English" },
+  "status": "released",
+  "minimumAvailability": "released",
+  "images": [
+    {
+      "coverType": "poster",
+      "url": "/api/v3/mediacover/1/poster.jpg",
+      "remoteUrl": "https://image.tmdb.org/t/p/w500/example.jpg"
+    }
+  ],
+  "year": 2009,
+  "qualityProfileId": 1,
+  "hasFile": true,
+  "movieFileId": 25,
+  "monitored": true,
+  "isAvailable": true,
+  "runtime": 148,
+  "imdbId": "tt0000001",
+  "tmdbId": 19995,
+  "popularity": 12.5,
+  "ratings": { "imdb": { "votes": 100, "value": 8.0, "type": "user" } }
+}
