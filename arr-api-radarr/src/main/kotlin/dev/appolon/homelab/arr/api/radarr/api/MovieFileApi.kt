@@ -2,6 +2,7 @@ package dev.appolon.homelab.arr.api.radarr.api
 
 import dev.appolon.homelab.arr.api.radarr.model.MovieFileListResource
 import dev.appolon.homelab.arr.api.radarr.model.MovieFileResource
+import dev.appolon.homelab.arr.api.radarr.model.RenameMovieResource
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -13,6 +14,9 @@ import retrofit2.http.Query
 
 /** Radarr `MovieFile` tag: queries and edits the physical files behind movies. */
 interface MovieFileApi {
+    @GET("api/v3/rename")
+    suspend fun rename(@Query("movieId") movieId: List<Int>? = null): List<RenameMovieResource>
+
 
     /**
      * Lists movie files. Both filters repeat their query name per value

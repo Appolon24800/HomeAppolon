@@ -1,7 +1,6 @@
 package dev.appolon.homelab.arr.api.sonarr.model
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
 
 /** Sonarr BlocklistResource wire contract. Dates remain unparsed strings. */
 @Serializable
@@ -17,5 +16,5 @@ data class BlocklistResource(
     val protocol: DownloadProtocol = DownloadProtocol.UNKNOWN,
     val indexer: String? = null,
     val message: String? = null,
-    val series: JsonObject = JsonObject(emptyMap())
+    val series: SeriesResource = SeriesResource()
 )

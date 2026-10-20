@@ -11,7 +11,7 @@ import retrofit2.http.Query
 
 /** String flags follow the spec, and 204, 404, 409 and 500 remain distinguishable. */
 interface EpisodesSubtitlesApi {
-    @PATCH("episodes/subtitles")
+    @PATCH("api/episodes/subtitles")
     suspend fun patchEpisodesSubtitles(
         @Query("seriesid") seriesId: Int,
         @Query("episodeid") episodeId: Int,
@@ -21,7 +21,7 @@ interface EpisodesSubtitlesApi {
     ): Response<Unit>
 
     @Multipart
-    @POST("episodes/subtitles")
+    @POST("api/episodes/subtitles")
     suspend fun postEpisodesSubtitles(
         @Query("seriesid") seriesId: Int,
         @Query("episodeid") episodeId: Int,
@@ -31,7 +31,7 @@ interface EpisodesSubtitlesApi {
         @Part file: MultipartBody.Part,
     ): Response<Unit>
 
-    @DELETE("episodes/subtitles")
+    @DELETE("api/episodes/subtitles")
     suspend fun deleteEpisodesSubtitles(
         @Query("seriesid") seriesId: Int,
         @Query("episodeid") episodeId: Int,
@@ -44,7 +44,7 @@ interface EpisodesSubtitlesApi {
 
 /** String flags follow the spec, and 204, 404, 409 and 500 remain distinguishable. */
 interface MoviesSubtitlesApi {
-    @PATCH("movies/subtitles")
+    @PATCH("api/movies/subtitles")
     suspend fun patchMoviesSubtitles(
         @Query("radarrid") radarrId: Int,
         @Query("language") language: String,
@@ -53,7 +53,7 @@ interface MoviesSubtitlesApi {
     ): Response<Unit>
 
     @Multipart
-    @POST("movies/subtitles")
+    @POST("api/movies/subtitles")
     suspend fun postMoviesSubtitles(
         @Query("radarrid") radarrId: Int,
         @Query("language") language: String,
@@ -62,7 +62,7 @@ interface MoviesSubtitlesApi {
         @Part file: MultipartBody.Part,
     ): Response<Unit>
 
-    @DELETE("movies/subtitles")
+    @DELETE("api/movies/subtitles")
     suspend fun deleteMoviesSubtitles(
         @Query("radarrid") radarrId: Int,
         @Query("language") language: String,

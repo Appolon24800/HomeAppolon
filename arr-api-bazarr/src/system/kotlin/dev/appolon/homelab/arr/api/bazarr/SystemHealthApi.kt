@@ -7,6 +7,6 @@ import retrofit2.http.GET
 /** Health issues have no schema in the bundled spec, so the payload stays raw JSON. */
 @JvmSuppressWildcards
 interface SystemHealthApi {
-    @GET("system/health")
+    @GET("api/system/health")
     suspend fun getSystemHealth(): JsonObject
 }

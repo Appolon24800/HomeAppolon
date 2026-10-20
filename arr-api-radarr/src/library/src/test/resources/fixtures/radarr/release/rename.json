@@ -1,0 +1,4 @@
+[
+  {"id": 1, "movieId": 7, "movieFileId": 12, "existingPath": "old.mkv", "newPath": "Movie (2026).mkv"},
+  {"id": 2, "movieId": 8, "movieFileId": 13, "existingPath": null, "newPath": null}
+]

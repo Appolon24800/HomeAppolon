@@ -9,13 +9,13 @@ import retrofit2.http.Query
 
 /** Writes expose HTTP status; the spec leaves successful POST and GET bodies unspecified. */
 interface EpisodesBlacklistApi {
-    @GET("episodes/blacklist")
+    @GET("api/episodes/blacklist")
     suspend fun getEpisodesBlacklist(
         @Query("start") start: Int? = null,
         @Query("length") length: Int? = null,
     ): JsonObject
 
-    @POST("episodes/blacklist")
+    @POST("api/episodes/blacklist")
     suspend fun postEpisodesBlacklist(
         @Query("seriesid") seriesId: Int,
         @Query("episodeid") episodeId: Int,
@@ -25,7 +25,7 @@ interface EpisodesBlacklistApi {
         @Query("subtitles_path") subtitlesPath: String,
     ): Response<JsonObject>
 
-    @DELETE("episodes/blacklist")
+    @DELETE("api/episodes/blacklist")
     suspend fun deleteEpisodesBlacklist(
         @Query("all") all: String? = null,
         @Query("provider") provider: String? = null,
@@ -35,13 +35,13 @@ interface EpisodesBlacklistApi {
 
 /** Writes expose HTTP status; the spec leaves successful POST and GET bodies unspecified. */
 interface MoviesBlacklistApi {
-    @GET("movies/blacklist")
+    @GET("api/movies/blacklist")
     suspend fun getMoviesBlacklist(
         @Query("start") start: Int? = null,
         @Query("length") length: Int? = null,
     ): JsonObject
 
-    @POST("movies/blacklist")
+    @POST("api/movies/blacklist")
     suspend fun postMoviesBlacklist(
         @Query("radarrid") radarrId: Int,
         @Query("provider") provider: String,
@@ -50,7 +50,7 @@ interface MoviesBlacklistApi {
         @Query("subtitles_path") subtitlesPath: String,
     ): Response<JsonObject>
 
-    @DELETE("movies/blacklist")
+    @DELETE("api/movies/blacklist")
     suspend fun deleteMoviesBlacklist(
         @Query("all") all: String? = null,
         @Query("provider") provider: String? = null,

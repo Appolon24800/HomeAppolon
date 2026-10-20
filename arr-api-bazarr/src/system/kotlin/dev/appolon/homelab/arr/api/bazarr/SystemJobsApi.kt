@@ -16,21 +16,21 @@ import retrofit2.http.Query
  */
 @JvmSuppressWildcards
 interface SystemJobsApi {
-    @GET("system/jobs")
+    @GET("api/system/jobs")
     suspend fun getSystemJobs(
         @Query("id") id: Int? = null,
         @Query("status") status: String? = null,
     ): JsonObject
 
-    @POST("system/jobs")
+    @POST("api/system/jobs")
     suspend fun postSystemJobs(
         @Query("id") id: Int,
         @Query("action") action: String,
     ): Response<Unit>
 
-    @PATCH("system/jobs")
+    @PATCH("api/system/jobs")
     suspend fun patchSystemJobs(@Query("queueName") queueName: String): Response<Unit>
 
-    @DELETE("system/jobs")
+    @DELETE("api/system/jobs")
     suspend fun deleteSystemJobs(@Query("id") id: Int): Response<Unit>
 }

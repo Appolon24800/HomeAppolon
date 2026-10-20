@@ -8,6 +8,6 @@ import retrofit2.http.Query
 /** Language lists have no schema in the bundled spec, so the payload stays raw JSON. */
 @JvmSuppressWildcards
 interface SystemLanguagesApi {
-    @GET("system/languages")
+    @GET("api/system/languages")
     suspend fun getLanguages(@Query("history") history: String? = null): JsonObject
 }

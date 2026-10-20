@@ -78,7 +78,7 @@ class BazarrLibraryApiTest(private val case: LibraryCase) {
     }
 
     private fun retrofit(server: MockWebServer): Retrofit = Retrofit.Builder()
-        .baseUrl(server.url("/prefix/api/"))
+        .baseUrl(server.url("/prefix/"))
         .addConverterFactory(ArrJson.asConverterFactory("application/json".toMediaType()))
         .build()
 

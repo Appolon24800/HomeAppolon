@@ -6,25 +6,25 @@ import retrofit2.http.Query
 
 /** Tag responses have no schema in the bundled spec. */
 interface SeriesTagsApi {
-    @GET("series/tags")
+    @GET("api/series/tags")
     suspend fun getSeriesTags(): JsonObject
 }
 
 /** Tag responses have no schema in the bundled spec. */
 interface MoviesTagsApi {
-    @GET("movies/tags")
+    @GET("api/movies/tags")
     suspend fun getMoviesTags(): JsonObject
 }
 
 /** Badge responses have no schema in the bundled spec. */
 interface BadgesApi {
-    @GET("badges")
+    @GET("api/badges")
     suspend fun getBadges(): JsonObject
 }
 
 /** History dates remain untouched inside the undocumented response object. */
 interface EpisodesHistoryApi {
-    @GET("episodes/history")
+    @GET("api/episodes/history")
     suspend fun getEpisodesHistory(
         @Query("start") start: Int? = null,
         @Query("length") length: Int? = null,
@@ -34,7 +34,7 @@ interface EpisodesHistoryApi {
 
 /** History dates remain untouched inside the undocumented response object. */
 interface MoviesHistoryApi {
-    @GET("movies/history")
+    @GET("api/movies/history")
     suspend fun getMoviesHistory(
         @Query("start") start: Int? = null,
         @Query("length") length: Int? = null,
@@ -44,7 +44,7 @@ interface MoviesHistoryApi {
 
 /** Wanted response bodies have no schema in the bundled spec. */
 interface EpisodesWantedApi {
-    @GET("episodes/wanted")
+    @GET("api/episodes/wanted")
     suspend fun getEpisodesWanted(
         @Query("start") start: Int? = null,
         @Query("length") length: Int? = null,
@@ -54,7 +54,7 @@ interface EpisodesWantedApi {
 
 /** Wanted response bodies have no schema in the bundled spec. */
 interface MoviesWantedApi {
-    @GET("movies/wanted")
+    @GET("api/movies/wanted")
     suspend fun getMoviesWanted(
         @Query("start") start: Int? = null,
         @Query("length") length: Int? = null,

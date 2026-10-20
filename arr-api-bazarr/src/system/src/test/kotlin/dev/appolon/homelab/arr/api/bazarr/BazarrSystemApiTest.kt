@@ -85,7 +85,7 @@ class BazarrSystemApiTest(private val case: SystemCase) {
     }
 
     private fun retrofit(server: MockWebServer): Retrofit = Retrofit.Builder()
-        .baseUrl(server.url("/prefix/api/"))
+        .baseUrl(server.url("/prefix/"))
         .addConverterFactory(ArrJson.asConverterFactory("application/json".toMediaType()))
         .build()
 

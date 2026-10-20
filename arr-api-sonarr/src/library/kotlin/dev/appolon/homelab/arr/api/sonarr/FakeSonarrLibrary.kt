@@ -25,6 +25,7 @@ class FakeSonarrLibrary(
     var error: (String) -> Throwable? = { null }
 ) {
     val seriesStore: MutableMap<Int, SeriesResource> = linkedMapOf()
+    val lookupCatalog: MutableList<SeriesResource> = mutableListOf()
     val episodeStore: MutableMap<Int, EpisodeResource> = linkedMapOf()
     val episodeFileStore: MutableMap<Int, EpisodeFileResource> = linkedMapOf()
     val renames: MutableList<RenameEpisodeResource> = mutableListOf()
@@ -43,6 +44,15 @@ class FakeSonarrLibrary(
     )
 
     val series: SeriesApi = object : SeriesApi {
+        override suspend fun lookup(term: String?, language: Int?): List<SeriesResource> {
+            before("Series.lookup")
+            val query = term?.trim()?.takeIf { it.isNotEmpty() } ?: return emptyList()
+            return lookupCatalog.filter {
+                it.title?.contains(query, ignoreCase = true) == true ||
+                    query.equals("tvdb:${it.tvdbId}", ignoreCase = true)
+            }
+        }
+
         override suspend fun list(
             tvdbId: Int?,
             includeSeasonImages: Boolean?

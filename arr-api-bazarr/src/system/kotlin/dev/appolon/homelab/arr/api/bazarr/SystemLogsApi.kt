@@ -9,9 +9,9 @@ import retrofit2.http.GET
 /** Log entries have no schema in the bundled spec, so the payload stays raw JSON. */
 @JvmSuppressWildcards
 interface SystemLogsApi {
-    @GET("system/logs")
+    @GET("api/system/logs")
     suspend fun getSystemLogs(): JsonObject
 
-    @DELETE("system/logs")
+    @DELETE("api/system/logs")
     suspend fun deleteSystemLogs(): Response<Unit>
 }

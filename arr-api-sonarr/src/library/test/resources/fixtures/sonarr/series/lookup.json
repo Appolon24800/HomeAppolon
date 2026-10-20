@@ -1,0 +1,9 @@
+[
+  {
+    "id": 7,
+    "title": "Example Series",
+    "tvdbId": 12345,
+    "seasons": [{"seasonNumber": 1, "monitored": true}],
+    "images": [{"coverType": "poster", "url": "https://example.test/poster.jpg"}]
+  }
+]

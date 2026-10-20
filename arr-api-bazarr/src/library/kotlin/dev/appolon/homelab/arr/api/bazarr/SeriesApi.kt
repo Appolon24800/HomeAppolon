@@ -9,7 +9,7 @@ import retrofit2.http.Query
 
 /** Raw JSON is intentional: the bundled spec declares no response schema. */
 interface SeriesApi {
-    @GET("series")
+    @GET("api/series")
     suspend fun getSeries(
         @Query("start") start: Int? = null,
         @Query("length") length: Int? = null,
@@ -23,13 +23,13 @@ interface SeriesApi {
         @Query("tags[]") tags: List<String>? = null,
     ): JsonObject
 
-    @PATCH("series")
+    @PATCH("api/series")
     suspend fun patchSeries(
         @Query("seriesid") seriesId: Int? = null,
         @Query("action") action: String? = null,
     ): Response<Unit>
 
-    @POST("series")
+    @POST("api/series")
     suspend fun postSeries(
         @Query("seriesid") seriesIds: List<Int>? = null,
         @Query("profileid") profileIds: List<String>? = null,

@@ -10,6 +10,6 @@ import retrofit2.http.GET
  */
 @JvmSuppressWildcards
 interface SystemPingApi {
-    @GET("system/ping")
+    @GET("api/system/ping")
     suspend fun getSystemPing(): JsonObject
 }

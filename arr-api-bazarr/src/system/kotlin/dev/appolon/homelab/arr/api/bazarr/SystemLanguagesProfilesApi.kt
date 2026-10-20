@@ -7,6 +7,6 @@ import retrofit2.http.GET
 /** Language profiles have no schema in the bundled spec, so the payload stays raw JSON. */
 @JvmSuppressWildcards
 interface SystemLanguagesProfilesApi {
-    @GET("system/languages/profiles")
+    @GET("api/system/languages/profiles")
     suspend fun getLanguagesProfiles(): JsonObject
 }

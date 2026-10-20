@@ -10,6 +10,7 @@ import dev.appolon.homelab.arr.api.radarr.api.MovieFolderApi
 import dev.appolon.homelab.arr.api.radarr.api.MovieImportApi
 import dev.appolon.homelab.arr.api.radarr.api.MovieLookupApi
 import retrofit2.Retrofit
+import dev.appolon.homelab.arr.api.radarr.api.ReleaseApi
 
 /**
  * Factory for every Retrofit interface this module owns. The caller supplies
@@ -17,6 +18,8 @@ import retrofit2.Retrofit
  * header, proxy, and trust, per the architecture doc.
  */
 object RadarrApis {
+    fun release(retrofit: Retrofit): ReleaseApi = retrofit.create(ReleaseApi::class.java)
+
     fun movie(retrofit: Retrofit): MovieApi = retrofit.create(MovieApi::class.java)
 
     fun movieEditor(retrofit: Retrofit): MovieEditorApi =

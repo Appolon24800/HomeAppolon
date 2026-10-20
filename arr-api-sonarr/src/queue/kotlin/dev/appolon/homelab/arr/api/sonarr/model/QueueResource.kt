@@ -1,7 +1,6 @@
 package dev.appolon.homelab.arr.api.sonarr.model
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
 
 /** Sonarr QueueResource wire contract. Dates remain unparsed strings. */
 @Serializable
@@ -10,8 +9,8 @@ data class QueueResource(
     val seriesId: Int? = null,
     val episodeId: Int? = null,
     val seasonNumber: Int? = null,
-    val series: JsonObject = JsonObject(emptyMap()),
-    val episode: JsonObject = JsonObject(emptyMap()),
+    val series: SeriesResource = SeriesResource(),
+    val episode: EpisodeResource = EpisodeResource(),
     val languages: List<Language>? = null,
     val quality: QualityModel = QualityModel(),
     val customFormats: List<CustomFormatResource>? = null,

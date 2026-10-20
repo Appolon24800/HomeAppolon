@@ -18,7 +18,7 @@ class BazarrLibraryStatusTest {
         server.start()
         try {
             server.enqueue(MockResponse().setBody("{}"))
-            val retrofit = Retrofit.Builder().baseUrl(server.url("/api/"))
+            val retrofit = Retrofit.Builder().baseUrl(server.url("/"))
                 .addConverterFactory(ArrJson.asConverterFactory("application/json".toMediaType()))
                 .build()
             BazarrLibraryApis.series(retrofit).getSeries()
@@ -34,7 +34,7 @@ class BazarrLibraryStatusTest {
         server.start()
         try {
             server.enqueue(MockResponse().setResponseCode(409).setBody("permission issue"))
-            val retrofit = Retrofit.Builder().baseUrl(server.url("/api/"))
+            val retrofit = Retrofit.Builder().baseUrl(server.url("/"))
                 .addConverterFactory(ArrJson.asConverterFactory("application/json".toMediaType()))
                 .build()
             val response = BazarrLibraryApis.moviesSubtitles(retrofit)

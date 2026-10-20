@@ -305,7 +305,7 @@ class FakeSonarrQueue(
                 (seriesId == null || it.seriesId == seriesId) &&
                     (eventType == null || it.eventType == eventType) &&
                     (seasonNumber == null ||
-                        it.episode["seasonNumber"]?.toString() == seasonNumber.toString())
+                        it.episode.seasonNumber == seasonNumber)
             }
         }
 
@@ -331,7 +331,7 @@ class FakeSonarrQueue(
             return manualImports.filter {
                 (downloadId == null || it.downloadId == downloadId) &&
                     (folder == null || it.path?.startsWith(folder) == true) &&
-                    (seriesId == null || it.series?.get("id")?.toString() == seriesId.toString()) &&
+                    (seriesId == null || it.series.id == seriesId) &&
                     (seasonNumber == null || it.seasonNumber == seasonNumber) &&
                     (filterExistingFiles == false ||
                         it.episodeFileId == null || it.episodeFileId == 0)

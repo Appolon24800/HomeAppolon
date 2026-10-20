@@ -9,6 +9,9 @@ import dev.appolon.homelab.arr.api.radarr.api.MovieFileApi
 import dev.appolon.homelab.arr.api.radarr.api.MovieFolderApi
 import dev.appolon.homelab.arr.api.radarr.api.MovieImportApi
 import dev.appolon.homelab.arr.api.radarr.api.MovieLookupApi
+import dev.appolon.homelab.arr.api.radarr.api.ReleaseApi
+import dev.appolon.homelab.arr.api.radarr.model.ReleaseResource
+import dev.appolon.homelab.arr.api.radarr.model.RenameMovieResource
 import dev.appolon.homelab.arr.api.radarr.model.AlternativeTitleResource
 import dev.appolon.homelab.arr.api.radarr.model.ApplyTags
 import dev.appolon.homelab.arr.api.radarr.model.CreditResource
@@ -57,6 +60,24 @@ class FakeRadarrLibrary(
     private val state = State(latencyMs = latencyMs, error = error, sleep = sleep)
 
     val movie: MovieApi = MovieApiFake(state)
+    val releases: MutableList<ReleaseResource> get() = state.releases
+    val grabbedReleases: MutableList<ReleaseResource> get() = state.grabbedReleases
+    val renames: MutableList<RenameMovieResource> get() = state.renames
+    val release: ReleaseApi = object : ReleaseApi {
+        override suspend fun list(movieId: Int?): List<ReleaseResource> = state.gate().let {
+            state.releases.filter { movieId == null || it.movieId == movieId || it.mappedMovieId == movieId }
+        }
+
+        override suspend fun grab(release: ReleaseResource): Response<ReleaseResource> = state.gate().let {
+            state.grabbedReleases += release
+            Response.success(release)
+        }
+
+        override suspend fun push(release: ReleaseResource): List<ReleaseResource> = state.gate().let {
+            state.releases += release
+            listOf(release)
+        }
+    }
     val movieEditor: MovieEditorApi = MovieEditorApiFake(state)
     val movieFile: MovieFileApi = MovieFileApiFake(state)
     val movieFolder: MovieFolderApi = MovieFolderApiFake(state)
@@ -106,6 +127,9 @@ class FakeRadarrLibrary(
         private val sleep: suspend (Long) -> Unit = {},
     ) {
         val movies = mutableListOf<MovieResource>()
+        val releases = mutableListOf<ReleaseResource>()
+        val grabbedReleases = mutableListOf<ReleaseResource>()
+        val renames = mutableListOf<RenameMovieResource>()
         val movieFiles = mutableListOf<MovieFileResource>()
         val alternativeTitles = mutableListOf<AlternativeTitleResource>()
         val credits = mutableListOf<CreditResource>()
@@ -232,6 +256,10 @@ class FakeRadarrLibrary(
     }
 
     private class MovieFileApiFake(private val s: State) : MovieFileApi {
+        override suspend fun rename(movieId: List<Int>?): List<RenameMovieResource> = s.gate().let {
+            s.renames.filter { movieId == null || it.movieId in movieId }
+        }
+
         override suspend fun list(
             movieId: List<Int>?,
             movieFileIds: List<Int>?,

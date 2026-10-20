@@ -10,9 +10,9 @@ import retrofit2.http.Query
 /** Task listings have no schema in the bundled spec, so reads stay raw JSON. */
 @JvmSuppressWildcards
 interface SystemTasksApi {
-    @GET("system/tasks")
+    @GET("api/system/tasks")
     suspend fun getSystemTasks(): JsonObject
 
-    @POST("system/tasks")
+    @POST("api/system/tasks")
     suspend fun postSystemTasks(@Query("taskid") taskId: String): Response<Unit>
 }

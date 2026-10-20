@@ -12,15 +12,15 @@ import retrofit2.http.Query
 /** Backup listings have no schema in the bundled spec, so reads stay raw JSON. */
 @JvmSuppressWildcards
 interface SystemBackupsApi {
-    @GET("system/backups")
+    @GET("api/system/backups")
     suspend fun getSystemBackups(): JsonObject
 
-    @POST("system/backups")
+    @POST("api/system/backups")
     suspend fun postSystemBackups(): Response<Unit>
 
-    @PATCH("system/backups")
+    @PATCH("api/system/backups")
     suspend fun patchSystemBackups(@Query("filename") filename: String): Response<Unit>
 
-    @DELETE("system/backups")
+    @DELETE("api/system/backups")
     suspend fun deleteSystemBackups(@Query("filename") filename: String): Response<Unit>
 }

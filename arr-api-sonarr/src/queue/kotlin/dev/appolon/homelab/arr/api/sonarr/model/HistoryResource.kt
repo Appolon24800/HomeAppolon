@@ -1,7 +1,6 @@
 package dev.appolon.homelab.arr.api.sonarr.model
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
 
 /** Sonarr HistoryResource wire contract. Dates remain unparsed strings. */
 @Serializable
@@ -19,6 +18,6 @@ data class HistoryResource(
     val downloadId: String? = null,
     val eventType: EpisodeHistoryEventType = EpisodeHistoryEventType.UNKNOWN,
     val data: Map<String, String?>? = null,
-    val episode: JsonObject = JsonObject(emptyMap()),
-    val series: JsonObject = JsonObject(emptyMap())
+    val episode: EpisodeResource = EpisodeResource(),
+    val series: SeriesResource = SeriesResource()
 )

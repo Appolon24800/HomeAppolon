@@ -1,7 +1,6 @@
 package dev.appolon.homelab.arr.api.sonarr.model
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
 
 /** Sonarr ManualImportReprocessResource wire contract. Dates remain unparsed strings. */
 @Serializable
@@ -10,7 +9,7 @@ data class ManualImportReprocessResource(
     val path: String? = null,
     val seriesId: Int = 0,
     val seasonNumber: Int? = null,
-    val episodes: List<JsonObject>? = null,
+    val episodes: List<EpisodeResource>? = null,
     val episodeIds: List<Int>? = null,
     val quality: QualityModel = QualityModel(),
     val languages: List<Language>? = null,

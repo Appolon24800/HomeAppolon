@@ -10,9 +10,9 @@ import retrofit2.http.Query
 /** Announcement payloads have no schema in the bundled spec, so reads stay raw JSON. */
 @JvmSuppressWildcards
 interface SystemAnnouncementsApi {
-    @GET("system/announcements")
+    @GET("api/system/announcements")
     suspend fun getSystemAnnouncements(): JsonObject
 
-    @POST("system/announcements")
+    @POST("api/system/announcements")
     suspend fun postSystemAnnouncements(@Query("hash") hash: String): Response<Unit>
 }

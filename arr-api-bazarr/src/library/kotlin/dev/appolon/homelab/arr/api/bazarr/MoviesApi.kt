@@ -9,7 +9,7 @@ import retrofit2.http.Query
 
 /** Raw JSON is intentional: the bundled spec declares no response schema. */
 interface MoviesApi {
-    @GET("movies")
+    @GET("api/movies")
     suspend fun getMovies(
         @Query("start") start: Int? = null,
         @Query("length") length: Int? = null,
@@ -23,13 +23,13 @@ interface MoviesApi {
         @Query("tags[]") tags: List<String>? = null,
     ): JsonObject
 
-    @PATCH("movies")
+    @PATCH("api/movies")
     suspend fun patchMovies(
         @Query("radarrid") radarrId: Int? = null,
         @Query("action") action: String? = null,
     ): Response<Unit>
 
-    @POST("movies")
+    @POST("api/movies")
     suspend fun postMovies(
         @Query("radarrid") radarrIds: List<Int>? = null,
         @Query("profileid") profileIds: List<String>? = null,

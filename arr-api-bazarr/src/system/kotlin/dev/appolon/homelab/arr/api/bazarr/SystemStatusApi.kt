@@ -7,6 +7,6 @@ import retrofit2.http.GET
 /** Status payloads have no schema in the bundled spec, so the body passes through untouched. */
 @JvmSuppressWildcards
 interface SystemStatusApi {
-    @GET("system/status")
+    @GET("api/system/status")
     suspend fun getSystemStatus(): JsonObject
 }
