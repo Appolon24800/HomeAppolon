@@ -1,0 +1,38 @@
+[
+  {
+    "id": 0,
+    "name": "Specarr",
+    "fields": [
+      {
+        "order": 0,
+        "name": "baseUrl",
+        "label": "Base URL",
+        "value": "",
+        "type": "url",
+        "advanced": false,
+        "selectOptions": [],
+        "section": "",
+        "privacy": "normal"
+      },
+      {
+        "order": 1,
+        "name": "apiKey",
+        "label": "API Key",
+        "value": "",
+        "type": "text",
+        "advanced": false,
+        "selectOptions": [],
+        "section": "",
+        "privacy": "apiKey"
+      }
+    ],
+    "implementationName": "Specarr",
+    "implementation": "Specarr",
+    "configContract": "SpecarrSettings",
+    "infoLink": "https://wiki.servarr.com/prowlarr/applications",
+    "tags": [],
+    "presets": [],
+    "syncLevel": "disabled",
+    "testCommand": "TestSpecarr"
+  }
+]

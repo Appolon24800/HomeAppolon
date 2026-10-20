@@ -1,0 +1,34 @@
+[
+  {
+    "id": 5000,
+    "name": "TV",
+    "description": "Television",
+    "subCategories": [
+      {
+        "id": 5030,
+        "name": "TV/HD",
+        "description": "High definition television",
+        "subCategories": []
+      },
+      {
+        "id": 5040,
+        "name": "TV/SD",
+        "description": "Standard definition television",
+        "subCategories": []
+      }
+    ]
+  },
+  {
+    "id": 2000,
+    "name": "Movies",
+    "description": "Movies",
+    "subCategories": [
+      {
+        "id": 2040,
+        "name": "Movies/HD",
+        "description": "High definition movies",
+        "subCategories": []
+      }
+    ]
+  }
+]

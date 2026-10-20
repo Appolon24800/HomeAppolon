@@ -1,0 +1,81 @@
+[
+  {
+    "id": 0,
+    "name": "Spec Newznab",
+    "fields": [
+      {
+        "order": 0,
+        "name": "baseUrl",
+        "label": "Base URL",
+        "value": "",
+        "type": "url",
+        "advanced": false,
+        "selectOptions": [],
+        "section": "",
+        "privacy": "normal"
+      }
+    ],
+    "implementationName": "Spec Newznab",
+    "implementation": "Newznab",
+    "configContract": "NewznabSettings",
+    "infoLink": "https://wiki.servarr.com/prowlarr/supported-indexers",
+    "tags": [],
+    "presets": [
+      {
+        "id": 0,
+        "name": "Spec Preset",
+        "fields": [
+          {
+            "order": 0,
+            "name": "baseUrl",
+            "label": "Base URL",
+            "value": "https://preset.example.org",
+            "type": "url",
+            "advanced": false,
+            "selectOptions": [],
+            "section": "",
+            "privacy": "normal"
+          }
+        ],
+        "implementationName": "Spec Newznab",
+        "implementation": "Newznab",
+        "configContract": "NewznabSettings",
+        "tags": [],
+        "presets": []
+      }
+    ],
+    "indexerUrls": ["https://example.org"],
+    "legacyUrls": [],
+    "definitionName": "spec",
+    "language": "en-US",
+    "encoding": "UTF-8",
+    "enable": true,
+    "supportsRss": true,
+    "supportsSearch": true,
+    "protocol": "usenet",
+    "privacy": "public",
+    "capabilities": {
+      "id": 0,
+      "supportsRawSearch": false,
+      "searchParams": ["q"],
+      "tvSearchParams": ["q", "season", "ep"],
+      "movieSearchParams": ["q"],
+      "musicSearchParams": ["q"],
+      "bookSearchParams": ["q"]
+    }
+  },
+  {
+    "id": 0,
+    "name": "Spec Tracker",
+    "implementationName": "Spec Torrent Tracker",
+    "implementation": "SpecTracker",
+    "configContract": "SpecTrackerSettings",
+    "tags": [],
+    "presets": [],
+    "enable": true,
+    "supportsRss": true,
+    "supportsSearch": true,
+    "protocol": "torrent",
+    "privacy": "public"
+  }
+]

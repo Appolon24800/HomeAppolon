@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "Spec Proxy",
+    "implementationName": "Spec Proxy",
+    "implementation": "SpecProxy",
+    "configContract": "SpecProxySettings",
+    "tags": [1],
+    "link": "https://spec-proxy.example.org",
+    "onHealthIssue": true,
+    "supportsOnHealthIssue": true,
+    "includeHealthWarnings": false
+  },
+  {
+    "id": 2,
+    "name": "Second Spec Proxy",
+    "implementationName": "Second Spec Proxy",
+    "implementation": "SecondSpecProxy",
+    "configContract": "SecondSpecProxySettings",
+    "tags": []
+  }
+]

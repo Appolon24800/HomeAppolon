@@ -1,0 +1,52 @@
+{
+  "id": 1,
+  "name": "Specarr",
+  "fields": [
+    {
+      "order": 0,
+      "name": "baseUrl",
+      "label": "Base URL",
+      "value": "http://specarr.example:8989",
+      "type": "url",
+      "advanced": false,
+      "selectOptions": [],
+      "section": "",
+      "privacy": "normal"
+    },
+    {
+      "order": 1,
+      "name": "apiKey",
+      "label": "API Key",
+      "value": "spec-key",
+      "type": "text",
+      "advanced": false,
+      "selectOptions": [],
+      "section": "",
+      "privacy": "apiKey"
+    },
+    {
+      "order": 2,
+      "name": "syncLevel",
+      "label": "Sync Level",
+      "value": "fullSync",
+      "type": "select",
+      "advanced": false,
+      "selectOptions": [
+        { "value": 1, "name": "Disabled", "order": 1, "hint": "disabled" },
+        { "value": 2, "name": "Add Only", "order": 2, "hint": "addOnly" },
+        { "value": 3, "name": "Full Sync", "order": 3, "hint": "fullSync" }
+      ],
+      "section": "",
+      "privacy": "normal"
+    }
+  ],
+  "implementationName": "Specarr",
+  "implementation": "Specarr",
+  "configContract": "SpecarrSettings",
+  "infoLink": "https://wiki.servarr.com/prowlarr/applications",
+  "message": { "message": "Spec application notice", "type": "info" },
+  "tags": [1],
+  "presets": [],
+  "syncLevel": "fullSync",
+  "testCommand": "TestSpecarr"
+}

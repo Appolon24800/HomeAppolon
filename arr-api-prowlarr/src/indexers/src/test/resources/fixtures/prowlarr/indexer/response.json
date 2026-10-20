@@ -1,0 +1,105 @@
+{
+  "id": 1,
+  "name": "Spec Indexer",
+  "fields": [
+    {
+      "order": 0,
+      "name": "baseUrl",
+      "label": "Base URL",
+      "helpText": "Indexer feed and search URL",
+      "helpLink": "https://wiki.servarr.com/prowlarr/faq",
+      "value": "https://example.org/api",
+      "type": "url",
+      "advanced": false,
+      "selectOptions": [],
+      "section": "",
+      "hidden": "visible",
+      "privacy": "normal",
+      "isFloat": false
+    },
+    {
+      "order": 1,
+      "name": "catId",
+      "label": "Categories",
+      "value": [2000, 2040],
+      "type": "select",
+      "advanced": false,
+      "selectOptions": [
+        { "value": 2000, "name": "Movies", "order": 1, "hint": "2000" },
+        { "value": 2040, "name": "Movies/HD", "order": 2, "hint": "2040", "parentValue": 2000 }
+      ],
+      "section": "",
+      "privacy": "normal"
+    },
+    {
+      "order": 2,
+      "name": "apiKey",
+      "label": "API Key",
+      "value": "spec-key",
+      "type": "text",
+      "advanced": false,
+      "selectOptions": [],
+      "section": "",
+      "privacy": "apiKey"
+    }
+  ],
+  "implementationName": "Spec Newznab",
+  "implementation": "Newznab",
+  "configContract": "NewznabSettings",
+  "infoLink": "https://wiki.servarr.com/prowlarr/supported-indexers",
+  "message": { "message": "Spec notice", "type": "info" },
+  "tags": [1, 2],
+  "presets": [],
+  "indexerUrls": ["https://example.org"],
+  "legacyUrls": [],
+  "definitionName": "spec",
+  "description": "Fixture indexer derived from the bundled OpenAPI schema",
+  "language": "en-US",
+  "encoding": "UTF-8",
+  "enable": true,
+  "redirect": false,
+  "supportsRss": true,
+  "supportsSearch": true,
+  "supportsRedirect": false,
+  "supportsPagination": false,
+  "appProfileId": 1,
+  "protocol": "usenet",
+  "privacy": "semiPrivate",
+  "capabilities": {
+    "id": 1,
+    "limitsMax": 100,
+    "limitsDefault": 100,
+    "categories": [
+      {
+        "id": 2000,
+        "name": "Movies",
+        "description": "Movie categories",
+        "subCategories": [
+          {
+            "id": 2040,
+            "name": "Movies/HD",
+            "description": "High definition movies",
+            "subCategories": []
+          }
+        ]
+      }
+    ],
+    "supportsRawSearch": true,
+    "searchParams": ["q"],
+    "tvSearchParams": ["q", "season", "ep"],
+    "movieSearchParams": ["q", "imdbId"],
+    "musicSearchParams": ["q", "album"],
+    "bookSearchParams": ["q", "title"]
+  },
+  "priority": 25,
+  "downloadClientId": 1,
+  "added": "2024-01-15T10:30:00Z",
+  "status": {
+    "id": 1,
+    "indexerId": 1,
+    "disabledTill": "2024-02-02T00:00:00Z",
+    "mostRecentFailure": "2024-02-01T08:00:00Z",
+    "initialFailure": "2024-02-01T07:55:00Z"
+  },
+  "sortName": "spec"
+}

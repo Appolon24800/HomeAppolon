@@ -1,0 +1,27 @@
+[
+  {
+    "id": 0,
+    "name": "Spec Proxy",
+    "fields": [
+      {
+        "order": 0,
+        "name": "host",
+        "label": "Host",
+        "value": "",
+        "type": "text",
+        "advanced": false,
+        "selectOptions": [],
+        "section": "",
+        "privacy": "normal"
+      }
+    ],
+    "implementationName": "Spec Proxy",
+    "implementation": "SpecProxy",
+    "configContract": "SpecProxySettings",
+    "infoLink": "https://wiki.servarr.com/prowlarr/indexer-proxies",
+    "tags": [],
+    "presets": [],
+    "supportsOnHealthIssue": true,
+    "testCommand": "TestSpecProxy"
+  }
+]
