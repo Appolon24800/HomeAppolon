@@ -1,0 +1,14 @@
+{
+  "page": 1,
+  "pageSize": 10,
+  "sortKey": null,
+  "sortDirection": "default",
+  "totalRecords": 1,
+  "records": [
+    {
+      "id": 1,
+      "tvdbId": 12345,
+      "title": "string"
+    }
+  ]
+}

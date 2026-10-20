@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "name": "string",
+    "fields": [
+      {
+        "order": 0,
+        "name": "apiKey",
+        "label": "string",
+        "value": "string",
+        "type": "textbox",
+        "advanced": false
+      }
+    ],
+    "implementationName": "string",
+    "implementation": "string",
+    "configContract": "string",
+    "infoLink": "string",
+    "message": {
+      "message": "string",
+      "type": "info"
+    },
+    "tags": [1],
+    "presets": [],
+    "enableAutomaticAdd": true,
+    "searchForMissingEpisodes": true,
+    "shouldMonitor": "all",
+    "monitorNewItems": "all",
+    "rootFolderPath": "string",
+    "qualityProfileId": 1,
+    "seriesType": "standard",
+    "language": {
+      "id": 1,
+      "name": "string"
+    },
+    "seasonFolder": true,
+    "listType": "program",
+    "listOrder": 1,
+    "minRefreshInterval": "01:00:00",
+    "tagExisting": "none"
+  }
+]
