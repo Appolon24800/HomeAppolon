@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "name": "Kodi",
+    "fields": [],
+    "implementationName": "Kodi",
+    "implementation": "Kodi",
+    "configContract": "KodiSettings",
+    "infoLink": "https://wiki.servarr.com/sonarr/settings#metadata",
+    "message": {
+      "message": "",
+      "type": "info"
+    },
+    "tags": [],
+    "presets": [],
+    "enable": true
+  },
+  {
+    "id": 2,
+    "name": "Roksbox",
+    "fields": [],
+    "implementationName": "Roksbox",
+    "implementation": "Roksbox",
+    "configContract": "RoksboxSettings",
+    "infoLink": "https://wiki.servarr.com/sonarr/settings#metadata",
+    "message": {
+      "message": "",
+      "type": "info"
+    },
+    "tags": [],
+    "presets": [],
+    "enable": false
+  }
+]

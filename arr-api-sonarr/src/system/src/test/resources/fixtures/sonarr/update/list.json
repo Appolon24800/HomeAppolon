@@ -1,0 +1,41 @@
+[
+  {
+    "id": 1,
+    "version": "4.0.13.2900",
+    "branch": "main",
+    "releaseDate": "2026-10-15T00:00:00Z",
+    "fileName": "Sonarr.main.4.0.13.2900.linux-musl-x64.tar.gz",
+    "url": "https://download.sonarr.tv/v4/main/4.0.13.2900",
+    "installed": false,
+    "installedOn": null,
+    "installable": true,
+    "latest": true,
+    "changes": {
+      "new": [
+        "#1234 Added a thing",
+        "#2345 Fixed another"
+      ],
+      "fixed": [
+        "#3456 Fixed a bug"
+      ]
+    },
+    "hash": "abc123def456"
+  },
+  {
+    "id": 2,
+    "version": "4.0.12.2863",
+    "branch": "main",
+    "releaseDate": "2026-09-01T00:00:00Z",
+    "fileName": "Sonarr.main.4.0.12.2863.linux-musl-x64.tar.gz",
+    "url": "https://download.sonarr.tv/v4/main/4.0.12.2863",
+    "installed": true,
+    "installedOn": "2026-09-02T00:00:00Z",
+    "installable": false,
+    "latest": false,
+    "changes": {
+      "new": [],
+      "fixed": []
+    },
+    "hash": "fed654cba321"
+  }
+]

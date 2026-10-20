@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "name": "Anime tagging",
+    "removeTagsAutomatically": true,
+    "tags": [
+      1
+    ],
+    "specifications": []
+  }
+]

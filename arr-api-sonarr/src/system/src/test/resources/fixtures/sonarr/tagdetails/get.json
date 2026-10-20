@@ -1,0 +1,23 @@
+{
+  "id": 1,
+  "label": "anime",
+  "delayProfileIds": [
+    1
+  ],
+  "importListIds": [],
+  "notificationIds": [
+    3
+  ],
+  "restrictionIds": [],
+  "excludedReleaseProfileIds": [],
+  "indexerIds": [
+    1,
+    2
+  ],
+  "downloadClientIds": [],
+  "autoTagIds": [],
+  "seriesIds": [
+    10,
+    11
+  ]
+}

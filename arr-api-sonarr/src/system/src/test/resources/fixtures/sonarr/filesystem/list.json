@@ -1,0 +1,30 @@
+{
+  "directories": [
+    {
+      "name": "Shows",
+      "path": "/tv/Shows",
+      "type": "folder"
+    },
+    {
+      "name": "Anime",
+      "path": "/tv/Anime",
+      "type": "folder"
+    }
+  ],
+  "files": [
+    {
+      "name": "notes.txt",
+      "path": "/tv/notes.txt",
+      "type": "file",
+      "size": 42
+    },
+    {
+      "name": "poster.jpg",
+      "path": "/tv/poster.jpg",
+      "type": "file",
+      "size": 20480
+    }
+  ],
+  "parent": "/tv",
+  "current": "/tv"
+}

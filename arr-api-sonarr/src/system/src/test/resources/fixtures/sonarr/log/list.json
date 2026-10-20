@@ -1,0 +1,27 @@
+{
+  "page": 1,
+  "pageSize": 10,
+  "sortKey": "time",
+  "sortDirection": "descending",
+  "totalRecords": 2,
+  "records": [
+    {
+      "id": 1002,
+      "time": "2026-10-20T09:00:01.234Z",
+      "level": "info",
+      "logger": "Sonarr.Http.Authentication",
+      "message": "Auth-Unauthorized ip 127.0.0.1",
+      "method": "POST"
+    },
+    {
+      "id": 1001,
+      "time": "2026-10-20T08:59:58.100Z",
+      "exceptionType": "StartupException",
+      "exception": "System.InvalidOperationException: Operation is not valid",
+      "level": "error",
+      "logger": "Sonarr.ErrorManagement",
+      "message": "EPIC FAIL",
+      "method": "GET"
+    }
+  ]
+}

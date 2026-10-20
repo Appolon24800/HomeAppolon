@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "Check For Finished Downloads",
+    "taskName": "CheckForFinishedDownload",
+    "interval": 1,
+    "lastExecution": "2026-10-20T09:00:00Z",
+    "lastStartTime": "2026-10-20T09:00:00Z",
+    "nextExecution": "2026-10-20T09:01:00Z",
+    "lastDuration": "00:00:00.2500000"
+  },
+  {
+    "id": 2,
+    "name": "Refresh Series",
+    "taskName": "RefreshSeries",
+    "interval": 60,
+    "lastExecution": "2026-10-20T08:00:00Z",
+    "lastStartTime": "2026-10-20T08:00:00Z",
+    "nextExecution": "2026-10-20T09:00:00Z",
+    "lastDuration": "00:00:02.1000000"
+  }
+]

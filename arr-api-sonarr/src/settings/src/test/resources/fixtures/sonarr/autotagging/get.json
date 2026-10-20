@@ -1,0 +1,28 @@
+{
+  "id": 1,
+  "name": "Anime tagging",
+  "removeTagsAutomatically": true,
+  "tags": [
+    1
+  ],
+  "specifications": [
+    {
+      "id": 1,
+      "name": "Genre",
+      "implementation": "SeriesSpecification",
+      "implementationName": "Series",
+      "negate": false,
+      "required": true,
+      "fields": [
+        {
+          "order": 1,
+          "name": "genre",
+          "label": "Genre",
+          "value": "anime",
+          "type": "text",
+          "advanced": false
+        }
+      ]
+    }
+  ]
+}
