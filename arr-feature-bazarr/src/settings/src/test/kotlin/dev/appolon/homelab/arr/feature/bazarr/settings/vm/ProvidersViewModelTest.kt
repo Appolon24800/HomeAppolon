@@ -53,6 +53,7 @@ class ProvidersViewModelTest {
     )
 
     private fun runVm(
+        seed: (FakeBazarrSubtitles) -> Unit = {},
         block: suspend TestScope.() -> Unit,
     ) = runTest(main) {
         system = FakeBazarrSystem()
@@ -60,6 +61,7 @@ class ProvidersViewModelTest {
         subtitles.responses["get_providers"] = settingsDataPayload(
             listOf(providerRow(provider = "opensubtitles"), providerRow(provider = "subf2m")),
         )
+        seed(subtitles)
         vm = buildVm()
         val job = launch { vm.lce.collect {} }
         advanceUntilIdle()
@@ -95,5 +97,33 @@ class ProvidersViewModelTest {
 
         assertEquals(ProvidersMessage.ResetQueued, vm.state.value.message)
         assertTrue(vm.state.value.queuedReset)
+    }
+
+    @Test
+    fun `a failed load surfaces the error state and retry recovers`() = runVm(
+        seed = {
+            it.errorInjection = { op -> if (op == "get_providers") IOException() else null }
+        },
+    ) {
+        assertTrue(vm.lce.value is LceState.Error)
+
+        subtitles.errorInjection = { null }
+        vm.refresh()
+
+        assertTrue(vm.lce.value is LceState.Content)
+        assertEquals(
+            listOf("opensubtitles", "subf2m"),
+            vm.state.value.providers.map { it.provider },
+        )
+    }
+
+    @Test
+    fun `refresh failure with rows loaded keeps content with the load error`() = runVm {
+        subtitles.errorInjection = { op -> if (op == "get_providers") IOException() else null }
+
+        vm.refresh()
+
+        assertTrue(vm.lce.value is LceState.Content)
+        assertTrue(vm.state.value.loadError != null)
     }
 }

@@ -38,6 +38,7 @@ dependencies {
     implementation(project(":arr-core"))
     implementation(project(":arr-net"))
     implementation(project(":arr-data"))
+    implementation(project(":arr-sync"))
     implementation(project(":arr-ui-core"))
     implementation(project(":arr-api-radarr"))
     implementation(libs.kotlinx.serialization.json)

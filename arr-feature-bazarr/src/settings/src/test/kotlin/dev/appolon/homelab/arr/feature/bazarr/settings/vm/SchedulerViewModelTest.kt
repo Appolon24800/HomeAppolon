@@ -57,6 +57,7 @@ class SchedulerViewModelTest {
     )
 
     private fun runVm(
+        seed: (FakeBazarrSystem) -> Unit = {},
         block: suspend TestScope.() -> Unit,
     ) = runTest(main) {
         system = FakeBazarrSystem()
@@ -66,6 +67,7 @@ class SchedulerViewModelTest {
                 taskRow(jobId = "update_movies", name = "Update Movies"),
             ),
         )
+        seed(system)
         vm = buildVm()
         val job = launch { vm.lce.collect {} }
         advanceUntilIdle()
@@ -103,5 +105,29 @@ class SchedulerViewModelTest {
         assertEquals(SchedulerMessage.RunQueued, vm.state.value.message)
         assertEquals(setOf("update_movies"), vm.state.value.queuedTaskIds)
         assertTrue(vm.state.value.tasks.first { it.jobId == "update_movies" }.running)
+    }
+
+    @Test
+    fun `a failed load surfaces the error state and retry recovers`() = runVm(
+        seed = { it.failure = failing("get_system_tasks") },
+    ) {
+        assertTrue(vm.lce.value is LceState.Error)
+
+        system.failure = { null }
+        vm.refresh()
+
+        assertTrue(vm.lce.value is LceState.Content)
+        assertEquals(2, vm.state.value.tasks.size)
+    }
+
+    @Test
+    fun `refresh bypasses the cache and pulls task changes`() = runVm {
+        system.responses["get_system_tasks"] = settingsDataPayload(
+            listOf(taskRow(jobId = "update_series", name = "Update Series")),
+        )
+
+        vm.refresh()
+
+        assertEquals(listOf("update_series"), vm.state.value.tasks.map { it.jobId })
     }
 }

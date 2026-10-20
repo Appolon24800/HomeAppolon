@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indexers -->
+    <string name="arr_lidarr_indexer_option_minutes_support">Minutes</string>
+    <string name="arr_lidarr_indexer_option_days_support">Days</string>
+    <string name="arr_lidarr_indexer_option_megabytes_support">Megabytes, 0 is unlimited</string>
+    <string name="arr_lidarr_indexer_option_rss_minutes_support">Minutes, 0 disables RSS</string>
+
+    <!-- Download clients -->
+
+    <!-- Remote path mappings -->
+    <string name="arr_lidarr_mapping_section">Mappings</string>
+</resources>

@@ -101,4 +101,24 @@ class SonarrGeneralSettingsViewModelTest : SonarrSettingsSystemVmTest() {
 
         assertTrue(vm.lce.value is LceState.Error)
     }
+
+    @Test
+    fun `retry after a failed load reloads the draft`() = runTest {
+        api.error = { IOException("offline") }
+
+        val vm = withViewModel(::SonarrGeneralSettingsViewModel) { it.lce }
+        assertTrue(vm.lce.value is LceState.Error)
+
+        api.error = { null }
+        api.hostConfig = HostConfigResource(
+            id = 1,
+            port = 8989,
+            urlBase = "/sonarr",
+        )
+        vm.refresh()
+        advanceUntilIdle()
+
+        assertTrue(vm.lce.value is LceState.Content)
+        assertEquals("/sonarr", (vm.lce.value as LceState.Content).data.draft.urlBase)
+    }
 }

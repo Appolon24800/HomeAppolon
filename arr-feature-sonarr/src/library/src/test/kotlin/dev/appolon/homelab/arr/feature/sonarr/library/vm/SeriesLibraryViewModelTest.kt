@@ -323,4 +323,53 @@ class SeriesLibraryViewModelTest {
         assertEquals("year", vm.state.value.sortId)
         assertTrue(vm.state.value.sortDescending)
     }
+
+    @Test
+    fun `a fresh ViewModel reports loading until first collection`() {
+        val fresh = SeriesLibraryViewModel(repository, savedFilters)
+        assertEquals(LceState.Loading, fresh.lce.value)
+        collectors.launch { fresh.lce.collect {} }
+        assertTrue(fresh.lce.value is LceState.Content)
+    }
+
+    @Test
+    fun `refresh failure with a warm cache keeps content and records the load error`() = runTest {
+        assertTrue(vm.lce.value is LceState.Content)
+        fake.error = { _: String -> IOException("down") }
+        vm.refresh()
+        val state = vm.state.value
+        assertTrue(vm.lce.value is LceState.Content)
+        assertTrue(state.loadError != null)
+        assertEquals(listOf("Alpha", "Beta"), state.series.map { it.title })
+    }
+
+    @Test
+    fun `retry after a failed load recovers to content and clears the error`() = runTest {
+        val failing = FakeSonarrLibrary(error = { IOException("down") })
+        val errorVm = SeriesLibraryViewModel(
+            SonarrSeriesRepository(
+                serverId = serverId,
+                store = FakeEntityStore(),
+                seriesApi = failing.series,
+                seriesEditorApi = failing.seriesEditor,
+                seasonPassApi = failing.seasonPass,
+                qualityProfileApi = { emptyList() },
+                tagApi = { emptyList() },
+                commandRunner = { _, _ -> dev.appolon.homelab.arr.core.ArrResult.ok(Unit) },
+                actionQueue = FakeActionQueue(),
+                ioDispatcher = dispatcher,
+            ),
+            SavedSeriesFiltersStore(FakeEntityStore(), serverId),
+        )
+        subscribeLce(errorVm)
+        assertTrue(errorVm.lce.value is LceState.Error)
+
+        failing.error = { _: String -> null }
+        failing.seriesStore[9] = series(9, "Recovered")
+        errorVm.refresh()
+
+        assertTrue(errorVm.lce.value is LceState.Content)
+        assertNull(errorVm.state.value.loadError)
+        assertEquals(listOf("Recovered"), errorVm.state.value.series.map { it.title })
+    }
 }

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Import lists -->
+
+    <string name="arr_lidarr_lists_empty_message">Add an import list to discover artists automatically.</string>
+    <string name="arr_lidarr_lists_auto">Automatic add</string>
+
+    <!-- Import list editor -->
+    <string name="arr_lidarr_list_automatic_add">Add artists found on this list automatically</string>
+    <string name="arr_lidarr_list_search">Search for missing albums on add</string>
+    <string name="arr_lidarr_list_monitor_existing">Monitor artists already in Lidarr</string>
+    <string name="arr_lidarr_list_monitor">Monitor strategy</string>
+    <string name="arr_lidarr_list_quality_profile">Quality profile id</string>
+    <string name="arr_lidarr_list_quality_profile_support">The numeric id shown in Settings, Profiles</string>
+    <string name="arr_lidarr_list_metadata_profile">Metadata profile id</string>
+    <string name="arr_lidarr_list_metadata_profile_support">The numeric id shown in Settings, Profiles</string>
+
+    <!-- Import list exclusions -->
+    <string name="arr_lidarr_exclusions_cd_delete">Stop excluding %1$s</string>
+    <string name="arr_lidarr_exclusions_empty_message">Excluded artists never come back from a list sync.</string>
+    <string name="arr_lidarr_exclusions_section">Exclusions</string>
+    <string name="arr_lidarr_exclusions_artist_label">Artist name</string>
+    <string name="arr_lidarr_exclusions_foreign_id_label">MusicBrainz artist id</string>
+    <string name="arr_lidarr_exclusions_foreign_id_support">The MusicBrainz artist id the list reports</string>
+    <string name="arr_lidarr_exclusions_foreign_id_value">MusicBrainz %1$s</string>
+
+    <!-- Connect notifications -->
+    <string name="arr_lidarr_notification_event_release_import">On release import</string>
+    <string name="arr_lidarr_notification_event_artist_added">On artist added</string>
+    <string name="arr_lidarr_notification_event_artist_delete">On artist delete</string>
+    <string name="arr_lidarr_notification_event_album_delete">On album delete</string>
+    <string name="arr_lidarr_notification_event_download_failure">On download failure</string>
+    <string name="arr_lidarr_notification_event_import_failure">On import failure</string>
+    <string name="arr_lidarr_notification_event_track_retag">On track retag</string>
+
+    <!-- Metadata consumers -->
+</resources>

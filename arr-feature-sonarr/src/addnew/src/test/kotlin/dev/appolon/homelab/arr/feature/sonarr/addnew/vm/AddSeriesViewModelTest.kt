@@ -14,6 +14,7 @@ import dev.appolon.homelab.arr.api.sonarr.model.SeasonResource
 import dev.appolon.homelab.arr.api.sonarr.model.SeriesResource
 import dev.appolon.homelab.arr.api.sonarr.model.SeriesTypes
 import dev.appolon.homelab.arr.api.sonarr.model.TagResource
+import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.sonarr.addnew.SonarrSeriesLookupRunner
@@ -294,5 +295,92 @@ class AddSeriesViewModelTest {
         assertTrue(vm.state.value.message != null)
         vm.consumeMessage()
         assertNull(vm.state.value.message)
+    }
+
+    @Test
+    fun `search failure surfaces the search error and retry recovers`() {
+        var failLookup = true
+        val flakyVm = AddSeriesViewModel(
+            SonarrAddRepository(
+                serverId = serverId,
+                store = FakeEntityStore(),
+                seriesApi = library.series,
+                lookupRunner = SonarrSeriesLookupRunner { _ ->
+                    if (failLookup) {
+                        ArrResult.err(ArrError.Network(IOException("down")))
+                    } else {
+                        ArrResult.ok(lookupResults)
+                    }
+                },
+                rootFolderApi = { system.rootFolderApi.list() },
+                qualityProfileApi = { calendar.qualityProfile.list() },
+                languageProfileApi = { calendar.languageProfile.list() },
+                tagApi = { system.tagApi.list() },
+                importListApi = discovery.importList,
+                importListExclusionApi = discovery.importListExclusion,
+                actionQueue = FakeActionQueue(),
+                ioDispatcher = dispatcher,
+            ),
+        )
+        flakyVm.onQueryChange("Aqua")
+        flakyVm.search()
+        assertTrue(flakyVm.state.value.searchError is ArrError.Network)
+        assertTrue(flakyVm.state.value.results.isEmpty())
+        assertTrue(flakyVm.state.value.searching.not())
+
+        failLookup = false
+        flakyVm.search()
+        assertNull(flakyVm.state.value.searchError)
+        assertEquals(3, flakyVm.state.value.results.size)
+    }
+
+    @Test
+    fun `clearing the query after a failed search clears the error`() {
+        var failLookup = true
+        val flakyVm = AddSeriesViewModel(
+            SonarrAddRepository(
+                serverId = serverId,
+                store = FakeEntityStore(),
+                seriesApi = library.series,
+                lookupRunner = SonarrSeriesLookupRunner { _ ->
+                    if (failLookup) {
+                        ArrResult.err(ArrError.Network(IOException("down")))
+                    } else {
+                        ArrResult.ok(lookupResults)
+                    }
+                },
+                rootFolderApi = { system.rootFolderApi.list() },
+                qualityProfileApi = { calendar.qualityProfile.list() },
+                languageProfileApi = { calendar.languageProfile.list() },
+                tagApi = { system.tagApi.list() },
+                importListApi = discovery.importList,
+                importListExclusionApi = discovery.importListExclusion,
+                actionQueue = FakeActionQueue(),
+                ioDispatcher = dispatcher,
+            ),
+        )
+        flakyVm.onQueryChange("Aqua")
+        flakyVm.search()
+        assertTrue(flakyVm.state.value.searchError != null)
+
+        flakyVm.onQueryChange("")
+        val state = flakyVm.state.value
+        assertNull(state.searchError)
+        assertTrue(state.results.isEmpty())
+        assertTrue(state.searched.not())
+    }
+
+    @Test
+    fun `import lists failure surfaces the lists error and retry recovers`() {
+        // Both fetches must fail: one success clears the error banner.
+        discovery.error = { _: String -> IOException("down") }
+        vm.refreshLists()
+        assertTrue(vm.state.value.listsError != null)
+
+        discovery.error = { _: String -> null }
+        discovery.importListStore[3] = ImportListResource(id = 3, name = "Trakt")
+        vm.refreshLists()
+        assertNull(vm.state.value.listsError)
+        assertEquals(listOf("Trakt"), vm.state.value.importLists.map { it.name })
     }
 }

@@ -100,4 +100,34 @@ class SonarrSystemStatusViewModelTest : SonarrSettingsSystemVmTest() {
         assertTrue(vm.lce.value is LceState.Content)
         assertNull(vm.state.value.loadError)
     }
+
+    @Test
+    fun `retry after the error state recovers to content`() = runTest {
+        api.error = { IOException("offline") }
+        val vm = withViewModel(::SonarrSystemStatusViewModel) { it.lce }
+        assertTrue(vm.lce.value is LceState.Error)
+
+        api.error = { null }
+        seed()
+        vm.refresh()
+        advanceUntilIdle()
+
+        assertTrue(vm.lce.value is LceState.Content)
+        assertEquals("4.0.12.2278", (vm.lce.value as LceState.Content).data.status.version)
+    }
+
+    @Test
+    fun `refresh past the ttl refetches and renders the new version`() = runTest {
+        seed()
+        val vm = withViewModel(::SonarrSystemStatusViewModel) { it.lce }
+        assertEquals("4.0.12.2278", (vm.lce.value as LceState.Content).data.status.version)
+
+        now += dev.appolon.homelab.arr.feature.sonarr.settings.system.data
+            .SonarrSettingsSystemRepository.SYSTEM_TTL_MILLIS + 1
+        api.systemStatus = api.systemStatus.copy(version = "4.0.99.0000")
+        vm.refresh()
+        advanceUntilIdle()
+
+        assertEquals("4.0.99.0000", (vm.lce.value as LceState.Content).data.status.version)
+    }
 }
