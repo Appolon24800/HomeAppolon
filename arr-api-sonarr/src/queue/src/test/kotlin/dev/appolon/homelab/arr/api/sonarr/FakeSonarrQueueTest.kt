@@ -4,6 +4,7 @@ import dev.appolon.homelab.arr.api.sonarr.model.BlocklistBulkResource
 import dev.appolon.homelab.arr.api.sonarr.model.BlocklistResource
 import dev.appolon.homelab.arr.api.sonarr.model.CommandResource
 import dev.appolon.homelab.arr.api.sonarr.model.EpisodeHistoryEventType
+import dev.appolon.homelab.arr.api.sonarr.model.EpisodeResource
 import dev.appolon.homelab.arr.api.sonarr.model.HistoryResource
 import dev.appolon.homelab.arr.api.sonarr.model.ManualImportReprocessResource
 import dev.appolon.homelab.arr.api.sonarr.model.ManualImportResource
@@ -19,8 +20,6 @@ import java.io.IOException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
@@ -63,7 +62,7 @@ class FakeSonarrQueueTest {
         assertTrue(fake.blocklistStore.isEmpty())
         fake.historyStore[1] = HistoryResource(
             id = 1, seriesId = 5, episodeId = 9, date = "2026-01-01T00:00:00Z",
-            episode = buildJsonObject { put("seasonNumber", 2) }
+            episode = EpisodeResource(seasonNumber = 2)
         )
         assertEquals(1, fake.history.list(episodeId = 9).totalRecords)
         assertEquals(1, fake.history.series(seriesId = 5, seasonNumber = 2).size)

@@ -5,7 +5,6 @@ import dev.appolon.homelab.arr.api.sonarr.model.LocalizationResource
 import dev.appolon.homelab.arr.net.ArrJson
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -49,7 +48,7 @@ class SonarrLocalizationContractTest {
         val expected = ArrJson.decodeFromString<LocalizationResource>(
             fixture("fixtures/sonarr/localization/get.json")
         )
-        assertEquals("Add", expected.strings!!["Add"]!!.jsonPrimitive.content)
+        assertEquals("Add", expected.strings!!["Add"])
         assertEquals(expected, api.get())
         val request = server.takeRequest()
         assertEquals("GET", request.method)
