@@ -1,0 +1,3 @@
+GET  -> api/v1/system/status
+GET  -> api/v1/system/routes
+POST -> api/v1/system/restart

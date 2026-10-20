@@ -1,0 +1,10 @@
+{
+  "id": 1,
+  "name": "Check For Updates",
+  "taskName": "CheckForUpdates",
+  "interval": 3600,
+  "lastExecution": "2026-10-20T07:30:00Z",
+  "lastStartTime": "2026-10-20T07:30:00Z",
+  "nextExecution": "2026-10-20T08:30:00Z",
+  "lastDuration": "00:00:01.1234567"
+}
