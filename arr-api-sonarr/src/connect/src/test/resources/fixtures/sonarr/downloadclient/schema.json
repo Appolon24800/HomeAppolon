@@ -1,0 +1,153 @@
+[
+  {
+    "id": 0,
+    "name": "Sabnzbd",
+    "fields": [
+      {
+        "order": 1,
+        "name": "host",
+        "label": "Host",
+        "unit": null,
+        "helpText": "",
+        "helpTextWarning": null,
+        "helpLink": "",
+        "value": "127.0.0.1",
+        "type": "textbox",
+        "advanced": false,
+        "selectOptions": [],
+        "selectOptionsProviderAction": null,
+        "section": "",
+        "hidden": null,
+        "privacy": "normal",
+        "placeholder": null,
+        "isFloat": false
+      },
+      {
+        "order": 2,
+        "name": "port",
+        "label": "Port",
+        "unit": null,
+        "helpText": "",
+        "helpTextWarning": null,
+        "helpLink": "",
+        "value": 8080,
+        "type": "number",
+        "advanced": false,
+        "selectOptions": [],
+        "selectOptionsProviderAction": null,
+        "section": "",
+        "hidden": null,
+        "privacy": "normal",
+        "placeholder": null,
+        "isFloat": false
+      },
+      {
+        "order": 3,
+        "name": "useSsl",
+        "label": "Use SSL",
+        "unit": null,
+        "helpText": "",
+        "helpTextWarning": null,
+        "helpLink": "",
+        "value": false,
+        "type": "select",
+        "advanced": false,
+        "selectOptions": [
+          {
+            "value": 0,
+            "name": "Use SSL",
+            "order": 0,
+            "hint": null
+          },
+          {
+            "value": 1,
+            "name": "Prefer SSL",
+            "order": 1,
+            "hint": null
+          }
+        ],
+        "selectOptionsProviderAction": null,
+        "section": "",
+        "hidden": null,
+        "privacy": "normal",
+        "placeholder": null,
+        "isFloat": false
+      },
+      {
+        "order": 4,
+        "name": "category",
+        "label": "Category",
+        "unit": null,
+        "helpText": "",
+        "helpTextWarning": null,
+        "helpLink": "",
+        "value": "tv-sonarr",
+        "type": "textbox",
+        "advanced": true,
+        "selectOptions": [],
+        "selectOptionsProviderAction": null,
+        "section": "",
+        "hidden": null,
+        "privacy": "normal",
+        "placeholder": null,
+        "isFloat": false
+      }
+    ],
+    "implementationName": "SABnzbd",
+    "implementation": "Sabnzbd",
+    "configContract": "SabnzbdSettings",
+    "infoLink": "https://wiki.servarr.com/sonarr",
+    "message": {
+      "message": null,
+      "type": "info"
+    },
+    "tags": [],
+    "presets": [
+      {
+        "id": 0,
+        "name": "Sabnzbd",
+        "fields": [
+          {
+            "order": 1,
+            "name": "host",
+            "label": "Host",
+            "unit": null,
+            "helpText": "",
+            "helpTextWarning": null,
+            "helpLink": "",
+            "value": "",
+            "type": "textbox",
+            "advanced": false,
+            "selectOptions": [],
+            "selectOptionsProviderAction": null,
+            "section": "",
+            "hidden": null,
+            "privacy": "normal",
+            "placeholder": null,
+            "isFloat": false
+          }
+        ],
+        "implementationName": "SABnzbd",
+        "implementation": "Sabnzbd",
+        "configContract": "SabnzbdSettings",
+        "infoLink": "https://wiki.servarr.com/sonarr",
+        "message": {
+          "message": null,
+          "type": "info"
+        },
+        "tags": [],
+        "presets": [],
+        "enable": true,
+        "protocol": "usenet",
+        "priority": 1,
+        "removeCompletedDownloads": true,
+        "removeFailedDownloads": true
+      }
+    ],
+    "enable": true,
+    "protocol": "usenet",
+    "priority": 1,
+    "removeCompletedDownloads": true,
+    "removeFailedDownloads": true
+  }
+]
