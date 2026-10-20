@@ -45,6 +45,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.api.lidarr.model.ImportListResource
+import dev.appolon.homelab.arr.api.lidarr.model.TagResource
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.lidarr.R
 import dev.appolon.homelab.arr.feature.lidarr.settings.connect.LidarrConnectClients
@@ -56,7 +57,6 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
-import dev.appolon.homelab.arr.api.lidarr.model.TagResource
 import dev.appolon.homelab.arr.ui.R as ArrUiR
 
 /** Destination for the import lists route. */
@@ -396,7 +396,10 @@ private fun SyncPreviewSheet(
                                     stringResource(R.string.arr_lidarr_lists_preview_manual_add)
                                 },
                                 row.monitor?.let { monitor ->
-                                    stringResource(R.string.arr_lidarr_lists_preview_monitor, monitorLabel(monitor))
+                                    stringResource(
+                                        R.string.arr_lidarr_lists_preview_monitor,
+                                        monitorLabel(monitor),
+                                    )
                                 },
                                 stringResource(
                                     R.string.arr_lidarr_lists_preview_quality_profile,

@@ -31,8 +31,8 @@ enum class ExclusionsNotice { ADDED, ADDED_QUEUED, DELETED, DELETED_QUEUED }
 
 /**
  * Import list exclusions state: rows keyed by MusicBrainz artist id, an
- * add dialog, and delete with confirm. Excluded artists never come back
- * from a list sync.
+ * add dialog, and delete with confirm. Rows the add-artist group created
+ * offline appear here too because both read the same entity type.
  */
 class LidarrImportListExclusionsViewModel(
     private val serverId: ServerId,

@@ -26,8 +26,8 @@ import kotlinx.serialization.json.JsonElement
 /**
  * Editable import list draft. Beyond the dynamic provider fields, a
  * Lidarr list carries the add options every synced artist inherits:
- * monitoring strategy, existing-artist monitoring, search on add,
- * quality and metadata profiles, and root folder.
+ * monitor strategy, existing-artist monitoring, search on add, quality
+ * and metadata profiles, and root folder.
  */
 data class ImportListDraft(
     val id: Int = 0,

@@ -186,9 +186,7 @@ class LidarrDownloadClientEditorViewModel(
     }
 
     /** Builds the wire resource from the draft without writing anything. */
-    private suspend fun buildResource(
-        draft: DownloadClientDraft,
-    ): ArrResult<DownloadClientResource> {
+    private suspend fun buildResource(draft: DownloadClientDraft): ArrResult<DownloadClientResource> {
         val tagIds = when (val ids = repository.ensureTagIds(draft.tagLabels)) {
             is ArrResult.Ok -> ids.value
             is ArrResult.Err -> return ArrResult.err(ids.error)

@@ -1,5 +1,10 @@
 package dev.appolon.homelab.arr
 
+import dev.appolon.homelab.arr.feature.sonarr.SonarrPollAdapter
+import dev.appolon.homelab.arr.feature.radarr.RadarrPollAdapter
+import dev.appolon.homelab.arr.feature.prowlarr.ProwlarrPollAdapter
+import dev.appolon.homelab.arr.feature.lidarr.LidarrPollAdapter
+import dev.appolon.homelab.arr.feature.bazarr.BazarrPollAdapter
 import android.app.NotificationManager
 import android.content.Context
 import android.net.ConnectivityManager
@@ -87,6 +92,15 @@ internal class ArrRuntime(context: Context) {
 
     /** Merged shell content for every configured app. */
     val content: ArrShellContent = wiring.content
+
+    init {
+        // Background sync adapters: one per app type, sharing the graph and client factory.
+        SyncBootstrap.registerAdapter(AppType.RADARR, RadarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+        SyncBootstrap.registerAdapter(AppType.SONARR, SonarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+        SyncBootstrap.registerAdapter(AppType.LIDARR, LidarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+        SyncBootstrap.registerAdapter(AppType.PROWLARR, ProwlarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+        SyncBootstrap.registerAdapter(AppType.BAZARR, BazarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+    }
 
     /** Switcher display data, kept live from the server registry. */
     val shellServers = wiring.shellServers

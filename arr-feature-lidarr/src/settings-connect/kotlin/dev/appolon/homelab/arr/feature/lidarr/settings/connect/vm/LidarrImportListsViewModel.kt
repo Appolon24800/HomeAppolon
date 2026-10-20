@@ -2,6 +2,7 @@ package dev.appolon.homelab.arr.feature.lidarr.settings.connect.vm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.appolon.homelab.arr.api.lidarr.model.ImportListMonitorType
 import dev.appolon.homelab.arr.api.lidarr.model.ImportListResource
 import dev.appolon.homelab.arr.api.lidarr.model.TagResource
 import dev.appolon.homelab.arr.core.ArrError
@@ -19,12 +20,32 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** One list's row in the sync preview sheet. */
+data class ImportListSyncRow(
+    val name: String,
+    val implementationName: String?,
+    val automaticAdd: Boolean,
+    val searchForNew: Boolean,
+    val monitor: ImportListMonitorType?,
+    val qualityProfileId: Int,
+    val metadataProfileId: Int,
+    val rootFolderPath: String?,
+    val minRefreshInterval: String?,
+)
+
+/** The sync preview sheet payload: what every list would do on a sync. */
+data class ImportListSyncPreview(
+    val rows: List<ImportListSyncRow> = emptyList(),
+    val exclusionCount: Int = 0,
+)
+
 /** Content payload of the import lists LCE state. */
 data class LidarrImportListsContent(
     val lists: List<ImportListResource>,
     val tags: List<TagResource>,
     val queuedRemovedIds: Set<Int>,
     val pendingActions: Int,
+    val preview: ImportListSyncPreview,
 )
 
 /** Transient results of import list writes and probes, mapped to strings by the screen. */
@@ -38,10 +59,11 @@ enum class ImportListsNotice {
 
 /**
  * Import lists list state. Rows show the automatic-add and search badges,
- * the add options a synced artist inherits, and tag chips; the app bar
- * offers test-all, the server-side sync command, and the exclusions entry
- * point. Lidarr has no import list config endpoint, so per-list settings
- * live on the list resources themselves and there is no options card.
+ * the quality and metadata profiles a synced artist inherits, and tag
+ * chips; the app bar offers test-all, the server-side sync command, the
+ * sync preview sheet built from the cached lists, and exclusions. Lidarr
+ * has no import list config endpoint, so per-list options live on each
+ * list's editor instead of a group options card.
  */
 class LidarrImportListsViewModel(
     private val serverId: ServerId,
@@ -56,13 +78,33 @@ class LidarrImportListsViewModel(
         val tags: List<TagResource> = emptyList(),
         val queuedRemovedIds: Set<Int> = emptySet(),
         val pendingActions: Int = 0,
+        val exclusions: Int = 0,
+        val previewOpen: Boolean = false,
         val testingAll: Boolean = false,
         val syncing: Boolean = false,
         val confirmDeleteFor: ImportListResource? = null,
         val writeError: ArrError? = null,
         val notice: ImportListsNotice? = null,
         val busy: Boolean = false,
-    )
+    ) {
+        val preview: ImportListSyncPreview
+            get() = ImportListSyncPreview(
+                rows = lists.map { list ->
+                    ImportListSyncRow(
+                        name = list.name.orEmpty(),
+                        implementationName = list.implementationName,
+                        automaticAdd = list.enableAutomaticAdd,
+                        searchForNew = list.shouldSearch,
+                        monitor = list.shouldMonitor,
+                        qualityProfileId = list.qualityProfileId,
+                        metadataProfileId = list.metadataProfileId,
+                        rootFolderPath = list.rootFolderPath,
+                        minRefreshInterval = list.minRefreshInterval,
+                    )
+                },
+                exclusionCount = exclusions,
+            )
+    }
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
@@ -79,6 +121,7 @@ class LidarrImportListsViewModel(
                         tags = s.tags,
                         queuedRemovedIds = s.queuedRemovedIds,
                         pendingActions = s.pendingActions,
+                        preview = s.preview,
                     ),
                     refreshing = s.refreshing,
                 )
@@ -109,6 +152,11 @@ class LidarrImportListsViewModel(
         viewModelScope.launch {
             repository.queuedCount().collect { pending ->
                 _state.update { it.copy(pendingActions = pending) }
+            }
+        }
+        viewModelScope.launch {
+            repository.observeExclusions().collect { exclusions ->
+                _state.update { it.copy(exclusions = exclusions.size) }
             }
         }
         refresh()
@@ -161,6 +209,14 @@ class LidarrImportListsViewModel(
                 }
             }
         }
+    }
+
+    fun openPreview() {
+        _state.update { it.copy(previewOpen = true) }
+    }
+
+    fun closePreview() {
+        _state.update { it.copy(previewOpen = false) }
     }
 
     fun requestDelete(list: ImportListResource) {

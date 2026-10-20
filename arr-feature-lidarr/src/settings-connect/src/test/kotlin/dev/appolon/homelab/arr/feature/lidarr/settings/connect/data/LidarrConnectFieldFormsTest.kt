@@ -4,6 +4,7 @@ import dev.appolon.homelab.arr.api.lidarr.model.Field
 import dev.appolon.homelab.arr.api.lidarr.model.PrivacyLevel
 import dev.appolon.homelab.arr.api.lidarr.model.SelectOption
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
@@ -21,7 +22,7 @@ class LidarrConnectFieldFormsTest {
         advanced: Boolean = false,
         section: String? = null,
         selectOptions: List<SelectOption>? = null,
-        value: kotlinx.serialization.json.JsonElement = JsonNull,
+        value: JsonElement = JsonNull,
     ) = Field(
         name = name,
         type = type,
@@ -66,7 +67,7 @@ class LidarrConnectFieldFormsTest {
         )
         assertEquals(
             ConnectFieldRenderKind.TAG_SELECT,
-            LidarrConnectFieldForms.renderKind(field(name = "tags", type = "tag")),
+            LidarrConnectFieldForms.renderKind(field(type = "tag")),
         )
         assertEquals(
             ConnectFieldRenderKind.TEXT,
