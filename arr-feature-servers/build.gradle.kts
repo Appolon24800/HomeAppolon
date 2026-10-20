@@ -28,7 +28,11 @@ dependencies {
     implementation(project(":arr-net"))
     implementation(project(":arr-data"))
     implementation(project(":arr-ui-core"))
+    implementation(libs.kotlinx.serialization.json)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
+    testImplementation(libs.junit)
+    testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
