@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Wanted (missing + cutoff unmet), album granularity -->
+    <string name="arr_lidarr_wanted_title">Wanted</string>
+    <string name="arr_lidarr_wanted_tab_missing">Missing</string>
+    <string name="arr_lidarr_wanted_tab_cutoff">Cutoff unmet</string>
+    <string name="arr_lidarr_wanted_empty_missing_title">Nothing missing</string>
+    <string name="arr_lidarr_wanted_empty_missing_message">Every monitored album has its tracks.</string>
+    <string name="arr_lidarr_wanted_empty_cutoff_title">Cutoff met everywhere</string>
+    <string name="arr_lidarr_wanted_empty_cutoff_message">No album is waiting for a better quality file.</string>
+    <string name="arr_lidarr_wanted_cd_search_album">Search for %1$s by %2$s</string>
+    <string name="arr_lidarr_wanted_cd_search_all">Search for every album listed</string>
+    <string name="arr_lidarr_wanted_cd_queued">%1$d changes waiting to sync</string>
+    <string name="arr_lidarr_wanted_cd_open_artist">Open %1$s</string>
+    <string name="arr_lidarr_wanted_cd_monitored">Monitored</string>
+    <string name="arr_lidarr_wanted_cd_unmonitored">Not monitored</string>
+    <string name="arr_lidarr_wanted_badge_queued">Queued</string>
+    <string name="arr_lidarr_wanted_loading_more">Loading more</string>
+    <string name="arr_lidarr_wanted_release_date_unknown">Release date unknown</string>
+
+    <!-- Filters -->
+    <string name="arr_lidarr_wanted_filter_monitored">Monitored</string>
+    <string name="arr_lidarr_wanted_filter_release_type">Release type</string>
+    <string name="arr_lidarr_wanted_filter_clear">Clear filters</string>
+    <string name="arr_lidarr_wanted_filter_empty_options">Nothing to filter yet</string>
+    <string name="arr_lidarr_wanted_release_type_album">Album</string>
+    <string name="arr_lidarr_wanted_release_type_single">Single</string>
+    <string name="arr_lidarr_wanted_release_type_ep">EP</string>
+
+    <!-- Snackbar outcomes -->
+    <string name="arr_lidarr_wanted_msg_search_started_one">Search started</string>
+    <string name="arr_lidarr_wanted_msg_search_started_many">Search started for %1$d albums</string>
+    <string name="arr_lidarr_wanted_msg_search_queued_one">You\'re offline. The search will run when the connection returns.</string>
+    <string name="arr_lidarr_wanted_msg_search_queued_many">You\'re offline. Searches for %1$d albums will run when the connection returns.</string>
+    <string name="arr_lidarr_wanted_msg_search_failed">The search didn\'t go through. Try again.</string>
+</resources>
