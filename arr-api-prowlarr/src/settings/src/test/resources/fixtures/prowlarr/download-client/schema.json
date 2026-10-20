@@ -1,0 +1,34 @@
+[
+  {
+    "id": 0,
+    "name": "SABnzbd",
+    "fields": [
+      {
+        "order": 1,
+        "name": "host",
+        "label": "Host",
+        "value": "",
+        "type": "url",
+        "advanced": false,
+        "selectOptions": [],
+        "privacy": "normal",
+        "isFloat": false
+      }
+    ],
+    "implementationName": "SABnzbd",
+    "implementation": "Sabnzbd",
+    "configContract": "SabnzbdSettings",
+    "infoLink": "https://wiki.servarr.com/prowlarr/supported#sabnzbd",
+    "message": {
+      "message": null,
+      "type": "info"
+    },
+    "tags": [],
+    "presets": [],
+    "enable": true,
+    "protocol": "usenet",
+    "priority": 1,
+    "categories": [],
+    "supportsCategories": true
+  }
+]

@@ -1,0 +1,32 @@
+{
+  "parent": "/media",
+  "current": "/media",
+  "directories": [
+    {
+      "type": "folder",
+      "name": "movies",
+      "path": "/media/movies",
+      "size": 4096,
+      "lastModified": "2026-01-02T03:04:05Z",
+      "extension": ""
+    },
+    {
+      "type": "folder",
+      "name": "tv",
+      "path": "/media/tv",
+      "size": 4096,
+      "lastModified": "2026-01-02T03:04:05Z",
+      "extension": ""
+    }
+  ],
+  "files": [
+    {
+      "type": "file",
+      "name": "notes.txt",
+      "path": "/media/notes.txt",
+      "size": 128,
+      "lastModified": "2026-01-02T03:04:05Z",
+      "extension": ".txt"
+    }
+  ]
+}
