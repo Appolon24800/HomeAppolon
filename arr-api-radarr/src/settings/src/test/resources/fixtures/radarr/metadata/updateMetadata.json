@@ -1,0 +1,21 @@
+{
+  "id": 1,
+  "name": "Kodi",
+  "fields": [
+    {
+      "order": 1,
+      "name": "metadataProfileId",
+      "label": "Profile",
+      "value": 1,
+      "type": "select",
+      "advanced": false
+    }
+  ],
+  "implementationName": "Kodi",
+  "implementation": "KodiMetadata",
+  "configContract": "KodiMetadataSettings",
+  "infoLink": "https://wiki.servarr.com/radarr/supported#kodi-metadata",
+  "tags": [],
+  "presets": [],
+  "enable": false
+}

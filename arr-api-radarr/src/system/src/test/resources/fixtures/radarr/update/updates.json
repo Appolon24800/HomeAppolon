@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "version": "5.30.1.9000",
+    "branch": "master",
+    "releaseDate": "2026-10-01T00:00:00Z",
+    "fileName": "Radarr.master.5.30.1.9000.linux-core-x64.tar.gz",
+    "url": "https://github.com/Radarr/Radarr/releases/tag/v5.30.1.9000",
+    "installed": false,
+    "installedOn": null,
+    "installable": false,
+    "latest": true,
+    "changes": {
+      "new": [
+        "Added something"
+      ],
+      "fixed": [
+        "Fixed something"
+      ]
+    },
+    "hash": "abc123"
+  }
+]

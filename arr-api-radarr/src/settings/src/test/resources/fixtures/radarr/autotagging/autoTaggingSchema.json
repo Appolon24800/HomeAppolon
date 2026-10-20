@@ -1,0 +1,20 @@
+[
+  {
+    "id": 0,
+    "name": "Quality",
+    "implementation": "QualitySpecification",
+    "implementationName": "Quality",
+    "negate": false,
+    "required": false,
+    "fields": [
+      {
+        "order": 1,
+        "name": "value",
+        "label": "Root Folder",
+        "value": "/movies",
+        "type": "text",
+        "advanced": false
+      }
+    ]
+  }
+]

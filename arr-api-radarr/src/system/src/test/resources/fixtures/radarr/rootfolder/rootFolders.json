@@ -1,0 +1,15 @@
+[
+  {
+    "id": 1,
+    "path": "/movies",
+    "accessible": true,
+    "freeSpace": 150000000000,
+    "unmappedFolders": [
+      {
+        "name": "Unmapped Movie (2020)",
+        "path": "/movies/Unmapped Movie (2020)",
+        "relativePath": "Unmapped Movie (2020)"
+      }
+    ]
+  }
+]

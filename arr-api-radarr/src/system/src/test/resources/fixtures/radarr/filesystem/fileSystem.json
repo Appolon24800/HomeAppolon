@@ -1,0 +1,23 @@
+{
+  "parent": "/movies",
+  "directories": [
+    {
+      "type": "folder",
+      "name": "Movies",
+      "path": "/movies/Movies",
+      "extension": "",
+      "size": 0,
+      "lastModified": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "files": [
+    {
+      "type": "file",
+      "name": "readme.txt",
+      "path": "/movies/readme.txt",
+      "extension": ".txt",
+      "size": 42,
+      "lastModified": "2026-02-01T00:00:00Z"
+    }
+  ]
+}

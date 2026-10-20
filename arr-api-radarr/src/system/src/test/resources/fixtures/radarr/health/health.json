@@ -1,0 +1,9 @@
+[
+  {
+    "id": 1,
+    "source": "RemovedMoviesCheck",
+    "type": "warning",
+    "message": "Movies were removed from TMDb",
+    "wikiUrl": "https://wiki.servarr.com/radarr/faq#movies-were-removed-from-tmdb"
+  }
+]
