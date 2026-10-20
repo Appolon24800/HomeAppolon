@@ -18,10 +18,13 @@ android {
 
 android {
     sourceSets {
-        getByName("main") { kotlin.srcDirs("src/library/kotlin", "src/subtitles/kotlin", "src/system/kotlin", "src/settings/kotlin") }
+        getByName("main") {
+            kotlin.srcDirs("src/main/kotlin", "src/library/kotlin", "src/library/main/kotlin", "src/subtitles/kotlin", "src/subtitles/main/kotlin", "src/system/kotlin", "src/system/main/kotlin", "src/settings/kotlin", "src/settings/main/kotlin")
+            res.srcDirs("src/library/res", "src/library/main/res", "src/subtitles/res", "src/subtitles/main/res", "src/system/res", "src/system/main/res", "src/settings/res", "src/settings/main/res")
+        }
         getByName("test") {
-            kotlin.srcDirs("src/library/src/test/kotlin", "src/subtitles/src/test/kotlin", "src/system/src/test/kotlin", "src/settings/src/test/kotlin")
-            resources.srcDirs("src/library/src/test/resources", "src/subtitles/src/test/resources", "src/system/src/test/resources", "src/settings/src/test/resources")
+            kotlin.srcDirs("src/library/src/test/kotlin", "src/library/test/kotlin", "src/subtitles/src/test/kotlin", "src/subtitles/test/kotlin", "src/system/src/test/kotlin", "src/system/test/kotlin", "src/settings/src/test/kotlin", "src/settings/test/kotlin")
+            resources.srcDirs("src/library/src/test/resources", "src/library/test/resources", "src/subtitles/src/test/resources", "src/subtitles/test/resources", "src/system/src/test/resources", "src/system/test/resources", "src/settings/src/test/resources", "src/settings/test/resources")
         }
     }
 }

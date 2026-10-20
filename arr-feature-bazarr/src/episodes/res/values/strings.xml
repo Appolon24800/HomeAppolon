@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Episode subtitle list -->
+    <string name="arr_bazarr_episodes_title">Episodes</string>
+    <string name="arr_bazarr_episodes_subtitle">Episode subtitles</string>
+    <string name="arr_bazarr_episodes_empty_title">No episodes</string>
+    <string name="arr_bazarr_episodes_empty_message">This series has no episode subtitle information yet.</string>
+    <string name="arr_bazarr_none_present">No subtitles attached</string>
+    <string name="arr_bazarr_missing_only">Missing only</string>
+    <string name="arr_bazarr_missing_language">Missing %1$s</string>
+    <string name="arr_bazarr_missing_list">Missing: %1$s</string>
+    <string name="arr_bazarr_hearing_impaired">Hearing impaired</string>
+    <string name="arr_bazarr_forced">Forced</string>
+    <string name="arr_bazarr_score">Score %1$d</string>
+    <string name="arr_bazarr_queued">Queued</string>
+
+    <!-- Movie subtitle list -->
+    <string name="arr_bazarr_movie_title">Movie</string>
+    <string name="arr_bazarr_subtitles_section">Subtitles</string>
+    <string name="arr_bazarr_missing_section">Missing subtitles</string>
+    <string name="arr_bazarr_nothing_missing">Nothing missing</string>
+
+    <!-- Manual search -->
+    <string name="arr_bazarr_manual_search_title">Manual search: %1$s</string>
+    <string name="arr_bazarr_manual_search_empty_title">No results</string>
+    <string name="arr_bazarr_manual_search_empty_message">No provider returned a subtitle for this search.</string>
+    <string name="arr_bazarr_provider_result">From %1$s</string>
+    <string name="arr_bazarr_provider_name">Provider %1$s</string>
+
+    <!-- Upload -->
+    <string name="arr_bazarr_upload_title">Upload subtitle</string>
+    <string name="arr_bazarr_upload_pick_language">Select language</string>
+    <string name="arr_bazarr_upload_choose_file">Choose file</string>
+    <string name="arr_bazarr_upload_submit">Upload</string>
+
+    <!-- Content viewer -->
+    <string name="arr_bazarr_viewer_title">Subtitle file</string>
+    <string name="arr_bazarr_viewer_empty">The subtitle file is empty or unreadable.</string>
+    <string name="arr_bazarr_viewer_failed">Could not load the subtitle file.</string>
+    <string name="arr_bazarr_close">Close</string>
+
+    <!-- Wanted -->
+    <string name="arr_bazarr_wanted_title">Wanted subtitles</string>
+    <string name="arr_bazarr_wanted_tab_episodes">Episodes</string>
+    <string name="arr_bazarr_wanted_tab_movies">Movies</string>
+    <string name="arr_bazarr_wanted_empty_title">Nothing wanted</string>
+    <string name="arr_bazarr_wanted_empty_message">Every wanted subtitle has been downloaded.</string>
+
+    <!-- History -->
+    <string name="arr_bazarr_history_title">History</string>
+    <string name="arr_bazarr_history_empty_title">No history</string>
+    <string name="arr_bazarr_history_empty_message">No subtitle decisions have been recorded yet.</string>
+    <string name="arr_bazarr_history_unknown_action">Subtitle event</string>
+
+    <!-- Write results -->
+    <string name="arr_bazarr_download_synced">Subtitle download started</string>
+    <string name="arr_bazarr_download_queued">Download will retry when online</string>
+    <string name="arr_bazarr_delete_synced">Subtitle deleted</string>
+    <string name="arr_bazarr_delete_queued">Delete will retry when online</string>
+    <string name="arr_bazarr_upload_synced">Subtitle uploaded</string>
+
+    <!-- Content descriptions -->
+    <string name="arr_bazarr_cd_download">Download subtitle</string>
+    <string name="arr_bazarr_cd_delete">Delete subtitle</string>
+    <string name="arr_bazarr_cd_upload">Upload subtitle</string>
+    <string name="arr_bazarr_cd_search">Search subtitles across providers</string>
+    <string name="arr_bazarr_cd_search_download">Search and download missing subtitles</string>
+    <string name="arr_bazarr_cd_view">View subtitle file</string>
+    <string name="arr_bazarr_cd_refresh">Refresh</string>
+    <string name="arr_bazarr_cd_movie_event">Movie subtitle event</string>
+    <string name="arr_bazarr_cd_episode_event">Episode subtitle event</string>
+</resources>

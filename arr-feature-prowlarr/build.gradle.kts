@@ -17,12 +17,12 @@ android {
     }
     sourceSets {
         getByName("main") {
-            kotlin.srcDirs("src/indexers/kotlin", "src/search/kotlin", "src/stats/kotlin", "src/history/kotlin", "src/settings/kotlin")
-            res.srcDirs("src/indexers/res", "src/search/res", "src/stats/res", "src/history/res", "src/settings/res")
+            kotlin.srcDirs("src/main/kotlin", "src/indexers/kotlin", "src/indexers/main/kotlin", "src/search/kotlin", "src/search/main/kotlin", "src/stats/kotlin", "src/stats/main/kotlin", "src/history/kotlin", "src/history/main/kotlin", "src/settings/kotlin", "src/settings/main/kotlin")
+            res.srcDirs("src/indexers/res", "src/indexers/main/res", "src/search/res", "src/search/main/res", "src/stats/res", "src/stats/main/res", "src/history/res", "src/history/main/res", "src/settings/res", "src/settings/main/res")
         }
         getByName("test") {
-            kotlin.srcDirs("src/indexers/src/test/kotlin", "src/search/src/test/kotlin", "src/stats/src/test/kotlin", "src/history/src/test/kotlin", "src/settings/src/test/kotlin")
-            resources.srcDirs("src/indexers/src/test/resources", "src/search/src/test/resources", "src/stats/src/test/resources", "src/history/src/test/resources", "src/settings/src/test/resources")
+            kotlin.srcDirs("src/indexers/src/test/kotlin", "src/indexers/test/kotlin", "src/search/src/test/kotlin", "src/search/test/kotlin", "src/stats/src/test/kotlin", "src/stats/test/kotlin", "src/history/src/test/kotlin", "src/history/test/kotlin", "src/settings/src/test/kotlin", "src/settings/test/kotlin")
+            resources.srcDirs("src/indexers/src/test/resources", "src/indexers/test/resources", "src/search/src/test/resources", "src/search/test/resources", "src/stats/src/test/resources", "src/stats/test/resources", "src/history/src/test/resources", "src/history/test/resources", "src/settings/src/test/resources", "src/settings/test/resources")
         }
     }
 }
