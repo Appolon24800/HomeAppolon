@@ -6,7 +6,6 @@ import dev.appolon.homelab.arr.api.bazarr.model.SonarrWebhook
 import dev.appolon.homelab.arr.net.ArrJson
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.JsonObject
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -199,8 +198,12 @@ class BazarrSubtitlesEndpointTest(private val case: SubtitleEndpointCase) {
         if (case.returnsResponse) {
             val response = result as Response<*>
             assertEquals(case.status, response.code())
-            if (case.status == 204) assertNull(response.body())
-            else assertEquals(ArrJson.parseToJsonElement(subtitleFixture(case.tag)), response.body())
+            if (case.status == 204) {
+                assertNull(response.body())
+            } else {
+                val expected = ArrJson.parseToJsonElement(subtitleFixture(case.tag))
+                assertEquals(expected, response.body())
+            }
         } else {
             assertEquals(ArrJson.parseToJsonElement(subtitleFixture(case.tag)), result)
         }
@@ -373,7 +376,9 @@ class BazarrSubtitlesEndpointTest(private val case: SubtitleEndpointCase) {
             SubtitleEndpointCase(
                 "get_jellyfin_libraries", "jellyfin", "GET", "jellyfin/libraries",
                 query("url" to "https://example.test/jellyfin/", "apikey" to "fixture-value"),
-            ) { it.jellyfin.getJellyfinLibraries("https://example.test/jellyfin/", "fixture-value") },
+            ) {
+                it.jellyfin.getJellyfinLibraries("https://example.test/jellyfin/", "fixture-value")
+            },
             SubtitleEndpointCase(
                 "post_jellyfin_test_connection", "jellyfin", "POST", "jellyfin/test-connection",
                 query("url" to "https://example.test/jellyfin/", "apikey" to "fixture-value"),

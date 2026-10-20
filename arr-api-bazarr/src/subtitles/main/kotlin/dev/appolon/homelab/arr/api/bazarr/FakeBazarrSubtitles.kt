@@ -39,7 +39,7 @@ class FakeBazarrSubtitles(
 
     private fun <T> response(operationId: String, body: T?, defaultCode: Int): Response<T> {
         val code = statusCodes[operationId] ?: defaultCode
-        require(code in 200..599) { "Expected an HTTP status in 200..599" }
+        require(code in 200..299 || code in 400..599) { "Expected a success or error status" }
         return if (code < 300) {
             Response.success(code, if (code == 204 || code == 205) null else body)
         } else {
