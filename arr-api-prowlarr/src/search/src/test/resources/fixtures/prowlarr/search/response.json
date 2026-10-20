@@ -1,0 +1,48 @@
+{
+  "id": 1,
+  "guid": "spec-guid-1",
+  "age": 40,
+  "ageHours": 40.5,
+  "ageMinutes": 2430.0,
+  "size": 734003200,
+  "files": 45,
+  "grabs": 12,
+  "indexerId": 1,
+  "indexer": "Spec Indexer",
+  "subGroup": "SpecGroup",
+  "releaseHash": "spec-release-hash",
+  "title": "Spec Release 1080p",
+  "sortTitle": "spec release 1080p",
+  "imdbId": 1375666,
+  "tmdbId": 603,
+  "tvdbId": 0,
+  "tvMazeId": 0,
+  "publishDate": "2026-01-15T10:30:00Z",
+  "commentUrl": "https://example.org/comments/1",
+  "downloadUrl": "https://example.org/download/1",
+  "infoUrl": "https://example.org/details/1",
+  "posterUrl": "https://example.org/posters/1.jpg",
+  "indexerFlags": ["freeleech"],
+  "categories": [
+    {
+      "id": 2000,
+      "name": "Movies",
+      "description": "Movie categories",
+      "subCategories": [
+        {
+          "id": 2040,
+          "name": "Movies/HD",
+          "description": "High definition movies",
+          "subCategories": []
+        }
+      ]
+    }
+  ],
+  "magnetUrl": "magnet:?xt=urn:btih:spec-infohash",
+  "infoHash": "spec-infohash",
+  "seeders": 24,
+  "leechers": 3,
+  "protocol": "torrent",
+  "fileName": "Spec.Release.1080p.mkv",
+  "downloadClientId": 1
+}

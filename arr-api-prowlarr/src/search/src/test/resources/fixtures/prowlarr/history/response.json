@@ -1,0 +1,12 @@
+{
+  "id": 1,
+  "indexerId": 1,
+  "date": "2026-01-15T10:30:00Z",
+  "downloadId": "spec-download-1",
+  "successful": true,
+  "eventType": "releaseGrabbed",
+  "data": {
+    "query": "spec",
+    "source": "Prowlarr"
+  }
+}

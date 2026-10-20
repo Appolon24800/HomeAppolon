@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "indexerId": 1,
+    "date": "2026-01-15T10:30:00Z",
+    "downloadId": "spec-download-1",
+    "successful": true,
+    "eventType": "releaseGrabbed",
+    "data": { "query": "spec" }
+  },
+  {
+    "id": 2,
+    "indexerId": 2,
+    "date": "2026-01-16T09:00:00Z",
+    "successful": true,
+    "eventType": "indexerQuery",
+    "data": { "query": "spec", "categories": "2000" }
+  },
+  {
+    "id": 3,
+    "indexerId": 1,
+    "date": "2026-01-17T12:45:00Z",
+    "successful": false,
+    "eventType": "indexerAuth",
+    "data": { "error": "spec auth failure" }
+  }
+]

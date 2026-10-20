@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:newznab="https://www.newznab.com/DTD/2010/feeds/attributes/">
+  <channel>
+    <title>Spec Indexer</title>
+    <link>https://example.org</link>
+    <description>Spec fixture feed</description>
+    <item>
+      <title>Spec Release 1080p</title>
+      <guid isPermaLink="true">https://example.org/details/1</guid>
+      <pubDate>Thu, 15 Jan 2026 10:30:00 +0000</pubDate>
+      <newznab:attr name="category" value="2000" />
+    </item>
+  </channel>
+</rss>
