@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Artists library -->
+    <string name="arr_lidarr_library_title">Artists</string>
+    <string name="arr_lidarr_library_empty_title">No artists</string>
+    <string name="arr_lidarr_library_empty_message">Artists you add to Lidarr will show up here.</string>
+    <string name="arr_lidarr_library_cd_view_posters">Switch to poster view</string>
+    <string name="arr_lidarr_library_cd_view_table">Switch to table view</string>
+    <string name="arr_lidarr_library_cd_sort_descending">Reverse sort order</string>
+    <string name="arr_lidarr_library_cd_queued">%1$d changes waiting to sync</string>
+    <string name="arr_lidarr_library_badge_missing">Missing</string>
+    <string name="arr_lidarr_library_badge_queued">Queued</string>
+    <string name="arr_lidarr_library_badge_queued_cd">Changes for this artist are queued</string>
+    <string name="arr_lidarr_library_selected_count">%1$d selected</string>
+    <string name="arr_lidarr_library_cd_select_all">Select every artist shown</string>
+    <string name="arr_lidarr_library_cd_clear_selection">Leave selection mode</string>
+    <string name="arr_lidarr_library_cd_refresh_metadata">Refresh metadata</string>
+    <string name="arr_lidarr_library_cd_scan_disk">Scan disk for changes</string>
+    <string name="arr_lidarr_library_cd_edit_selected">Edit selected artists</string>
+    <string name="arr_lidarr_library_cd_delete_selected">Delete selected artists</string>
+    <string name="arr_lidarr_library_cd_select_artist">Select %1$s</string>
+    <string name="arr_lidarr_library_cd_open_artist">Open %1$s</string>
+    <string name="arr_lidarr_library_cd_monitored">Monitored</string>
+    <string name="arr_lidarr_library_cd_unmonitored">Not monitored</string>
+    <string name="arr_lidarr_library_albums">%1$d albums</string>
+    <string name="arr_lidarr_library_albums_with_missing">%1$d albums, %2$d missing</string>
+    <string name="arr_lidarr_library_release_status">%1$d released, %2$d upcoming</string>
+
+    <!-- Filters -->
+    <string name="arr_lidarr_filter_monitored">Monitored</string>
+    <string name="arr_lidarr_filter_missing">Missing albums</string>
+    <string name="arr_lidarr_filter_quality">Quality profile</string>
+    <string name="arr_lidarr_filter_metadata">Metadata profile</string>
+    <string name="arr_lidarr_filter_genre">Genre</string>
+    <string name="arr_lidarr_filter_albums">Album count</string>
+    <string name="arr_lidarr_filter_folder">Folder</string>
+    <string name="arr_lidarr_filter_tags">Tags</string>
+    <string name="arr_lidarr_filter_sheet_title">Filter artists</string>
+    <string name="arr_lidarr_filter_yes">Yes</string>
+    <string name="arr_lidarr_filter_no">No</string>
+    <string name="arr_lidarr_filter_any">Any</string>
+    <string name="arr_lidarr_filter_albums_from">At least</string>
+    <string name="arr_lidarr_filter_albums_to">At most</string>
+    <string name="arr_lidarr_filter_invalid_albums">Enter album counts as numbers</string>
+    <string name="arr_lidarr_filter_clear">Clear filters</string>
+    <string name="arr_lidarr_filter_tag_option">Tag %1$d</string>
+    <string name="arr_lidarr_filter_empty_options">Nothing to filter yet</string>
+
+    <!-- Saved filters -->
+    <string name="arr_lidarr_saved_filters">Saved filters</string>
+    <string name="arr_lidarr_saved_filter_save">Save current filters</string>
+    <string name="arr_lidarr_saved_filter_empty">No saved filters yet</string>
+    <string name="arr_lidarr_saved_filter_name_hint">Filter name</string>
+    <string name="arr_lidarr_saved_filter_dialog_title">Save filter</string>
+    <string name="arr_lidarr_saved_filter_save_button">Save</string>
+    <string name="arr_lidarr_saved_filter_cancel">Cancel</string>
+    <string name="arr_lidarr_saved_filter_delete_cd">Delete filter %1$s</string>
+
+    <!-- Sort menu -->
+    <string name="arr_lidarr_sort_title">Artist</string>
+    <string name="arr_lidarr_sort_added">Date added</string>
+    <string name="arr_lidarr_sort_albums">Albums</string>
+    <string name="arr_lidarr_sort_size">Size on disk</string>
+
+    <!-- Artist editor sheet -->
+    <string name="arr_lidarr_editor_title">Edit artists</string>
+    <string name="arr_lidarr_editor_target_count">Editing %1$d artists</string>
+    <string name="arr_lidarr_editor_unchanged">Unchanged</string>
+    <string name="arr_lidarr_editor_monitored">Monitored</string>
+    <string name="arr_lidarr_editor_monitor_strategy">Monitoring strategy</string>
+    <string name="arr_lidarr_editor_quality">Quality profile</string>
+    <string name="arr_lidarr_editor_metadata">Metadata profile</string>
+    <string name="arr_lidarr_editor_root_folder">Root folder</string>
+    <string name="arr_lidarr_editor_root_folder_hint">Leave blank to keep the current folder</string>
+    <string name="arr_lidarr_editor_tags">Tags</string>
+    <string name="arr_lidarr_editor_tags_hint">Tag ids, separated by commas</string>
+    <string name="arr_lidarr_editor_tags_invalid">Enter tag ids as numbers</string>
+    <string name="arr_lidarr_editor_tags_apply">Apply tags</string>
+    <string name="arr_lidarr_editor_tags_add">Add</string>
+    <string name="arr_lidarr_editor_tags_remove">Remove</string>
+    <string name="arr_lidarr_editor_tags_replace">Replace</string>
+    <string name="arr_lidarr_editor_move_files">Move files to the new root folder</string>
+    <string name="arr_lidarr_editor_save">Save</string>
+    <string name="arr_lidarr_editor_cancel">Cancel</string>
+
+    <!-- Monitoring strategies -->
+    <string name="arr_lidarr_strategy_all">All albums</string>
+    <string name="arr_lidarr_strategy_none">None</string>
+    <string name="arr_lidarr_strategy_new">New albums</string>
+    <string name="arr_lidarr_strategy_missing">Missing albums</string>
+
+    <!-- Delete dialog -->
+    <string name="arr_lidarr_delete_title">Delete %1$d artists?</string>
+    <string name="arr_lidarr_delete_files">Delete the track files too</string>
+    <string name="arr_lidarr_delete_exclusion">Add an import exclusion</string>
+    <string name="arr_lidarr_delete_confirm">Delete</string>
+    <string name="arr_lidarr_delete_cancel">Cancel</string>
+
+    <!-- Snackbar outcomes -->
+    <string name="arr_lidarr_msg_edit_synced">Changes saved</string>
+    <string name="arr_lidarr_msg_edit_queued">You\'re offline. Changes will sync when the connection returns.</string>
+    <string name="arr_lidarr_msg_delete_synced">Artists deleted</string>
+    <string name="arr_lidarr_msg_delete_queued">Delete queued until the connection returns.</string>
+    <string name="arr_lidarr_msg_command_started">Command sent</string>
+    <string name="arr_lidarr_msg_command_queued">Command queued until the connection returns.</string>
+    <string name="arr_lidarr_msg_write_failed">The change didn\'t go through. Try again.</string>
+</resources>
