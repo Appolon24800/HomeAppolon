@@ -1,0 +1,1061 @@
+{
+  "Queue": [
+    {
+      "tag": "Queue",
+      "name": "delete",
+      "verb": "delete",
+      "path": "/api/v3/queue/{id}",
+      "params": [
+        [
+          "id",
+          "Int",
+          "@Path(\"id\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        [
+          "removeFromClient",
+          "Boolean?",
+          "@Query(\"removeFromClient\")",
+          {
+            "type": "boolean",
+            "default": true
+          }
+        ],
+        [
+          "blocklist",
+          "Boolean?",
+          "@Query(\"blocklist\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        [
+          "skipRedownload",
+          "Boolean?",
+          "@Query(\"skipRedownload\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        [
+          "changeCategory",
+          "Boolean?",
+          "@Query(\"changeCategory\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      ],
+      "result": "Unit",
+      "response": null,
+      "body": null
+    },
+    {
+      "tag": "Queue",
+      "name": "deleteBulk",
+      "verb": "delete",
+      "path": "/api/v3/queue/bulk",
+      "params": [
+        [
+          "removeFromClient",
+          "Boolean?",
+          "@Query(\"removeFromClient\")",
+          {
+            "type": "boolean",
+            "default": true
+          }
+        ],
+        [
+          "blocklist",
+          "Boolean?",
+          "@Query(\"blocklist\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        [
+          "skipRedownload",
+          "Boolean?",
+          "@Query(\"skipRedownload\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        [
+          "changeCategory",
+          "Boolean?",
+          "@Query(\"changeCategory\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        [
+          "body",
+          "QueueBulkResource",
+          "@Body",
+          {
+            "$ref": "#/components/schemas/QueueBulkResource"
+          }
+        ]
+      ],
+      "result": "Unit",
+      "response": null,
+      "body": {
+        "$ref": "#/components/schemas/QueueBulkResource"
+      }
+    },
+    {
+      "tag": "Queue",
+      "name": "list",
+      "verb": "get",
+      "path": "/api/v3/queue",
+      "params": [
+        [
+          "page",
+          "Int?",
+          "@Query(\"page\")",
+          {
+            "type": "integer",
+            "format": "int32",
+            "default": 1
+          }
+        ],
+        [
+          "pageSize",
+          "Int?",
+          "@Query(\"pageSize\")",
+          {
+            "type": "integer",
+            "format": "int32",
+            "default": 10
+          }
+        ],
+        [
+          "sortKey",
+          "String?",
+          "@Query(\"sortKey\")",
+          {
+            "type": "string"
+          }
+        ],
+        [
+          "sortDirection",
+          "SortDirection?",
+          "@Query(\"sortDirection\")",
+          {
+            "$ref": "#/components/schemas/SortDirection"
+          }
+        ],
+        [
+          "includeUnknownSeriesItems",
+          "Boolean?",
+          "@Query(\"includeUnknownSeriesItems\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        [
+          "includeSeries",
+          "Boolean?",
+          "@Query(\"includeSeries\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        [
+          "includeEpisode",
+          "Boolean?",
+          "@Query(\"includeEpisode\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        [
+          "seriesIds",
+          "List<Int>?",
+          "@Query(\"seriesIds\")",
+          {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        [
+          "protocol",
+          "DownloadProtocol?",
+          "@Query(\"protocol\")",
+          {
+            "$ref": "#/components/schemas/DownloadProtocol"
+          }
+        ],
+        [
+          "languages",
+          "List<Int>?",
+          "@Query(\"languages\")",
+          {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        [
+          "quality",
+          "List<Int>?",
+          "@Query(\"quality\")",
+          {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        [
+          "status",
+          "List<QueueStatus>?",
+          "@Query(\"status\")",
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QueueStatus"
+            }
+          }
+        ]
+      ],
+      "result": "QueueResourcePagingResource",
+      "response": {
+        "$ref": "#/components/schemas/QueueResourcePagingResource"
+      },
+      "body": null
+    }
+  ],
+  "QueueAction": [
+    {
+      "tag": "QueueAction",
+      "name": "create",
+      "verb": "post",
+      "path": "/api/v3/queue/grab/{id}",
+      "params": [
+        [
+          "id",
+          "Int",
+          "@Path(\"id\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ]
+      ],
+      "result": "Unit",
+      "response": null,
+      "body": null
+    },
+    {
+      "tag": "QueueAction",
+      "name": "createBulk",
+      "verb": "post",
+      "path": "/api/v3/queue/grab/bulk",
+      "params": [
+        [
+          "body",
+          "QueueBulkResource",
+          "@Body",
+          {
+            "$ref": "#/components/schemas/QueueBulkResource"
+          }
+        ]
+      ],
+      "result": "Unit",
+      "response": null,
+      "body": {
+        "$ref": "#/components/schemas/QueueBulkResource"
+      }
+    }
+  ],
+  "QueueDetails": [
+    {
+      "tag": "QueueDetails",
+      "name": "list",
+      "verb": "get",
+      "path": "/api/v3/queue/details",
+      "params": [
+        [
+          "seriesId",
+          "Int?",
+          "@Query(\"seriesId\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        [
+          "episodeIds",
+          "List<Int>?",
+          "@Query(\"episodeIds\")",
+          {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        [
+          "includeSeries",
+          "Boolean?",
+          "@Query(\"includeSeries\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        [
+          "includeEpisode",
+          "Boolean?",
+          "@Query(\"includeEpisode\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      ],
+      "result": "List<QueueResource>",
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/QueueResource"
+        }
+      },
+      "body": null
+    }
+  ],
+  "QueueStatus": [
+    {
+      "tag": "QueueStatus",
+      "name": "list",
+      "verb": "get",
+      "path": "/api/v3/queue/status",
+      "params": [],
+      "result": "QueueStatusResource",
+      "response": {
+        "$ref": "#/components/schemas/QueueStatusResource"
+      },
+      "body": null
+    }
+  ],
+  "Blocklist": [
+    {
+      "tag": "Blocklist",
+      "name": "list",
+      "verb": "get",
+      "path": "/api/v3/blocklist",
+      "params": [
+        [
+          "page",
+          "Int?",
+          "@Query(\"page\")",
+          {
+            "type": "integer",
+            "format": "int32",
+            "default": 1
+          }
+        ],
+        [
+          "pageSize",
+          "Int?",
+          "@Query(\"pageSize\")",
+          {
+            "type": "integer",
+            "format": "int32",
+            "default": 10
+          }
+        ],
+        [
+          "sortKey",
+          "String?",
+          "@Query(\"sortKey\")",
+          {
+            "type": "string"
+          }
+        ],
+        [
+          "sortDirection",
+          "SortDirection?",
+          "@Query(\"sortDirection\")",
+          {
+            "$ref": "#/components/schemas/SortDirection"
+          }
+        ],
+        [
+          "seriesIds",
+          "List<Int>?",
+          "@Query(\"seriesIds\")",
+          {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        [
+          "protocols",
+          "List<DownloadProtocol>?",
+          "@Query(\"protocols\")",
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DownloadProtocol"
+            }
+          }
+        ]
+      ],
+      "result": "BlocklistResourcePagingResource",
+      "response": {
+        "$ref": "#/components/schemas/BlocklistResourcePagingResource"
+      },
+      "body": null
+    },
+    {
+      "tag": "Blocklist",
+      "name": "delete",
+      "verb": "delete",
+      "path": "/api/v3/blocklist/{id}",
+      "params": [
+        [
+          "id",
+          "Int",
+          "@Path(\"id\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ]
+      ],
+      "result": "Unit",
+      "response": null,
+      "body": null
+    },
+    {
+      "tag": "Blocklist",
+      "name": "deleteBulk",
+      "verb": "delete",
+      "path": "/api/v3/blocklist/bulk",
+      "params": [
+        [
+          "body",
+          "BlocklistBulkResource",
+          "@Body",
+          {
+            "$ref": "#/components/schemas/BlocklistBulkResource"
+          }
+        ]
+      ],
+      "result": "Unit",
+      "response": null,
+      "body": {
+        "$ref": "#/components/schemas/BlocklistBulkResource"
+      }
+    }
+  ],
+  "History": [
+    {
+      "tag": "History",
+      "name": "list",
+      "verb": "get",
+      "path": "/api/v3/history",
+      "params": [
+        [
+          "page",
+          "Int?",
+          "@Query(\"page\")",
+          {
+            "type": "integer",
+            "format": "int32",
+            "default": 1
+          }
+        ],
+        [
+          "pageSize",
+          "Int?",
+          "@Query(\"pageSize\")",
+          {
+            "type": "integer",
+            "format": "int32",
+            "default": 10
+          }
+        ],
+        [
+          "sortKey",
+          "String?",
+          "@Query(\"sortKey\")",
+          {
+            "type": "string"
+          }
+        ],
+        [
+          "sortDirection",
+          "SortDirection?",
+          "@Query(\"sortDirection\")",
+          {
+            "$ref": "#/components/schemas/SortDirection"
+          }
+        ],
+        [
+          "includeSeries",
+          "Boolean?",
+          "@Query(\"includeSeries\")",
+          {
+            "type": "boolean"
+          }
+        ],
+        [
+          "includeEpisode",
+          "Boolean?",
+          "@Query(\"includeEpisode\")",
+          {
+            "type": "boolean"
+          }
+        ],
+        [
+          "eventType",
+          "List<Int>?",
+          "@Query(\"eventType\")",
+          {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        [
+          "episodeId",
+          "Int?",
+          "@Query(\"episodeId\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        [
+          "downloadId",
+          "String?",
+          "@Query(\"downloadId\")",
+          {
+            "type": "string"
+          }
+        ],
+        [
+          "seriesIds",
+          "List<Int>?",
+          "@Query(\"seriesIds\")",
+          {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        [
+          "languages",
+          "List<Int>?",
+          "@Query(\"languages\")",
+          {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        [
+          "quality",
+          "List<Int>?",
+          "@Query(\"quality\")",
+          {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ]
+      ],
+      "result": "HistoryResourcePagingResource",
+      "response": {
+        "$ref": "#/components/schemas/HistoryResourcePagingResource"
+      },
+      "body": null
+    },
+    {
+      "tag": "History",
+      "name": "since",
+      "verb": "get",
+      "path": "/api/v3/history/since",
+      "params": [
+        [
+          "date",
+          "String?",
+          "@Query(\"date\")",
+          {
+            "type": "string",
+            "format": "date-time"
+          }
+        ],
+        [
+          "eventType",
+          "EpisodeHistoryEventType?",
+          "@Query(\"eventType\")",
+          {
+            "$ref": "#/components/schemas/EpisodeHistoryEventType"
+          }
+        ],
+        [
+          "includeSeries",
+          "Boolean?",
+          "@Query(\"includeSeries\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        [
+          "includeEpisode",
+          "Boolean?",
+          "@Query(\"includeEpisode\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      ],
+      "result": "List<HistoryResource>",
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/HistoryResource"
+        }
+      },
+      "body": null
+    },
+    {
+      "tag": "History",
+      "name": "series",
+      "verb": "get",
+      "path": "/api/v3/history/series",
+      "params": [
+        [
+          "seriesId",
+          "Int?",
+          "@Query(\"seriesId\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        [
+          "seasonNumber",
+          "Int?",
+          "@Query(\"seasonNumber\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        [
+          "eventType",
+          "EpisodeHistoryEventType?",
+          "@Query(\"eventType\")",
+          {
+            "$ref": "#/components/schemas/EpisodeHistoryEventType"
+          }
+        ],
+        [
+          "includeSeries",
+          "Boolean?",
+          "@Query(\"includeSeries\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ],
+        [
+          "includeEpisode",
+          "Boolean?",
+          "@Query(\"includeEpisode\")",
+          {
+            "type": "boolean",
+            "default": false
+          }
+        ]
+      ],
+      "result": "List<HistoryResource>",
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/HistoryResource"
+        }
+      },
+      "body": null
+    },
+    {
+      "tag": "History",
+      "name": "markFailed",
+      "verb": "post",
+      "path": "/api/v3/history/failed/{id}",
+      "params": [
+        [
+          "id",
+          "Int",
+          "@Path(\"id\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ]
+      ],
+      "result": "Unit",
+      "response": null,
+      "body": null
+    }
+  ],
+  "ManualImport": [
+    {
+      "tag": "ManualImport",
+      "name": "list",
+      "verb": "get",
+      "path": "/api/v3/manualimport",
+      "params": [
+        [
+          "folder",
+          "String?",
+          "@Query(\"folder\")",
+          {
+            "type": "string"
+          }
+        ],
+        [
+          "downloadId",
+          "String?",
+          "@Query(\"downloadId\")",
+          {
+            "type": "string"
+          }
+        ],
+        [
+          "seriesId",
+          "Int?",
+          "@Query(\"seriesId\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        [
+          "seasonNumber",
+          "Int?",
+          "@Query(\"seasonNumber\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        [
+          "filterExistingFiles",
+          "Boolean?",
+          "@Query(\"filterExistingFiles\")",
+          {
+            "type": "boolean",
+            "default": true
+          }
+        ]
+      ],
+      "result": "List<ManualImportResource>",
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ManualImportResource"
+        }
+      },
+      "body": null
+    },
+    {
+      "tag": "ManualImport",
+      "name": "create",
+      "verb": "post",
+      "path": "/api/v3/manualimport",
+      "params": [
+        [
+          "body",
+          "List<ManualImportReprocessResource>",
+          "@Body",
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManualImportReprocessResource"
+            }
+          }
+        ]
+      ],
+      "result": "Unit",
+      "response": null,
+      "body": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ManualImportReprocessResource"
+        }
+      }
+    }
+  ],
+  "Command": [
+    {
+      "tag": "Command",
+      "name": "create",
+      "verb": "post",
+      "path": "/api/v3/command",
+      "params": [
+        [
+          "body",
+          "CommandResource",
+          "@Body",
+          {
+            "$ref": "#/components/schemas/CommandResource"
+          }
+        ]
+      ],
+      "result": "CommandResource",
+      "response": {
+        "$ref": "#/components/schemas/CommandResource"
+      },
+      "body": {
+        "$ref": "#/components/schemas/CommandResource"
+      }
+    },
+    {
+      "tag": "Command",
+      "name": "list",
+      "verb": "get",
+      "path": "/api/v3/command",
+      "params": [],
+      "result": "List<CommandResource>",
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CommandResource"
+        }
+      },
+      "body": null
+    },
+    {
+      "tag": "Command",
+      "name": "delete",
+      "verb": "delete",
+      "path": "/api/v3/command/{id}",
+      "params": [
+        [
+          "id",
+          "Int",
+          "@Path(\"id\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ]
+      ],
+      "result": "Unit",
+      "response": null,
+      "body": null
+    },
+    {
+      "tag": "Command",
+      "name": "get",
+      "verb": "get",
+      "path": "/api/v3/command/{id}",
+      "params": [
+        [
+          "id",
+          "Int",
+          "@Path(\"id\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ]
+      ],
+      "result": "Response<CommandResource>",
+      "response": {
+        "$ref": "#/components/schemas/CommandResource"
+      },
+      "body": null
+    }
+  ],
+  "Release": [
+    {
+      "tag": "Release",
+      "name": "create",
+      "verb": "post",
+      "path": "/api/v3/release",
+      "params": [
+        [
+          "body",
+          "ReleaseResource",
+          "@Body",
+          {
+            "$ref": "#/components/schemas/ReleaseResource"
+          }
+        ]
+      ],
+      "result": "Unit",
+      "response": null,
+      "body": {
+        "$ref": "#/components/schemas/ReleaseResource"
+      }
+    },
+    {
+      "tag": "Release",
+      "name": "list",
+      "verb": "get",
+      "path": "/api/v3/release",
+      "params": [
+        [
+          "seriesId",
+          "Int?",
+          "@Query(\"seriesId\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        [
+          "episodeId",
+          "Int?",
+          "@Query(\"episodeId\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        [
+          "seasonNumber",
+          "Int?",
+          "@Query(\"seasonNumber\")",
+          {
+            "type": "integer",
+            "format": "int32"
+          }
+        ]
+      ],
+      "result": "List<ReleaseResource>",
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ReleaseResource"
+        }
+      },
+      "body": null
+    }
+  ],
+  "ReleasePush": [
+    {
+      "tag": "ReleasePush",
+      "name": "create",
+      "verb": "post",
+      "path": "/api/v3/release/push",
+      "params": [
+        [
+          "body",
+          "ReleaseResource",
+          "@Body",
+          {
+            "$ref": "#/components/schemas/ReleaseResource"
+          }
+        ]
+      ],
+      "result": "List<ReleaseResource>",
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ReleaseResource"
+        }
+      },
+      "body": {
+        "$ref": "#/components/schemas/ReleaseResource"
+      }
+    }
+  ],
+  "Parse": [
+    {
+      "tag": "Parse",
+      "name": "list",
+      "verb": "get",
+      "path": "/api/v3/parse",
+      "params": [
+        [
+          "title",
+          "String?",
+          "@Query(\"title\")",
+          {
+            "type": "string"
+          }
+        ],
+        [
+          "path",
+          "String?",
+          "@Query(\"path\")",
+          {
+            "type": "string"
+          }
+        ]
+      ],
+      "result": "ParseResource",
+      "response": {
+        "$ref": "#/components/schemas/ParseResource"
+      },
+      "body": null
+    }
+  ],
+  "Ping": [
+    {
+      "tag": "Ping",
+      "name": "list",
+      "verb": "get",
+      "path": "/ping",
+      "params": [],
+      "result": "Response<PingResource>",
+      "response": {
+        "$ref": "#/components/schemas/PingResource"
+      },
+      "body": null
+    },
+    {
+      "tag": "Ping",
+      "name": "head",
+      "verb": "head",
+      "path": "/ping",
+      "params": [],
+      "result": "Response<Unit>",
+      "response": {
+        "$ref": "#/components/schemas/PingResource"
+      },
+      "body": null
+    }
+  ]
+}

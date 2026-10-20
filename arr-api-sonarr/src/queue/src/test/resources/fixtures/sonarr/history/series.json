@@ -1,0 +1,31 @@
+[
+  {
+    "id": 1,
+    "episodeId": 1,
+    "seriesId": 1,
+    "sourceTitle": null,
+    "languages": null,
+    "quality": {
+      "quality": {
+        "id": 1,
+        "name": null,
+        "source": "unknown",
+        "resolution": 1
+      },
+      "revision": {
+        "version": 1,
+        "real": 1,
+        "isRepack": false
+      }
+    },
+    "customFormats": null,
+    "customFormatScore": 1,
+    "qualityCutoffNotMet": false,
+    "date": "2026-01-01T00:00:00Z",
+    "downloadId": null,
+    "eventType": "unknown",
+    "data": null,
+    "episode": {},
+    "series": {}
+  }
+]
