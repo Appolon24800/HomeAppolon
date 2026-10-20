@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Artist detail: hero, top bar, and menu. -->
+    <string name="arr_lidarr_detail_cd_back">Go back</string>
+    <string name="arr_lidarr_detail_cd_more">More options</string>
+    <string name="arr_lidarr_detail_cd_hero">Cover art for %1$s</string>
+    <string name="arr_lidarr_detail_cd_monitored">%1$s is monitored. Tap to stop monitoring.</string>
+    <string name="arr_lidarr_detail_cd_not_monitored">%1$s is not monitored. Tap to start monitoring.</string>
+    <string name="arr_lidarr_detail_meta">%1$d albums · %2$d tracks · %3$s</string>
+    <string name="arr_lidarr_detail_genres">Genres: %1$s</string>
+    <string name="arr_lidarr_detail_queued_change">Changes queued. They will sync when the connection returns.</string>
+    <string name="arr_lidarr_detail_queued_banner">%1$d changes waiting to sync</string>
+    <string name="arr_lidarr_detail_menu_refresh_metadata">Refresh metadata</string>
+    <string name="arr_lidarr_detail_menu_scan">Rescan artist folder</string>
+    <string name="arr_lidarr_detail_menu_search">Search monitored albums</string>
+    <string name="arr_lidarr_detail_menu_manual_search">Manual search</string>
+    <string name="arr_lidarr_detail_menu_rename">Preview file renames</string>
+    <string name="arr_lidarr_detail_menu_retag">Preview tag updates</string>
+    <string name="arr_lidarr_detail_menu_import">Interactive import</string>
+    <string name="arr_lidarr_detail_menu_edit">Edit artist</string>
+    <string name="arr_lidarr_detail_menu_delete">Delete artist</string>
+    <string name="arr_lidarr_detail_empty_title">Artist not found</string>
+    <string name="arr_lidarr_detail_empty_message">This artist is no longer in Lidarr.</string>
+
+    <!-- Albums tab. -->
+    <string name="arr_lidarr_detail_tab_albums">Albums</string>
+    <string name="arr_lidarr_detail_tab_history">History</string>
+    <string name="arr_lidarr_detail_group_header">%1$s (%2$d)</string>
+    <string name="arr_lidarr_detail_group_albums">Albums</string>
+    <string name="arr_lidarr_detail_group_singles">Singles</string>
+    <string name="arr_lidarr_detail_group_eps">EPs</string>
+    <string name="arr_lidarr_detail_group_others">Other</string>
+    <string name="arr_lidarr_detail_albums_empty">No albums for this artist yet.</string>
+    <string name="arr_lidarr_detail_album_tracks">%1$d of %2$d tracks</string>
+    <string name="arr_lidarr_detail_cd_album_cover">Cover for %1$s</string>
+    <string name="arr_lidarr_detail_cd_album_monitored">%1$s is monitored. Tap to stop monitoring.</string>
+    <string name="arr_lidarr_detail_cd_album_not_monitored">%1$s is not monitored. Tap to start monitoring.</string>
+    <string name="arr_lidarr_detail_cd_search_album">Search for %1$s</string>
+    <string name="arr_lidarr_detail_cd_album_more">More actions for %1$s</string>
+    <string name="arr_lidarr_detail_action_manual_search">Manual search</string>
+    <string name="arr_lidarr_detail_action_rename">Preview renames</string>
+    <string name="arr_lidarr_detail_action_retag">Preview tag updates</string>
+
+    <!-- Track list. -->
+    <string name="arr_lidarr_detail_tracks_empty">No tracks.</string>
+    <string name="arr_lidarr_detail_cd_explicit">%1$s is explicit</string>
+    <string name="arr_lidarr_detail_cd_edit_file">Edit the file for %1$s</string>
+    <string name="arr_lidarr_detail_track_missing">Missing</string>
+    <string name="arr_lidarr_detail_track_file_line">%1$s · %2$s</string>
+
+    <!-- History tab. -->
+    <string name="arr_lidarr_detail_history_empty">No history for this artist yet.</string>
+    <string name="arr_lidarr_detail_cd_refresh_history">Refresh history</string>
+    <string name="arr_lidarr_detail_history_grabbed">Grabbed</string>
+    <string name="arr_lidarr_detail_history_imported">Imported</string>
+    <string name="arr_lidarr_detail_history_failed">Download failed</string>
+    <string name="arr_lidarr_detail_history_deleted">File deleted</string>
+    <string name="arr_lidarr_detail_history_renamed">File renamed</string>
+    <string name="arr_lidarr_detail_history_retagged">File retagged</string>
+    <string name="arr_lidarr_detail_history_ignored">Ignored</string>
+    <string name="arr_lidarr_detail_history_incomplete">Album import incomplete</string>
+    <string name="arr_lidarr_detail_history_unknown">Event</string>
+
+    <!-- Manual search sheet. -->
+    <string name="arr_lidarr_detail_search_title_album">Manual search: %1$s</string>
+    <string name="arr_lidarr_detail_search_title_artist">Manual search: whole artist</string>
+    <string name="arr_lidarr_detail_search_empty">No releases found.</string>
+    <string name="arr_lidarr_detail_cd_refresh_releases">Search again</string>
+    <string name="arr_lidarr_detail_cd_grab_release">Download %1$s</string>
+    <string name="arr_lidarr_detail_release_seeders">%1$d seeders</string>
+
+    <!-- Rename preview. -->
+    <string name="arr_lidarr_detail_rename_title">Rename files</string>
+    <string name="arr_lidarr_detail_rename_note">Renaming applies to every listed file.</string>
+    <string name="arr_lidarr_detail_rename_empty">Nothing needs renaming.</string>
+    <string name="arr_lidarr_detail_rename_confirm">Rename files</string>
+
+    <!-- Retag preview. -->
+    <string name="arr_lidarr_detail_retag_title">Update tags</string>
+    <string name="arr_lidarr_detail_retag_note">Tags are rewritten from the MusicBrainz metadata.</string>
+    <string name="arr_lidarr_detail_retag_empty">No tag differences found.</string>
+    <string name="arr_lidarr_detail_retag_confirm">Update tags</string>
+    <string name="arr_lidarr_detail_retag_change">%1$s: %2$s to %3$s</string>
+    <string name="arr_lidarr_detail_retag_blank">(empty)</string>
+
+    <!-- Interactive import. -->
+    <string name="arr_lidarr_detail_import_title">Interactive import</string>
+    <string name="arr_lidarr_detail_import_scope">Files under the artist folder</string>
+    <string name="arr_lidarr_detail_import_empty">No files found to import.</string>
+    <string name="arr_lidarr_detail_import_selected_count">%1$d selected</string>
+    <string name="arr_lidarr_detail_cd_import_select">Select %1$s</string>
+    <plurals name="arr_lidarr_detail_import_action">
+        <item quantity="one">Import %1$d file</item>
+        <item quantity="other">Import %1$d files</item>
+    </plurals>
+
+    <!-- Track file editor. -->
+    <string name="arr_lidarr_detail_file_title">Edit file</string>
+    <string name="arr_lidarr_detail_file_quality">Quality</string>
+    <string name="arr_lidarr_detail_file_release_group">Release group</string>
+    <string name="arr_lidarr_detail_file_delete">Delete file</string>
+    <string name="arr_lidarr_detail_file_delete_title">Delete file?</string>
+    <string name="arr_lidarr_detail_file_delete_message">The file will be removed from disk and the track will show as missing.</string>
+    <string name="arr_lidarr_detail_file_save">Save</string>
+    <string name="arr_lidarr_detail_cancel">Cancel</string>
+
+    <!-- Artist edit sheet. -->
+    <string name="arr_lidarr_detail_edit_title">Edit artist</string>
+    <string name="arr_lidarr_detail_edit_monitored">Monitored</string>
+    <string name="arr_lidarr_detail_edit_monitor_new">Monitor new items</string>
+    <string name="arr_lidarr_monitor_new_all">All new albums</string>
+    <string name="arr_lidarr_monitor_new_new">New albums only</string>
+    <string name="arr_lidarr_monitor_new_none">None</string>
+    <string name="arr_lidarr_detail_edit_quality">Quality profile</string>
+    <string name="arr_lidarr_detail_edit_metadata">Metadata profile</string>
+    <string name="arr_lidarr_detail_edit_path">Path</string>
+    <string name="arr_lidarr_detail_edit_root_folder">Album folder (root folder)</string>
+    <string name="arr_lidarr_detail_edit_root_folder_hint">Leave blank to keep the current folder</string>
+    <string name="arr_lidarr_detail_edit_tags">Tags (ids, comma separated)</string>
+    <string name="arr_lidarr_detail_edit_tags_error">Enter numbers separated by commas.</string>
+    <string name="arr_lidarr_detail_edit_move_files">Move files to the new path</string>
+    <string name="arr_lidarr_detail_edit_save">Save changes</string>
+
+    <!-- Delete dialog. -->
+    <string name="arr_lidarr_detail_delete_title">Delete artist?</string>
+    <string name="arr_lidarr_detail_delete_message">%1$s will be deleted from Lidarr.</string>
+    <string name="arr_lidarr_detail_delete_files">Delete the track files too</string>
+    <string name="arr_lidarr_detail_delete_exclusion">Add an import exclusion</string>
+    <string name="arr_lidarr_detail_delete_confirm">Delete</string>
+
+    <!-- Result snackbars. -->
+    <string name="arr_lidarr_detail_message_synced">Changes applied.</string>
+    <string name="arr_lidarr_detail_message_queued">Offline. The change is queued and will sync.</string>
+    <string name="arr_lidarr_detail_message_search_started">Search started.</string>
+    <string name="arr_lidarr_detail_message_search_queued">Offline. Search is queued.</string>
+    <string name="arr_lidarr_detail_message_grabbed">Release sent to the download client.</string>
+    <string name="arr_lidarr_detail_message_grab_queued">Offline. The grab is queued.</string>
+    <string name="arr_lidarr_detail_message_import_queued">Offline. The import is queued.</string>
+    <string name="arr_lidarr_detail_message_rename_started">Renaming started.</string>
+    <string name="arr_lidarr_detail_message_rename_queued">Offline. Renaming is queued.</string>
+    <string name="arr_lidarr_detail_message_retag_started">Tag update started.</string>
+    <string name="arr_lidarr_detail_message_retag_queued">Offline. The tag update is queued.</string>
+    <string name="arr_lidarr_detail_message_delete_synced">Artist deleted.</string>
+    <string name="arr_lidarr_detail_message_delete_queued">Offline. Deletion is queued.</string>
+    <string name="arr_lidarr_detail_message_failed">The change didn\'t go through. Try again.</string>
+    <plurals name="arr_lidarr_detail_message_imported">
+        <item quantity="one">%1$d file imported.</item>
+        <item quantity="other">%1$d files imported.</item>
+    </plurals>
+</resources>
