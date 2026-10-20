@@ -1,0 +1,15 @@
+[{
+  "id": 1, "name": "Standard",
+  "primaryAlbumTypes": [
+    {"id": 1, "albumType": {"id": 0, "name": "Album"}, "allowed": true},
+    {"id": 2, "albumType": {"id": 4, "name": "Broadcast"}, "allowed": false}
+  ],
+  "secondaryAlbumTypes": [
+    {"id": 1, "albumType": {"id": 0, "name": "Studio"}, "allowed": true},
+    {"id": 2, "albumType": {"id": 1, "name": "Live"}, "allowed": false}
+  ],
+  "releaseStatuses": [
+    {"id": 1, "releaseStatus": {"id": 1, "name": "Official"}, "allowed": true},
+    {"id": 2, "releaseStatus": {"id": 2, "name": "Promotional"}, "allowed": false}
+  ]
+}]

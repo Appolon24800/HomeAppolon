@@ -1,0 +1,9 @@
+[{
+  "id": 1, "name": "Lossless",
+  "includeCustomFormatWhenRenaming": true,
+  "specifications": []
+}, {
+  "id": 2, "name": "24bit",
+  "includeCustomFormatWhenRenaming": true,
+  "specifications": []
+}]

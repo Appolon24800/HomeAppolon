@@ -1,0 +1,12 @@
+{
+  "id": 1, "name": "Standard Music",
+  "upgradeAllowed": true, "cutoff": 3,
+  "items": [
+    {"id": 1, "name": "MP3-96", "quality": {"id": 1, "name": "MP3-96"}, "allowed": false},
+    {"id": 2, "name": "FLAC", "quality": {"id": 9, "name": "FLAC"}, "allowed": true}
+  ],
+  "minFormatScore": 0, "cutoffFormatScore": 0,
+  "formatItems": [
+    {"id": 1, "format": 1, "name": "Lossless", "score": 100}
+  ]
+}

@@ -1,0 +1,27 @@
+[{
+  "id": 1, "title": "Future Days", "disambiguation": null,
+  "overview": "Spec-derived fixture album.",
+  "artistId": 2, "foreignAlbumId": "b6a2c5d3-1e4f-4a7b-9c8d-0e1f2a3b4c5d",
+  "monitored": true, "anyReleaseOk": false, "profileId": 1,
+  "duration": 2460000, "albumType": "Album", "secondaryTypes": [],
+  "mediumCount": 1,
+  "ratings": {"votes": 12, "value": 8.4},
+  "releaseDate": "2026-11-06T00:00:00Z",
+  "genres": ["progressive rock"],
+  "media": [{"mediumNumber": 1, "mediumName": "CD", "mediumFormat": "CD"}],
+  "images": [{"url": "https://lidarr.example/future-days.jpg", "coverType": "cover"}],
+  "links": [{"url": "https://musicbrainz.example/release-group/1", "name": "MusicBrainz"}],
+  "lastSearchTime": null,
+  "statistics": {"trackFileCount": 0, "trackCount": 8, "totalTrackCount": 8, "sizeOnDisk": 0}
+}, {
+  "id": 2, "title": "Music for Airports",
+  "overview": "Unmonitored spec-derived fixture album.",
+  "artistId": 3, "foreignAlbumId": "c7b3d6e4-2f5a-4b8c-8d9e-1f2a3b4c5d6e",
+  "monitored": false, "anyReleaseOk": false, "profileId": 1,
+  "duration": 2400000, "albumType": "Album",
+  "mediumCount": 1,
+  "ratings": {"votes": 30, "value": 9.1},
+  "releaseDate": "1978-03-01T00:00:00Z",
+  "genres": ["ambient"],
+  "statistics": {"trackFileCount": 4, "trackCount": 4, "totalTrackCount": 4, "sizeOnDisk": 1048576}
+}]

@@ -1,0 +1,12 @@
+{
+  "id": 1, "name": "Standard",
+  "primaryAlbumTypes": [
+    {"id": 1, "albumType": {"id": 0, "name": "Album"}, "allowed": true}
+  ],
+  "secondaryAlbumTypes": [
+    {"id": 1, "albumType": {"id": 0, "name": "Studio"}, "allowed": true}
+  ],
+  "releaseStatuses": [
+    {"id": 1, "releaseStatus": {"id": 1, "name": "Official"}, "allowed": true}
+  ]
+}

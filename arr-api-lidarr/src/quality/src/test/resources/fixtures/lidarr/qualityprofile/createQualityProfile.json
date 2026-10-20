@@ -1,0 +1,9 @@
+{
+  "id": 3, "name": "Created Profile",
+  "upgradeAllowed": true, "cutoff": 9,
+  "items": [
+    {"id": 1, "name": "FLAC", "quality": {"id": 9, "name": "FLAC"}, "allowed": true}
+  ],
+  "minFormatScore": 0, "cutoffFormatScore": 0,
+  "formatItems": []
+}

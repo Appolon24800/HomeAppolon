@@ -1,0 +1,9 @@
+[{
+  "id": 0, "name": null, "implementation": "LanguageSpecification",
+  "implementationName": "Language", "infoLink": "https://lidarr.example",
+  "negate": false, "required": false,
+  "fields": [{
+    "order": 0, "name": "value", "label": "Language", "value": 1, "type": "languageSelect"
+  }],
+  "presets": []
+}]
