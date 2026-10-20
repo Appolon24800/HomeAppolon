@@ -10,3 +10,7 @@ captures/
 *.apk
 *.aab
 keystore/
+
+# arr live-test credentials (never commit)
+local.arr-test.properties
+docs/arr-api/fixtures/
