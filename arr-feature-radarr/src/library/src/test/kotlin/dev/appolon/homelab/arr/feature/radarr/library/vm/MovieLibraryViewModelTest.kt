@@ -186,7 +186,8 @@ class MovieLibraryViewModelTest {
         advanceUntilIdle()
         assertEquals(MoviePresentation.INITIAL_COUNT, vm.state.value.presentation.visible.size)
         vm.loadMore()
-        assertEquals(MoviePresentation.INITIAL_COUNT + MoviePresentation.PAGE_COUNT, vm.state.value.visibleCount)
+        val grown = MoviePresentation.INITIAL_COUNT + MoviePresentation.PAGE_COUNT
+        assertEquals(grown, vm.state.value.visibleCount)
         assertTrue(vm.state.value.presentation.visible.size <= vm.state.value.movies.size)
     }
 
@@ -270,7 +271,8 @@ class MovieLibraryViewModelTest {
             actionQueue = queue,
             io = main,
         )
-        val scoped = MovieLibraryViewModel(repository, SavedMovieFiltersStore(store, ServerId("s1")))
+        val saved = SavedMovieFiltersStore(store, ServerId("s1"))
+        val scoped = MovieLibraryViewModel(repository, saved)
         val job = launch { scoped.lce.collect {} }
         advanceUntilIdle()
         scoped.enterSelectMode(3)

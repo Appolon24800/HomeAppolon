@@ -54,7 +54,8 @@ object RadarrLibraryFeature {
     }
 
     fun openMovies(navigator: ArrShellNavigator, serverId: ServerId) {
-        val path = fillPattern(MOVIES_PATTERN, mapOf("serverId" to serverId.value)) ?: MOVIES_PATTERN
+        val path = fillPattern(MOVIES_PATTERN, mapOf("serverId" to serverId.value))
+            ?: MOVIES_PATTERN
         navigator.open(ArrRoute.Feature(ROUTE_OWNER, path))
     }
 }

@@ -41,10 +41,38 @@ class MovieLibraryFiltersTest {
     )
 
     private val library = listOf(
-        movie(1, monitored = true, hasFile = true, quality = 1, genres = listOf("Drama"), tags = setOf(10)),
-        movie(2, monitored = true, hasFile = false, quality = 2, genres = listOf("Comedy"), tags = setOf(11)),
-        movie(3, monitored = false, hasFile = true, quality = 1, genres = listOf("Drama"), year = 1999),
-        movie(4, monitored = true, hasFile = false, quality = 3, genres = listOf(), folder = "/other"),
+        movie(
+            1,
+            monitored = true,
+            hasFile = true,
+            quality = 1,
+            genres = listOf("Drama"),
+            tags = setOf(10),
+        ),
+        movie(
+            2,
+            monitored = true,
+            hasFile = false,
+            quality = 2,
+            genres = listOf("Comedy"),
+            tags = setOf(11),
+        ),
+        movie(
+            3,
+            monitored = false,
+            hasFile = true,
+            quality = 1,
+            genres = listOf("Drama"),
+            year = 1999,
+        ),
+        movie(
+            4,
+            monitored = true,
+            hasFile = false,
+            quality = 3,
+            genres = listOf(),
+            folder = "/other",
+        ),
     )
 
     private val options = MovieLibraryFilters.optionsFrom(library, nowYear = 2026)
@@ -87,7 +115,8 @@ class MovieLibraryFiltersTest {
 
     @Test
     fun `genre choice intersects`() {
-        val state = FilterState().with(MovieLibraryFilters.GENRE, FilterValue.Choice(setOf("Drama")))
+        val state = FilterState()
+            .with(MovieLibraryFilters.GENRE, FilterValue.Choice(setOf("Drama")))
         val result = applyFilters(library, MovieLibraryFilters.definitions(options), state)
         assertEquals(listOf(1, 3), result.map { it.id })
     }
@@ -108,7 +137,8 @@ class MovieLibraryFiltersTest {
 
     @Test
     fun `folder choice matches the resolved folder`() {
-        val state = FilterState().with(MovieLibraryFilters.FOLDER, FilterValue.Choice(setOf("/other")))
+        val state = FilterState()
+            .with(MovieLibraryFilters.FOLDER, FilterValue.Choice(setOf("/other")))
         val result = applyFilters(library, MovieLibraryFilters.definitions(options), state)
         assertEquals(listOf(4), result.map { it.id })
     }
@@ -134,7 +164,8 @@ class MovieLibraryFiltersTest {
         val state = FilterState()
             .with(MovieLibraryFilters.MONITORED, FilterValue.Toggle(null))
             .with(MovieLibraryFilters.QUALITY, FilterValue.Choice(emptySet()))
-        assertEquals(library, applyFilters(library, MovieLibraryFilters.definitions(options), state))
+        val definitions = MovieLibraryFilters.definitions(options)
+        assertEquals(library, applyFilters(library, definitions, state))
     }
 
     @Test

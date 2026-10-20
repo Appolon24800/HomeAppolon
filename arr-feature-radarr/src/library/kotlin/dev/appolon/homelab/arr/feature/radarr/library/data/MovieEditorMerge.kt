@@ -11,7 +11,10 @@ import dev.appolon.homelab.arr.api.radarr.model.MovieResource
  * optimistic state while a bulk edit sits in the offline queue, so the library
  * reads as already edited and reconciles when the replay lands.
  */
-fun applyMovieEditor(movies: List<MovieResource>, editor: MovieEditorResource): List<MovieResource> {
+fun applyMovieEditor(
+    movies: List<MovieResource>,
+    editor: MovieEditorResource,
+): List<MovieResource> {
     val ids = editor.movieIds.orEmpty().toSet()
     if (ids.isEmpty()) return movies
     return movies.map { movie ->

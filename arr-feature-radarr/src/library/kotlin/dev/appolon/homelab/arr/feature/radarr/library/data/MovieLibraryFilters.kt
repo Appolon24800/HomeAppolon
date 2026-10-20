@@ -106,15 +106,13 @@ object MovieLibraryFilters {
             val selected = (value as FilterValue.Choice).selected
             folderOf(movie) in selected
         },
-        FilterDefinition(FilterSpec.Choice(TAGS, options.tagIds.map(Int::toString))) { movie, value ->
+        FilterDefinition(
+            FilterSpec.Choice(TAGS, options.tagIds.map(Int::toString)),
+        ) { movie, value ->
             val selected = (value as FilterValue.Choice).selected
             movie.tags.orEmpty().any { it.toString() in selected }
         },
     )
-
-    /** Number of filters whose value currently narrows the list. */
-    fun activeCount(ids: List<String>, state: dev.appolon.homelab.arr.core.FilterState): Int =
-        ids.count(state::isActive)
 }
 
 /** Sort keys the library offers; selectors stay typed via [SortSpec.byNullable]. */

@@ -95,7 +95,12 @@ class MoviePosterUrlsTest {
     fun `local poster wins and builds from the mediacover path`() {
         val movie = MovieResource(
             id = 12,
-            images = listOf(MediaCover(coverType = MediaCoverTypes.POSTER, url = "/api/v3/mediacover/12/poster.jpg")),
+            images = listOf(
+                MediaCover(
+                    coverType = MediaCoverTypes.POSTER,
+                    url = "/api/v3/mediacover/12/poster.jpg",
+                ),
+            ),
         )
         assertEquals(
             "http://host:30025/radarr/api/v3/mediacover/12/poster.jpg",

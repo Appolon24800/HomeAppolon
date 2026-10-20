@@ -108,8 +108,15 @@ private fun ToggleSection(
 ) {
     val current = (state.value(spec.id) as? FilterValue.Toggle)?.on
     val label = filterLabel(spec.id)
-    Text(label, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(bottom = 8.dp))
-    val options = listOf(true to R.string.arr_radarr_filter_yes, false to R.string.arr_radarr_filter_no)
+    Text(
+        label,
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.padding(bottom = 8.dp),
+    )
+    val options = listOf(
+        true to R.string.arr_radarr_filter_yes,
+        false to R.string.arr_radarr_filter_no,
+    )
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
         options.forEachIndexed { index, (value, res) ->
             SegmentedButton(
@@ -125,7 +132,10 @@ private fun ToggleSection(
         SegmentedButton(
             selected = current == null,
             onClick = { onValueChange(spec.id, FilterValue.Toggle(null)) },
-            shape = SegmentedButtonDefaults.itemShape(index = options.size, count = options.size + 1),
+            shape = SegmentedButtonDefaults.itemShape(
+                index = options.size,
+                count = options.size + 1,
+            ),
             label = { Text(stringResource(R.string.arr_radarr_filter_any)) },
         )
     }
@@ -244,8 +254,15 @@ internal fun filterLabel(id: String): String = when (id) {
 }
 
 @Composable
-internal fun optionLabel(id: String, option: String, profileLabel: (Int) -> String): String = when (id) {
+internal fun optionLabel(
+    id: String,
+    option: String,
+    profileLabel: (Int) -> String,
+): String = when (id) {
     MovieLibraryFilters.QUALITY -> option.toIntOrNull()?.let(profileLabel) ?: option
-    MovieLibraryFilters.TAGS -> stringResource(R.string.arr_radarr_filter_tag_option, option.toIntOrNull() ?: 0)
+    MovieLibraryFilters.TAGS -> stringResource(
+        R.string.arr_radarr_filter_tag_option,
+        option.toIntOrNull() ?: 0,
+    )
     else -> option
 }

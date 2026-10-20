@@ -85,22 +85,16 @@ class RadarrMoviesRepository(
         } catch (e: Throwable) {
             return@withContext ArrResult.err(e.arrError())
         }
-        val incoming = fetched.associateBy { it.id }
-        val existing = cachedMovies()
-        existing.forEach { cached ->
-            val id = cached.id.toString()
-            val replacement = incoming[cached.id]
-            if (replacement != null) {
-                store.put(serverId, MOVIE_TYPE, id, replacement, MovieResource.serializer())
-            } else {
-                store.delete(serverId, MOVIE_TYPE, id)
-            }
+        val incomingIds = fetched.map { it.id }.toSet()
+        val existingIds = cachedMovies().map { it.id }.toSet()
+        existingIds.filter { it !in incomingIds }.forEach { id ->
+            store.delete(serverId, MOVIE_TYPE, id.toString())
         }
-        val fresh = fetched.filter { movie -> existing.none { it.id == movie.id } }
+        // One write for the whole library keeps the fetchedAt stamp uniform.
         store.putAll(
             serverId,
             MOVIE_TYPE,
-            fresh.map { it.id.toString() to it },
+            fetched.map { it.id.toString() to it },
             MovieResource.serializer(),
             fetchedAtMillis = now(),
         )
@@ -112,7 +106,9 @@ class RadarrMoviesRepository(
         if (isStale(ttlMillis)) refresh() else ArrResult.ok(Unit)
 
     /** Quality profiles for filter labels and the editor dropdown, cached with its own TTL. */
-    suspend fun qualityProfiles(ttlMillis: Long = PROFILE_TTL_MILLIS): ArrResult<List<QualityProfileResource>> =
+    suspend fun qualityProfiles(
+        ttlMillis: Long = PROFILE_TTL_MILLIS,
+    ): ArrResult<List<QualityProfileResource>> =
         withContext(io) {
             val cached = store.getAll(serverId, PROFILE_TYPE, QualityProfileResource.serializer())
             val fetched = store.lastFetchedAt(serverId, PROFILE_TYPE)
@@ -157,7 +153,10 @@ class RadarrMoviesRepository(
             }
             if (response.isSuccessful) {
                 response.body().orEmpty().forEach { touched ->
-                    store.put(serverId, MOVIE_TYPE, touched.id.toString(), touched, MovieResource.serializer())
+                    store.put(
+                        serverId, MOVIE_TYPE,
+                        touched.id.toString(), touched, MovieResource.serializer(),
+                    )
                 }
                 ArrResult.ok(WriteOutcome.Synced)
             } else {
@@ -228,7 +227,9 @@ class RadarrMoviesRepository(
             .filter { it.serverId == serverId && it.path == EDITOR_PATH }
             .flatMap { action ->
                 runCatching {
-                    ArrJson.decodeFromString(MovieEditorResource.serializer(), action.bodyJson.orEmpty())
+                    ArrJson.decodeFromString(
+                        MovieEditorResource.serializer(), action.bodyJson.orEmpty(),
+                    )
                 }.getOrNull()?.movieIds.orEmpty()
             }
             .toSet()
@@ -249,13 +250,16 @@ class RadarrMoviesRepository(
         if (isDelete) {
             targets.forEach { id -> store.delete(serverId, MOVIE_TYPE, id.toString()) }
         } else {
-            // Only touched rows are rewritten so the TTL of untouched movies survives.
+            // Only touched rows are rewritten, and the fetch stamp is carried
+            // over so an optimistic edit does not extend the refresh TTL.
+            val stamp = store.lastFetchedAt(serverId, MOVIE_TYPE) ?: now()
             val merged = applyMovieEditor(cachedMovies(), editor).filter { it.id in targets }
             store.putAll(
                 serverId,
                 MOVIE_TYPE,
                 merged.map { it.id.toString() to it },
                 MovieResource.serializer(),
+                fetchedAtMillis = stamp,
             )
         }
         val action = action(

@@ -106,7 +106,9 @@ fun MovieEditorSheet(
                     onChange { form -> form.copy(rootFolderPath = value) }
                 },
                 label = { Text(stringResource(R.string.arr_radarr_editor_root_folder)) },
-                supportingText = { Text(stringResource(R.string.arr_radarr_editor_root_folder_hint)) },
+                supportingText = {
+                    Text(stringResource(R.string.arr_radarr_editor_root_folder_hint))
+                },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -155,7 +157,10 @@ fun MovieEditorSheet(
                     SegmentedButton(
                         selected = form.applyTags == mode,
                         onClick = { onChange { form -> form.copy(applyTags = mode) } },
-                        shape = SegmentedButtonDefaults.itemShape(index = index, count = modes.size),
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = modes.size,
+                        ),
                         label = { Text(stringResource(res)) },
                     )
                 }

@@ -19,7 +19,12 @@ import kotlinx.serialization.KSerializer
  */
 class FakeEntityStore : EntityStore {
 
-    private data class Row(val serverId: ServerId, val type: EntityType, val id: String, val json: String)
+    private data class Row(
+        val serverId: ServerId,
+        val type: EntityType,
+        val id: String,
+        val json: String,
+    )
 
     private val rows = MutableStateFlow<List<Row>>(emptyList())
     private val fetchedAt = HashMap<Pair<ServerId, EntityType>, Long>()
@@ -42,7 +47,10 @@ class FakeEntityStore : EntityStore {
         fetchedAtMillis: Long,
     ) {
         val encoded = values.map { (id, value) ->
-            Row(serverId, type, id, dev.appolon.homelab.arr.net.ArrJson.encodeToString(serializer, value))
+            Row(
+                serverId, type, id,
+                dev.appolon.homelab.arr.net.ArrJson.encodeToString(serializer, value),
+            )
         }
         rows.value = rows.value.filterNot { row ->
             row.serverId == serverId && row.type == type && row.id in values.map { it.first }
@@ -50,16 +58,27 @@ class FakeEntityStore : EntityStore {
         fetchedAt[serverId to type] = fetchedAtMillis
     }
 
-    override suspend fun <T> getAll(serverId: ServerId, type: EntityType, serializer: KSerializer<T>): List<T> =
+    override suspend fun <T> getAll(
+        serverId: ServerId,
+        type: EntityType,
+        serializer: KSerializer<T>,
+    ): List<T> =
         rows.value.filter { it.serverId == serverId && it.type == type }
             .map { decode(it, serializer) }
 
-    override suspend fun <T> get(serverId: ServerId, type: EntityType, id: String, serializer: KSerializer<T>): T? =
+    override suspend fun <T> get(
+        serverId: ServerId,
+        type: EntityType,
+        id: String,
+        serializer: KSerializer<T>,
+    ): T? =
         rows.value.firstOrNull { it.serverId == serverId && it.type == type && it.id == id }
             ?.let { decode(it, serializer) }
 
     override suspend fun delete(serverId: ServerId, type: EntityType, id: String) {
-        rows.value = rows.value.filterNot { it.serverId == serverId && it.type == type && it.id == id }
+        rows.value = rows.value.filterNot {
+            it.serverId == serverId && it.type == type && it.id == id
+        }
     }
 
     override suspend fun deleteAll(serverId: ServerId, type: EntityType?) {

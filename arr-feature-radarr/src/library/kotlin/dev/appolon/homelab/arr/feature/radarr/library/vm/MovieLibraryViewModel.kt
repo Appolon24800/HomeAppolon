@@ -105,7 +105,11 @@ data class MovieLibraryUiState(
 
     /** ids the next bulk operation targets: the selection, or everything presented. */
     val bulkTargets: List<Int>
-        get() = if (selectMode && selection.isNotEmpty()) selection.sorted() else presentation.all.map { it.id }
+        get() = if (selectMode && selection.isNotEmpty()) {
+            selection.sorted()
+        } else {
+            presentation.all.map { it.id }
+        }
 }
 
 /**
@@ -172,7 +176,8 @@ class MovieLibraryViewModel(
             _state.update { it.copy(refreshing = true) }
             when (val result = repository.refresh()) {
                 is ArrResult.Ok -> _state.update { it.copy(refreshing = false, loadError = null) }
-                is ArrResult.Err -> _state.update { it.copy(refreshing = false, loadError = result.error) }
+                is ArrResult.Err ->
+                    _state.update { it.copy(refreshing = false, loadError = result.error) }
             }
         }
     }
@@ -194,7 +199,11 @@ class MovieLibraryViewModel(
     }
 
     fun setFilterValue(id: String, value: FilterValue) = _state.update { s ->
-        val next = if (value == emptyValue(id)) s.filterState.without(id) else s.filterState.with(id, value)
+        val next = if (value == emptyValue(id)) {
+            s.filterState.without(id)
+        } else {
+            s.filterState.with(id, value)
+        }
         s.copy(
             filterState = next,
             activeSavedFilterId = null,

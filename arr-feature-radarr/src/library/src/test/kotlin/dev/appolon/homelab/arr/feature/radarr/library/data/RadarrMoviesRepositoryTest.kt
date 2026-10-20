@@ -47,7 +47,10 @@ class RadarrMoviesRepositoryTest {
             movieApi = fake.movie,
             movieEditorApi = fake.movieEditor,
             qualityProfileApi = {
-                listOf(QualityProfileResource(id = 1, name = "HD"), QualityProfileResource(id = 2, name = "UHD"))
+                listOf(
+                    QualityProfileResource(id = 1, name = "HD"),
+                    QualityProfileResource(id = 2, name = "UHD"),
+                )
             },
             commandRunner = { command, ids ->
                 commandCalls += command to ids
@@ -147,7 +150,11 @@ class RadarrMoviesRepositoryTest {
     fun `delete offline removes rows optimistically and enqueues`() = runTest {
         repository.refresh()
         fake.error = IOException("offline")
-        val outcome = repository.deleteMovies(listOf(1), deleteFiles = true, addImportExclusion = false)
+        val outcome = repository.deleteMovies(
+            listOf(1),
+            deleteFiles = true,
+            addImportExclusion = false,
+        )
         assertTrue((outcome as ArrResult.Ok).value is WriteOutcome.Queued)
         assertEquals(listOf("Beta"), repository.cachedMovies().map { it.title })
         val action = queue.pending().single()
@@ -158,7 +165,11 @@ class RadarrMoviesRepositoryTest {
     @Test
     fun `delete online removes rows and stays off the queue`() = runTest {
         repository.refresh()
-        val outcome = repository.deleteMovies(listOf(1), deleteFiles = false, addImportExclusion = true)
+        val outcome = repository.deleteMovies(
+            listOf(1),
+            deleteFiles = false,
+            addImportExclusion = true,
+        )
         assertTrue((outcome as ArrResult.Ok).value is WriteOutcome.Synced)
         assertEquals(listOf("Beta"), repository.cachedMovies().map { it.title })
         assertTrue(queue.pending().isEmpty())
@@ -169,7 +180,9 @@ class RadarrMoviesRepositoryTest {
     fun `server errors do not enqueue`() = runTest {
         repository.refresh()
         fake.errorOnce = HttpException(Response.error<Any>(409, "conflict".toResponseBody(null)))
-        val outcome = repository.editMovies(MovieEditorResource(movieIds = listOf(1), monitored = false))
+        val outcome = repository.editMovies(
+            MovieEditorResource(movieIds = listOf(1), monitored = false),
+        )
         val error = (outcome as ArrResult.Err).error
         assertTrue(error is ArrError.Http)
         assertEquals(409, (error as ArrError.Http).code)

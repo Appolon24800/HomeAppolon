@@ -55,7 +55,8 @@ fun SavedMovieFilter.toFilterState(): FilterState {
 
 /** Converts live filter state into the serializable saved form. */
 fun FilterState.toSavedValues(): SavedMovieFilterValues {
-    fun choice(id: String): Set<String> = (values[id] as? FilterValue.Choice)?.selected ?: emptySet()
+    fun choice(id: String): Set<String> =
+        (values[id] as? FilterValue.Choice)?.selected ?: emptySet()
     val range = values[MovieLibraryFilters.YEAR] as? FilterValue.Range
     return SavedMovieFilterValues(
         monitored = (values[MovieLibraryFilters.MONITORED] as? FilterValue.Toggle)?.on,

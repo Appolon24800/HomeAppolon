@@ -779,14 +779,18 @@ private fun SelectionBar(
             IconButton(onClick = onClear) {
                 Icon(
                     imageVector = Icons.Filled.Close,
-                    contentDescription = stringResource(R.string.arr_radarr_library_cd_clear_selection),
+                    contentDescription = stringResource(
+                        R.string.arr_radarr_library_cd_clear_selection,
+                    ),
                 )
             }
             Spacer(Modifier.weight(1f))
             IconButton(onClick = onRefreshMetadata) {
                 Icon(
                     imageVector = Icons.Filled.Refresh,
-                    contentDescription = stringResource(R.string.arr_radarr_library_cd_refresh_metadata),
+                    contentDescription = stringResource(
+                        R.string.arr_radarr_library_cd_refresh_metadata,
+                    ),
                 )
             }
             IconButton(onClick = onScanDisk) {
@@ -798,13 +802,17 @@ private fun SelectionBar(
             IconButton(onClick = onEdit) {
                 Icon(
                     imageVector = Icons.Filled.Edit,
-                    contentDescription = stringResource(R.string.arr_radarr_library_cd_edit_selected),
+                    contentDescription = stringResource(
+                        R.string.arr_radarr_library_cd_edit_selected,
+                    ),
                 )
             }
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
-                    contentDescription = stringResource(R.string.arr_radarr_library_cd_delete_selected),
+                    contentDescription = stringResource(
+                        R.string.arr_radarr_library_cd_delete_selected,
+                    ),
                 )
             }
         }
