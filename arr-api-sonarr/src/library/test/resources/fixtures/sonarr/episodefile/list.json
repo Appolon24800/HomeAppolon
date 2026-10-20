@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "seriesId": 1,
+    "seasonNumber": 1,
+    "relativePath": null,
+    "path": null,
+    "size": 1,
+    "dateAdded": "2026-01-01T00:00:00Z",
+    "sceneName": null,
+    "releaseGroup": null,
+    "languages": null,
+    "quality": {
+      "quality": {
+        "id": 1,
+        "name": null,
+        "source": "unknown",
+        "resolution": 1
+      },
+      "revision": {
+        "version": 1,
+        "real": 1,
+        "isRepack": true
+      }
+    },
+    "customFormats": null,
+    "customFormatScore": 1,
+    "indexerFlags": null,
+    "releaseType": "unknown",
+    "mediaInfo": {
+      "id": 1,
+      "audioBitrate": 1,
+      "audioChannels": 1.0,
+      "audioCodec": null,
+      "audioLanguages": null,
+      "audioStreamCount": 1,
+      "videoBitDepth": 1,
+      "videoBitrate": 1,
+      "videoCodec": null,
+      "videoFps": 1.0,
+      "videoDynamicRange": null,
+      "videoDynamicRangeType": null,
+      "resolution": null,
+      "runTime": null,
+      "scanType": null,
+      "subtitles": null
+    },
+    "qualityCutoffNotMet": true
+  }
+]
