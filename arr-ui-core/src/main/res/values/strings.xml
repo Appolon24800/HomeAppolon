@@ -24,4 +24,12 @@
     <string name="arr_status_completed">Completed</string>
     <string name="arr_status_failed">Failed</string>
     <string name="arr_calendar_today">Today</string>
+
+    <!-- Arr shell: navigation host, server switcher, screen scaffold. -->
+    <string name="arr_shell_more_servers">%1$d more servers</string>
+    <string name="arr_shell_cd_server_unhealthy">Server %1$s can\'t be reached right now.</string>
+    <string name="arr_shell_cd_settings">Open settings</string>
+    <string name="arr_shell_cd_back">Go back</string>
+    <string name="arr_shell_unavailable_title">This screen isn\'t available yet</string>
+    <string name="arr_shell_unavailable_message">No module registered a screen for %1$s.</string>
 </resources>
