@@ -33,6 +33,9 @@ import dev.appolon.homelab.arr.feature.sonarr.settings.mm.sonarrSettingsMmShellC
 import dev.appolon.homelab.arr.feature.sonarr.settings.quality.SonarrQualityClients
 import dev.appolon.homelab.arr.feature.sonarr.settings.quality.SonarrSettingsQualityFeature
 import dev.appolon.homelab.arr.feature.sonarr.settings.quality.sonarrSettingsQualityShellContent
+import dev.appolon.homelab.arr.feature.sonarr.settings.system.SonarrSettingsSystemClients
+import dev.appolon.homelab.arr.feature.sonarr.settings.system.SonarrSettingsSystemFeature
+import dev.appolon.homelab.arr.feature.sonarr.settings.system.sonarrSettingsSystemShellContent
 import dev.appolon.homelab.arr.feature.sonarr.wanted.SonarrWantedDeps
 import dev.appolon.homelab.arr.feature.sonarr.wanted.SonarrWantedRoutes
 import dev.appolon.homelab.arr.feature.sonarr.wanted.withSonarrWanted
@@ -47,10 +50,9 @@ import dev.appolon.homelab.arr.ui.shell.ArrShellContent
  *
  * Bundled groups: series library, series detail, add new, wanted with season
  * pass, queue with manual import, activity history and blocklist, calendar,
- * search with interactive import, and the media management, quality, and
- * connect settings groups.
- *
- * Skipped: the settings-system group has no committed Sonarr files yet.
+ * search with interactive import, and the media management, quality,
+ * connect, and system settings groups. Every feature matrix group for
+ * Sonarr has a committed home.
  */
 object SonarrFeatureRoot {
 
@@ -70,6 +72,7 @@ object SonarrFeatureRoot {
         SonarrSettingsQualityFeature.register(registry)
         SonarrActivityFeature.register(registry)
         SonarrSettingsConnectFeature.register(registry)
+        SonarrSettingsSystemFeature.register(registry)
     }
 
     /**
@@ -87,6 +90,7 @@ object SonarrFeatureRoot {
         mediaManagementClients: (ServerId) -> SonarrSettingsMmClients,
         qualityClients: (ServerId) -> SonarrQualityClients,
         connectClients: (ServerId) -> SonarrConnectClients,
+        systemClients: (ServerId) -> SonarrSettingsSystemClients,
     ): ArrShellContent {
         val graphBacked = ArrShellContent()
             .withSonarrSeriesLibrary(SonarrLibraryDeps.from(graph), registry)
@@ -100,6 +104,7 @@ object SonarrFeatureRoot {
         val mediaManagement = sonarrSettingsMmShellContent(mediaManagementClients)
         val quality = sonarrSettingsQualityShellContent(qualityClients)
         val connect = sonarrSettingsConnectShellContent(connectClients)
+        val system = sonarrSettingsSystemShellContent(systemClients)
         return ArrShellContent(
             serverList = graphBacked.serverList,
             serverHome = graphBacked.serverHome,
@@ -116,6 +121,7 @@ object SonarrFeatureRoot {
                 SonarrMediaManagementFeature.PATTERNS to mediaManagement,
                 SonarrSettingsQualityFeature.PATTERNS to quality,
                 SonarrSettingsConnectFeature.PATTERNS to connect,
+                SonarrSettingsSystemFeature.PATTERNS to system,
             ),
         )
     }

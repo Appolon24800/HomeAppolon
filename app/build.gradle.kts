@@ -108,6 +108,14 @@ dependencies {
     implementation(project(":arr-feature-prowlarr"))
     implementation(project(":arr-feature-bazarr"))
     implementation(project(":arr-sync"))
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(project(":arr-api-radarr"))
+    implementation(project(":arr-api-sonarr"))
+    implementation(project(":arr-api-lidarr"))
+    implementation(project(":arr-api-prowlarr"))
+    implementation(project(":arr-api-bazarr"))
 
     testImplementation(libs.junit)
 

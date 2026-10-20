@@ -1,5 +1,38 @@
 package dev.appolon.homelab.arr
 
+import retrofit2.Retrofit
+import okhttp3.MediaType.Companion.toMediaType
+import dev.appolon.homelab.arr.net.ArrJson
+import dev.appolon.homelab.arr.net.ServerEndpoint
+import dev.appolon.homelab.arr.net.TrustSpec
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import dev.appolon.homelab.arr.feature.lidarr.activity.LidarrActivityClients
+import dev.appolon.homelab.arr.feature.lidarr.activity.LidarrActivityFeature
+import dev.appolon.homelab.arr.feature.lidarr.activity.lidarrActivityShellContent
+import dev.appolon.homelab.arr.feature.lidarr.calendar.LidarrCalendarDeps
+import dev.appolon.homelab.arr.feature.lidarr.calendar.withLidarrCalendar
+import dev.appolon.homelab.arr.feature.lidarr.search.LidarrSearchDeps
+import dev.appolon.homelab.arr.feature.lidarr.search.withLidarrSearch
+import dev.appolon.homelab.arr.feature.lidarr.settings.connect.LidarrConnectClients
+import dev.appolon.homelab.arr.feature.lidarr.settings.connect.LidarrSettingsConnectConnection
+import dev.appolon.homelab.arr.feature.lidarr.settings.connect.LidarrSettingsConnectFeature
+import dev.appolon.homelab.arr.feature.lidarr.settings.connect.lidarrSettingsConnectShellContent
+import dev.appolon.homelab.arr.feature.lidarr.settings.quality.LidarrQualityClients
+import dev.appolon.homelab.arr.feature.lidarr.settings.quality.LidarrSettingsQualityConnection
+import dev.appolon.homelab.arr.feature.lidarr.settings.quality.LidarrSettingsQualityFeature
+import dev.appolon.homelab.arr.feature.lidarr.settings.quality.lidarrSettingsQualityShellContent
+import dev.appolon.homelab.arr.feature.lidarr.settings.system.LidarrSettingsSystemClients
+import dev.appolon.homelab.arr.feature.lidarr.settings.system.LidarrSettingsSystemConnection
+import dev.appolon.homelab.arr.feature.lidarr.settings.system.LidarrSettingsSystemFeature
+import dev.appolon.homelab.arr.feature.lidarr.settings.system.lidarrSettingsSystemShellContent
+import dev.appolon.homelab.arr.api.lidarr.LidarrQueueApis
+import dev.appolon.homelab.arr.feature.sonarr.activity.SonarrActivityClients
+import dev.appolon.homelab.arr.feature.sonarr.activity.sonarrActivityShellContent
+import dev.appolon.homelab.arr.api.sonarr.SonarrQueueApis
+import dev.appolon.homelab.arr.feature.sonarr.settings.system.SonarrSettingsSystemClients
+import dev.appolon.homelab.arr.feature.sonarr.settings.system.SonarrSettingsSystemConnection
+import dev.appolon.homelab.arr.feature.sonarr.settings.system.SonarrSettingsSystemFeature
+import dev.appolon.homelab.arr.feature.sonarr.settings.system.sonarrSettingsSystemShellContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -113,7 +146,7 @@ import kotlinx.coroutines.launch
 internal class ArrFeatureWiring(
     private val graph: ArrDataGraph,
     registry: ArrRouteRegistry,
-    clientFactory: ArrClientFactory,
+    private val clientFactory: ArrClientFactory,
     scope: CoroutineScope,
 ) {
     /** Switcher display data for [dev.appolon.homelab.arr.ArrHost]. */
@@ -167,11 +200,65 @@ internal class ArrFeatureWiring(
         }
     }
 
+    private val sonarrSystemBundles = settingsBundles { id ->
+        SonarrSettingsSystemConnection(graph.registry, graph.secrets, clientFactory).connect(id)?.let { apis ->
+            SonarrSettingsSystemClients(graph.entityStore, graph.actionQueue, apis)
+        }
+    }
+
+    private val sonarrActivityBundles = settingsBundles { id ->
+        activityRetrofit(id)?.let { retrofit ->
+            SonarrActivityClients(
+                graph.entityStore,
+                graph.actionQueue,
+                SonarrQueueApis.history(retrofit),
+                SonarrQueueApis.blocklist(retrofit),
+            )
+        }
+    }
+
+    private val sonarrPlainGroups: List<Pair<List<String>, ArrShellContent>> = listOf(
+        SonarrActivityFeature.PATTERNS to sonarrActivityShellContent(provider(sonarrActivityBundles)),
+    )
+
     private val lidarrMmBundles = settingsBundles { id ->
         LidarrSettingsMmConnection(graph.registry, graph.secrets, clientFactory).connect(id)?.let { apis ->
             LidarrSettingsMmClients(graph.entityStore, graph.actionQueue, apis)
         }
     }
+
+    private val lidarrQualityBundles = settingsBundles { id ->
+        LidarrSettingsQualityConnection(graph.registry, graph.secrets, clientFactory).connect(id)?.let { apis ->
+            LidarrQualityClients(graph.entityStore, graph.actionQueue, apis)
+        }
+    }
+
+    private val lidarrConnectBundles = settingsBundles { id ->
+        LidarrSettingsConnectConnection(graph.registry, graph.secrets, clientFactory).connect(id)?.let { apis ->
+            LidarrConnectClients(graph.entityStore, graph.actionQueue, apis)
+        }
+    }
+
+    private val lidarrSystemBundles = settingsBundles { id ->
+        LidarrSettingsSystemConnection(graph.registry, graph.secrets, clientFactory).connect(id)?.let { apis ->
+            LidarrSettingsSystemClients(graph.entityStore, graph.actionQueue, apis)
+        }
+    }
+
+    private val lidarrActivityBundles = settingsBundles { id ->
+        activityRetrofit(id)?.let { retrofit ->
+            LidarrActivityClients(
+                graph.entityStore,
+                graph.actionQueue,
+                LidarrQueueApis.history(retrofit),
+                LidarrQueueApis.blocklist(retrofit),
+            )
+        }
+    }
+
+    private val lidarrPlainGroups: List<Pair<List<String>, ArrShellContent>> = listOf(
+        LidarrActivityFeature.PATTERNS to lidarrActivityShellContent(provider(lidarrActivityBundles)),
+    )
 
     private val radarrPlainGroups: List<Pair<List<String>, ArrShellContent>> = listOf(
         RadarrLibraryFeature.PATTERNS to radarrLibrary,
@@ -205,6 +292,11 @@ internal class ArrFeatureWiring(
             sonarrConnectBundles,
             sonarrSettingsConnectShellContent(provider(sonarrConnectBundles)),
         ),
+        SettingsGroup(
+            SonarrSettingsSystemFeature.PATTERNS,
+            sonarrSystemBundles,
+            sonarrSettingsSystemShellContent(provider(sonarrSystemBundles)),
+        ),
     )
 
     private val lidarrSettingsGroups: List<SettingsGroup<*>> = listOf(
@@ -212,6 +304,21 @@ internal class ArrFeatureWiring(
             LidarrMediaManagementFeature.PATTERNS,
             lidarrMmBundles,
             lidarrSettingsMmShellContent(provider(lidarrMmBundles)),
+        ),
+        SettingsGroup(
+            LidarrSettingsQualityFeature.PATTERNS,
+            lidarrQualityBundles,
+            lidarrSettingsQualityShellContent(provider(lidarrQualityBundles)),
+        ),
+        SettingsGroup(
+            LidarrSettingsConnectFeature.PATTERNS,
+            lidarrConnectBundles,
+            lidarrSettingsConnectShellContent(provider(lidarrConnectBundles)),
+        ),
+        SettingsGroup(
+            LidarrSettingsSystemFeature.PATTERNS,
+            lidarrSystemBundles,
+            lidarrSettingsSystemShellContent(provider(lidarrSystemBundles)),
         ),
     )
 
@@ -246,6 +353,8 @@ internal class ArrFeatureWiring(
         .withLidarrArtistDetail(LidarrArtistDetailDeps.from(graph))
         .withLidarrWanted(LidarrWantedDeps.from(graph), registry)
         .withLidarrQueue(LidarrQueueDeps.from(graph), registry)
+        .withLidarrCalendar(LidarrCalendarDeps.from(graph), registry)
+        .withLidarrSearch(LidarrSearchDeps.from(graph), registry)
 
     private val prowlarrContent = ProwlarrFeatureRoot.shellContent(graph)
     private val bazarrContent = BazarrFeatureRoot.shellContent(graph)
@@ -357,9 +466,11 @@ internal class ArrFeatureWiring(
             SettingsDispatch(route, sonarrSettingsGroups)
             return
         }
-        // The activity group has no committed connection helper yet.
-        if (SonarrActivityFeature.PATTERNS.any { matchRoutePattern(it, segments) != null }) {
-            ShellUnavailable(route)
+        val plain = sonarrPlainGroups.firstOrNull { (patterns, _) ->
+            patterns.any { matchRoutePattern(it, segments) != null }
+        }
+        if (plain != null) {
+            plain.second.feature?.invoke(route)
             return
         }
         val slot = sonarrChained.feature
@@ -369,16 +480,48 @@ internal class ArrFeatureWiring(
     @Composable
     private fun LidarrFeatureDispatch(route: ArrRoute.Feature) {
         val segments = route.path.split('/')
-        if (LidarrMediaManagementFeature.PATTERNS.any { matchRoutePattern(it, segments) != null }) {
+        if (lidarrSettingsGroups.any { group ->
+                group.patterns.any { matchRoutePattern(it, segments) != null }
+            }) {
             SettingsDispatch(route, lidarrSettingsGroups)
             return
         }
+        val plain = lidarrPlainGroups.firstOrNull { (patterns, _) ->
+            patterns.any { matchRoutePattern(it, segments) != null }
+        }
+        if (plain != null) {
+            plain.second.feature?.invoke(route)
+            return
+        }
         // Library and add-new keep standalone feature slots; the wrapped
-        // chain covers wanted, queue, and any future wrappers above them.
+        // chain covers detail, wanted, queue, calendar, and search.
         lidarrLibrary.feature?.invoke(route)
         lidarrAddNew.feature?.invoke(route)
         val slot = lidarrChained.feature
         if (slot != null) slot.invoke(route) else ShellUnavailable(route)
+    }
+
+    /** Per-server Retrofit for the activity groups, mirroring the settings connections. */
+    private suspend fun activityRetrofit(serverId: ServerId): Retrofit? {
+        val server = graph.registry.byId(serverId) ?: return null
+        val endpoint = try {
+            ServerEndpoint(
+                serverId = server.id,
+                baseUrl = server.baseUrl,
+                apiKey = graph.secrets.decrypt(server.apiKeyEncrypted),
+                basicAuthUser = server.basicAuthUser,
+                basicAuthPassword = server.basicAuthPasswordEncrypted?.let { graph.secrets.decrypt(it) },
+                proxy = server.proxy,
+                trust = server.trust ?: TrustSpec.System,
+            )
+        } catch (t: Throwable) {
+            return null
+        }
+        return Retrofit.Builder()
+            .baseUrl(ServerEndpoint.normalizeBaseUrl(server.baseUrl))
+            .client(clientFactory.clientFor(endpoint))
+            .addConverterFactory(ArrJson.asConverterFactory("application/json".toMediaType()))
+            .build()
     }
 
     /**
