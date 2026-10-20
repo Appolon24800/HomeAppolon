@@ -3,8 +3,10 @@ package dev.appolon.homelab.arr.api.bazarr
 import retrofit2.Retrofit
 
 /**
- * Creates every system and settings tagged interface from one configured [Retrofit] instance,
- * which supplies the base URL (including the /api prefix), X-Api-Key header and JSON converter.
+ * Creates every system and settings tagged interface from one configured [Retrofit] instance.
+ * The base URL is the server root, including any deployment prefix, but excludes api/; each
+ * annotation path carries the api/ prefix itself. The instance also supplies the X-Api-Key
+ * header and JSON converter.
  */
 object BazarrSystemApis {
     fun announcements(retrofit: Retrofit): SystemAnnouncementsApi =

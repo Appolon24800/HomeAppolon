@@ -11,6 +11,6 @@ import retrofit2.http.POST
  */
 @JvmSuppressWildcards
 interface SystemSettingsApi {
-    @POST("system/webhooks/test")
+    @POST("api/system/webhooks/test")
     suspend fun postSystemWebhookTest(): Response<Unit>
 }
