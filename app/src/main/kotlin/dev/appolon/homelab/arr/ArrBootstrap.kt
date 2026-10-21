@@ -100,11 +100,30 @@ object ArrBootstrap {
             graph = coldGraph,
             clientFactory = DefaultArrClientFactory(
                 globalProxy = globalProxySnapshot(coldGraph, coldScope),
+                cookieSource = WebViewCookieSource(),
             ),
         )
     }
 }
 
+
+/** Bridges the app WebView's cookie jar into arr API clients, same-origin only. */
+private class WebViewCookieSource : dev.appolon.homelab.arr.net.CookieSource {
+    override fun cookiesFor(url: String): List<okhttp3.Cookie> = runCatching {
+        val manager = android.webkit.CookieManager.getInstance()
+        val header = manager.getCookie(url) ?: return emptyList()
+        val host = java.net.URI(url).host ?: return emptyList()
+        header.split(";").mapNotNull { part ->
+            val idx = part.indexOf('=')
+            if (idx <= 0) return@mapNotNull null
+            okhttp3.Cookie.Builder()
+                .name(part.substring(0, idx).trim())
+                .value(part.substring(idx + 1).trim())
+                .domain(host)
+                .build()
+        }
+    }.getOrDefault(emptyList())
+}
 
 /**
  * Cheap cached snapshot of the global default proxy: a collector keeps a
@@ -141,7 +160,7 @@ internal fun registerDefaultSyncAdapters(graph: ArrDataGraph, clientFactory: Arr
  */
 internal class ArrRuntime(context: Context) {
     val graph: ArrDataGraph = SyncBootstrap.dataGraph(context)
-    val clientFactory: ArrClientFactory = DefaultArrClientFactory()
+    val clientFactory: ArrClientFactory = DefaultArrClientFactory(cookieSource = WebViewCookieSource())
     val registry: ArrRouteRegistry = ArrRouteRegistry()
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

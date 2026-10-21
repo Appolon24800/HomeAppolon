@@ -48,6 +48,11 @@ object ArrAutoConnect {
         data object NeedSetup : Outcome
     }
 
+    /** The WebView's Cookie header for [url], or null when there is none. */
+    private fun webSessionCookie(url: String): String? = runCatching {
+        android.webkit.CookieManager.getInstance().getCookie(url)
+    }.getOrNull()
+
     /** Wall-clock budget for the whole invisible round trip. */
     private val TIMEOUT_MS = 15_000L
 
@@ -242,6 +247,12 @@ object ArrAutoConnect {
             .callTimeout(10, TimeUnit.SECONDS)
             .followRedirects(false)
             .followSslRedirects(false)
+            // SSO-fronted servers only serve JSON to the browser session;
+            // attach the WebView cookie for this origin like the factory does.
+            .addInterceptor(
+                dev.appolon.homelab.arr.net.SessionCookieInterceptorAccessible
+                    .forBase(baseUrl = base, cookieHeaderProvider = ::webSessionCookie),
+            )
             .build()
         try {
             STATUS_PATHS.any { path ->

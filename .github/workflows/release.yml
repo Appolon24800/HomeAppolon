@@ -74,6 +74,7 @@ jobs:
         run: |
           mkdir -p dist
           cp app/build/outputs/apk/release/app-release.apk "dist/HomeAppolon-${VERSION_NAME}.apk"
+          cp app/build/outputs/mapping/release/mapping.txt "dist/mapping-${VERSION_NAME}.txt"
           cd dist
           sha256sum "HomeAppolon-${VERSION_NAME}.apk" > SHA256SUMS.txt
 

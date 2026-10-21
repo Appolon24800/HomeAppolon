@@ -33,6 +33,7 @@ class DefaultArrClientFactory(
     private val orbotDetector: OrbotDetector = OrbotDetector(),
     base: OkHttpClient = OkHttpClient(),
     private val globalProxy: () -> ProxyConfig? = { null },
+    private val cookieSource: CookieSource = CookieSource.None,
 ) : ArrClientFactory {
     private val baseClient = base
     private val cache = ConcurrentHashMap<CacheKey, CachedClient>()
@@ -116,6 +117,7 @@ class DefaultArrClientFactory(
                         UserAgentInterceptor
                     },
                 )
+                addInterceptor(SessionCookieInterceptor(endpoint.baseUrl, cookieSource))
                 configureProxy(proxy)
                 configureTrust(endpoint.trust)
             }
@@ -233,5 +235,5 @@ private class HeadersInterceptor(
 }
 
 /** Origin equality on scheme, host, and port; [HttpUrl] normalizes default ports per scheme. */
-private fun HttpUrl.sameOrigin(other: HttpUrl?): Boolean =
+internal fun HttpUrl.sameOrigin(other: HttpUrl?): Boolean =
     other != null && scheme == other.scheme && host == other.host && port == other.port
