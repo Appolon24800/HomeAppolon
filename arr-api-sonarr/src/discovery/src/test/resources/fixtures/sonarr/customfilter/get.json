@@ -1,0 +1,13 @@
+{
+  "id": 1,
+  "type": "seriesIndex",
+  "label": "string",
+  "filters": [
+    {
+      "key": "monitored",
+      "operator": "equal",
+      "value": "true",
+      "type": "equal"
+    }
+  ]
+}

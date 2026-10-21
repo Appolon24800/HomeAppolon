@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- General settings -->
+    <string name="arr_lidarr_general_url_base_support">For reverse proxy setups, for example /lidarr. Changing this requires a restart.</string>
+    <string name="arr_lidarr_general_launch_browser_support">Open the Lidarr web UI in a browser when the server starts.</string>
+    <string name="arr_lidarr_general_ssl_read_only">Certificate files are managed in the server config directory.</string>
+    <string name="arr_lidarr_general_ssl_docs">Open the Lidarr SSL documentation</string>
+    <string name="arr_lidarr_general_auth_external_hint">Authentication is handled by an external proxy; Lidarr trusts the remote user header.</string>
+    <string name="arr_lidarr_general_analytics_support">Send anonymous usage and error information to the Lidarr team. This includes information on your browser, which Lidarr pages you use, error reporting, and installation version.</string>
+
+    <!-- Tags -->
+    <string name="arr_lidarr_tags_empty_message">Tags apply to artists, lists, indexers, and other consumers to drive automation.</string>
+    <string name="arr_lidarr_tags_delete_message">Deleting a tag removes it from every artist, list, indexer, and rule that uses it.</string>
+    <string name="arr_lidarr_tags_usage_artists">%1$d artists</string>
+
+    <!-- Backups -->
+    <string name="arr_lidarr_backup_notice_restored">Restore started; Lidarr will restart.</string>
+    <string name="arr_lidarr_backup_empty_message">No backups yet. Create one now or wait for the scheduled backup.</string>
+    <string name="arr_lidarr_backup_restore_message">Restoring replaces the current database and settings with the backup\'s contents. Lidarr will restart during the restore.</string>
+
+    <!-- Updates -->
+    <string name="arr_lidarr_updates_notice_install_started">Update installation started; Lidarr will restart.</string>
+    <string name="arr_lidarr_updates_mechanism_builtin">Built-in updater</string>
+    <string name="arr_lidarr_updates_mechanism_external">Updates are handled externally: %1$s</string>
+    <string name="arr_lidarr_updates_up_to_date">Lidarr is up to date</string>
+
+    <!-- Auto tagging -->
+    <string name="arr_lidarr_autotag_delete_message">Deleting this rule stops its tags being applied or removed automatically.</string>
+</resources>

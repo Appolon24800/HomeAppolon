@@ -1,0 +1,29 @@
+{
+  "page": 2,
+  "pageSize": 2,
+  "sortKey": "time",
+  "sortDirection": "descending",
+  "totalRecords": 5,
+  "records": [
+    {
+      "id": 4,
+      "time": "2026-10-20T07:59:58Z",
+      "exception": null,
+      "exceptionType": null,
+      "level": "info",
+      "logger": "Prowlarr.Http.Authentication",
+      "message": "Auth-authorized ip 127.0.0.1",
+      "method": "GET"
+    },
+    {
+      "id": 3,
+      "time": "2026-10-20T07:59:57Z",
+      "exception": "Spec exception line 1\nSpec exception line 2",
+      "exceptionType": "SpecException",
+      "level": "error",
+      "logger": "Prowlarr.Framework.HttpClient",
+      "message": "Spec request failed",
+      "method": "POST"
+    }
+  ]
+}

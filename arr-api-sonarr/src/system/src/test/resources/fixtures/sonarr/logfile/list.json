@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "filename": "sonarr.trace.txt",
+    "lastWriteTime": "2026-10-20T09:00:00Z",
+    "contentsUrl": "/api/v3/log/file/sonarr.trace.txt",
+    "downloadUrl": "/api/v3/log/file/sonarr.trace.txt"
+  },
+  {
+    "id": 2,
+    "filename": "sonarr.update.txt",
+    "lastWriteTime": "2026-10-20T08:30:00Z",
+    "contentsUrl": "/api/v3/log/file/sonarr.update.txt",
+    "downloadUrl": "/api/v3/log/file/sonarr.update.txt"
+  }
+]

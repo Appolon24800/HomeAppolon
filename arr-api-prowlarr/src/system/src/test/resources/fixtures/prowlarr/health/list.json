@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "source": "IndexerStatusCheck",
+    "type": "warning",
+    "message": "Indexer 4 (Spec Indexer) has been disabled due to failures",
+    "wikiUrl": "https://wiki.servarr.com/prowlarr/faq#indexer-disabled"
+  },
+  {
+    "id": 2,
+    "source": "UpdateCheck",
+    "type": "notice",
+    "message": "New update is available",
+    "wikiUrl": "https://wiki.servarr.com/prowlarr/faq#update-available"
+  }
+]

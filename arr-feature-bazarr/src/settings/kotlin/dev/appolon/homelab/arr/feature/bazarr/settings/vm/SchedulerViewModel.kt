@@ -1,0 +1,120 @@
+package dev.appolon.homelab.arr.feature.bazarr.settings.vm
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dev.appolon.homelab.arr.core.ArrError
+import dev.appolon.homelab.arr.core.ArrResult
+import dev.appolon.homelab.arr.feature.bazarr.settings.data.BazarrSettingsRepository
+import dev.appolon.homelab.arr.feature.bazarr.settings.data.SettingsWriteOutcome
+import dev.appolon.homelab.arr.feature.bazarr.settings.model.BazarrScheduledTask
+import dev.appolon.homelab.arr.net.arrError
+import dev.appolon.homelab.arr.ui.lce.LceState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+/** Transient one-line result of a run-now request, surfaced as a snackbar. */
+sealed interface SchedulerMessage {
+    data object RunSynced : SchedulerMessage
+    data object RunQueued : SchedulerMessage
+    data class WriteFailed(val error: ArrError) : SchedulerMessage
+}
+
+/** State of the scheduler screen. */
+data class SchedulerUiState(
+    val loaded: Boolean = false,
+    val loadError: ArrError? = null,
+    val tasks: List<BazarrScheduledTask> = emptyList(),
+    val busyTaskIds: Set<String> = emptySet(),
+    val queuedTaskIds: Set<String> = emptySet(),
+    val refreshing: Boolean = false,
+    val message: SchedulerMessage? = null,
+)
+
+/**
+ * ViewModel of the scheduler screen. The bundled spec exposes task intervals
+ * read-only plus a run-now write, so rows display each task's interval and
+ * next run and offer immediate execution.
+ */
+class SchedulerViewModel(
+    private val repository: BazarrSettingsRepository,
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(SchedulerUiState())
+    val state: StateFlow<SchedulerUiState> = _state.asStateFlow()
+
+    val lce: StateFlow<LceState<SchedulerUiState>> = state
+        .map { s ->
+            when {
+                s.loadError != null && s.tasks.isEmpty() -> LceState.Error(s.loadError)
+                !s.loaded -> LceState.Loading
+                s.tasks.isEmpty() -> LceState.Empty
+                else -> LceState.Content(s, refreshing = s.refreshing)
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LceState.Loading)
+
+    init {
+        viewModelScope.launch {
+            repository.observeTasks()
+                .catch { t -> _state.update { it.copy(loaded = true, loadError = t.arrError()) } }
+                .collect { rows -> _state.update { it.copy(tasks = rows, loaded = true) } }
+        }
+        viewModelScope.launch {
+            repository.queuedTaskIds()
+                .catch { }
+                .collect { ids -> _state.update { it.copy(queuedTaskIds = ids) } }
+        }
+        load()
+    }
+
+    private fun load() {
+        viewModelScope.launch {
+            when (val result = repository.tasks()) {
+                is ArrResult.Ok -> _state.update { it.copy(loadError = null) }
+                is ArrResult.Err -> _state.update { it.copy(loadError = result.error) }
+            }
+        }
+    }
+
+    /** Pull-to-refresh and error retry entry point; bypasses the cache TTL. */
+    fun refresh() {
+        viewModelScope.launch {
+            _state.update { it.copy(refreshing = true) }
+            when (val result = repository.tasks(BazarrSettingsRepository.FORCE_REFRESH)) {
+                is ArrResult.Ok -> _state.update { it.copy(refreshing = false, loadError = null) }
+                is ArrResult.Err ->
+                    _state.update { it.copy(refreshing = false, loadError = result.error) }
+            }
+        }
+    }
+
+    /** Runs one scheduled task immediately. */
+    fun runNow(task: BazarrScheduledTask) {
+        viewModelScope.launch {
+            _state.update { it.copy(busyTaskIds = it.busyTaskIds + task.jobId) }
+            val result = repository.runTaskNow(task)
+            _state.update {
+                it.copy(
+                    busyTaskIds = it.busyTaskIds - task.jobId,
+                    message = when (result) {
+                        is ArrResult.Ok -> when (result.value) {
+                            is SettingsWriteOutcome.Synced -> SchedulerMessage.RunSynced
+                            is SettingsWriteOutcome.Queued -> SchedulerMessage.RunQueued
+                        }
+
+                        is ArrResult.Err -> SchedulerMessage.WriteFailed(result.error)
+                    },
+                )
+            }
+        }
+    }
+
+    fun consumeMessage() = _state.update { it.copy(message = null) }
+}

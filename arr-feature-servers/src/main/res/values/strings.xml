@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Server list -->
+    <string name="arr_servers_title">Servers</string>
+    <string name="arr_servers_empty_title">No servers yet</string>
+    <string name="arr_servers_empty_message">Add a Radarr, Sonarr, Lidarr, Prowlarr, or Bazarr instance to use the native screens.</string>
+    <string name="arr_servers_add">Add server</string>
+    <string name="arr_servers_cd_add">Add a server</string>
+    <string name="arr_servers_cd_proxy">Proxy settings</string>
+    <string name="arr_servers_cd_notifications">Notification settings</string>
+    <string name="arr_servers_cd_sync">Sync status</string>
+    <string name="arr_servers_card_subtitle">%1$s · %2$s</string>
+    <string name="arr_servers_cd_move_up">Move %1$s up</string>
+    <string name="arr_servers_cd_move_down">Move %1$s down</string>
+    <string name="arr_servers_cd_delete">Delete %1$s</string>
+    <string name="arr_servers_cd_health_ok">%1$s is reachable</string>
+    <string name="arr_servers_cd_health_unreachable">%1$s can\'t be reached right now</string>
+    <string name="arr_servers_cd_health_unknown">Reachability of %1$s is unknown</string>
+    <string name="arr_servers_probing">Checking servers…</string>
+    <string name="arr_servers_delete_title">Delete this server?</string>
+    <string name="arr_servers_delete_message">%1$s will be removed from this device. Nothing on the server itself is deleted.</string>
+    <string name="arr_servers_delete_confirm">Delete</string>
+    <string name="arr_servers_delete_cancel">Cancel</string>
+
+    <!-- Add / edit sheet -->
+    <string name="arr_servers_edit_title_add">Add server</string>
+    <string name="arr_servers_edit_title_edit">Edit server</string>
+    <string name="arr_servers_edit_save">Save</string>
+    <string name="arr_servers_edit_name_label">Name</string>
+    <string name="arr_servers_edit_name_blank">Enter a name.</string>
+    <string name="arr_servers_edit_type_label">App type</string>
+    <string name="arr_servers_edit_url_label">Base URL</string>
+    <string name="arr_servers_edit_url_blank">Enter the server address.</string>
+    <string name="arr_servers_edit_url_invalid">That address doesn\'t look complete. Example: http://192.168.1.10:7878</string>
+    <string name="arr_servers_edit_url_preview">Will use %1$s</string>
+    <string name="arr_servers_edit_key_label">API key</string>
+    <string name="arr_servers_edit_key_blank">Enter the API key from the server\'s settings page.</string>
+    <string name="arr_servers_edit_key_paste">Paste</string>
+    <string name="arr_servers_edit_key_scan">Scan QR code</string>
+    <string name="arr_servers_edit_scan_hint">Scanning needs the camera integration. Paste the key for now.</string>
+    <string name="arr_servers_edit_basic_user_label">Basic auth username (optional)</string>
+    <string name="arr_servers_edit_basic_password_label">Basic auth password (optional)</string>
+    <string name="arr_servers_edit_basic_incomplete">Fill in both basic auth fields or leave both empty.</string>
+    <string name="arr_servers_edit_test">Test connection</string>
+    <string name="arr_servers_edit_testing">Testing…</string>
+    <string name="arr_servers_edit_test_ok">Connected. Version %1$s</string>
+    <string name="arr_servers_edit_test_ok_noversion">Connected. The server didn\'t report a version.</string>
+
+    <!-- Proxy settings -->
+    <string name="arr_servers_proxy_title">Proxy</string>
+    <string name="arr_servers_proxy_global_header">Global default</string>
+    <string name="arr_servers_proxy_global_support">Applies to every server that doesn\'t set its own proxy.</string>
+    <string name="arr_servers_proxy_type_label">Proxy type</string>
+    <string name="arr_servers_proxy_type_none">Direct</string>
+    <string name="arr_servers_proxy_type_http">HTTP</string>
+    <string name="arr_servers_proxy_type_socks5">SOCKS5</string>
+    <string name="arr_servers_proxy_host_label">Host</string>
+    <string name="arr_servers_proxy_host_blank">Enter the proxy host.</string>
+    <string name="arr_servers_proxy_port_label">Port</string>
+    <string name="arr_servers_proxy_port_blank">Enter the proxy port.</string>
+    <string name="arr_servers_proxy_port_invalid">Enter a port between 1 and 65535.</string>
+    <string name="arr_servers_proxy_username_label">Username (optional)</string>
+    <string name="arr_servers_proxy_password_label">Password (optional)</string>
+    <string name="arr_servers_proxy_credentials_incomplete">Fill in both proxy credentials or leave both empty.</string>
+    <string name="arr_servers_proxy_orbot">Route through Orbot</string>
+    <string name="arr_servers_proxy_orbot_support">Orbot must be installed. Traffic then goes through Tor as SOCKS5 on 127.0.0.1:9050 with DNS resolved through the proxy; without Orbot the server connects directly.</string>
+    <string name="arr_servers_proxy_servers_header">Per server</string>
+    <string name="arr_servers_proxy_override">Use its own proxy</string>
+    <string name="arr_servers_proxy_override_support">Overrides the global default. Keep off to follow the global proxy.</string>
+    <string name="arr_servers_proxy_trust_header">Certificates</string>
+    <string name="arr_servers_proxy_trust_accept">Accept self-signed certificate</string>
+    <string name="arr_servers_proxy_trust_support">Skips normal certificate checks for this server. Prefer pinning the fingerprint below.</string>
+    <string name="arr_servers_proxy_fingerprint_label">SHA-256 fingerprint (optional)</string>
+    <string name="arr_servers_proxy_fingerprint_invalid">Enter 64 hex characters (colons allowed) or clear the field.</string>
+    <string name="arr_servers_proxy_save">Save proxy settings</string>
+    <string name="arr_servers_proxy_saved">Saved</string>
+    <string name="arr_servers_proxy_error">Fix the highlighted fields before saving.</string>
+
+    <!-- Notification preferences -->
+    <string name="arr_servers_notify_title">Notifications</string>
+    <string name="arr_servers_notify_kill">Enable notifications</string>
+    <string name="arr_servers_notify_kill_support">Turn off to silence every server at once.</string>
+    <string name="arr_servers_notify_channel_grab">Grabbed releases</string>
+    <string name="arr_servers_notify_channel_import">Imports</string>
+    <string name="arr_servers_notify_channel_fail">Failures</string>
+    <string name="arr_servers_notify_channel_health">Health checks</string>
+    <string name="arr_servers_notify_channel_disk">Disk space</string>
+    <string name="arr_servers_notify_preview">Preview</string>
+    <string name="arr_servers_notify_preview_title">Sample notification</string>
+    <string name="arr_servers_notify_preview_text">Notifications for %1$s will look like this.</string>
+    <string name="arr_servers_notify_preview_channel">Previews</string>
+    <string name="arr_servers_notify_preview_unavailable">Notifications are turned off for this app.</string>
+
+    <!-- Sync status -->
+    <string name="arr_servers_sync_title">Sync status</string>
+    <string name="arr_servers_sync_empty_title">Everything is in sync</string>
+    <string name="arr_servers_sync_empty_message">Actions that fail while offline wait here before being sent.</string>
+    <string name="arr_servers_sync_pending_header">Waiting to sync</string>
+    <string name="arr_servers_sync_dead_header">Stopped after repeated failures</string>
+    <string name="arr_servers_sync_dead_support">These actions failed five times and were kept here instead of being lost. Discard them, or fix the server and send them again.</string>
+    <string name="arr_servers_sync_retry">Retry now</string>
+    <string name="arr_servers_sync_retry_all">Retry all</string>
+    <string name="arr_servers_sync_cd_retry_all">Retry every pending action</string>
+    <string name="arr_servers_sync_discard">Discard</string>
+    <string name="arr_servers_sync_cd_discard">Discard this action</string>
+    <string name="arr_servers_sync_action_path">%1$s %2$s</string>
+    <string name="arr_servers_sync_last_error">Last error: %1$s</string>
+    <string name="arr_servers_sync_meta">Waiting %1$s · Attempt %2$d</string>
+    <string name="arr_servers_sync_result">Sent %1$d actions; %2$d stopped after too many failures.</string>
+
+    <!-- Feature host -->
+    <string name="arr_servers_foreign_title">This screen isn\'t available</string>
+    <string name="arr_servers_foreign_message">No module registered a screen for %1$s.</string>
+</resources>

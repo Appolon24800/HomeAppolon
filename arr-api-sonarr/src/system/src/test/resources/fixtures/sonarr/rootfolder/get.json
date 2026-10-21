@@ -1,0 +1,14 @@
+{
+  "id": 1,
+  "path": "/tv",
+  "accessible": true,
+  "freeSpace": 5368709120,
+  "totalSpace": 21474836480,
+  "unmappedFolders": [
+    {
+      "name": "Some Unmapped Show",
+      "path": "/tv/Some Unmapped Show",
+      "relativePath": "Some Unmapped Show"
+    }
+  ]
+}

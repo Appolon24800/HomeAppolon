@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across the quality settings group -->
+
+    <!-- Quality definitions editor -->
+
+    <!-- Quality profiles -->
+    <string name="arr_radarr_quality_profiles_empty_message">Add a profile to choose which qualities Radarr grabs.</string>
+    <string name="arr_radarr_quality_delete_profile_message">Movies using this profile must be moved to another one first.</string>
+    <string name="arr_radarr_quality_profile_language">Preferred language</string>
+
+    <!-- Custom formats -->
+    <string name="arr_radarr_quality_condition_edition">Edition</string>
+    <string name="arr_radarr_quality_condition_quality_modifier">Quality modifier</string>
+
+    <!-- Delay profiles -->
+
+    <!-- Release profiles -->
+
+    <!-- Languages -->
+</resources>

@@ -1,0 +1,53 @@
+[
+  {
+    "id": 1,
+    "name": "Example Webhook",
+    "fields": [
+      {
+        "order": 0,
+        "name": "url",
+        "label": "URL",
+        "value": "https://example.com/hook",
+        "type": "url",
+        "advanced": false,
+        "privacy": "normal"
+      }
+    ],
+    "implementationName": "Webhook",
+    "implementation": "Webhook",
+    "configContract": "WebhookSettings",
+    "infoLink": "https://wiki.servarr.com/lidarr/notifications",
+    "message": { "message": "string", "type": "info" },
+    "tags": [1],
+    "presets": null,
+    "link": "https://example.com",
+    "onGrab": true,
+    "onReleaseImport": true,
+    "onUpgrade": true,
+    "onRename": false,
+    "onArtistAdd": false,
+    "onArtistDelete": false,
+    "onAlbumDelete": false,
+    "onHealthIssue": true,
+    "onHealthRestored": false,
+    "onDownloadFailure": true,
+    "onImportFailure": true,
+    "onTrackRetag": false,
+    "onApplicationUpdate": false,
+    "supportsOnGrab": true,
+    "supportsOnReleaseImport": true,
+    "supportsOnUpgrade": true,
+    "supportsOnRename": true,
+    "supportsOnArtistAdd": true,
+    "supportsOnArtistDelete": true,
+    "supportsOnAlbumDelete": true,
+    "supportsOnHealthIssue": true,
+    "supportsOnHealthRestored": true,
+    "includeHealthWarnings": false,
+    "supportsOnDownloadFailure": true,
+    "supportsOnImportFailure": true,
+    "supportsOnTrackRetag": true,
+    "supportsOnApplicationUpdate": true,
+    "testCommand": "Test"
+  }
+]

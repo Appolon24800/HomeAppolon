@@ -1,0 +1,14 @@
+{
+  "id": 2,
+  "quality": {
+    "id": 4,
+    "name": "WEBRip-480p",
+    "source": "webRip",
+    "resolution": 480
+  },
+  "title": "WEBRip-480p",
+  "weight": 5,
+  "minSize": null,
+  "maxSize": 90.0,
+  "preferredSize": null
+}

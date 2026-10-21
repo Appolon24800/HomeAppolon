@@ -1,0 +1,56 @@
+{
+  "id": 1,
+  "title": null,
+  "parsedEpisodeInfo": {
+    "releaseTitle": null,
+    "seriesTitle": null,
+    "seriesTitleInfo": {
+      "title": null,
+      "titleWithoutYear": null,
+      "year": 1,
+      "allTitles": null
+    },
+    "quality": {
+      "quality": {
+        "id": 1,
+        "name": null,
+        "source": "unknown",
+        "resolution": 1
+      },
+      "revision": {
+        "version": 1,
+        "real": 1,
+        "isRepack": false
+      }
+    },
+    "seasonNumbers": null,
+    "seasonNumber": 1,
+    "episodeNumbers": null,
+    "absoluteEpisodeNumbers": null,
+    "specialAbsoluteEpisodeNumbers": null,
+    "airDate": null,
+    "languages": null,
+    "fullSeason": false,
+    "isPartialSeason": false,
+    "isMultiSeason": false,
+    "isSeasonExtra": false,
+    "isSplitEpisode": false,
+    "isMiniSeries": false,
+    "special": false,
+    "releaseGroup": null,
+    "releaseHash": null,
+    "seasonPart": 1,
+    "releaseTokens": null,
+    "dailyPart": null,
+    "isDaily": false,
+    "isAbsoluteNumbering": false,
+    "isPossibleSpecialEpisode": false,
+    "isPossibleSceneSeasonSpecial": false,
+    "releaseType": "unknown"
+  },
+  "series": {},
+  "episodes": null,
+  "languages": null,
+  "customFormats": null,
+  "customFormatScore": 1
+}

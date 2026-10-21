@@ -1,0 +1,27 @@
+{
+  "id": 1,
+  "name": "Kodi",
+  "fields": [
+    {
+      "order": 1,
+      "name": "seriesMetadata",
+      "label": "Series Metadata",
+      "value": true,
+      "type": "checkbox",
+      "advanced": false
+    }
+  ],
+  "implementationName": "Kodi",
+  "implementation": "Kodi",
+  "configContract": "KodiSettings",
+  "infoLink": "https://wiki.servarr.com/sonarr/settings#metadata",
+  "message": {
+    "message": "Test message",
+    "type": "info"
+  },
+  "tags": [
+    1
+  ],
+  "presets": [],
+  "enable": true
+}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Media management screen -->
+    <string name="arr_radarr_mm_link_naming">Movie naming</string>
+    <string name="arr_radarr_mm_link_naming_support">File name tokens with a live preview</string>
+    <string name="arr_radarr_mm_minimum_free_space">Minimum free space</string>
+    <string name="arr_radarr_mm_auto_unmonitor">Unmonitor movies after deletion from disk</string>
+    <string name="arr_radarr_mm_create_empty_folders">Create empty movie folders</string>
+    <string name="arr_radarr_mm_auto_rename_folders">Rename movie folders to match movie title</string>
+
+    <!-- Naming editor screen -->
+    <string name="arr_radarr_naming_rename_movies">Rename movies</string>
+    <string name="arr_radarr_naming_rename_movies_support">Replace illegal characters in file names</string>
+    <string name="arr_radarr_naming_movie_format">Standard movie format</string>
+    <string name="arr_radarr_naming_folder_format">Movie folder format</string>
+    <string name="arr_radarr_naming_movie_preview">Movie file preview</string>
+    <string name="arr_radarr_naming_folder_preview">Folder preview</string>
+
+    <!-- Root folders screen -->
+    <string name="arr_radarr_roots_delete_message">Delete %1$s from Radarr? Movies stay in the database but lose their path.</string>
+
+    <!-- Filesystem browser -->
+</resources>

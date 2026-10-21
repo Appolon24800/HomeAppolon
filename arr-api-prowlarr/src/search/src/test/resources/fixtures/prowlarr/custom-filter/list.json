@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "type": "search",
+    "label": "Spec filter",
+    "filters": [
+      { "key": "query", "value": "spec" }
+    ]
+  },
+  {
+    "id": 2,
+    "type": "history",
+    "label": "Spec history filter",
+    "filters": [
+      { "key": "eventType", "value": "indexerQuery" }
+    ]
+  }
+]

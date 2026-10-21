@@ -1,0 +1,11 @@
+{
+  "id": 0, "title": "string",
+  "parsedAlbumInfo": {
+    "releaseTitle": "string", "albumTitle": "string", "artistName": "string",
+    "albumType": "string", "artistTitleInfo": {}, "quality": {},
+    "releaseDate": "string", "discography": false, "discographyStart": 0,
+    "discographyEnd": 0, "releaseGroup": "string", "releaseHash": "string",
+    "releaseVersion": "string"
+  },
+  "artist": {"id": 2}, "albums": [{"id": 3}], "customFormats": [], "customFormatScore": 0
+}

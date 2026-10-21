@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "name": "Movies on SSD",
+    "removeTagsAutomatically": false,
+    "tags": [
+      1
+    ],
+    "specifications": [
+      {
+        "id": 1,
+        "name": "Root Folder",
+        "implementation": "RootFolderSpecification",
+        "implementationName": "Root Folder",
+        "negate": false,
+        "required": true,
+        "fields": [
+          {
+            "order": 1,
+            "name": "value",
+            "label": "Root Folder",
+            "value": "/movies",
+            "type": "text",
+            "advanced": false
+          }
+        ]
+      }
+    ]
+  }
+]

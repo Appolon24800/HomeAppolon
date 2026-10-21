@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "title": null,
+    "sortTitle": null,
+    "tmdbId": 1,
+    "images": null,
+    "overview": null,
+    "monitored": false,
+    "rootFolderPath": null,
+    "qualityProfileId": 1,
+    "searchOnAdd": false,
+    "minimumAvailability": "tba",
+    "movies": null,
+    "missingMovies": 1,
+    "tags": null
+  }
+]

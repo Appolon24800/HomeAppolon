@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared connect strings -->
+    <string name="arr_radarr_connect_test_pass">Test passed</string>
+    <string name="arr_radarr_connect_test_fail">Test failed</string>
+
+    <!-- Indexers -->
+    <string name="arr_radarr_indexers_seed_time">Seed time %1$s</string>
+    <string name="arr_radarr_indexers_option_availability_delay">Availability delay</string>
+    <string name="arr_radarr_indexers_option_prefer_flags">Prefer indexer flags</string>
+
+    <!-- Download clients -->
+
+    <!-- Remote path mappings -->
+
+    <!-- Import lists -->
+    <string name="arr_radarr_lists_cd_preview">Preview what the lists discover</string>
+    <string name="arr_radarr_lists_empty_message">Add an import list to discover movies automatically.</string>
+    <string name="arr_radarr_lists_auto">Automatic sync</string>
+    <string name="arr_radarr_lists_preview_summary">%1$d to add, %2$d already in the library, %3$d excluded</string>
+    <string name="arr_radarr_lists_preview_addable">Would be added</string>
+    <string name="arr_radarr_lists_preview_excluded">Excluded</string>
+    <string name="arr_radarr_lists_option_sync_level_support">What happens to movies that leave the lists</string>
+
+    <!-- Import list exclusions -->
+    <string name="arr_radarr_exclusions_cd_delete">Exclude no longer: %1$s</string>
+    <string name="arr_radarr_exclusions_empty_message">Excluded movies never come back from a list sync.</string>
+    <string name="arr_radarr_exclusions_title_label">Movie title</string>
+    <string name="arr_radarr_exclusions_tmdb_label">TMDb id</string>
+    <string name="arr_radarr_exclusions_tmdb_value">TMDb %1$d</string>
+
+    <!-- Connect notifications -->
+    <string name="arr_radarr_notification_event_movie_delete">On movie delete</string>
+    <string name="arr_radarr_notification_event_file_delete">On movie file delete</string>
+    <string name="arr_radarr_notification_event_file_delete_upgrade">On movie file delete for upgrade</string>
+    <string name="arr_radarr_notification_event_movie_added">On movie added</string>
+
+    <!-- Metadata consumers -->
+</resources>

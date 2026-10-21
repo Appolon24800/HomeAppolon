@@ -1,0 +1,7 @@
+{
+  "id": 3, "enabled": true,
+  "required": ["hdtv"],
+  "ignored": [],
+  "indexerId": 0,
+  "tags": [4]
+}

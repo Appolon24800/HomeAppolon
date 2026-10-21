@@ -1,0 +1,17 @@
+{
+  "id": 0,
+  "name": "",
+  "removeTagsAutomatically": false,
+  "tags": [],
+  "specifications": [
+    {
+      "id": 0,
+      "name": "Quality Profile",
+      "implementation": "QualityProfileSpecification",
+      "implementationName": "Quality Profile",
+      "negate": false,
+      "required": true,
+      "fields": []
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "directories": [
+    { "name": "artist", "path": "/music/artist", "type": "folder" }
+  ],
+  "files": [
+    { "name": "track.mp3", "path": "/music/artist/track.mp3", "type": "file" }
+  ],
+  "parent": "/music"
+}

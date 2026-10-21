@@ -1,0 +1,28 @@
+{
+  "id": 1,
+  "name": "ApplicationIndexerSync",
+  "commandName": "Application Indexer Sync",
+  "message": "Spec command queued",
+  "body": {
+    "sendUpdatesToClient": true,
+    "updateScheduledTask": false,
+    "completionMessage": "Completed",
+    "requiresDiskAccess": false,
+    "isExclusive": false,
+    "isTypeExclusive": false,
+    "name": "ApplicationIndexerSync",
+    "trigger": "manual",
+    "suppressMessages": false,
+    "clientUserAgent": "SpecClient/1.0"
+  },
+  "priority": "normal",
+  "status": "queued",
+  "queued": "2026-01-15T10:30:00Z",
+  "duration": "00:00:05",
+  "trigger": "manual",
+  "clientUserAgent": "SpecClient/1.0",
+  "stateChangeTime": "2026-01-15T10:30:00Z",
+  "sendUpdatesToClient": true,
+  "updateScheduledTask": true,
+  "lastExecutionTime": "2026-01-14T10:30:00Z"
+}

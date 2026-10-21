@@ -1,0 +1,9 @@
+[
+  {
+    "id": 1,
+    "filename": "radarr.txt",
+    "lastWriteTime": "2026-10-01T00:00:00Z",
+    "contentsUrl": "/api/v3/log/file/radarr.txt",
+    "downloadUrl": "/api/v3/log/file/radarr.txt?format=raw"
+  }
+]

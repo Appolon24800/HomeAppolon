@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="arr_sonarr_queue_details_episode_title">Episode title</string>
+    <string name="arr_sonarr_manual_import_unmatched">No series matched</string>
+    <string name="arr_sonarr_manual_import_need_match">Every selected file needs a matched series and episode</string>
+</resources>

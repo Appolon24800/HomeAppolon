@@ -1,0 +1,18 @@
+{
+  "id": 1,
+  "name": null,
+  "fields": null,
+  "implementationName": null,
+  "implementation": null,
+  "configContract": null,
+  "infoLink": null,
+  "message": {
+    "message": null,
+    "type": "info"
+  },
+  "tags": null,
+  "presets": null,
+  "tmdbId": 1,
+  "movieTitle": null,
+  "movieYear": 1
+}

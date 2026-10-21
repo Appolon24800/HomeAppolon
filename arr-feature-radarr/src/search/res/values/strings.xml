@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Interactive search (release list per movie) -->
+    <string name="arr_radarr_releases_empty_message">No indexer returned a release for this movie. Refresh to search again.</string>
+
+    <!-- Grab sheet, shared by any Radarr screen group -->
+
+    <!-- Interactive import decision flow -->
+    <string name="arr_radarr_import_flow_movie_error_title">Movie unavailable</string>
+</resources>

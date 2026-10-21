@@ -1,0 +1,7 @@
+{
+  "current": "v3",
+  "deprecated": [
+    "v1",
+    "v2"
+  ]
+}

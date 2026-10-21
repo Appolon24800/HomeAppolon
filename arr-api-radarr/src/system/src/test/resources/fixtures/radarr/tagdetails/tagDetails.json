@@ -1,0 +1,19 @@
+[
+  {
+    "id": 1,
+    "label": "imdb-top-250",
+    "delayProfileIds": [],
+    "importListIds": [],
+    "notificationIds": [],
+    "releaseProfileIds": [],
+    "indexerIds": [],
+    "downloadClientIds": [],
+    "autoTagIds": [
+      1
+    ],
+    "movieIds": [
+      1,
+      2
+    ]
+  }
+]

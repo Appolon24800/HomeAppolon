@@ -1,0 +1,12 @@
+[
+  {
+    "id": 901,
+    "movieId": 1,
+    "movieFileId": 25,
+    "relativePath": "Example Movie (2009).en.srt",
+    "extension": ".srt",
+    "languageTags": ["eng"],
+    "title": "English",
+    "type": "subtitle"
+  }
+]

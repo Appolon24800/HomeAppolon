@@ -1,0 +1,13 @@
+{
+  "id": 1, "guid": "string", "quality": {}, "qualityWeight": 0,
+  "age": 0, "ageHours": 0.5, "ageMinutes": 30.0, "size": 4294967296,
+  "indexerId": 1, "indexer": "string", "releaseGroup": "string", "subGroup": "string",
+  "releaseHash": "string", "title": "string", "discography": false, "sceneSource": false,
+  "airDate": "string", "artistName": "string", "albumTitle": "string",
+  "approved": true, "temporarilyRejected": false, "rejected": false, "rejections": [],
+  "publishDate": "2026-01-01T00:00:00Z", "commentUrl": "string", "downloadUrl": "string",
+  "infoUrl": "string", "downloadAllowed": true, "releaseWeight": 0,
+  "customFormats": [], "customFormatScore": 0, "magnetUrl": "string", "infoHash": "string",
+  "seeders": 1, "leechers": null, "protocol": "torrent", "indexerFlags": 0,
+  "artistId": 2, "albumId": 3, "downloadClientId": null, "downloadClient": "string"
+}

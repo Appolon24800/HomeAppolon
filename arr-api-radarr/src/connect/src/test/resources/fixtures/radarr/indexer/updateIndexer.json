@@ -1,0 +1,23 @@
+{
+  "id": 1,
+  "name": "Prowlarr",
+  "fields": null,
+  "implementationName": null,
+  "implementation": null,
+  "configContract": null,
+  "infoLink": null,
+  "message": {
+    "message": null,
+    "type": "info"
+  },
+  "tags": null,
+  "presets": null,
+  "enableRss": false,
+  "enableAutomaticSearch": false,
+  "enableInteractiveSearch": false,
+  "supportsRss": false,
+  "supportsSearch": false,
+  "protocol": "unknown",
+  "priority": 25,
+  "downloadClientId": 0
+}

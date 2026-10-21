@@ -1,0 +1,7 @@
+{
+  "id": 1, "enabled": true,
+  "required": ["flac", "24bit"],
+  "ignored": ["transcode"],
+  "indexerId": 2,
+  "tags": [1, 2]
+}

@@ -1,0 +1,45 @@
+{
+  "id": 1,
+  "name": "Spec SABnzbd",
+  "fields": [
+    {
+      "order": 1,
+      "name": "host",
+      "label": "Host",
+      "unit": null,
+      "helpText": "SABnzbd host",
+      "helpTextWarning": null,
+      "helpLink": "https://sabnzbd.org",
+      "value": "http://spec-host:8080",
+      "type": "url",
+      "advanced": false,
+      "selectOptions": [],
+      "selectOptionsProviderAction": null,
+      "section": null,
+      "hidden": "visible",
+      "privacy": "normal",
+      "placeholder": null,
+      "isFloat": false
+    }
+  ],
+  "implementationName": "SABnzbd",
+  "implementation": "Sabnzbd",
+  "configContract": "SabnzbdSettings",
+  "infoLink": "https://wiki.servarr.com/prowlarr/supported#sabnzbd",
+  "message": {
+    "message": null,
+    "type": "info"
+  },
+  "tags": [1],
+  "presets": [],
+  "enable": true,
+  "protocol": "usenet",
+  "priority": 25,
+  "categories": [
+    {
+      "clientCategory": "tv-hd",
+      "categories": [5030, 5040]
+    }
+  ],
+  "supportsCategories": true
+}

@@ -1,0 +1,13 @@
+{
+  "id": 3,
+  "enableUsenet": true,
+  "enableTorrent": false,
+  "preferredProtocol": "usenet",
+  "usenetDelay": 90,
+  "torrentDelay": 0,
+  "bypassIfHighestQuality": false,
+  "bypassIfAboveCustomFormatScore": false,
+  "minimumCustomFormatScore": 0,
+  "order": 3,
+  "tags": null
+}

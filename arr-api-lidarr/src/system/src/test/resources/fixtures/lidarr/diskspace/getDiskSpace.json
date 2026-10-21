@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "path": "/music",
+    "label": "/music",
+    "freeSpace": 5368709120,
+    "totalSpace": 10737418240
+  },
+  {
+    "id": 2,
+    "path": "/downloads",
+    "label": "/downloads",
+    "freeSpace": 1073741824,
+    "totalSpace": 5368709120
+  }
+]

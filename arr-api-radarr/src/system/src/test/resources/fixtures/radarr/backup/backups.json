@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "name": "radarr_backup_2026-10-01_030000.tar.gz",
+    "path": "/config/Backups/radarr_backup_2026-10-01_030000.tar.gz",
+    "type": "scheduled",
+    "size": 204800,
+    "time": "2026-10-01T03:00:00Z"
+  }
+]

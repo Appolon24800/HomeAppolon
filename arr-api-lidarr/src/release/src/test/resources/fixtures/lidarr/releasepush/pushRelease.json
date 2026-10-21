@@ -1,0 +1,8 @@
+{
+  "id": 1, "title": "string", "quality": {}, "qualityWeight": 0,
+  "age": 0, "ageHours": 0.0, "ageMinutes": 0.0, "size": 4294967296, "indexerId": 1,
+  "discography": false, "sceneSource": false, "approved": true,
+  "temporarilyRejected": false, "rejected": false, "publishDate": "2026-01-01T00:00:00Z",
+  "downloadAllowed": true, "releaseWeight": 0, "customFormatScore": 0,
+  "protocol": "usenet", "indexerFlags": 0
+}

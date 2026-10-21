@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared library group titles and tabs -->
+    <string name="arr_bazarr_lib_tab_series">Series</string>
+    <string name="arr_bazarr_lib_tab_movies">Movies</string>
+    <string name="arr_bazarr_lib_cd_view_table">Switch to table view</string>
+    <string name="arr_bazarr_lib_cd_view_posters">Switch to poster view</string>
+    <string name="arr_bazarr_lib_cd_sort_descending">Reverse sort order</string>
+    <string name="arr_bazarr_lib_cd_open_filters">Open filters</string>
+    <string name="arr_bazarr_lib_cd_select_all">Select all</string>
+    <string name="arr_bazarr_lib_cd_exit_selection">Leave selection mode</string>
+    <string name="arr_bazarr_lib_cd_queued">%1$d changes waiting to sync</string>
+    <string name="arr_bazarr_lib_cd_item_queued">Change waiting to sync</string>
+    <string name="arr_bazarr_lib_selected_count">%1$d selected</string>
+    <string name="arr_bazarr_lib_action_apply_profile">Assign profile</string>
+    <string name="arr_bazarr_lib_badge_summary">%1$d episodes and %2$d movies missing subtitles</string>
+
+    <!-- Subtitle status badges -->
+    <string name="arr_bazarr_lib_status_complete">Complete</string>
+    <string name="arr_bazarr_lib_status_partial">Partial</string>
+    <string name="arr_bazarr_lib_status_missing">Missing</string>
+    <string name="arr_bazarr_lib_status_none_wanted">None wanted</string>
+    <string name="arr_bazarr_lib_cd_status">Subtitle status: %1$s</string>
+
+    <!-- Filters -->
+    <string name="arr_bazarr_lib_filter_sheet_title">Filters</string>
+    <string name="arr_bazarr_lib_filter_clear">Clear filters</string>
+    <string name="arr_bazarr_lib_filter_done">Done</string>
+    <string name="arr_bazarr_lib_filter_subtitles">Subtitles</string>
+    <string name="arr_bazarr_lib_filter_hearing_impaired">Hearing impaired</string>
+    <string name="arr_bazarr_lib_filter_monolingual">Monolingual</string>
+    <string name="arr_bazarr_lib_filter_tags">Tags</string>
+    <string name="arr_bazarr_lib_filter_blacklist">Blacklisted</string>
+    <string name="arr_bazarr_lib_filter_status">Status</string>
+    <string name="arr_bazarr_lib_filter_any">Any</string>
+    <string name="arr_bazarr_lib_filter_yes">Yes</string>
+    <string name="arr_bazarr_lib_filter_no">No</string>
+
+    <!-- Sorts -->
+    <string name="arr_bazarr_lib_sort_title">Title</string>
+    <string name="arr_bazarr_lib_sort_year">Year</string>
+    <string name="arr_bazarr_lib_sort_missing">Missing</string>
+    <string name="arr_bazarr_lib_sort_episodes">Episodes</string>
+    <string name="arr_bazarr_lib_sort_subtitles">Subtitles</string>
+
+    <!-- Series list -->
+    <string name="arr_bazarr_series_title">Series</string>
+    <string name="arr_bazarr_series_empty_title">No series</string>
+    <string name="arr_bazarr_series_empty_message">Series synchronized from Sonarr appear here.</string>
+    <string name="arr_bazarr_series_episode_progress">%1$d of %2$d episodes complete</string>
+    <string name="arr_bazarr_series_cd_open_episodes">Browse episodes of %1$s</string>
+
+    <!-- Movies list -->
+    <string name="arr_bazarr_movies_title">Movies</string>
+    <string name="arr_bazarr_movies_empty_title">No movies</string>
+    <string name="arr_bazarr_movies_empty_message">Movies synchronized from Radarr appear here.</string>
+    <string name="arr_bazarr_movies_missing_languages">Missing: %1$s</string>
+    <string name="arr_bazarr_movies_cd_open">Open subtitles for %1$s</string>
+    <plurals name="arr_bazarr_movies_subtitle_count">
+        <item quantity="one">%1$d subtitle</item>
+        <item quantity="other">%1$d subtitles</item>
+    </plurals>
+
+    <!-- Mass editor -->
+    <string name="arr_bazarr_profile_picker_title">Assign language profile</string>
+    <string name="arr_bazarr_profile_picker_count">Applies to %1$d items</string>
+    <string name="arr_bazarr_profile_picker_none">No language profiles available</string>
+    <string name="arr_bazarr_profile_applied">Profile assigned</string>
+    <string name="arr_bazarr_profile_queued">Profile assignment queued for sync</string>
+    <string name="arr_bazarr_write_failed">Changes could not be saved</string>
+    <string name="arr_bazarr_profile_picker_cancel">Cancel</string>
+
+    <!-- Episodes browser -->
+    <string name="arr_bazarr_series_episodes_title">Episodes</string>
+    <string name="arr_bazarr_series_episodes_empty_title">No episodes</string>
+    <string name="arr_bazarr_series_episodes_empty_message">This series has no episodes in Bazarr.</string>
+    <string name="arr_bazarr_series_episodes_season">Season %1$d</string>
+    <string name="arr_bazarr_series_episodes_present">Subtitles</string>
+    <string name="arr_bazarr_series_episodes_missing">Missing</string>
+    <string name="arr_bazarr_series_episodes_cd_missing">Missing %1$s</string>
+    <string name="arr_bazarr_series_episodes_cd_open">Open subtitles for %1$s</string>
+    <string name="arr_bazarr_series_episodes_cd_hearing_impaired">Hearing impaired</string>
+    <string name="arr_bazarr_lib_cd_select">Select %1$s</string>
+    <string name="arr_bazarr_sort_state_ascending">Ascending</string>
+    <string name="arr_bazarr_sort_state_descending">Descending</string>
+</resources>

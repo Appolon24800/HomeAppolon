@@ -1,0 +1,38 @@
+{
+  "page": 1,
+  "pageSize": 10,
+  "sortKey": "releaseDate",
+  "sortDirection": "descending",
+  "totalRecords": 1,
+  "records": [{
+    "id": 4,
+    "title": "Cutoff Album",
+    "artistId": 2,
+    "foreignAlbumId": "1a2b3c4d-5678-4efa-bc90-1234567890ab",
+    "monitored": true,
+    "anyReleaseOk": true,
+    "profileId": 1,
+    "duration": 1800000,
+    "albumType": "EP",
+    "secondaryTypes": [],
+    "mediumCount": 1,
+    "ratings": { "votes": 5, "value": 3.9 },
+    "releaseDate": "2026-01-16T00:00:00Z",
+    "genres": ["Pop"],
+    "statistics": {
+      "trackFileCount": 4,
+      "trackCount": 5,
+      "totalTrackCount": 5,
+      "sizeOnDisk": 104857600,
+      "percentOfTracks": 80.0
+    },
+    "artist": {
+      "id": 2,
+      "status": "continuing",
+      "ended": false,
+      "artistName": "Example Artist",
+      "foreignArtistId": "b10bbbfc-cf9e-42e0-be17-e2c3e1edf222",
+      "monitored": true
+    }
+  }]
+}

@@ -1,0 +1,47 @@
+package dev.appolon.homelab.arr.api.lidarr.model
+
+import kotlinx.serialization.Serializable
+
+/** Lidarr NotificationResource wire resource; supportsOn* mirror the spec fields. */
+@Serializable
+data class NotificationResource(
+    val id: Int = 0,
+    val name: String? = null,
+    val fields: List<Field>? = null,
+    val implementationName: String? = null,
+    val implementation: String? = null,
+    val configContract: String? = null,
+    val infoLink: String? = null,
+    val message: ProviderMessage = ProviderMessage(),
+    val tags: Set<Int>? = null,
+    val presets: List<NotificationResource>? = null,
+    val link: String? = null,
+    val onGrab: Boolean = false,
+    val onReleaseImport: Boolean = false,
+    val onUpgrade: Boolean = false,
+    val onRename: Boolean = false,
+    val onArtistAdd: Boolean = false,
+    val onArtistDelete: Boolean = false,
+    val onAlbumDelete: Boolean = false,
+    val onHealthIssue: Boolean = false,
+    val onHealthRestored: Boolean = false,
+    val onDownloadFailure: Boolean = false,
+    val onImportFailure: Boolean = false,
+    val onTrackRetag: Boolean = false,
+    val onApplicationUpdate: Boolean = false,
+    val supportsOnGrab: Boolean = false,
+    val supportsOnReleaseImport: Boolean = false,
+    val supportsOnUpgrade: Boolean = false,
+    val supportsOnRename: Boolean = false,
+    val supportsOnArtistAdd: Boolean = false,
+    val supportsOnArtistDelete: Boolean = false,
+    val supportsOnAlbumDelete: Boolean = false,
+    val supportsOnHealthIssue: Boolean = false,
+    val supportsOnHealthRestored: Boolean = false,
+    val supportsOnDownloadFailure: Boolean = false,
+    val supportsOnImportFailure: Boolean = false,
+    val supportsOnTrackRetag: Boolean = false,
+    val supportsOnApplicationUpdate: Boolean = false,
+    val includeHealthWarnings: Boolean = false,
+    val testCommand: String? = null,
+)

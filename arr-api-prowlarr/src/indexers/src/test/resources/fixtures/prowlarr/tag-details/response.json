@@ -1,0 +1,8 @@
+{
+  "id": 1,
+  "label": "spec-tag",
+  "notificationIds": [1],
+  "indexerIds": [1, 2],
+  "indexerProxyIds": [1],
+  "applicationIds": [1]
+}

@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "name": "sonarr_backup_2026-10-19_02-00-00_v4.0.12",
+    "path": "/config/Backups/scheduled/sonarr_backup_2026-10-19_02-00-00_v4.0.12.zip",
+    "type": "scheduled",
+    "size": 158734,
+    "time": "2026-10-19T02:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "sonarr_backup_2026-10-18_18-30-00_v4.0.12",
+    "path": "/config/Backups/manual/sonarr_backup_2026-10-18_18-30-00_v4.0.12.zip",
+    "type": "manual",
+    "size": 157980,
+    "time": "2026-10-18T18:30:00Z"
+  }
+]

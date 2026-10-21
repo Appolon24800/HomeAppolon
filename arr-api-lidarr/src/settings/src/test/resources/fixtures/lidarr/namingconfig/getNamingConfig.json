@@ -1,0 +1,15 @@
+{
+  "id": 1,
+  "renameTracks": true,
+  "replaceIllegalCharacters": true,
+  "colonReplacementFormat": 1,
+  "standardTrackFormat": "{Artist Name} - {Album Title} - {track:00} - {Track Title}",
+  "multiDiscTrackFormat": "{Artist Name} - {Album Title} - cd{medium:00} - {track:00} - {Track Title}",
+  "artistFolderFormat": "{Artist Name}",
+  "includeArtistName": true,
+  "includeAlbumTitle": true,
+  "includeQuality": true,
+  "replaceSpaces": false,
+  "separator": " - ",
+  "numberStyle": "00"
+}

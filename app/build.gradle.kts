@@ -40,7 +40,12 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
             signingConfig = signingConfigs.getByName("release")
         }
     }
@@ -89,6 +94,28 @@ dependencies {
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.svg)
     implementation(libs.zxing.core)
+
+    // Native *arr client: dashboard integration hosts the arr shell and its
+    // shared data/network/sync modules plus the five app feature bundles.
+    implementation(project(":arr-core"))
+    implementation(project(":arr-net"))
+    implementation(project(":arr-data"))
+    implementation(project(":arr-ui-core"))
+    implementation(project(":arr-feature-servers"))
+    implementation(project(":arr-feature-radarr"))
+    implementation(project(":arr-feature-sonarr"))
+    implementation(project(":arr-feature-lidarr"))
+    implementation(project(":arr-feature-prowlarr"))
+    implementation(project(":arr-feature-bazarr"))
+    implementation(project(":arr-sync"))
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.kotlinx.serialization)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(project(":arr-api-radarr"))
+    implementation(project(":arr-api-sonarr"))
+    implementation(project(":arr-api-lidarr"))
+    implementation(project(":arr-api-prowlarr"))
+    implementation(project(":arr-api-bazarr"))
 
     testImplementation(libs.junit)
 

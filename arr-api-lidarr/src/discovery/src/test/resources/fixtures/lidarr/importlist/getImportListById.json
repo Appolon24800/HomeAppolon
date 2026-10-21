@@ -1,0 +1,30 @@
+{
+  "id": 1,
+  "name": "Example List",
+  "fields": [{
+    "order": 0,
+    "name": "baseUrl",
+    "label": "Base URL",
+    "value": "https://example.com/api",
+    "type": "url",
+    "advanced": false,
+    "privacy": "normal"
+  }],
+  "implementationName": "Example Import",
+  "implementation": "ExampleImport",
+  "configContract": "ExampleImportSettings",
+  "infoLink": "https://wiki.servarr.com/lidarr#import-lists",
+  "message": { "message": "string", "type": "info" },
+  "tags": [1],
+  "enableAutomaticAdd": true,
+  "shouldMonitor": "entireArtist",
+  "shouldMonitorExisting": false,
+  "shouldSearch": true,
+  "rootFolderPath": "/music",
+  "monitorNewItems": "all",
+  "qualityProfileId": 1,
+  "metadataProfileId": 1,
+  "listType": "program",
+  "listOrder": 1,
+  "minRefreshInterval": "01:00:00"
+}

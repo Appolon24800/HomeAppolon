@@ -1,0 +1,52 @@
+[
+  {
+    "id": 0,
+    "name": "Discord",
+    "fields": [
+      {
+        "order": 1,
+        "name": "webHookUrl",
+        "label": "Webhook URL",
+        "value": "",
+        "type": "url",
+        "advanced": false,
+        "selectOptions": [],
+        "privacy": "apiKey",
+        "isFloat": false
+      },
+      {
+        "order": 2,
+        "name": "username",
+        "label": "Username",
+        "value": "",
+        "type": "text",
+        "advanced": false,
+        "selectOptions": [],
+        "privacy": "userName",
+        "isFloat": false
+      }
+    ],
+    "implementationName": "Discord",
+    "implementation": "Discord",
+    "configContract": "DiscordSettings",
+    "infoLink": "https://wiki.servarr.com/prowlarr/supported#discord",
+    "message": {
+      "message": null,
+      "type": "info"
+    },
+    "tags": [],
+    "presets": [],
+    "link": "",
+    "onGrab": false,
+    "onHealthIssue": false,
+    "onHealthRestored": false,
+    "onApplicationUpdate": false,
+    "supportsOnGrab": true,
+    "includeManualGrabs": false,
+    "supportsOnHealthIssue": true,
+    "supportsOnHealthRestored": true,
+    "includeHealthWarnings": false,
+    "supportsOnApplicationUpdate": true,
+    "testCommand": "Test"
+  }
+]

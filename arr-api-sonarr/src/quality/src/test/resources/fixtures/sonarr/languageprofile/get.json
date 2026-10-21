@@ -1,0 +1,19 @@
+{
+  "id": 1,
+  "name": "English",
+  "upgradeAllowed": true,
+  "cutoff": {
+    "id": 1,
+    "name": "English"
+  },
+  "languages": [
+    {
+      "id": 1,
+      "language": {
+        "id": 1,
+        "name": "English"
+      },
+      "allowed": true
+    }
+  ]
+}

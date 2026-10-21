@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="arr_channel_grab_name">Grabs</string>
+    <string name="arr_channel_grab_description">New downloads grabbed from indexers</string>
+    <string name="arr_channel_import_name">Imports</string>
+    <string name="arr_channel_import_description">Media imported into the library</string>
+    <string name="arr_channel_fail_name">Failures</string>
+    <string name="arr_channel_fail_description">Failed downloads and processing errors</string>
+    <string name="arr_channel_health_name">Health</string>
+    <string name="arr_channel_health_description">Server health warnings</string>
+    <string name="arr_channel_disk_name">Disk space</string>
+    <string name="arr_channel_disk_description">Low disk space warnings</string>
+
+    <string name="arr_summary_grab_title">New grabs</string>
+    <string name="arr_summary_import_title">New imports</string>
+    <string name="arr_summary_fail_title">Download failures</string>
+    <string name="arr_summary_health_title">Health warnings</string>
+    <string name="arr_summary_disk_title">Disk space low</string>
+
+    <plurals name="arr_summary_grab_body">
+        <item quantity="one">%1$d download was queued on %2$s.</item>
+        <item quantity="other">%1$d downloads were queued on %2$s.</item>
+    </plurals>
+    <plurals name="arr_summary_import_body">
+        <item quantity="one">%1$d item was imported on %2$s.</item>
+        <item quantity="other">%1$d items were imported on %2$s.</item>
+    </plurals>
+    <plurals name="arr_summary_fail_body">
+        <item quantity="one">%1$d download failed on %2$s.</item>
+        <item quantity="other">%1$d downloads failed on %2$s.</item>
+    </plurals>
+    <plurals name="arr_summary_health_body">
+        <item quantity="one">%1$d health issue needs attention on %2$s.</item>
+        <item quantity="other">%1$d health issues need attention on %2$s.</item>
+    </plurals>
+    <plurals name="arr_summary_disk_body">
+        <item quantity="one">%1$d disk warning was reported on %2$s.</item>
+        <item quantity="other">%1$d disk warnings were reported on %2$s.</item>
+    </plurals>
+</resources>

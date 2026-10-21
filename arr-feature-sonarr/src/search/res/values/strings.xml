@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Interactive search (release list per series, season, or episode) -->
+    <string name="arr_sonarr_releases_cd_push">Push an external release</string>
+    <string name="arr_sonarr_releases_season_pack">Season pack</string>
+    <string name="arr_sonarr_releases_approved">Approved</string>
+    <string name="arr_sonarr_releases_pending_approval">Not approved</string>
+    <string name="arr_sonarr_releases_filter_all">All releases</string>
+    <string name="arr_sonarr_releases_filter_packs">Season packs</string>
+    <string name="arr_sonarr_releases_filter_episodes">Episodes</string>
+    <string name="arr_sonarr_releases_empty_message">No indexer returned a release for this search. Refresh to search again.</string>
+    <string name="arr_sonarr_releases_notice_pushed">Release pushed to Sonarr</string>
+    <string name="arr_sonarr_releases_notice_push_queued">Offline: the push will sync when the connection returns</string>
+    <string name="arr_sonarr_releases_details_kind">Kind</string>
+    <string name="arr_sonarr_releases_details_approval">Approval</string>
+
+    <!-- External release push -->
+    <string name="arr_sonarr_push_title">Push external release</string>
+    <string name="arr_sonarr_push_label_title">Release title</string>
+    <string name="arr_sonarr_push_label_url">Download link or magnet</string>
+    <string name="arr_sonarr_push_label_indexer">Indexer (optional)</string>
+    <string name="arr_sonarr_push_action">Push</string>
+
+    <!-- Grab sheet, shared by any Sonarr screen group -->
+
+    <!-- Interactive import decision flow -->
+    <string name="arr_sonarr_import_flow_series_error_title">Series unavailable</string>
+</resources>

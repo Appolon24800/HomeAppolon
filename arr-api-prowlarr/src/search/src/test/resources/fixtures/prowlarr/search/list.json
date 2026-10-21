@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "guid": "spec-guid-1",
+    "age": 40,
+    "ageHours": 40.5,
+    "ageMinutes": 2430.0,
+    "size": 734003200,
+    "files": 45,
+    "grabs": 12,
+    "indexerId": 1,
+    "indexer": "Spec Indexer",
+    "title": "Spec Release 1080p",
+    "sortTitle": "spec release 1080p",
+    "publishDate": "2026-01-15T10:30:00Z",
+    "downloadUrl": "https://example.org/download/1",
+    "categories": [
+      { "id": 2000, "name": "Movies", "description": "Movie categories", "subCategories": [] }
+    ],
+    "protocol": "torrent",
+    "seeders": 24,
+    "leechers": 3
+  },
+  {
+    "id": 2,
+    "guid": "spec-guid-2",
+    "age": 3,
+    "ageHours": 70.0,
+    "ageMinutes": 4200.0,
+    "size": 52428800,
+    "indexerId": 2,
+    "indexer": "Spec Indexer Two",
+    "title": "Spec Release 720p",
+    "sortTitle": "spec release 720p",
+    "publishDate": "2026-01-17T08:00:00Z",
+    "downloadUrl": "https://example.org/download/2",
+    "categories": [
+      { "id": 5000, "name": "TV", "description": "Television", "subCategories": [] }
+    ],
+    "protocol": "usenet"
+  }
+]

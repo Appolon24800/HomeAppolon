@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "label": "example",
+    "delayProfileIds": [1],
+    "importListIds": [],
+    "notificationIds": [1],
+    "restrictionIds": [],
+    "indexerIds": [1],
+    "downloadClientIds": [1],
+    "autoTagIds": [1],
+    "artistIds": [1]
+  }
+]

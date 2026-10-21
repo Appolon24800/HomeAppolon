@@ -1,0 +1,19 @@
+{
+  "id": 1,
+  "name": "string",
+  "implementation": "string",
+  "configContract": "string",
+  "infoLink": "string",
+  "enableAutomaticAdd": true,
+  "searchForMissingEpisodes": true,
+  "shouldMonitor": "all",
+  "monitorNewItems": "all",
+  "rootFolderPath": "string",
+  "qualityProfileId": 1,
+  "seriesType": "standard",
+  "seasonFolder": true,
+  "listType": "program",
+  "listOrder": 1,
+  "minRefreshInterval": "01:00:00",
+  "tagExisting": "none"
+}

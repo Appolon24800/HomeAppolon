@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared across the quality settings group -->
+
+    <!-- Quality definitions editor -->
+
+    <!-- Quality profiles -->
+    <string name="arr_sonarr_quality_profiles_empty_message">Add a profile to choose which qualities Sonarr grabs.</string>
+    <string name="arr_sonarr_quality_delete_profile_message">Series using this profile must be moved to another one first.</string>
+
+    <!-- Language profiles (Sonarr only) -->
+    <string name="arr_sonarr_quality_language_profiles_title">Language profiles</string>
+    <string name="arr_sonarr_quality_language_profiles_empty_title">No language profiles</string>
+    <string name="arr_sonarr_quality_language_profiles_empty_message">Add a profile to choose which languages Sonarr accepts.</string>
+    <string name="arr_sonarr_quality_language_profiles_row_support">%1$d languages allowed, upgrading until %2$s</string>
+    <string name="arr_sonarr_quality_cd_add_language_profile">Add a language profile</string>
+    <string name="arr_sonarr_quality_cd_delete_language_profile">Delete the language profile %1$s</string>
+    <string name="arr_sonarr_quality_delete_language_profile_title">Delete language profile?</string>
+    <string name="arr_sonarr_quality_language_profile_editor_title_new">New language profile</string>
+    <string name="arr_sonarr_quality_language_profile_editor_title_edit">Edit language profile</string>
+    <string name="arr_sonarr_quality_language_profile_upgrade_allowed">Allow language upgrades</string>
+    <string name="arr_sonarr_quality_language_profile_upgrade_allowed_support">Upgrade to better languages as they become available</string>
+    <string name="arr_sonarr_quality_language_profile_cutoff_row">Stop upgrading at this language</string>
+
+    <!-- Custom formats -->
+
+    <!-- Delay profiles -->
+
+    <!-- Release profiles -->
+
+    <!-- Languages -->
+</resources>

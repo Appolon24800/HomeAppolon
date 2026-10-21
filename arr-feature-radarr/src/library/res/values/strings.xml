@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Movies library -->
+    <string name="arr_radarr_library_title">Movies</string>
+    <string name="arr_radarr_library_empty_title">No movies</string>
+    <string name="arr_radarr_library_empty_message">Movies you add to Radarr will show up here.</string>
+    <string name="arr_radarr_library_cd_select_all">Select every movie shown</string>
+    <string name="arr_radarr_library_cd_clear_selection">Leave selection mode</string>
+    <string name="arr_radarr_library_cd_scan_disk">Scan disk for changes</string>
+    <string name="arr_radarr_library_cd_edit_selected">Edit selected movies</string>
+    <string name="arr_radarr_library_cd_delete_selected">Delete selected movies</string>
+
+    <!-- Filters -->
+    <string name="arr_radarr_filter_sheet_title">Filter movies</string>
+    <string name="arr_radarr_filter_year_from">From year</string>
+    <string name="arr_radarr_filter_year_to">To year</string>
+    <string name="arr_radarr_filter_invalid_year">Enter a four digit year</string>
+    <string name="arr_radarr_filter_tag_option">Tag %1$d</string>
+
+    <!-- Saved filters -->
+    <string name="arr_radarr_saved_filters">Saved filters</string>
+    <string name="arr_radarr_saved_filter_name_hint">Filter name</string>
+    <string name="arr_radarr_saved_filter_delete_cd">Delete filter %1$s</string>
+
+    <!-- Sort menu -->
+    <string name="arr_radarr_sort_added">Date added</string>
+    <string name="arr_radarr_sort_size">Size on disk</string>
+
+    <!-- Movie editor sheet -->
+    <string name="arr_radarr_editor_title">Edit movies</string>
+    <string name="arr_radarr_editor_target_count">Editing %1$d movies</string>
+    <string name="arr_radarr_editor_root_folder_hint">Leave blank to keep the current folder</string>
+    <string name="arr_radarr_editor_tags_hint">Tag ids, separated by commas</string>
+    <string name="arr_radarr_editor_tags_invalid">Enter tag ids as numbers</string>
+    <string name="arr_radarr_editor_tags_apply">Apply tags</string>
+    <string name="arr_radarr_editor_move_files">Move files to the new root folder</string>
+
+    <!-- Status names shared by the availability picker and table rows -->
+
+    <!-- Delete dialog -->
+    <string name="arr_radarr_delete_title">Delete %1$d movies?</string>
+    <string name="arr_radarr_delete_files">Delete the movie files too</string>
+    <string name="arr_radarr_delete_exclusion">Add an import exclusion</string>
+
+    <!-- Snackbar outcomes -->
+    <string name="arr_radarr_msg_delete_synced">Movies deleted</string>
+    <string name="arr_radarr_msg_delete_queued">Delete queued until the connection returns.</string>
+    <string name="arr_radarr_msg_command_started">Command sent</string>
+    <string name="arr_radarr_msg_command_queued">Command queued until the connection returns.</string>
+</resources>

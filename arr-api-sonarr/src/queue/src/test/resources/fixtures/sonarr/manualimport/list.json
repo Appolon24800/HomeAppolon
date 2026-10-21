@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "path": null,
+    "relativePath": null,
+    "folderName": null,
+    "name": null,
+    "size": 1,
+    "series": {},
+    "seasonNumber": null,
+    "episodes": null,
+    "episodeFileId": null,
+    "releaseGroup": null,
+    "quality": {
+      "quality": {
+        "id": 1,
+        "name": null,
+        "source": "unknown",
+        "resolution": 1
+      },
+      "revision": {
+        "version": 1,
+        "real": 1,
+        "isRepack": false
+      }
+    },
+    "languages": null,
+    "qualityWeight": 1,
+    "downloadId": null,
+    "customFormats": null,
+    "customFormatScore": 1,
+    "indexerFlags": 1,
+    "releaseType": "unknown",
+    "rejections": null
+  }
+]

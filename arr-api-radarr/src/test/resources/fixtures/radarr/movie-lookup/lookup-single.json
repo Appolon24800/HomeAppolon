@@ -1,0 +1,17 @@
+{
+  "title": "Example Movie",
+  "originalLanguage": { "id": 1, "name": "English" },
+  "status": "announced",
+  "minimumAvailability": "announced",
+  "images": [
+    {
+      "coverType": "poster",
+      "remoteUrl": "https://image.tmdb.org/t/p/w500/example.jpg"
+    }
+  ],
+  "year": 2026,
+  "tmdbId": 19995,
+  "imdbId": "tt0000001",
+  "ratings": { "tmdb": { "votes": 5, "value": 6.0, "type": "user" } },
+  "popularity": 3.25
+}

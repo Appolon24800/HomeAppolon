@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Interactive search (release list per artist or album) -->
+    <string name="arr_lidarr_releases_title">Interactive search</string>
+    <string name="arr_lidarr_releases_cd_refresh">Refresh the release list</string>
+    <string name="arr_lidarr_releases_cd_push">Push an external release</string>
+    <string name="arr_lidarr_releases_cd_grab">Grab %1$s</string>
+    <string name="arr_lidarr_releases_cd_rejections">Show rejection reasons for %1$s</string>
+    <string name="arr_lidarr_releases_sort_quality">Custom format score</string>
+    <string name="arr_lidarr_releases_sort_seeders">Seeders</string>
+    <string name="arr_lidarr_releases_sort_age">Age</string>
+    <string name="arr_lidarr_releases_sort_size">Size</string>
+    <string name="arr_lidarr_releases_score">Score %1$d</string>
+    <string name="arr_lidarr_releases_age_days">%1$d d</string>
+    <string name="arr_lidarr_releases_age_hours">%1$d h</string>
+    <string name="arr_lidarr_releases_seeders">%1$d seeders</string>
+    <string name="arr_lidarr_releases_seeders_leechers">%1$d seeders, %2$d leechers</string>
+    <string name="arr_lidarr_releases_no_seeders">No peers reported</string>
+    <string name="arr_lidarr_releases_rejections_count">%1$d rejection reasons</string>
+    <string name="arr_lidarr_releases_discography">Discography</string>
+    <string name="arr_lidarr_releases_approved">Approved</string>
+    <string name="arr_lidarr_releases_pending_approval">Not approved</string>
+    <string name="arr_lidarr_releases_filter_all">All releases</string>
+    <string name="arr_lidarr_releases_filter_packs">Album packs</string>
+    <string name="arr_lidarr_releases_filter_discography">Discography</string>
+    <string name="arr_lidarr_releases_empty_title">No releases found</string>
+    <string name="arr_lidarr_releases_empty_message">No indexer returned a release for this search. Refresh to search again.</string>
+    <string name="arr_lidarr_releases_stale_banner">Showing cached results; the last refresh failed.</string>
+    <string name="arr_lidarr_releases_pending_banner">A grab is waiting to sync</string>
+    <string name="arr_lidarr_releases_notice_grabbed">Grab sent to the download client</string>
+    <string name="arr_lidarr_releases_notice_grab_queued">Offline: the grab will sync when the connection returns</string>
+    <string name="arr_lidarr_releases_notice_pushed">Release pushed to Lidarr</string>
+    <string name="arr_lidarr_releases_notice_push_queued">Offline: the push will sync when the connection returns</string>
+    <string name="arr_lidarr_releases_details_pane_hint_title">Pick a release</string>
+    <string name="arr_lidarr_releases_details_pane_hint_message">Expand a release\'s rejection reasons to see its details here.</string>
+    <string name="arr_lidarr_releases_details_quality">Quality</string>
+    <string name="arr_lidarr_releases_details_kind">Kind</string>
+    <string name="arr_lidarr_releases_details_artist">Artist</string>
+    <string name="arr_lidarr_releases_details_custom_formats">Custom formats</string>
+    <string name="arr_lidarr_releases_details_indexer">Indexer</string>
+    <string name="arr_lidarr_releases_details_size">Size</string>
+    <string name="arr_lidarr_releases_details_age">Age</string>
+    <string name="arr_lidarr_releases_details_approval">Approval</string>
+    <string name="arr_lidarr_releases_details_rejections">Rejection reasons</string>
+
+    <!-- External release push -->
+    <string name="arr_lidarr_push_title">Push external release</string>
+    <string name="arr_lidarr_push_label_title">Release title</string>
+    <string name="arr_lidarr_push_label_url">Download link or magnet</string>
+    <string name="arr_lidarr_push_label_indexer">Indexer (optional)</string>
+    <string name="arr_lidarr_push_protocol_torrent">Torrent</string>
+    <string name="arr_lidarr_push_protocol_usenet">Usenet</string>
+    <string name="arr_lidarr_push_action">Push</string>
+    <string name="arr_lidarr_push_cancel">Cancel</string>
+
+    <!-- Grab sheet, shared by any Lidarr screen group -->
+    <string name="arr_lidarr_grab_sheet_title">Grab release</string>
+    <string name="arr_lidarr_grab_sheet_quality_label">Quality</string>
+    <string name="arr_lidarr_grab_sheet_as_parsed">As parsed</string>
+    <string name="arr_lidarr_grab_sheet_cd_quality">Choose the grab quality override</string>
+    <string name="arr_lidarr_grab_sheet_action">Grab</string>
+    <string name="arr_lidarr_grab_sheet_cancel">Cancel</string>
+
+    <!-- Interactive import decision flow -->
+    <string name="arr_lidarr_import_flow_title">Interactive import</string>
+    <string name="arr_lidarr_import_flow_artist_error_title">Artist unavailable</string>
+    <string name="arr_lidarr_import_flow_current_folder">Current folder: %1$s</string>
+    <string name="arr_lidarr_import_flow_folders_label">Folders</string>
+    <string name="arr_lidarr_import_flow_files_label">Files</string>
+    <string name="arr_lidarr_import_flow_cd_folder">Open folder %1$s</string>
+    <string name="arr_lidarr_import_flow_cd_parent">Open the parent folder</string>
+    <string name="arr_lidarr_import_flow_cd_pick_folder">Pick %1$s as the import folder</string>
+    <string name="arr_lidarr_import_flow_cd_file">Toggle selection of %1$s</string>
+    <string name="arr_lidarr_import_flow_cd_edit_decision">Edit the quality of %1$s</string>
+    <string name="arr_lidarr_import_flow_server_match">Server matched: %1$s</string>
+    <string name="arr_lidarr_import_flow_no_match">No artist, album, and release match</string>
+    <string name="arr_lidarr_import_flow_track_count">%1$d tracks</string>
+    <string name="arr_lidarr_import_flow_quality_line">Quality: %1$s</string>
+    <string name="arr_lidarr_import_flow_rejections">%1$d rejection reasons</string>
+    <string name="arr_lidarr_import_flow_selected">%1$d selected</string>
+    <string name="arr_lidarr_import_flow_select_all">Select all</string>
+    <string name="arr_lidarr_import_flow_clear_selection">Clear</string>
+    <string name="arr_lidarr_import_flow_approve">Import</string>
+    <string name="arr_lidarr_import_flow_editor_title">Quality</string>
+    <string name="arr_lidarr_import_flow_editor_quality">Quality</string>
+    <string name="arr_lidarr_import_flow_editor_as_parsed">As parsed (%1$s)</string>
+    <string name="arr_lidarr_import_flow_editor_save">Save</string>
+    <string name="arr_lidarr_import_flow_editor_cancel">Cancel</string>
+    <string name="arr_lidarr_import_flow_notice_imported">Import started for %1$d files</string>
+    <string name="arr_lidarr_import_flow_notice_queued">Offline: the import will sync when the connection returns</string>
+    <string name="arr_lidarr_import_flow_no_files_title">No importable files</string>
+    <string name="arr_lidarr_import_flow_no_files_message">Open another folder and try again.</string>
+    <string name="arr_lidarr_import_flow_pick_folder_hint">Pick a folder to list its files.</string>
+    <string name="arr_lidarr_import_flow_folders_error_title">Folders unavailable</string>
+    <string name="arr_lidarr_import_flow_files_error_title">Files unavailable</string>
+</resources>

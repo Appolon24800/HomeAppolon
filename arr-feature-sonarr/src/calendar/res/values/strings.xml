@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Calendar screen -->
+    <string name="arr_sonarr_calendar_empty_message">Episodes of series you add to Sonarr will show their airings here.</string>
+    <string name="arr_sonarr_calendar_month_empty">No episodes this month.</string>
+    <string name="arr_sonarr_calendar_day_empty">No episodes on this day.</string>
+    <string name="arr_sonarr_calendar_day_hint">Tap a day to see its episodes.</string>
+    <string name="arr_sonarr_calendar_agenda_empty">No upcoming episodes.</string>
+    <string name="arr_sonarr_calendar_air_state_aired">Aired</string>
+    <string name="arr_sonarr_calendar_air_state_not_yet_aired">Not yet aired</string>
+    <string name="arr_sonarr_calendar_cd_entry">%1$s, %2$s, %3$s</string>
+    <plurals name="arr_sonarr_calendar_episodes_count">
+        <item quantity="one">%1$d episode</item>
+        <item quantity="other">%1$d episodes</item>
+    </plurals>
+</resources>

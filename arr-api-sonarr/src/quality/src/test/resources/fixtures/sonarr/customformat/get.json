@@ -1,0 +1,30 @@
+{
+  "id": 1,
+  "name": "Surround Sound",
+  "includeCustomFormatWhenRenaming": false,
+  "specifications": [
+    {
+      "id": 1,
+      "name": "Surround Sound",
+      "implementation": "ReleaseSpecification",
+      "implementationName": "Release",
+      "infoLink": "https://wiki.servarr.com/sonarr/settings#custom-formats",
+      "negate": false,
+      "required": false,
+      "fields": [
+        {
+          "order": 0,
+          "name": "value",
+          "label": "Regular Expression",
+          "helpText": "Release Token to match against",
+          "value": "DTS(\\b|_|-)(HD|ES)?(\\b|_|-)?(X|\\d)",
+          "type": "textbox",
+          "advanced": false,
+          "privacy": "normal",
+          "isFloat": false
+        }
+      ],
+      "presets": []
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": 1,
+  "name": "Any",
+  "upgradeAllowed": true,
+  "cutoff": 4,
+  "items": [
+    {
+      "id": 1,
+      "name": "SDTV",
+      "quality": {
+        "id": 1,
+        "name": "SDTV",
+        "source": "television",
+        "resolution": 480
+      },
+      "items": null,
+      "allowed": true,
+      "minSize": null,
+      "maxSize": null,
+      "preferredSize": null
+    }
+  ],
+  "minFormatScore": 0,
+  "cutoffFormatScore": 0,
+  "minUpgradeFormatScore": 1,
+  "formatItems": [
+    {
+      "id": 1,
+      "format": 1,
+      "name": "Surround Sound",
+      "score": 5
+    }
+  ]
+}

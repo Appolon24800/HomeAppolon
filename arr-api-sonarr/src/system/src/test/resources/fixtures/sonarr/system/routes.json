@@ -1,0 +1,17 @@
+{
+  "routes": [
+    {
+      "path": "/api/v3/system/status",
+      "methods": [
+        "GET"
+      ]
+    },
+    {
+      "path": "/api/v3/series",
+      "methods": [
+        "GET",
+        "POST"
+      ]
+    }
+  ]
+}

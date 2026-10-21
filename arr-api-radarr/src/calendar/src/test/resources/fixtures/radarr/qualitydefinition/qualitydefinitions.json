@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "quality": { "id": 0, "name": "Unknown", "source": "unknown", "resolution": 0, "modifier": "none" },
+    "title": "Unknown",
+    "weight": 1,
+    "minSize": 0.0,
+    "maxSize": null,
+    "preferredSize": null
+  },
+  {
+    "id": 2,
+    "quality": { "id": 9, "name": "Bluray-1080p", "source": "bluray", "resolution": 1080, "modifier": "none" },
+    "title": "Bluray-1080p",
+    "weight": 39,
+    "minSize": 0.0,
+    "maxSize": 200.0,
+    "preferredSize": 100.0
+  }
+]

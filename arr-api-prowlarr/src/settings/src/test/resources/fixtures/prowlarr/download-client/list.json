@@ -1,0 +1,71 @@
+[
+  {
+    "id": 1,
+    "name": "Spec SABnzbd",
+    "fields": [
+      {
+        "order": 1,
+        "name": "host",
+        "label": "Host",
+        "value": "http://spec-host:8080",
+        "type": "url",
+        "advanced": false,
+        "selectOptions": [],
+        "privacy": "normal",
+        "isFloat": false
+      }
+    ],
+    "implementationName": "SABnzbd",
+    "implementation": "Sabnzbd",
+    "configContract": "SabnzbdSettings",
+    "infoLink": "https://wiki.servarr.com/prowlarr/supported#sabnzbd",
+    "message": {
+      "message": null,
+      "type": "info"
+    },
+    "tags": [1],
+    "presets": [],
+    "enable": true,
+    "protocol": "usenet",
+    "priority": 25,
+    "categories": [
+      {
+        "clientCategory": "tv-hd",
+        "categories": [5030, 5040]
+      }
+    ],
+    "supportsCategories": true
+  },
+  {
+    "id": 2,
+    "name": "Spec qBittorrent",
+    "fields": [
+      {
+        "order": 1,
+        "name": "host",
+        "label": "Host",
+        "value": "http://spec-host:9090",
+        "type": "url",
+        "advanced": false,
+        "selectOptions": [],
+        "privacy": "normal",
+        "isFloat": false
+      }
+    ],
+    "implementationName": "qBittorrent",
+    "implementation": "QBittorrent",
+    "configContract": "QBittorrentSettings",
+    "infoLink": "https://wiki.servarr.com/prowlarr/supported#qbittorrent",
+    "message": {
+      "message": null,
+      "type": "info"
+    },
+    "tags": [],
+    "presets": [],
+    "enable": false,
+    "protocol": "torrent",
+    "priority": 50,
+    "categories": [],
+    "supportsCategories": true
+  }
+]

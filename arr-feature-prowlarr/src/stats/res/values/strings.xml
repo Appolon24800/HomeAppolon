@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Stats screen -->
+    <string name="arr_prowlarr_stats_title">Stats</string>
+    <string name="arr_prowlarr_stats_subtitle">Last %1$s</string>
+    <string name="arr_prowlarr_stats_period_day">day</string>
+    <string name="arr_prowlarr_stats_period_week">week</string>
+    <string name="arr_prowlarr_stats_period_month">month</string>
+    <string name="arr_prowlarr_stats_period_year">year</string>
+    <string name="arr_prowlarr_stats_total_queries">Queries</string>
+    <string name="arr_prowlarr_stats_total_grabs">Grabs</string>
+    <string name="arr_prowlarr_stats_grab_ratio">Grab ratio</string>
+    <string name="arr_prowlarr_stats_avg_response">Avg response</string>
+    <string name="arr_prowlarr_stats_ratio_value">%1$.1f%%</string>
+    <string name="arr_prowlarr_stats_queries">queries</string>
+    <string name="arr_prowlarr_stats_grabs">grabs</string>
+    <string name="arr_prowlarr_stats_response">response</string>
+    <string name="arr_prowlarr_stats_queries_value">%1$d queries</string>
+    <string name="arr_prowlarr_stats_grabs_value">%1$d grabs</string>
+    <string name="arr_prowlarr_stats_failed_value">%1$d failed</string>
+    <string name="arr_prowlarr_stats_no_failures">No failures</string>
+    <string name="arr_prowlarr_stats_per_indexer">Per indexer</string>
+    <string name="arr_prowlarr_stats_chart_queries_title">Queries and grabs</string>
+    <string name="arr_prowlarr_stats_chart_response_title">Average response time</string>
+    <string name="arr_prowlarr_stats_hosts">Hosts</string>
+    <string name="arr_prowlarr_stats_unknown_agent">Unknown user agent</string>
+    <string name="arr_prowlarr_stats_unknown_host">Unknown host</string>
+    <string name="arr_prowlarr_stats_empty_title">No statistics yet</string>
+    <string name="arr_prowlarr_stats_empty_message">Run some searches and this window will fill with per-indexer counters.</string>
+    <string name="arr_prowlarr_stats_cd_queries_chart">Bar chart of queries and grabs for %1$d indexers, tallest stack first. Exact numbers are listed below.</string>
+    <string name="arr_prowlarr_stats_cd_response_chart">Line chart of average response time; slowest indexer is %1$s at %2$d milliseconds.</string>
+    <string name="arr_prowlarr_stats_cd_share_bar">%1$s issued %2$d percent of all queries.</string>
+</resources>

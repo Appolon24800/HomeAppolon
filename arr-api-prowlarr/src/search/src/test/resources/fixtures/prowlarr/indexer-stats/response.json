@@ -1,0 +1,47 @@
+{
+  "id": 1,
+  "indexers": [
+    {
+      "indexerId": 1,
+      "indexerName": "Spec Indexer",
+      "averageResponseTime": 120,
+      "averageGrabResponseTime": 340,
+      "numberOfQueries": 150,
+      "numberOfGrabs": 12,
+      "numberOfRssQueries": 90,
+      "numberOfAuthQueries": 2,
+      "numberOfFailedQueries": 1,
+      "numberOfFailedGrabs": 0,
+      "numberOfFailedRssQueries": 0,
+      "numberOfFailedAuthQueries": 0
+    },
+    {
+      "indexerId": 2,
+      "indexerName": "Spec Indexer Two",
+      "averageResponseTime": 210,
+      "averageGrabResponseTime": 415,
+      "numberOfQueries": 80,
+      "numberOfGrabs": 5,
+      "numberOfRssQueries": 40,
+      "numberOfAuthQueries": 1,
+      "numberOfFailedQueries": 3,
+      "numberOfFailedGrabs": 1,
+      "numberOfFailedRssQueries": 2,
+      "numberOfFailedAuthQueries": 0
+    }
+  ],
+  "userAgents": [
+    {
+      "userAgent": "SpecClient/1.0",
+      "numberOfQueries": 10,
+      "numberOfGrabs": 2
+    }
+  ],
+  "hosts": [
+    {
+      "host": "example.org",
+      "numberOfQueries": 30,
+      "numberOfGrabs": 4
+    }
+  ]
+}

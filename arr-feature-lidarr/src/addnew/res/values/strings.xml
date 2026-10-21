@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Add new screen -->
+    <string name="arr_lidarr_addnew_title">Add new</string>
+    <string name="arr_lidarr_addnew_search_hint">Search artists or albums</string>
+    <string name="arr_lidarr_addnew_scope_artists">Artists</string>
+    <string name="arr_lidarr_addnew_scope_albums">Albums</string>
+    <string name="arr_lidarr_addnew_tab_studio">Album studio</string>
+    <string name="arr_lidarr_addnew_tab_lists">Import lists</string>
+    <string name="arr_lidarr_addnew_cd_refresh">Refresh add new data</string>
+    <string name="arr_lidarr_addnew_cd_refresh_lists">Refresh import lists</string>
+    <string name="arr_lidarr_addnew_cd_queued_indicator">Changes are queued for sync</string>
+    <string name="arr_lidarr_addnew_pending_banner">%1$d changes waiting to sync</string>
+    <string name="arr_lidarr_addnew_search_empty_title">Nothing found</string>
+    <string name="arr_lidarr_addnew_search_empty_message">No artist or album matches \"%1$s\".</string>
+    <string name="arr_lidarr_addnew_existing_chip">In library</string>
+    <string name="arr_lidarr_addnew_queued_chip">Queued</string>
+    <string name="arr_lidarr_addnew_cd_result_add">Add %1$s</string>
+    <string name="arr_lidarr_addnew_cd_artist_cover">Cover of %1$s</string>
+    <string name="arr_lidarr_addnew_cd_album_cover">Cover of %1$s</string>
+    <string name="arr_lidarr_addnew_cd_open_discography">Pick albums of %1$s</string>
+    <string name="arr_lidarr_addnew_result_genres">%1$s</string>
+    <string name="arr_lidarr_addnew_result_by_artist">%1$s \u00b7 %2$s</string>
+    <string name="arr_lidarr_addnew_album_count">%1$d albums</string>
+
+    <!-- Artist add sheet -->
+    <string name="arr_lidarr_addnew_sheet_root_folder">Root folder</string>
+    <string name="arr_lidarr_addnew_sheet_pick_folder">Pick a folder</string>
+    <string name="arr_lidarr_addnew_sheet_free_space">%1$s free</string>
+    <string name="arr_lidarr_addnew_sheet_quality_profile">Quality profile</string>
+    <string name="arr_lidarr_addnew_sheet_pick_profile">Pick a profile</string>
+    <string name="arr_lidarr_addnew_sheet_metadata_profile">Metadata profile</string>
+    <string name="arr_lidarr_addnew_sheet_pick_metadata_profile">Pick a profile</string>
+    <string name="arr_lidarr_addnew_sheet_monitor">Monitoring</string>
+    <string name="arr_lidarr_addnew_sheet_tags">Tags</string>
+    <string name="arr_lidarr_addnew_sheet_no_tags">No tags on this server yet.</string>
+    <string name="arr_lidarr_addnew_action_add">Add</string>
+    <string name="arr_lidarr_addnew_action_add_search">Add and search</string>
+    <string name="arr_lidarr_addnew_monitor_all">All albums</string>
+    <string name="arr_lidarr_addnew_monitor_future">Future albums</string>
+    <string name="arr_lidarr_addnew_monitor_missing">Missing albums</string>
+    <string name="arr_lidarr_addnew_monitor_latest">Latest album</string>
+    <string name="arr_lidarr_addnew_monitor_none">None</string>
+
+    <!-- Album add sheet -->
+    <string name="arr_lidarr_addnew_album_artist_label">Artist</string>
+    <string name="arr_lidarr_addnew_album_artist_missing">Add %1$s to your library first; standalone albums file under a library artist.</string>
+    <string name="arr_lidarr_addnew_album_add_artist">Add the artist</string>
+    <string name="arr_lidarr_addnew_album_monitored">Monitor this album</string>
+    <string name="arr_lidarr_addnew_album_release_date">Released %1$s</string>
+
+    <!-- Album studio picker -->
+    <string name="arr_lidarr_addnew_studio_title">Album studio</string>
+    <string name="arr_lidarr_addnew_studio_strategy">Preselect by</string>
+    <string name="arr_lidarr_addnew_studio_select_all">Select all</string>
+    <string name="arr_lidarr_addnew_studio_select_none">Select none</string>
+    <string name="arr_lidarr_addnew_studio_apply">Apply %1$d changes</string>
+    <string name="arr_lidarr_addnew_studio_apply_none">Apply</string>
+    <string name="arr_lidarr_addnew_studio_empty_title">No albums</string>
+    <string name="arr_lidarr_addnew_studio_empty_message">This artist has no albums listed yet.</string>
+    <string name="arr_lidarr_addnew_studio_cd_toggle_album">Monitor %1$s</string>
+    <string name="arr_lidarr_addnew_studio_type_header">%1$s (%2$d)</string>
+
+    <!-- Studio tab -->
+    <string name="arr_lidarr_addnew_studio_tab_empty_title">No artists yet</string>
+    <string name="arr_lidarr_addnew_studio_tab_empty_message">Add an artist from search to pick its albums here.</string>
+
+    <!-- Import lists tab -->
+    <string name="arr_lidarr_addnew_lists_empty_title">No import lists</string>
+    <string name="arr_lidarr_addnew_lists_empty_message">Import lists configured on the server will show up here.</string>
+    <string name="arr_lidarr_addnew_lists_auto_add">Automatic</string>
+    <string name="arr_lidarr_addnew_lists_manual_add">Manual</string>
+    <string name="arr_lidarr_addnew_lists_quality">%1$s profile</string>
+
+    <!-- Notices -->
+    <string name="arr_lidarr_addnew_notice_artist_added">Added %1$s</string>
+    <string name="arr_lidarr_addnew_notice_artist_added_searching">Added %1$s and started searching</string>
+    <string name="arr_lidarr_addnew_notice_artist_add_queued">Add of %1$s queued for sync</string>
+    <string name="arr_lidarr_addnew_notice_artist_add_failed">Could not add %1$s</string>
+    <string name="arr_lidarr_addnew_notice_album_added">Added %1$s</string>
+    <string name="arr_lidarr_addnew_notice_album_added_searching">Added %1$s and started searching</string>
+    <string name="arr_lidarr_addnew_notice_album_add_queued">Add of %1$s queued for sync</string>
+    <string name="arr_lidarr_addnew_notice_album_add_failed">Could not add %1$s</string>
+    <string name="arr_lidarr_addnew_notice_studio_applied">Monitoring %1$d albums of %2$s</string>
+    <string name="arr_lidarr_addnew_notice_studio_queued">Album changes for %1$s queued for sync</string>
+    <string name="arr_lidarr_addnew_notice_studio_failed">Could not update albums of %1$s</string>
+</resources>

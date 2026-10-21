@@ -1,0 +1,12 @@
+{
+  "page": 1, "pageSize": 10, "sortKey": "date", "sortDirection": "descending",
+  "totalRecords": 1,
+  "records": [{
+    "id": 1, "albumId": 3, "artistId": 2, "trackId": 4, "sourceTitle": "string",
+    "quality": {}, "customFormats": [], "customFormatScore": 0,
+    "qualityCutoffNotMet": false, "date": "2026-01-01T00:00:00Z",
+    "downloadId": "string", "eventType": "trackFileImported",
+    "data": {"string": "string", "nullableValue": null},
+    "artist": {"id": 2}, "album": {"id": 3}, "track": {"id": 4}
+  }]
+}

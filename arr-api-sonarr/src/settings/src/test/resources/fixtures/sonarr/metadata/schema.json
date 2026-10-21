@@ -1,0 +1,18 @@
+[
+  {
+    "id": 0,
+    "name": "Kodi",
+    "fields": [],
+    "implementationName": "Kodi",
+    "implementation": "Kodi",
+    "configContract": "KodiSettings",
+    "infoLink": "https://wiki.servarr.com/sonarr/settings#metadata",
+    "message": {
+      "message": "",
+      "type": "info"
+    },
+    "tags": [],
+    "presets": [],
+    "enable": false
+  }
+]

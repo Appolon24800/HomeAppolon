@@ -1,0 +1,14 @@
+{
+  "id": 1,
+  "quality": {
+    "id": 1,
+    "name": "SDTV",
+    "source": "television",
+    "resolution": 480
+  },
+  "title": "SDTV",
+  "weight": 1,
+  "minSize": 0.0,
+  "maxSize": 50.0,
+  "preferredSize": 25.0
+}

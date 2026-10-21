@@ -1,0 +1,28 @@
+[
+  {
+    "id": 1,
+    "enableUsenet": true,
+    "enableTorrent": true,
+    "preferredProtocol": "usenet",
+    "usenetDelay": 120,
+    "torrentDelay": 180,
+    "bypassIfHighestQuality": true,
+    "bypassIfAboveCustomFormatScore": false,
+    "minimumCustomFormatScore": 0,
+    "order": 2,
+    "tags": []
+  },
+  {
+    "id": 2,
+    "enableUsenet": false,
+    "enableTorrent": true,
+    "preferredProtocol": "torrent",
+    "usenetDelay": 0,
+    "torrentDelay": 60,
+    "bypassIfHighestQuality": false,
+    "bypassIfAboveCustomFormatScore": true,
+    "minimumCustomFormatScore": 100,
+    "order": 1,
+    "tags": [1, 2]
+  }
+]

@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "name": "Global",
+    "enabled": true,
+    "required": "x264\nh264",
+    "ignored": "x265",
+    "indexerId": 0,
+    "tags": [1, 2]
+  }
+]

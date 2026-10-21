@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "name": "SABnzbd",
+    "fields": [
+      {
+        "order": 0,
+        "name": "host",
+        "label": "Host",
+        "value": "localhost",
+        "type": "text",
+        "advanced": false,
+        "privacy": "normal"
+      }
+    ],
+    "implementationName": "SABnzbd",
+    "implementation": "Sabnzbd",
+    "configContract": "SabnzbdSettings",
+    "infoLink": "https://wiki.servarr.com/lidarr/supported#sabnzbd",
+    "message": { "message": "string", "type": "info" },
+    "tags": [1],
+    "presets": null,
+    "enable": true,
+    "protocol": "usenet",
+    "priority": 25,
+    "removeCompletedDownloads": true,
+    "removeFailedDownloads": true
+  },
+  {
+    "id": 2,
+    "name": "qBittorrent",
+    "fields": [],
+    "implementationName": "qBittorrent",
+    "implementation": "QBittorrent",
+    "configContract": "QBittorrentSettings",
+    "infoLink": "https://wiki.servarr.com/lidarr/supported#qbittorrent",
+    "tags": [],
+    "enable": true,
+    "protocol": "torrent",
+    "priority": 50,
+    "removeCompletedDownloads": false,
+    "removeFailedDownloads": false
+  }
+]

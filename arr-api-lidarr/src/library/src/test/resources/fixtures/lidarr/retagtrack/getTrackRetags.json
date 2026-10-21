@@ -1,0 +1,19 @@
+[
+  {
+    "id": 1,
+    "artistId": 1,
+    "albumId": 1,
+    "trackNumbers": [
+      1
+    ],
+    "trackFileId": 1,
+    "path": null,
+    "changes": [
+      {
+        "field": null,
+        "oldValue": null,
+        "newValue": null
+      }
+    ]
+  }
+]

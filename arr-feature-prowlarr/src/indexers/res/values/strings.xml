@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared -->
+    <string name="arr_prowlarr_ok">OK</string>
+    <string name="arr_prowlarr_privacy_public">Public</string>
+    <string name="arr_prowlarr_privacy_semi_private">Semi-private</string>
+    <string name="arr_prowlarr_privacy_private">Private</string>
+    <string name="arr_prowlarr_sync_disabled">Sync disabled</string>
+    <string name="arr_prowlarr_sync_add_only">Add only</string>
+    <string name="arr_prowlarr_sync_full">Full sync</string>
+    <string name="arr_prowlarr_badge_throttled">Paused until %1$s</string>
+    <string name="arr_prowlarr_badge_failing">Failing</string>
+    <string name="arr_prowlarr_badge_queued_cd">Changes for this indexer are queued</string>
+
+    <!-- Indexers list -->
+    <string name="arr_prowlarr_indexers_empty_message">Add an indexer to start searching with Prowlarr.</string>
+    <string name="arr_prowlarr_indexers_search">Search indexers</string>
+    <string name="arr_prowlarr_indexers_delete_title">Delete indexers?</string>
+    <string name="arr_prowlarr_indexers_delete_message">%1$d indexer(s) will be removed from Prowlarr.</string>
+    <string name="arr_prowlarr_filter_protocol_all">All protocols</string>
+    <string name="arr_prowlarr_filter_privacy_all">Any privacy</string>
+    <string name="arr_prowlarr_filter_state_all">Any state</string>
+    <string name="arr_prowlarr_sort_protocol">Protocol</string>
+    <string name="arr_prowlarr_cd_view_cards">Switch to card view</string>
+    <string name="arr_prowlarr_cd_more">More actions</string>
+    <string name="arr_prowlarr_cd_select_all">Select every indexer shown</string>
+    <string name="arr_prowlarr_cd_edit_selected">Edit selected indexers</string>
+    <string name="arr_prowlarr_cd_delete_selected">Delete selected indexers</string>
+
+    <!-- Bulk edit -->
+    <string name="arr_prowlarr_bulk_title">Bulk edit indexers</string>
+    <string name="arr_prowlarr_bulk_disable">Disable</string>
+    <string name="arr_prowlarr_bulk_app_profile">App profile</string>
+    <string name="arr_prowlarr_bulk_priority">Priority (blank keeps current)</string>
+    <string name="arr_prowlarr_tags_add">Add tags</string>
+    <string name="arr_prowlarr_tags_remove">Remove tags</string>
+    <string name="arr_prowlarr_tags_replace">Replace tags</string>
+
+    <!-- Editor -->
+    <string name="arr_prowlarr_editor_search_schema">Search definitions</string>
+    <string name="arr_prowlarr_editor_no_schemas">No definitions match.</string>
+    <string name="arr_prowlarr_editor_info_link">Open website</string>
+    <string name="arr_prowlarr_editor_presets">Presets</string>
+    <string name="arr_prowlarr_editor_categories">Categories</string>
+    <string name="arr_prowlarr_cd_toggle_category">Toggle category %1$s</string>
+    <string name="arr_prowlarr_cd_expand_category">Expand subcategories</string>
+    <string name="arr_prowlarr_cd_collapse_category">Collapse subcategories</string>
+
+    <!-- Dynamic fields -->
+    <string name="arr_prowlarr_fields_help_link">Open help</string>
+    <string name="arr_prowlarr_fields_show_password">Show value</string>
+    <string name="arr_prowlarr_fields_hide_password">Hide value</string>
+
+    <!-- Categories manager -->
+    <string name="arr_prowlarr_categories_subtitle">Standard newznab categories across %1$d indexers</string>
+    <string name="arr_prowlarr_categories_empty">No categories found.</string>
+
+    <!-- Indexer proxies -->
+    <string name="arr_prowlarr_proxies_empty">No proxies configured.</string>
+    <string name="arr_prowlarr_proxies_add">Add proxy</string>
+    <string name="arr_prowlarr_proxies_edit">Edit proxy</string>
+    <string name="arr_prowlarr_proxies_delete_title">Delete proxy?</string>
+    <string name="arr_prowlarr_proxies_delete_message">This proxy will stop routing indexer traffic.</string>
+    <string name="arr_prowlarr_cd_edit_proxy">Edit proxy %1$s</string>
+    <string name="arr_prowlarr_cd_delete_proxy">Delete proxy %1$s</string>
+
+    <!-- Applications -->
+    <string name="arr_prowlarr_applications_title">Applications</string>
+    <string name="arr_prowlarr_applications_empty">No applications connected.</string>
+    <string name="arr_prowlarr_applications_add">Add application</string>
+    <string name="arr_prowlarr_applications_edit">Edit application</string>
+    <string name="arr_prowlarr_applications_sync_all">Sync all applications now</string>
+    <string name="arr_prowlarr_applications_profiles">Manage app profiles</string>
+    <string name="arr_prowlarr_applications_delete_title">Delete application?</string>
+    <string name="arr_prowlarr_applications_delete_message">This application will stop receiving indexers from Prowlarr.</string>
+    <string name="arr_prowlarr_sync_level">Sync level</string>
+    <string name="arr_prowlarr_sync_preview_title">Sync preview: %1$s</string>
+    <string name="arr_prowlarr_sync_preview_message">Sync level: %1$s. These indexers would sync:</string>
+    <string name="arr_prowlarr_cd_sync_preview">Preview sync for %1$s</string>
+    <string name="arr_prowlarr_cd_edit_application">Edit application %1$s</string>
+    <string name="arr_prowlarr_cd_delete_application">Delete application %1$s</string>
+
+    <!-- App profiles -->
+    <string name="arr_prowlarr_profiles_title">App profiles</string>
+    <string name="arr_prowlarr_profiles_add">Add profile</string>
+    <string name="arr_prowlarr_profiles_edit">Edit profile</string>
+    <string name="arr_prowlarr_profiles_summary">Minimum %1$d seeders</string>
+    <string name="arr_prowlarr_profiles_minimum_seeders">Minimum seeders</string>
+    <string name="arr_prowlarr_profiles_enable_rss">Enable RSS</string>
+    <string name="arr_prowlarr_profiles_enable_automatic_search">Enable automatic search</string>
+    <string name="arr_prowlarr_profiles_enable_interactive_search">Enable interactive search</string>
+    <string name="arr_prowlarr_profiles_delete_title">Delete profile?</string>
+    <string name="arr_prowlarr_profiles_delete_message">Indexers using this profile fall back to their defaults.</string>
+    <string name="arr_prowlarr_cd_edit_profile">Edit profile %1$s</string>
+    <string name="arr_prowlarr_cd_delete_profile">Delete profile %1$s</string>
+
+    <!-- Messages -->
+    <string name="arr_prowlarr_message_toggle_synced">Indexer updated.</string>
+    <string name="arr_prowlarr_message_toggle_queued">Offline. Change queued and applied locally.</string>
+    <string name="arr_prowlarr_message_bulk_synced">Bulk edit applied.</string>
+    <string name="arr_prowlarr_message_bulk_queued">Offline. Bulk edit queued.</string>
+    <string name="arr_prowlarr_message_delete_synced">Indexers deleted.</string>
+    <string name="arr_prowlarr_message_delete_queued">Offline. Delete queued.</string>
+    <string name="arr_prowlarr_message_test_passed">Test completed without errors.</string>
+    <string name="arr_prowlarr_message_test_failed">Test failed: %1$s</string>
+    <string name="arr_prowlarr_message_test_all_started">Testing all indexers. Results appear in the status badges.</string>
+    <string name="arr_prowlarr_message_write_failed">Action failed: %1$s</string>
+    <string name="arr_prowlarr_message_saved_queued">Offline. Save queued for sync.</string>
+    <string name="arr_prowlarr_message_sync_started">Application sync started.</string>
+    <string name="arr_prowlarr_message_sync_queued">Offline. Sync queued.</string>
+    <string name="arr_prowlarr_message_profile_saved">App profile saved.</string>
+    <string name="arr_prowlarr_message_profile_deleted">App profile deleted.</string>
+    <string name="arr_prowlarr_cd_loading">Loading</string>
+    <string name="arr_prowlarr_cd_testing">Testing</string>
+    <string name="arr_prowlarr_cd_saving">Saving</string>
+    <string name="arr_prowlarr_cd_percent">%1$d percent</string>
+    <string name="arr_prowlarr_sort_state_ascending">Ascending</string>
+    <string name="arr_prowlarr_sort_state_descending">Descending</string>
+</resources>

@@ -1,0 +1,7 @@
+{
+  "id": 1, "enabled": false,
+  "required": ["flac"],
+  "ignored": ["transcode", "remux"],
+  "indexerId": 2,
+  "tags": [1]
+}

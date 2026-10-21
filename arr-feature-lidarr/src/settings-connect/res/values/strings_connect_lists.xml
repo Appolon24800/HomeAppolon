@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Import lists. Lists discover artists and their albums, not series. -->
+
+    <string name="arr_lidarr_lists_cd_preview">Preview what the lists will sync</string>
+    <string name="arr_lidarr_lists_empty_message">Add an import list to discover artists automatically.</string>
+    <string name="arr_lidarr_lists_auto">Automatic add</string>
+    <string name="arr_lidarr_lists_quality_profile">Quality profile %1$d</string>
+    <string name="arr_lidarr_lists_metadata_profile">Metadata profile %1$d</string>
+    <string name="arr_lidarr_lists_preview_empty">No configured lists to preview.</string>
+    <string name="arr_lidarr_lists_preview_summary">%1$d lists will run on the next sync</string>
+    <string name="arr_lidarr_lists_preview_auto_add">Added automatically</string>
+    <string name="arr_lidarr_lists_preview_manual_add">Added manually</string>
+    <string name="arr_lidarr_lists_preview_monitor">Monitor %1$s</string>
+    <string name="arr_lidarr_lists_preview_quality_profile">Quality profile %1$d</string>
+    <string name="arr_lidarr_lists_preview_metadata_profile">Metadata profile %1$d</string>
+    <string name="arr_lidarr_lists_preview_exclusions">%1$d artists are excluded from syncs</string>
+    <string name="arr_lidarr_lists_preview_sync_now">Sync now</string>
+    <string name="arr_lidarr_list_automatic_add">Add artists found on this list automatically</string>
+    <string name="arr_lidarr_list_search_for_new">Search for new releases on add</string>
+    <string name="arr_lidarr_list_monitor_existing">Monitor artists already in Lidarr</string>
+    <string name="arr_lidarr_list_monitor">Monitor strategy</string>
+    <string name="arr_lidarr_list_monitor_none">None</string>
+    <string name="arr_lidarr_list_monitor_specific_album">Specific album</string>
+    <string name="arr_lidarr_list_monitor_entire_artist">Entire artist</string>
+    <string name="arr_lidarr_list_quality_profile">Quality profile id</string>
+    <string name="arr_lidarr_list_quality_profile_support">The numeric id shown in Settings, Quality</string>
+    <string name="arr_lidarr_list_metadata_profile">Metadata profile id</string>
+    <string name="arr_lidarr_list_metadata_profile_support">The numeric id shown in Settings, Metadata</string>
+
+    <!-- Import list exclusions -->
+    <string name="arr_lidarr_exclusions_cd_delete">Stop excluding %1$s</string>
+    <string name="arr_lidarr_exclusions_empty_message">Excluded artists never come back from a list sync.</string>
+    <string name="arr_lidarr_exclusions_section">Exclusions</string>
+    <string name="arr_lidarr_exclusions_title_label">Artist name</string>
+    <string name="arr_lidarr_exclusion_foreign_label">MusicBrainz id</string>
+    <string name="arr_lidarr_exclusion_foreign_support">The MusicBrainz artist id the list reports</string>
+    <string name="arr_lidarr_exclusion_foreign_value">MusicBrainz %1$s</string>
+
+    <!-- Connect notifications. Lidarr event matrix; shared events live in arr-ui-core. -->
+    <string name="arr_lidarr_notification_event_release_import">On release import</string>
+    <string name="arr_lidarr_notification_event_artist_added">On artist added</string>
+    <string name="arr_lidarr_notification_event_artist_delete">On artist deleted</string>
+    <string name="arr_lidarr_notification_event_album_delete">On album delete</string>
+    <string name="arr_lidarr_notification_event_download_failure">On download failure</string>
+    <string name="arr_lidarr_notification_event_import_failure">On import failure</string>
+    <string name="arr_lidarr_notification_event_track_retag">On track retag</string>
+
+    <!-- Metadata consumers: all labels are shared through arr-ui-core. -->
+</resources>

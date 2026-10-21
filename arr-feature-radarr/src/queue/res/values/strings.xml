@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="arr_radarr_manual_import_unmatched">No movie matched</string>
+    <string name="arr_radarr_manual_import_need_movie">Every selected file needs a matched movie</string>
+</resources>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Add new series: screen, tabs, search. -->
+    <string name="arr_sonarr_add_title">Add new series</string>
+    <string name="arr_sonarr_add_cd_refresh">Refresh data</string>
+    <string name="arr_sonarr_add_search_hint">Search series by title</string>
+    <string name="arr_sonarr_add_cd_clear_search">Clear search</string>
+    <string name="arr_sonarr_add_year_all">All years</string>
+    <string name="arr_sonarr_add_results_start_title">Find a series</string>
+    <string name="arr_sonarr_add_results_start_message">Search by title to add a series to Sonarr.</string>
+    <string name="arr_sonarr_add_results_none_message">Try another title or check the spelling.</string>
+    <string name="arr_sonarr_add_cd_in_library">%1$s is already in your library</string>
+    <string name="arr_sonarr_add_cd_queued_add">Add pending sync</string>
+
+    <!-- Add sheet. -->
+    <string name="arr_sonarr_add_untitled">Untitled series</string>
+    <string name="arr_sonarr_add_monitored">Monitor series</string>
+    <string name="arr_sonarr_add_root_folder_none">No root folder is configured yet. Add one in Sonarr\'s settings first.</string>
+    <string name="arr_sonarr_add_language">Language profile</string>
+    <string name="arr_sonarr_add_type_standard">Standard</string>
+    <string name="arr_sonarr_add_type_anime">Anime</string>
+    <string name="arr_sonarr_add_type_daily">Daily</string>
+    <string name="arr_sonarr_add_season_picker">Monitored seasons</string>
+    <string name="arr_sonarr_add_season_none">No seasons reported for this series.</string>
+    <string name="arr_sonarr_add_season_specials">Specials</string>
+    <string name="arr_sonarr_add_season_folder">Season folders</string>
+
+    <!-- Monitor strategies. -->
+    <string name="arr_sonarr_add_strategy_all">All episodes</string>
+    <string name="arr_sonarr_add_strategy_future">Future episodes</string>
+    <string name="arr_sonarr_add_strategy_missing">Missing episodes</string>
+    <string name="arr_sonarr_add_strategy_existing">Existing episodes</string>
+    <string name="arr_sonarr_add_strategy_first_season">First season only</string>
+    <string name="arr_sonarr_add_strategy_last_season">Last season only</string>
+    <string name="arr_sonarr_add_strategy_latest_season">Latest season only</string>
+    <string name="arr_sonarr_add_strategy_pilot">Pilot only</string>
+    <string name="arr_sonarr_add_strategy_recent">Recent episodes</string>
+    <string name="arr_sonarr_add_strategy_monitor_specials">Monitor specials</string>
+    <string name="arr_sonarr_add_strategy_unmonitor_specials">Unmonitor specials</string>
+    <string name="arr_sonarr_add_strategy_none">No episodes</string>
+
+    <!-- Import lists tab. -->
+    <string name="arr_sonarr_add_lists_empty_message">Add import lists in Sonarr\'s settings to discover series here.</string>
+    <string name="arr_sonarr_add_list_automatic">Adds automatically</string>
+    <string name="arr_sonarr_add_cd_sync_list">Sync %1$s now</string>
+    <string name="arr_sonarr_add_exclusions_empty">Series excluded from import lists.</string>
+    <string name="arr_sonarr_add_exclusion_delete_cd">Delete exclusion %1$s</string>
+    <string name="arr_sonarr_add_exclusion_dialog_title">Add import list exclusion</string>
+    <string name="arr_sonarr_add_exclusion_title_error">Enter a title.</string>
+    <string name="arr_sonarr_add_exclusion_tvdb_error">Enter a positive number.</string>
+
+    <!-- Result snackbars. -->
+    <string name="arr_sonarr_add_message_added">%1$s was added.</string>
+    <string name="arr_sonarr_add_message_add_failed">The add didn\'t go through. Try again.</string>
+    <string name="arr_sonarr_add_message_list_synced">Import list sync started.</string>
+    <string name="arr_sonarr_add_message_list_queued">Offline. Import list sync is queued.</string>
+    <string name="arr_sonarr_add_message_list_failed">The sync didn\'t go through. Try again.</string>
+    <string name="arr_sonarr_add_message_exclusion_saved">Exclusion saved.</string>
+    <string name="arr_sonarr_add_message_exclusion_deleted">Exclusion deleted.</string>
+    <string name="arr_sonarr_add_message_exclusion_queued">Offline. Exclusion change is queued.</string>
+    <string name="arr_sonarr_add_message_exclusion_failed">The exclusion change didn\'t go through. Try again.</string>
+
+    <plurals name="arr_sonarr_add_season_count">
+        <item quantity="one">%1$d season</item>
+        <item quantity="other">%1$d seasons</item>
+    </plurals>
+</resources>

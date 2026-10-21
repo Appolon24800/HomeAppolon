@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- History screen -->
+    <string name="arr_prowlarr_history_subtitle">%1$d events</string>
+    <string name="arr_prowlarr_history_subtitle_filtered">%1$d of %2$d events</string>
+    <string name="arr_prowlarr_history_search_hint">Filter by query text</string>
+    <string name="arr_prowlarr_history_filter_all">All indexers</string>
+    <string name="arr_prowlarr_history_event_query">Query</string>
+    <string name="arr_prowlarr_history_event_rss">RSS query</string>
+    <string name="arr_prowlarr_history_event_auth">Authorization</string>
+    <string name="arr_prowlarr_history_timing">Timing</string>
+    <string name="arr_prowlarr_history_ms_value">%1$d ms</string>
+    <string name="arr_prowlarr_history_cached">Cached</string>
+    <string name="arr_prowlarr_history_results">Results returned</string>
+    <string name="arr_prowlarr_history_query_type">Query type</string>
+    <string name="arr_prowlarr_history_clear_title">Clear history?</string>
+    <string name="arr_prowlarr_history_clear_message">All query history will be removed from the server. This cannot be undone.</string>
+    <string name="arr_prowlarr_history_cleared">History cleared.</string>
+    <string name="arr_prowlarr_history_clear_queued">Clear queued until the server is reachable.</string>
+    <string name="arr_prowlarr_history_empty_title">No history</string>
+    <string name="arr_prowlarr_history_empty_message">Searches, grabs and authorization checks will appear here.</string>
+    <string name="arr_prowlarr_history_cd_clear">Clear history</string>
+    <string name="arr_prowlarr_history_cd_collapse">Hide details for %1$s</string>
+</resources>

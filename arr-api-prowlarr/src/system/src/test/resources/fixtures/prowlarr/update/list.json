@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "version": "1.1.0.4500",
+    "branch": "master",
+    "releaseDate": "2026-09-01T00:00:00Z",
+    "fileName": "Prowlarr.master.1.1.0.4500.linux-core-x64.tar.gz",
+    "url": "https://github.com/Prowlarr/Prowlarr/releases/v1.1.0.4500",
+    "installed": false,
+    "installable": true,
+    "latest": true,
+    "changes": {
+      "new": ["Spec new feature one"],
+      "fixed": ["Spec fixed bug one", "Spec fixed bug two"]
+    },
+    "hash": "b7f0c9e2a1d4"
+  },
+  {
+    "id": 2,
+    "version": "1.0.0.4488",
+    "branch": "master",
+    "releaseDate": "2026-07-01T00:00:00Z",
+    "fileName": "Prowlarr.master.1.0.0.4488.linux-core-x64.tar.gz",
+    "url": "https://github.com/Prowlarr/Prowlarr/releases/v1.0.0.4488",
+    "installed": true,
+    "installedOn": "2026-08-15T12:00:00Z",
+    "installable": false,
+    "latest": false,
+    "changes": {
+      "new": ["Spec earlier feature"],
+      "fixed": ["Spec earlier fix"]
+    },
+    "hash": "3a9d81f0c2b6"
+  }
+]

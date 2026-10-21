@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "filename": "prowlarr.txt",
+    "lastWriteTime": "2026-10-20T08:00:00Z",
+    "contentsUrl": "/api/v1/log/file/prowlarr.txt",
+    "downloadUrl": "/api/v1/log/file/download/prowlarr.txt"
+  },
+  {
+    "id": 2,
+    "filename": "prowlarr.update.2026-10-19.txt",
+    "lastWriteTime": "2026-10-19T02:04:00Z",
+    "contentsUrl": "/api/v1/log/file/prowlarr.update.2026-10-19.txt",
+    "downloadUrl": "/api/v1/log/file/download/prowlarr.update.2026-10-19.txt"
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "id": 1,
+  "renameMovies": true,
+  "replaceIllegalCharacters": false,
+  "colonReplacementFormat": "dash",
+  "standardMovieFormat": "{Movie Title} ({Release Year}) {Quality Title}",
+  "movieFolderFormat": "{Movie Title} ({Release Year})"
+}

@@ -1,0 +1,9 @@
+{
+  "id": 1,
+  "type": "search",
+  "label": "Spec filter",
+  "filters": [
+    { "key": "query", "value": "spec" },
+    { "key": "categories", "value": [2000, 2040] }
+  ]
+}

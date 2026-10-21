@@ -1,0 +1,255 @@
+[
+  {
+    "id": 1,
+    "status": "continuing",
+    "ended": false,
+    "artistName": null,
+    "foreignArtistId": null,
+    "mbId": null,
+    "tadbId": 1,
+    "discogsId": 1,
+    "allMusicId": null,
+    "overview": null,
+    "artistType": null,
+    "disambiguation": null,
+    "links": [
+      {
+        "url": null,
+        "name": null
+      }
+    ],
+    "nextAlbum": {
+      "id": 1,
+      "title": null,
+      "disambiguation": null,
+      "overview": null,
+      "artistId": 1,
+      "foreignAlbumId": null,
+      "monitored": false,
+      "anyReleaseOk": false,
+      "profileId": 1,
+      "duration": 1,
+      "albumType": null,
+      "secondaryTypes": [
+        "string"
+      ],
+      "mediumCount": 1,
+      "ratings": {
+        "votes": 1,
+        "value": 1.0
+      },
+      "releaseDate": null,
+      "releases": [
+        {
+          "id": 1,
+          "albumId": 1,
+          "foreignReleaseId": null,
+          "title": null,
+          "status": null,
+          "duration": 1,
+          "trackCount": 1,
+          "media": [
+            {
+              "mediumNumber": 1,
+              "mediumName": null,
+              "mediumFormat": null
+            }
+          ],
+          "mediumCount": 1,
+          "disambiguation": null,
+          "country": [
+            "string"
+          ],
+          "label": [
+            "string"
+          ],
+          "format": null,
+          "monitored": false
+        }
+      ],
+      "genres": [
+        "string"
+      ],
+      "media": [
+        {
+          "mediumNumber": 1,
+          "mediumName": null,
+          "mediumFormat": null
+        }
+      ],
+      "images": [
+        {
+          "url": null,
+          "coverType": "unknown",
+          "extension": null,
+          "remoteUrl": null
+        }
+      ],
+      "links": [
+        {
+          "url": null,
+          "name": null
+        }
+      ],
+      "lastSearchTime": null,
+      "statistics": {
+        "trackFileCount": 1,
+        "trackCount": 1,
+        "totalTrackCount": 1,
+        "sizeOnDisk": 1,
+        "percentOfTracks": 1.0
+      },
+      "addOptions": {
+        "addType": "automatic",
+        "searchForNewAlbum": false
+      },
+      "remoteCover": null
+    },
+    "lastAlbum": {
+      "id": 1,
+      "title": null,
+      "disambiguation": null,
+      "overview": null,
+      "artistId": 1,
+      "foreignAlbumId": null,
+      "monitored": false,
+      "anyReleaseOk": false,
+      "profileId": 1,
+      "duration": 1,
+      "albumType": null,
+      "secondaryTypes": [
+        "string"
+      ],
+      "mediumCount": 1,
+      "ratings": {
+        "votes": 1,
+        "value": 1.0
+      },
+      "releaseDate": null,
+      "releases": [
+        {
+          "id": 1,
+          "albumId": 1,
+          "foreignReleaseId": null,
+          "title": null,
+          "status": null,
+          "duration": 1,
+          "trackCount": 1,
+          "media": [
+            {
+              "mediumNumber": 1,
+              "mediumName": null,
+              "mediumFormat": null
+            }
+          ],
+          "mediumCount": 1,
+          "disambiguation": null,
+          "country": [
+            "string"
+          ],
+          "label": [
+            "string"
+          ],
+          "format": null,
+          "monitored": false
+        }
+      ],
+      "genres": [
+        "string"
+      ],
+      "media": [
+        {
+          "mediumNumber": 1,
+          "mediumName": null,
+          "mediumFormat": null
+        }
+      ],
+      "images": [
+        {
+          "url": null,
+          "coverType": "unknown",
+          "extension": null,
+          "remoteUrl": null
+        }
+      ],
+      "links": [
+        {
+          "url": null,
+          "name": null
+        }
+      ],
+      "lastSearchTime": null,
+      "statistics": {
+        "trackFileCount": 1,
+        "trackCount": 1,
+        "totalTrackCount": 1,
+        "sizeOnDisk": 1,
+        "percentOfTracks": 1.0
+      },
+      "addOptions": {
+        "addType": "automatic",
+        "searchForNewAlbum": false
+      },
+      "remoteCover": null
+    },
+    "images": [
+      {
+        "url": null,
+        "coverType": "unknown",
+        "extension": null,
+        "remoteUrl": null
+      }
+    ],
+    "members": [
+      {
+        "name": null,
+        "instrument": null,
+        "images": [
+          {
+            "url": null,
+            "coverType": "unknown",
+            "extension": null,
+            "remoteUrl": null
+          }
+        ]
+      }
+    ],
+    "remotePoster": null,
+    "path": null,
+    "qualityProfileId": 1,
+    "metadataProfileId": 1,
+    "monitored": false,
+    "monitorNewItems": "all",
+    "rootFolderPath": null,
+    "folder": null,
+    "genres": [
+      "string"
+    ],
+    "cleanName": null,
+    "sortName": null,
+    "tags": [
+      1
+    ],
+    "added": "2026-01-01T00:00:00Z",
+    "addOptions": {
+      "monitor": "all",
+      "albumsToMonitor": [
+        "string"
+      ],
+      "monitored": false,
+      "searchForMissingAlbums": false
+    },
+    "ratings": {
+      "votes": 1,
+      "value": 1.0
+    },
+    "statistics": {
+      "albumCount": 1,
+      "trackFileCount": 1,
+      "trackCount": 1,
+      "totalTrackCount": 1,
+      "sizeOnDisk": 1,
+      "percentOfTracks": 1.0
+    }
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "id": 9,
+  "quality": {"id": 9, "name": "FLAC"},
+  "title": "FLAC",
+  "weight": 9,
+  "minSize": null,
+  "maxSize": null,
+  "preferredSize": null
+}

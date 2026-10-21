@@ -1,0 +1,41 @@
+{
+  "id": 1,
+  "name": "Spec Proxy",
+  "fields": [
+    {
+      "order": 0,
+      "name": "host",
+      "label": "Host",
+      "value": "spec-proxy.example.org",
+      "type": "text",
+      "advanced": false,
+      "selectOptions": [],
+      "section": "",
+      "privacy": "normal"
+    },
+    {
+      "order": 1,
+      "name": "port",
+      "label": "Port",
+      "value": 8191,
+      "type": "number",
+      "advanced": false,
+      "selectOptions": [],
+      "section": "",
+      "privacy": "normal",
+      "isFloat": false
+    }
+  ],
+  "implementationName": "Spec Proxy",
+  "implementation": "SpecProxy",
+  "configContract": "SpecProxySettings",
+  "infoLink": "https://wiki.servarr.com/prowlarr/indexer-proxies",
+  "message": { "message": "Spec proxy notice", "type": "warning" },
+  "tags": [1],
+  "presets": [],
+  "link": "https://spec-proxy.example.org",
+  "onHealthIssue": true,
+  "supportsOnHealthIssue": true,
+  "includeHealthWarnings": false,
+  "testCommand": "TestSpecProxy"
+}

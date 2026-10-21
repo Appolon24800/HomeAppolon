@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="arr_sonarr_history_series_query_hint">Filter by series, episode, or release name</string>
+    <string name="arr_sonarr_history_details_episode">Episode</string>
+    <string name="arr_sonarr_blocklist_empty_message">Releases rejected by Sonarr will appear here.</string>
+</resources>

@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "title": "Specimen Movie",
+    "sortTitle": "specimen movie",
+    "status": "released",
+    "monitored": true,
+    "inCinemas": "2026-10-21T00:00:00Z",
+    "digitalRelease": "2026-11-04T00:00:00Z",
+    "physicalRelease": "2026-11-18T00:00:00Z",
+    "year": 2026,
+    "hasFile": false,
+    "isAvailable": true,
+    "qualityProfileId": 1,
+    "runtime": 118,
+    "tmdbId": 1,
+    "titleSlug": "specimen-movie",
+    "tags": [1]
+  },
+  {
+    "id": 2,
+    "title": "Archive Movie",
+    "sortTitle": "archive movie",
+    "status": "released",
+    "monitored": false,
+    "digitalRelease": "2026-12-01T00:00:00Z",
+    "year": 2026,
+    "hasFile": false,
+    "isAvailable": true,
+    "qualityProfileId": 1,
+    "tmdbId": 2,
+    "titleSlug": "archive-movie",
+    "tags": []
+  }
+]

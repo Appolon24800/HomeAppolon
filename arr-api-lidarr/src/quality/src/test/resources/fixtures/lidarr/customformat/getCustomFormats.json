@@ -1,0 +1,17 @@
+[{
+  "id": 1, "name": "Lossless",
+  "includeCustomFormatWhenRenaming": false,
+  "specifications": [{
+    "id": 1, "name": "FLAC", "implementation": "QualitySpecification",
+    "implementationName": "Quality", "infoLink": "https://lidarr.example",
+    "negate": false, "required": false,
+    "fields": [{
+      "order": 0, "name": "value", "label": "Quality", "value": 9, "type": "quality"
+    }],
+    "presets": []
+  }]
+}, {
+  "id": 2, "name": "24bit",
+  "includeCustomFormatWhenRenaming": true,
+  "specifications": []
+}]

@@ -1,0 +1,9 @@
+{
+  "page": 1, "pageSize": 10, "sortKey": "date", "sortDirection": "descending",
+  "totalRecords": 1,
+  "records": [{
+    "id": 1, "artistId": 2, "albumIds": [3], "sourceTitle": "string",
+    "quality": {}, "customFormats": [], "date": "2026-01-01T00:00:00Z",
+    "protocol": "torrent", "indexer": "string", "message": "string"
+  }]
+}

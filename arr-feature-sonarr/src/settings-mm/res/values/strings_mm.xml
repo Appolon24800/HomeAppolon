@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Media management screen -->
+    <string name="arr_sonarr_mm_link_naming">Episode naming</string>
+    <string name="arr_sonarr_mm_link_naming_support">Standard, daily, and anime formats with a live preview</string>
+    <string name="arr_sonarr_mm_minimum_free_space">Minimum free space when importing</string>
+    <string name="arr_sonarr_mm_rejected_extensions">Rejected file extensions</string>
+    <string name="arr_sonarr_mm_rejected_extensions_support">Comma-separated extensions never imported, for example mp4, avi</string>
+    <string name="arr_sonarr_mm_auto_unmonitor">Unmonitor episodes deleted from disk</string>
+    <string name="arr_sonarr_mm_create_empty_folders">Create empty series folders</string>
+    <string name="arr_sonarr_mm_episode_title_required">Episode title required</string>
+    <string name="arr_sonarr_mm_season_pack">Season pack upgrade</string>
+    <string name="arr_sonarr_mm_season_pack_threshold">Season pack upgrade threshold</string>
+    <string name="arr_sonarr_mm_season_pack_threshold_support">Portion of the season that must upgrade, between 0 and 1</string>
+
+    <!-- Naming editor screen -->
+    <string name="arr_sonarr_naming_rename_episodes">Rename episodes</string>
+    <string name="arr_sonarr_naming_rename_episodes_support">Imported files are renamed to match the formats below</string>
+    <string name="arr_sonarr_naming_colon_dash">Dash</string>
+    <string name="arr_sonarr_naming_colon_space_dash">Space dash</string>
+    <string name="arr_sonarr_naming_colon_space_dash_space">Space dash space</string>
+    <string name="arr_sonarr_naming_colon_smart">Smart</string>
+    <string name="arr_sonarr_naming_colon_custom">Custom</string>
+    <string name="arr_sonarr_naming_custom_colon">Custom colon replacement</string>
+    <string name="arr_sonarr_naming_custom_colon_support">Text used in place of colons</string>
+    <string name="arr_sonarr_naming_multi_episode">Multi-episode style</string>
+    <string name="arr_sonarr_naming_multi_extend">Extend</string>
+    <string name="arr_sonarr_naming_multi_duplicate">Duplicate</string>
+    <string name="arr_sonarr_naming_multi_repeat">Repeat</string>
+    <string name="arr_sonarr_naming_multi_scene">Scene</string>
+    <string name="arr_sonarr_naming_multi_range">Range</string>
+    <string name="arr_sonarr_naming_multi_prefixed_range">Prefixed range</string>
+    <string name="arr_sonarr_naming_standard_format">Standard episode format</string>
+    <string name="arr_sonarr_naming_daily_format">Daily episode format</string>
+    <string name="arr_sonarr_naming_anime_format">Anime episode format</string>
+    <string name="arr_sonarr_naming_series_format">Series folder format</string>
+    <string name="arr_sonarr_naming_season_format">Season folder format</string>
+    <string name="arr_sonarr_naming_specials_format">Specials folder format</string>
+    <string name="arr_sonarr_naming_standard_preview">Standard episode preview</string>
+    <string name="arr_sonarr_naming_daily_preview">Daily episode preview</string>
+    <string name="arr_sonarr_naming_anime_preview">Anime episode preview</string>
+    <string name="arr_sonarr_naming_series_preview">Series folder preview</string>
+    <string name="arr_sonarr_naming_season_preview">Season folder preview</string>
+    <string name="arr_sonarr_naming_specials_preview">Specials folder preview</string>
+
+    <!-- Root folders screen -->
+    <string name="arr_sonarr_roots_delete_message">Delete %1$s from Sonarr? Series stay in the database but lose their path.</string>
+
+    <!-- Filesystem browser -->
+</resources>

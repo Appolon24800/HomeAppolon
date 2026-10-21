@@ -1,0 +1,28 @@
+{
+  "series": {
+    "id": 7,
+    "title": "Example Series",
+    "tvdbId": 12345,
+    "seasons": [{"seasonNumber": 2, "monitored": true}]
+  },
+  "episode": {
+    "id": 12,
+    "seriesId": 7,
+    "seasonNumber": 2,
+    "episodeNumber": 3,
+    "title": "Example Episode",
+    "series": {"id": 7, "title": "Example Series"},
+    "episodeFile": {"id": 20, "size": 5000000000}
+  },
+  "episodes": [
+    {
+      "id": 12,
+      "seriesId": 7,
+      "seasonNumber": 2,
+      "episodeNumber": 3,
+      "title": "Example Episode",
+      "series": {"id": 7, "title": "Example Series"},
+      "episodeFile": {"id": 20, "size": 5000000000}
+    }
+  ]
+}

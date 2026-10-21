@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "source": "IndexerStatusCheck",
+    "type": "error",
+    "message": "Indexer example-indexer has been disabled due to failures",
+    "wikiUrl": "https://wiki.servarr.com/sonarr/system#indexers-removed-due-to-failures"
+  },
+  {
+    "id": 2,
+    "source": "UpdateCheck",
+    "type": "notice",
+    "message": "New update is available",
+    "wikiUrl": "https://wiki.servarr.com/sonarr/system#update-check"
+  }
+]

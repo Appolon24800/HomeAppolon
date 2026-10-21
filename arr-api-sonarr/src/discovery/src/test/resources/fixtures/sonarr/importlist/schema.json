@@ -1,0 +1,29 @@
+[
+  {
+    "id": 0,
+    "name": "string",
+    "implementationName": "string",
+    "implementation": "string",
+    "configContract": "string",
+    "infoLink": "string",
+    "presets": [
+      {
+        "id": 0,
+        "name": "string",
+        "implementation": "string",
+        "listType": "other",
+        "enableAutomaticAdd": true,
+        "searchForMissingEpisodes": true,
+        "shouldMonitor": "all",
+        "monitorNewItems": "all",
+        "rootFolderPath": "string",
+        "qualityProfileId": 1,
+        "seriesType": "standard",
+        "seasonFolder": true,
+        "listOrder": 1,
+        "minRefreshInterval": "01:00:00",
+        "tagExisting": "none"
+      }
+    ]
+  }
+]

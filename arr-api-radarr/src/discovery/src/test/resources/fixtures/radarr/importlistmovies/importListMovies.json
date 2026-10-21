@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "title": null,
+    "sortTitle": null,
+    "originalLanguage": {
+      "id": 1,
+      "name": null
+    },
+    "status": "tba",
+    "overview": null,
+    "inCinemas": null,
+    "physicalRelease": null,
+    "digitalRelease": null,
+    "images": null,
+    "website": null,
+    "remotePoster": null,
+    "year": 1,
+    "youTubeTrailerId": null,
+    "studio": null,
+    "runtime": 1,
+    "imdbId": null,
+    "tmdbId": 1,
+    "folder": null,
+    "certification": null,
+    "popularity": 1.0,
+    "genres": null,
+    "ratings": {
+      "imdb": {
+        "votes": 1,
+        "value": 1.0,
+        "type": "user"
+      },
+      "tmdb": {
+        "votes": 1,
+        "value": 1.0,
+        "type": "user"
+      },
+      "metacritic": {
+        "votes": 1,
+        "value": 1.0,
+        "type": "user"
+      },
+      "rottenTomatoes": {
+        "votes": 1,
+        "value": 1.0,
+        "type": "user"
+      },
+      "trakt": {
+        "votes": 1,
+        "value": 1.0,
+        "type": "user"
+      }
+    },
+    "collection": {
+      "id": 1,
+      "title": null,
+      "cleanTitle": null,
+      "sortTitle": null,
+      "tmdbId": 1,
+      "overview": null,
+      "monitored": false,
+      "qualityProfileId": 1,
+      "rootFolderPath": null,
+      "searchOnAdd": false,
+      "minimumAvailability": "tba",
+      "lastInfoSync": null,
+      "images": null,
+      "added": "2026-01-01T00:00:00Z",
+      "movies": null,
+      "tags": null
+    },
+    "isExcluded": false,
+    "isExisting": false,
+    "isTrending": false,
+    "isPopular": false,
+    "isRecommendation": false,
+    "lists": null
+  }
+]

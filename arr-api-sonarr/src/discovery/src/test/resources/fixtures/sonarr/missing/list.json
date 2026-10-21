@@ -1,0 +1,21 @@
+{
+  "page": 1,
+  "pageSize": 10,
+  "sortKey": null,
+  "sortDirection": "default",
+  "totalRecords": 1,
+  "records": [
+    {
+      "seriesId": 1,
+      "seasonNumber": 1,
+      "episodeNumber": 1,
+      "title": "string",
+      "airDate": "2026-01-01",
+      "airDateUtc": "2026-01-01T00:00:00Z",
+      "overview": "string",
+      "hasFile": false,
+      "monitored": true,
+      "id": 1
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "seriesId": null,
+    "episodeId": null,
+    "seasonNumber": null,
+    "series": {},
+    "episode": {},
+    "languages": null,
+    "quality": {
+      "quality": {
+        "id": 1,
+        "name": null,
+        "source": "unknown",
+        "resolution": 1
+      },
+      "revision": {
+        "version": 1,
+        "real": 1,
+        "isRepack": false
+      }
+    },
+    "customFormats": null,
+    "customFormatScore": 1,
+    "size": 1.0,
+    "title": null,
+    "estimatedCompletionTime": null,
+    "added": null,
+    "status": "unknown",
+    "trackedDownloadStatus": "ok",
+    "trackedDownloadState": "downloading",
+    "statusMessages": null,
+    "errorMessage": null,
+    "downloadId": null,
+    "protocol": "unknown",
+    "downloadClient": null,
+    "downloadClientHasPostImportCategory": false,
+    "indexer": null,
+    "outputPath": null,
+    "episodeHasFile": false,
+    "sizeleft": 1.0,
+    "timeleft": null
+  }
+]

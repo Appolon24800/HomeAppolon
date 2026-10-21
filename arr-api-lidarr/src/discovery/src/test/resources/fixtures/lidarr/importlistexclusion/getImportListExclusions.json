@@ -1,0 +1,9 @@
+[{
+  "id": 1,
+  "foreignId": "b10bbbfc-cf9e-42e0-be17-e2c3e1edf222",
+  "artistName": "Example Artist"
+}, {
+  "id": 2,
+  "foreignId": "0c6a8f4e-b7bf-4c1f-9994-5a1a4e1a1a1a",
+  "artistName": "Other Artist"
+}]

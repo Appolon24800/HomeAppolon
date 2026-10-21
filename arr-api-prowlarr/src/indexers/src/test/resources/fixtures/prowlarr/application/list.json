@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "name": "Specarr",
+    "implementationName": "Specarr",
+    "implementation": "Specarr",
+    "configContract": "SpecarrSettings",
+    "tags": [1],
+    "syncLevel": "fullSync"
+  },
+  {
+    "id": 2,
+    "name": "Second Specarr",
+    "implementationName": "Second Specarr",
+    "implementation": "SecondSpecarr",
+    "configContract": "SecondSpecarrSettings",
+    "tags": [],
+    "syncLevel": "addOnly"
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "id": 3,
+  "name": "No obfuscated releases",
+  "enabled": true,
+  "required": null,
+  "ignored": "obfuscated",
+  "airDateRestriction": false,
+  "airDateGracePeriod": 0,
+  "allowSeasonPackWithoutAllEpisodesAired": false,
+  "indexerId": 0,
+  "tags": null,
+  "excludedTags": null
+}

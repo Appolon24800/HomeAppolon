@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared connect strings -->
+
+    <!-- Indexers -->
+    <string name="arr_sonarr_indexers_option_minutes_support">Minutes</string>
+    <string name="arr_sonarr_indexers_option_days_support">Days</string>
+    <string name="arr_sonarr_indexers_option_megabytes_support">Megabytes, 0 is unlimited</string>
+    <string name="arr_sonarr_indexers_option_minimum_minutes_support">Minutes, 0 disables RSS</string>
+    <string name="arr_sonarr_indexer_season_search_age">Season search maximum single episode age</string>
+    <string name="arr_sonarr_indexer_season_search_age_support">Minutes; 0 searches the whole season</string>
+
+    <!-- Download clients -->
+
+    <!-- Remote path mappings -->
+    <string name="arr_sonarr_paths_section">Mappings</string>
+
+    <!-- Import lists -->
+    <string name="arr_sonarr_lists_cd_preview">Preview what the lists will sync</string>
+    <string name="arr_sonarr_lists_empty_message">Add an import list to discover series automatically.</string>
+    <string name="arr_sonarr_lists_auto">Automatic add</string>
+    <string name="arr_sonarr_lists_preview_empty">No configured lists to preview.</string>
+    <string name="arr_sonarr_lists_preview_summary">%1$d lists will run on the next sync</string>
+    <string name="arr_sonarr_lists_preview_sync_level">Series leaving the lists: %1$s</string>
+    <string name="arr_sonarr_lists_preview_auto_add">Added automatically</string>
+    <string name="arr_sonarr_lists_preview_manual_add">Added manually</string>
+    <string name="arr_sonarr_lists_preview_monitor">Monitor %1$s</string>
+    <string name="arr_sonarr_lists_preview_quality_profile">Quality profile %1$d</string>
+    <string name="arr_sonarr_lists_preview_exclusions">%1$d series are excluded from syncs</string>
+    <string name="arr_sonarr_lists_preview_sync_now">Sync now</string>
+    <string name="arr_sonarr_lists_level_log_only">Log only</string>
+    <string name="arr_sonarr_lists_level_keep_and_unmonitor">Keep and unmonitor</string>
+    <string name="arr_sonarr_lists_level_keep_and_tag">Keep and tag</string>
+    <string name="arr_sonarr_lists_option_sync_level_support">What happens to series that leave the lists</string>
+    <string name="arr_sonarr_list_automatic_add">Add series found on this list automatically</string>
+    <string name="arr_sonarr_list_search_for_missing">Search for missing episodes on add</string>
+    <string name="arr_sonarr_list_season_folder">Create season folders</string>
+    <string name="arr_sonarr_list_monitor">Monitor strategy</string>
+    <string name="arr_sonarr_list_monitor_new_items">Monitor new items</string>
+    <string name="arr_sonarr_list_series_type">Series type</string>
+    <string name="arr_sonarr_list_quality_profile">Quality profile id</string>
+    <string name="arr_sonarr_list_quality_profile_support">The numeric id shown in Settings, Quality</string>
+
+    <!-- Import list exclusions -->
+    <string name="arr_sonarr_exclusions_cd_delete">Stop excluding %1$s</string>
+    <string name="arr_sonarr_exclusions_empty_message">Excluded series never come back from a list sync.</string>
+    <string name="arr_sonarr_exclusions_section">Exclusions</string>
+    <string name="arr_sonarr_exclusions_title_label">Series title</string>
+    <string name="arr_sonarr_exclusions_tvdb_label">TVDb id</string>
+    <string name="arr_sonarr_exclusions_tvdb_support">The TVDb series id the list reports</string>
+    <string name="arr_sonarr_exclusions_tvdb_value">TVDb %1$d</string>
+
+    <!-- Connect notifications -->
+    <string name="arr_sonarr_notification_event_import_complete">On import complete</string>
+    <string name="arr_sonarr_notification_event_series_added">On series added</string>
+    <string name="arr_sonarr_notification_event_series_delete">On series delete</string>
+    <string name="arr_sonarr_notification_event_file_delete">On episode file delete</string>
+    <string name="arr_sonarr_notification_event_file_delete_upgrade">On episode file delete for upgrade</string>
+
+    <!-- Metadata consumers -->
+</resources>

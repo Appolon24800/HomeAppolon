@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="arr_radarr_history_movie_query_hint">Filter by movie or release name</string>
+</resources>

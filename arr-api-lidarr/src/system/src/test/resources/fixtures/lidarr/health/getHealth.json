@@ -1,0 +1,9 @@
+[
+  {
+    "id": 1,
+    "source": "DownloadClientCheck",
+    "type": "warning",
+    "message": "Unable to communicate with download client",
+    "wikiUrl": "https://wiki.servarr.com/lidarr/system#download-client"
+  }
+]

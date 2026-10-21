@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Wanted (missing + cutoff unmet) -->
+    <string name="arr_radarr_wanted_empty_missing_message">Every monitored movie has a file.</string>
+    <string name="arr_radarr_wanted_empty_cutoff_message">No movie is waiting for a better quality file.</string>
+    <string name="arr_radarr_wanted_cd_search_all">Search for every movie listed</string>
+
+    <!-- Filters -->
+    <string name="arr_radarr_wanted_filter_profile_option">%1$s</string>
+
+    <!-- Snackbar outcomes -->
+    <string name="arr_radarr_wanted_msg_search_started_many">Search started for %1$d movies</string>
+    <string name="arr_radarr_wanted_msg_search_queued_many">You\'re offline. Searches for %1$d movies will run when the connection returns.</string>
+</resources>

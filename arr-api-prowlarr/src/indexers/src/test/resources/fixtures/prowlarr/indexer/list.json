@@ -1,0 +1,45 @@
+[
+  {
+    "id": 1,
+    "name": "Spec Indexer",
+    "implementationName": "Spec Newznab",
+    "implementation": "Newznab",
+    "configContract": "NewznabSettings",
+    "enable": true,
+    "supportsRss": true,
+    "supportsSearch": true,
+    "appProfileId": 1,
+    "protocol": "usenet",
+    "privacy": "semiPrivate",
+    "priority": 25,
+    "tags": [1, 2],
+    "added": "2024-01-15T10:30:00Z",
+    "capabilities": {
+      "id": 1,
+      "limitsMax": 100,
+      "limitsDefault": 100,
+      "categories": [],
+      "supportsRawSearch": true,
+      "searchParams": ["q"],
+      "tvSearchParams": ["q"],
+      "movieSearchParams": ["q"],
+      "musicSearchParams": ["q"],
+      "bookSearchParams": ["q"]
+    }
+  },
+  {
+    "id": 2,
+    "name": "Spec Tracker",
+    "implementationName": "Spec Torrent Tracker",
+    "implementation": "SpecTracker",
+    "configContract": "SpecTrackerSettings",
+    "enable": false,
+    "supportsRss": false,
+    "supportsSearch": true,
+    "appProfileId": 2,
+    "protocol": "torrent",
+    "privacy": "private",
+    "priority": 50,
+    "tags": []
+  }
+]
