@@ -4,6 +4,7 @@ import dev.appolon.homelab.arr.core.EntityType
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.ArrDataJson
 import dev.appolon.homelab.arr.data.EntityStore
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -28,6 +29,7 @@ import kotlinx.serialization.json.Json
 class SqliteEntityStore internal constructor(
     private val db: ArrDatabase,
     private val json: Json = ArrDataJson,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : EntityStore {
 
     private val writeTick = MutableSharedFlow<Unit>(
@@ -60,7 +62,7 @@ class SqliteEntityStore internal constructor(
         fetchedAtMillis: Long,
     ) {
         writeMutex.withLock {
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 db.inTransaction {
                     values.forEach { (id, value) ->
                         db.execute(
@@ -84,7 +86,7 @@ class SqliteEntityStore internal constructor(
         serverId: ServerId,
         type: EntityType,
         serializer: KSerializer<T>,
-    ): List<T> = withContext(Dispatchers.IO) {
+    ): List<T> = withContext(ioDispatcher) {
         db.query(EntitySql.SELECT_BY_SCOPE, listOf(serverId.value, type.value))
             .map { row -> json.decodeFromString(serializer, EntityRow(row).json) }
     }
@@ -94,7 +96,7 @@ class SqliteEntityStore internal constructor(
         type: EntityType,
         id: String,
         serializer: KSerializer<T>,
-    ): T? = withContext(Dispatchers.IO) {
+    ): T? = withContext(ioDispatcher) {
         db.query(EntitySql.SELECT_ONE, listOf(serverId.value, type.value, id))
             .firstOrNull()
             ?.let { json.decodeFromString(serializer, it[0] as String) }
@@ -102,7 +104,7 @@ class SqliteEntityStore internal constructor(
 
     override suspend fun delete(serverId: ServerId, type: EntityType, id: String) {
         writeMutex.withLock {
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 db.execute(EntitySql.DELETE_ONE, listOf(serverId.value, type.value, id))
             }
         }
@@ -111,7 +113,7 @@ class SqliteEntityStore internal constructor(
 
     override suspend fun deleteAll(serverId: ServerId, type: EntityType?) {
         writeMutex.withLock {
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 val args = listOfNotNull(serverId.value, type?.value)
                 db.execute(EntitySql.deleteAllFor(type?.value), args)
             }
@@ -120,7 +122,7 @@ class SqliteEntityStore internal constructor(
     }
 
     override suspend fun lastFetchedAt(serverId: ServerId, type: EntityType): Long? =
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             db.query(EntitySql.MAX_FETCHED_AT, listOf(serverId.value, type.value))
                 .firstOrNull()
                 ?.get(0) as? Long
@@ -146,7 +148,7 @@ class SqliteEntityStore internal constructor(
         fetchedAtMillis: Long,
     ) {
         writeMutex.withLock {
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 db.execute(
                     EntitySql.UPSERT,
                     listOf(serverId.value, type.value, id, encoded, fetchedAtMillis),

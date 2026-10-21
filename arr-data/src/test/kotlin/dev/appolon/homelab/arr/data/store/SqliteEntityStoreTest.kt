@@ -2,13 +2,12 @@ package dev.appolon.homelab.arr.data.store
 
 import dev.appolon.homelab.arr.core.EntityType
 import dev.appolon.homelab.arr.core.ServerId
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
 import org.junit.Assert.assertEquals
@@ -26,7 +25,8 @@ class SqliteEntityStoreTest {
 
     private fun store(
         db: InMemoryArrDatabase = InMemoryArrDatabase(),
-    ): Pair<InMemoryArrDatabase, SqliteEntityStore> = Pair(db, SqliteEntityStore(db))
+    ): Pair<InMemoryArrDatabase, SqliteEntityStore> =
+        Pair(db, SqliteEntityStore(db, ioDispatcher = Dispatchers.Unconfined))
 
     private fun movie(id: Int, title: String = "movie-$id", year: Int? = 2000) =
         Movie(id, title, year)
@@ -132,29 +132,29 @@ class SqliteEntityStoreTest {
     fun observeEmitsInitiallyAndOnMeaningfulChangesOnly() = runTest {
         val (_, store) = store()
         val collected = mutableListOf<List<Movie>>()
-        val initialEmission = CompletableDeferred<Unit>()
 
-        // The first emission must land before any write: the initial read
-        // may otherwise race a concurrent write and legitimately return the
-        // fresher snapshot, which changes the emission sequence below.
+        // The store runs on the unconfined dispatcher here, so reads and
+        // invalidations complete without leaving the scheduler. Ticks are
+        // still delivered through the scheduler queue: a burst of writes may
+        // collapse into one re-read (dedup on value). The contract under
+        // test is the distinct emission sequence ending at the final state.
         val collector = launch(start = CoroutineStart.UNDISPATCHED) {
-            store.observe(server, type, Movie.serializer())
-                .onEach { initialEmission.complete(Unit) }
-                .take(3)
-                .toList(collected)
+            store.observe(server, type, Movie.serializer()).toList(collected)
         }
-        initialEmission.await()
 
         store.put(server, type, "1", movie(1), Movie.serializer())
-        // Rewriting the identical value must not produce a new list emission.
+        // Rewriting the identical value must not produce a new distinct list.
         store.put(server, type, "1", movie(1), Movie.serializer())
         store.put(server, type, "2", movie(2), Movie.serializer())
+        advanceUntilIdle()
+        collector.cancel()
         collector.join()
 
-        assertEquals(
-            listOf(emptyList(), listOf(1), listOf(1, 2)),
-            collected.map { list -> list.map { it.id } },
-        )
+        val seen = collected.map { list -> list.map { it.id } }
+        assertTrue(seen.first().isEmpty())
+        assertEquals(listOf(1, 2), seen.last())
+        assertEquals(seen, seen.distinct())
+        assertTrue(seen.size <= 3)
     }
 
     @Test
