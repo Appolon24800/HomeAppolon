@@ -1,5 +1,9 @@
 package dev.appolon.homelab.arr
 
+import dev.appolon.homelab.arr.net.ProxyConfig
+import dev.appolon.homelab.arr.servers.net.QueuedActionExecutor
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import dev.appolon.homelab.arr.feature.sonarr.SonarrPollAdapter
 import dev.appolon.homelab.arr.feature.radarr.RadarrPollAdapter
 import dev.appolon.homelab.arr.feature.prowlarr.ProwlarrPollAdapter
@@ -90,11 +94,30 @@ object ArrBootstrap {
     @Keep
     @JvmStatic
     fun registerSyncAdaptersForColdStart(context: Context) {
+        val coldGraph = SyncBootstrap.dataGraph(context)
+        val coldScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         registerDefaultSyncAdapters(
-            graph = SyncBootstrap.dataGraph(context),
-            clientFactory = DefaultArrClientFactory(),
+            graph = coldGraph,
+            clientFactory = DefaultArrClientFactory(
+                globalProxy = globalProxySnapshot(coldGraph, coldScope),
+            ),
         )
     }
+}
+
+
+/**
+ * Cheap cached snapshot of the global default proxy: a collector keeps a
+ * StateFlow warm and the factory's non-suspend provider reads its value, so
+ * proxy resolution costs nothing per request while changes still rebuild
+ * cached clients through the factory's fingerprint.
+ */
+private fun globalProxySnapshot(graph: ArrDataGraph, scope: CoroutineScope): () -> ProxyConfig? {
+    val snapshot = MutableStateFlow<ProxyConfig?>(null)
+    scope.launch {
+        runCatching { graph.settings.observeDefaultProxy().collect { snapshot.value = it } }
+    }
+    return { snapshot.value }
 }
 
 /**
@@ -140,15 +163,34 @@ internal class ArrRuntime(context: Context) {
     /** Switcher display data, kept live from the server registry. */
     val shellServers: MutableStateFlow<List<ShellServer>> get() = wiring.shellServers
 
+    private val connectivity = connectivityFlow(context)
+
     private val live = LiveConnectionManager(
         scope = scope,
-        connectivity = connectivityFlow(context),
+        connectivity = connectivity,
         specs = { graph.registry.servers().mapNotNull(::liveSpecOf) },
         clientFactory = clientFactory,
     )
 
     /** Every live event from every server; the wiring scopes it per feature. */
     val liveEvents: SharedFlow<ArrEvent> get() = live.events
+
+    init {
+        // Reconnect = replay time: whenever connectivity returns, drain the
+        // offline action queue once for every registered server.
+        scope.launch {
+            connectivity
+                .drop(1) // ignore the initial state emission
+                .filter { it }
+                .collect {
+                    runCatching {
+                        graph.actionQueue.replay { action ->
+                            QueuedActionExecutor(graph.registry, graph.secrets).execute(action)
+                        }
+                    }
+                }
+        }
+    }
 
     init {
         // Background sync adapters: one per app type, sharing the graph and client factory.
