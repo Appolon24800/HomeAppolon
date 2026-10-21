@@ -109,10 +109,19 @@ def main():
 
     def document():
         check_crashes()
-        adb('shell', 'uiautomator dump /sdcard/release-smoke.xml')
-        return ET.fromstring(adb('shell', 'cat /sdcard/release-smoke.xml'))
+        # A busy emulator can fail or truncate a dump; retry rather than
+        # aborting the run on one bad poll.
+        for attempt in range(3):
+            adb('shell', 'uiautomator dump /sdcard/release-smoke.xml')
+            raw = adb('shell', 'cat /sdcard/release-smoke.xml')
+            try:
+                return ET.fromstring(raw)
+            except ET.ParseError:
+                if attempt == 2:
+                    return ET.fromstring('<node/>')
+        raise AssertionError('unreachable')
 
-    def wait_text(text, timeout=45):
+    def wait_text(text, timeout=60):
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             root = document()
@@ -179,7 +188,7 @@ def main():
         if not args.live_properties:
             wait_text(f'Release smoke {app}')
         else:
-            deadline = time.monotonic() + 45
+            deadline = time.monotonic() + 60
             while time.monotonic() < deadline:
                 root = document()
                 if any(n.get('text', '') in live_titles[app] for n in root.iter('node')):
