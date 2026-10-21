@@ -260,10 +260,12 @@ class BazarrSettingsRepository(
     /**
      * Runs one scheduled task now. Both the synced and queued paths mark the
      * cached row running so the scheduler reflects the request immediately.
+     * The queued descriptor carries the real `api/system/tasks` path the
+     * Retrofit API calls, so replay hits the same endpoint.
      */
     suspend fun runTaskNow(task: BazarrScheduledTask): ArrResult<SettingsWriteOutcome> = write(
         method = "POST",
-        path = "system/tasks?taskid=${task.jobId.urlEncoded()}",
+        path = "api/system/tasks?taskid=${task.jobId.urlEncoded()}",
         description = "Run scheduled task",
         call = { tasksApi.postSystemTasks(taskId = task.jobId) },
         optimistic = {
@@ -280,7 +282,7 @@ class BazarrSettingsRepository(
     /** Force starts, or moves a job to the top or bottom of its queue. */
     suspend fun jobAction(id: Int, action: String): ArrResult<SettingsWriteOutcome> = write(
         method = "POST",
-        path = "system/jobs?id=$id&action=${action.urlEncoded()}",
+        path = "api/system/jobs?id=$id&action=${action.urlEncoded()}",
         description = "Update job queue",
         call = { jobsApi.postSystemJobs(id = id, action = action) },
     )
@@ -291,7 +293,7 @@ class BazarrSettingsRepository(
      */
     suspend fun emptyJobQueue(queueName: String): ArrResult<SettingsWriteOutcome> = write(
         method = "PATCH",
-        path = "system/jobs?queueName=${queueName.urlEncoded()}",
+        path = "api/system/jobs?queueName=${queueName.urlEncoded()}",
         description = "Empty job queue",
         call = { jobsApi.patchSystemJobs(queueName = queueName) },
         optimistic = {
@@ -304,7 +306,7 @@ class BazarrSettingsRepository(
     /** Removes one job from its queue; the cached row drops immediately. */
     suspend fun deleteJob(job: BazarrJobRow): ArrResult<SettingsWriteOutcome> = write(
         method = "DELETE",
-        path = "system/jobs?id=${job.id}",
+        path = "api/system/jobs?id=${job.id}",
         description = "Delete queued job",
         call = { jobsApi.deleteSystemJobs(id = job.id) },
         optimistic = { store.delete(serverId, JOB_TYPE, job.id.toString()) },
@@ -313,7 +315,7 @@ class BazarrSettingsRepository(
     /** Starts a backup on the server; the file list fills in on next refresh. */
     suspend fun createBackup(): ArrResult<SettingsWriteOutcome> = write(
         method = "POST",
-        path = "system/backups",
+        path = "api/system/backups",
         description = "Create backup",
         call = { backupsApi.postSystemBackups() },
     )
@@ -321,7 +323,7 @@ class BazarrSettingsRepository(
     /** Restores one backup file; Bazarr restarts itself while applying it. */
     suspend fun restoreBackup(filename: String): ArrResult<SettingsWriteOutcome> = write(
         method = "PATCH",
-        path = "system/backups?filename=${filename.urlEncoded()}",
+        path = "api/system/backups?filename=${filename.urlEncoded()}",
         description = "Restore backup",
         call = { backupsApi.patchSystemBackups(filename = filename) },
     )
@@ -329,7 +331,7 @@ class BazarrSettingsRepository(
     /** Deletes one backup file; the cached row drops immediately. */
     suspend fun deleteBackup(backup: BazarrBackupFile): ArrResult<SettingsWriteOutcome> = write(
         method = "DELETE",
-        path = "system/backups?filename=${backup.filename.urlEncoded()}",
+        path = "api/system/backups?filename=${backup.filename.urlEncoded()}",
         description = "Delete backup",
         call = { backupsApi.deleteSystemBackups(filename = backup.filename) },
         optimistic = { store.delete(serverId, BACKUP_TYPE, backup.filename) },
@@ -341,7 +343,7 @@ class BazarrSettingsRepository(
      */
     suspend fun rotateLogs(): ArrResult<SettingsWriteOutcome> = write(
         method = "DELETE",
-        path = "system/logs",
+        path = "api/system/logs",
         description = "Rotate log files",
         call = { logsApi.deleteSystemLogs() },
         optimistic = { store.deleteAll(serverId, LOG_TYPE) },
@@ -377,7 +379,7 @@ class BazarrSettingsRepository(
     /** Task ids this server has queued run-now actions for. */
     fun queuedTaskIds(): Flow<Set<String>> = actionQueue.observe().map { pending ->
         pending.asSequence()
-            .filter { it.serverId == serverId && it.path.startsWith("system/tasks") }
+            .filter { it.serverId == serverId && it.path.startsWith("api/system/tasks") }
             .mapNotNull { paramValueOf(it.path, "taskid") }
             .toSet()
     }
@@ -388,7 +390,7 @@ class BazarrSettingsRepository(
             .filter { action ->
                 action.serverId == serverId &&
                     (action.method == "POST" || action.method == "DELETE") &&
-                    action.path.startsWith("system/jobs")
+                    action.path.startsWith("api/system/jobs")
             }
             .flatMap { idParamOf(it.path, "id").asSequence() }
             .toSet()
@@ -397,14 +399,16 @@ class BazarrSettingsRepository(
     /** Backup filenames this server has queued restore or delete actions for. */
     fun queuedBackupFiles(): Flow<Set<String>> = actionQueue.observe().map { pending ->
         pending.asSequence()
-            .filter { it.serverId == serverId && it.path.startsWith("system/backups") }
+            .filter { it.serverId == serverId && it.path.startsWith("api/system/backups") }
             .mapNotNull { paramValueOf(it.path, "filename") }
             .toSet()
     }
 
     /** True while a log rotation waits for replay. */
     fun queuedLogRotation(): Flow<Boolean> = actionQueue.observe().map { pending ->
-        pending.any { it.serverId == serverId && it.method == "DELETE" && it.path == "system/logs" }
+        pending.any {
+            it.serverId == serverId && it.method == "DELETE" && it.path == "api/system/logs"
+        }
     }
 
     // ------------------------------------------------------------ internals

@@ -4,6 +4,9 @@ import dev.appolon.homelab.arr.core.AppType
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.ArrDataJson
 import dev.appolon.homelab.arr.data.ArrServer
+import dev.appolon.homelab.arr.data.secrets.ArrSecrets
+import dev.appolon.homelab.arr.net.ProxyConfig
+import java.security.GeneralSecurityException
 import java.util.UUID
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
@@ -213,6 +216,73 @@ class DataStoreServerRegistryTest {
 
         assertEquals(created, decoded)
         assertTrue(blob.contains("\"type\":\"RADARR\""))
+    }
+
+    @Test
+    fun proxyPasswordIsEncryptedAtRestAndUsableOnRead() = runTest {
+        val store = FakePreferencesStore()
+        val secrets = FakeArrSecrets()
+        val registry = DataStoreServerRegistry(store, secrets)
+        val proxy = ProxyConfig(
+            type = ProxyConfig.Type.SOCKS5,
+            host = "proxy.lan",
+            port = 1080,
+            username = "u",
+            password = "plain-proxy-pass",
+        )
+
+        val created = registry.upsert(server().copy(proxy = proxy))
+
+        // The stored blob carries an envelope, not the plaintext password.
+        val blob = store.strings.getValue("arr_server_v1_${created.id.value}")
+        val atRest = ArrDataJson.decodeFromString(ArrServer.serializer(), blob)
+        assertEquals("v1:fake:plain-proxy-pass", atRest.proxy!!.password)
+
+        // Reads hand back usable credentials, and upsert returns the caller's row.
+        assertEquals("plain-proxy-pass", registry.byId(created.id)!!.proxy!!.password)
+        assertEquals("plain-proxy-pass", created.proxy!!.password)
+        assertEquals(1, secrets.encryptedPlaintexts.count { it == "plain-proxy-pass" })
+    }
+
+    @Test
+    fun proxyPasswordRewritesNeverDoubleEncrypt() = runTest {
+        val registry = registry()
+        val created = registry.upsert(
+            server().copy(
+                proxy = ProxyConfig(type = ProxyConfig.Type.HTTP, host = "p", port = 1, password = "pw"),
+            ),
+        )
+
+        val renamed = created.copy(name = "renamed")
+        registry.upsert(renamed)
+
+        assertEquals("pw", registry.byId(created.id)!!.proxy!!.password)
+    }
+
+    @Test
+    fun undecryptableProxyPasswordIsDroppedInsteadOfFailingReads() = runTest {
+        val store = FakePreferencesStore()
+        val writer = DataStoreServerRegistry(store, FakeArrSecrets())
+        val created = writer.upsert(
+            server().copy(
+                proxy = ProxyConfig(type = ProxyConfig.Type.HTTP, host = "p", port = 1, password = "pw"),
+            ),
+        )
+        // A different key cannot open the envelope written by the first one.
+        val rotatedReader = DataStoreServerRegistry(
+            store,
+            object : ArrSecrets {
+                override fun encrypt(plaintext: String): String = ArrSecrets.ENVELOPE_PREFIX + plaintext
+
+                override fun decrypt(envelope: String): String =
+                    throw GeneralSecurityException("key rotated")
+            },
+        )
+
+        val read = rotatedReader.byId(created.id)
+
+        assertEquals("p", read!!.proxy!!.host)
+        assertNull(read.proxy!!.password)
     }
 
     @Test

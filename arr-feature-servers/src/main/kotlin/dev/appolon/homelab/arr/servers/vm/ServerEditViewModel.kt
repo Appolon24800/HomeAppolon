@@ -14,6 +14,7 @@ import dev.appolon.homelab.arr.net.arrError
 import dev.appolon.homelab.arr.servers.logic.ServerForm
 import dev.appolon.homelab.arr.servers.net.ConnectionOutcome
 import dev.appolon.homelab.arr.servers.net.ConnectionTester
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -92,35 +93,40 @@ class ServerEditViewModel(
     /**
      * Runs one GET against the app-type status endpoint with whatever is
      * currently typed, reusing the stored proxy/trust when editing so the
-     * probe matches how real traffic would leave the device.
+     * probe matches how real traffic would leave the device. The form is
+     * snapshotted first and the probe runs once outside the state commit:
+     * [MutableStateFlow.update] retries its lambda on contention, so a
+     * network call inside it could fire twice.
      */
     fun testConnection() {
-        val form = _state.value.form
+        val current = _state.value
+        val form = current.form
         if (form.parsedUrl() == null) {
             _state.update { it.copy(showErrors = true) }
             return
         }
+        val endpoint = ServerEndpoint(
+            serverId = TEST_ID,
+            baseUrl = ServerEndpoint.normalizeBaseUrl(form.baseUrl),
+            apiKey = form.apiKey.trim(),
+            basicAuthUser = form.basicAuthUser.trim().takeIf { it.isNotEmpty() },
+            basicAuthPassword = form.basicAuthPassword.takeIf { it.isNotEmpty() },
+            proxy = current.original?.proxy,
+            trust = current.original?.trust ?: TrustSpec.System,
+        )
         viewModelScope.launch {
             _state.update { it.copy(testing = true) }
-            val original = _state.value.original
-            val endpoint = ServerEndpoint(
-                serverId = TEST_ID,
-                baseUrl = ServerEndpoint.normalizeBaseUrl(form.baseUrl),
-                apiKey = form.apiKey.trim(),
-                basicAuthUser = form.basicAuthUser.trim().takeIf { it.isNotEmpty() },
-                basicAuthPassword = form.basicAuthPassword.takeIf { it.isNotEmpty() },
-                proxy = original?.proxy,
-                trust = original?.trust ?: TrustSpec.System,
-            )
-            _state.update { s ->
-                s.copy(
-                    testing = false,
-                    test = when (val outcome = tester.test(endpoint, form.type)) {
-                        is ConnectionOutcome.Success -> TestState.Succeeded(outcome.version)
-                        is ConnectionOutcome.Failure -> TestState.Failed(outcome.error)
-                    },
-                )
+            val test = try {
+                when (val outcome = tester.test(endpoint, form.type)) {
+                    is ConnectionOutcome.Success -> TestState.Succeeded(outcome.version)
+                    is ConnectionOutcome.Failure -> TestState.Failed(outcome.error)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (t: Throwable) {
+                TestState.Failed(t.arrError())
             }
+            _state.update { s -> s.copy(testing = false, test = test) }
         }
     }
 

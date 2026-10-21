@@ -124,6 +124,9 @@ private fun SyncStatusContent(
     onRetryOne: (ActionId) -> Unit,
     onDiscard: (ActionId) -> Unit,
 ) {
+    // While a replay or single retry runs, per-card retries would race it
+    // and can double-execute the same action.
+    val retryEnabled = !state.working
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -140,6 +143,7 @@ private fun SyncStatusContent(
                     action = action,
                     onRetryOne = onRetryOne,
                     onDiscard = onDiscard,
+                    retryEnabled = retryEnabled,
                 )
             }
         }
@@ -162,6 +166,7 @@ private fun SyncStatusContent(
                     action = action,
                     onRetryOne = onRetryOne,
                     onDiscard = onDiscard,
+                    retryEnabled = retryEnabled,
                 )
             }
         }
@@ -173,6 +178,7 @@ private fun ActionCard(
     action: QueuedAction,
     onRetryOne: (ActionId) -> Unit,
     onDiscard: (ActionId) -> Unit,
+    retryEnabled: Boolean,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -212,7 +218,10 @@ private fun ActionCard(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                OutlinedButton(onClick = { onRetryOne(action.actionId) }) {
+                OutlinedButton(
+                    onClick = { onRetryOne(action.actionId) },
+                    enabled = retryEnabled,
+                ) {
                     Text(stringResource(R.string.arr_servers_sync_retry))
                 }
                 Spacer(Modifier.weight(1f))

@@ -184,7 +184,7 @@ class BazarrSettingsRepositoryTest {
 
         assertTrue((result as ArrResult.Ok).value is SettingsWriteOutcome.Queued)
         assertTrue(repo.observeTasks().first().single().running)
-        assertEquals("system/tasks?taskid=update_series", queue.pending().single().path)
+        assertEquals("api/system/tasks?taskid=update_series", queue.pending().single().path)
         assertEquals(setOf("update_series"), repo.queuedTaskIds().first())
     }
 
@@ -228,7 +228,7 @@ class BazarrSettingsRepositoryTest {
         assertTrue((result as ArrResult.Ok).value is SettingsWriteOutcome.Queued)
         assertTrue(repo.observeBackups().first().isEmpty())
         assertEquals(
-            "system/backups?filename=bazarr_backup.zip",
+            "api/system/backups?filename=bazarr_backup.zip",
             queue.pending().single().path,
         )
         assertEquals(setOf("bazarr_backup.zip"), repo.queuedBackupFiles().first())

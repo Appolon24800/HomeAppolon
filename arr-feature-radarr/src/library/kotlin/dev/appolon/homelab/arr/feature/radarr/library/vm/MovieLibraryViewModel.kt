@@ -26,6 +26,7 @@ import dev.appolon.homelab.arr.feature.radarr.library.data.toFilterState
 import dev.appolon.homelab.arr.net.arrError
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.time.Year
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -174,10 +175,19 @@ class MovieLibraryViewModel(
     fun refresh() {
         viewModelScope.launch {
             _state.update { it.copy(refreshing = true) }
-            when (val result = repository.refresh()) {
-                is ArrResult.Ok -> _state.update { it.copy(refreshing = false, loadError = null) }
-                is ArrResult.Err ->
-                    _state.update { it.copy(refreshing = false, loadError = result.error) }
+            // The whole repository operation is guarded, cache reads and
+            // writes included: a storage failure maps to the error LCE
+            // state instead of escaping viewModelScope.
+            runGuarded(
+                onError = { error ->
+                    _state.update { it.copy(refreshing = false, loadError = error) }
+                },
+            ) {
+                when (val result = repository.refresh()) {
+                    is ArrResult.Ok -> _state.update { it.copy(refreshing = false, loadError = null) }
+                    is ArrResult.Err ->
+                        _state.update { it.copy(refreshing = false, loadError = result.error) }
+                }
             }
         }
     }
@@ -221,8 +231,12 @@ class MovieLibraryViewModel(
         if (trimmed.isEmpty()) return
         val filter = newSavedFilter(trimmed, _state.value.filterState)
         viewModelScope.launch {
-            savedFilters.save(filter)
-            _state.update { it.copy(activeSavedFilterId = filter.id) }
+            runGuarded(onError = { error ->
+                _state.update { it.copy(message = LibraryMessage.WriteFailed(error)) }
+            }) {
+                savedFilters.save(filter)
+                _state.update { it.copy(activeSavedFilterId = filter.id) }
+            }
         }
     }
 
@@ -289,19 +303,23 @@ class MovieLibraryViewModel(
             moveFiles = form.moveFiles,
         )
         viewModelScope.launch {
-            when (val outcome = repository.editMovies(editor)) {
-                is ArrResult.Ok -> _state.update { s ->
-                    s.copy(
-                        editorForm = null,
-                        message = if (outcome.value is WriteOutcome.Queued) {
-                            LibraryMessage.EditQueued
-                        } else {
-                            LibraryMessage.EditSynced
-                        },
-                    )
-                }
-                is ArrResult.Err -> _state.update { s ->
-                    s.copy(message = LibraryMessage.WriteFailed(outcome.error))
+            runGuarded(onError = { error ->
+                _state.update { s -> s.copy(message = LibraryMessage.WriteFailed(error)) }
+            }) {
+                when (val outcome = repository.editMovies(editor)) {
+                    is ArrResult.Ok -> _state.update { s ->
+                        s.copy(
+                            editorForm = null,
+                            message = if (outcome.value is WriteOutcome.Queued) {
+                                LibraryMessage.EditQueued
+                            } else {
+                                LibraryMessage.EditSynced
+                            },
+                        )
+                    }
+                    is ArrResult.Err -> _state.update { s ->
+                        s.copy(message = LibraryMessage.WriteFailed(outcome.error))
+                    }
                 }
             }
         }
@@ -317,20 +335,24 @@ class MovieLibraryViewModel(
         _state.update { it.copy(confirmDelete = false) }
         if (targets.isEmpty()) return
         viewModelScope.launch {
-            when (val outcome = repository.deleteMovies(targets, deleteFiles, addImportExclusion)) {
-                is ArrResult.Ok -> _state.update { s ->
-                    s.copy(
-                        selectMode = false,
-                        selection = emptySet(),
-                        message = if (outcome.value is WriteOutcome.Queued) {
-                            LibraryMessage.DeleteQueued
-                        } else {
-                            LibraryMessage.DeleteSynced
-                        },
-                    )
-                }
-                is ArrResult.Err -> _state.update { s ->
-                    s.copy(message = LibraryMessage.WriteFailed(outcome.error))
+            runGuarded(onError = { error ->
+                _state.update { s -> s.copy(message = LibraryMessage.WriteFailed(error)) }
+            }) {
+                when (val outcome = repository.deleteMovies(targets, deleteFiles, addImportExclusion)) {
+                    is ArrResult.Ok -> _state.update { s ->
+                        s.copy(
+                            selectMode = false,
+                            selection = emptySet(),
+                            message = if (outcome.value is WriteOutcome.Queued) {
+                                LibraryMessage.DeleteQueued
+                            } else {
+                                LibraryMessage.DeleteSynced
+                            },
+                        )
+                    }
+                    is ArrResult.Err -> _state.update { s ->
+                        s.copy(message = LibraryMessage.WriteFailed(outcome.error))
+                    }
                 }
             }
         }
@@ -346,18 +368,22 @@ class MovieLibraryViewModel(
         val scoped = _state.value.takeIf { it.selectMode && it.selection.isNotEmpty() }
             ?.selection?.sorted()
         viewModelScope.launch {
-            when (val outcome = repository.runCommand(command, scoped)) {
-                is ArrResult.Ok -> _state.update { s ->
-                    s.copy(
-                        message = if (outcome.value is WriteOutcome.Queued) {
-                            LibraryMessage.CommandQueued
-                        } else {
-                            LibraryMessage.CommandStarted
-                        },
-                    )
-                }
-                is ArrResult.Err -> _state.update { s ->
-                    s.copy(message = LibraryMessage.WriteFailed(outcome.error))
+            runGuarded(onError = { error ->
+                _state.update { s -> s.copy(message = LibraryMessage.WriteFailed(error)) }
+            }) {
+                when (val outcome = repository.runCommand(command, scoped)) {
+                    is ArrResult.Ok -> _state.update { s ->
+                        s.copy(
+                            message = if (outcome.value is WriteOutcome.Queued) {
+                                LibraryMessage.CommandQueued
+                            } else {
+                                LibraryMessage.CommandStarted
+                            },
+                        )
+                    }
+                    is ArrResult.Err -> _state.update { s ->
+                        s.copy(message = LibraryMessage.WriteFailed(outcome.error))
+                    }
                 }
             }
         }
@@ -366,9 +392,28 @@ class MovieLibraryViewModel(
     fun consumeMessage() = _state.update { it.copy(message = null) }
 
     private suspend fun refreshProfiles() {
-        when (val result = repository.qualityProfiles()) {
-            is ArrResult.Ok -> _state.update { it.copy(qualityProfiles = result.value) }
-            is ArrResult.Err -> Unit
+        runGuarded(
+            onError = { error -> _state.update { it.copy(loadError = error) } },
+        ) {
+            when (val result = repository.qualityProfiles()) {
+                is ArrResult.Ok -> _state.update { it.copy(qualityProfiles = result.value) }
+                is ArrResult.Err -> Unit
+            }
+        }
+    }
+
+    /**
+     * Runs one repository or store operation, mapping every non-cancellation
+     * failure to [onError]; cache and network failures never escape
+     * [viewModelScope].
+     */
+    private suspend fun runGuarded(onError: (ArrError) -> Unit, block: suspend () -> Unit) {
+        try {
+            block()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (t: Throwable) {
+            onError(t.arrError())
         }
     }
 

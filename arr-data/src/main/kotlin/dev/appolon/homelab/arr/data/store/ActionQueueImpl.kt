@@ -8,6 +8,7 @@ import dev.appolon.homelab.arr.data.EntityStore
 import dev.appolon.homelab.arr.data.QueuedAction
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
 
 /**
  * [ActionQueue] persisted through the [EntityStore] under a synthetic server
@@ -25,6 +26,9 @@ class ActionQueueImpl(
     private val maxAttempts: Int = DEFAULT_MAX_ATTEMPTS,
 ) : ActionQueue {
 
+    /** Serializes replays queue-wide; see [replay]. */
+    private val replayGate = Mutex()
+
     override suspend fun enqueue(action: QueuedAction) {
         store.put(QUEUE_SCOPE, QUEUE_TYPE, action.actionId.value, action, QueuedAction.serializer())
     }
@@ -37,35 +41,44 @@ class ActionQueueImpl(
             .map { it.oldestFirst() }
 
     override suspend fun replay(executor: suspend (QueuedAction) -> Boolean): Pair<Int, Int> {
-        var succeeded = 0
-        var failedTerminally = 0
-        pending().forEach { action ->
-            if (executor(action)) {
-                remove(action.actionId)
-                succeeded++
-            } else {
-                val bumped = action.copy(
-                    attempts = action.attempts + 1,
-                    lastError = "replay attempt ${action.attempts + 1} failed",
-                )
-                if (bumped.attempts >= maxAttempts) {
-                    // Insert before delete so a crash between the two steps
-                    // can never lose the action.
-                    store.put(
-                        QUEUE_SCOPE, DEAD_TYPE, bumped.actionId.value, bumped,
-                        QueuedAction.serializer(),
-                    )
-                    store.delete(QUEUE_SCOPE, QUEUE_TYPE, bumped.actionId.value)
-                    failedTerminally++
+        // Single-flight: an automatic trigger and a manual retry running at
+        // the same time would execute the same action twice. A replay that
+        // is already draining the queue covers this caller's work, so the
+        // second entry reports no movement instead of racing.
+        if (!replayGate.tryLock()) return 0 to 0
+        try {
+            var succeeded = 0
+            var failedTerminally = 0
+            pending().forEach { action ->
+                if (executor(action)) {
+                    remove(action.actionId)
+                    succeeded++
                 } else {
-                    store.put(
-                        QUEUE_SCOPE, QUEUE_TYPE, bumped.actionId.value, bumped,
-                        QueuedAction.serializer(),
+                    val bumped = action.copy(
+                        attempts = action.attempts + 1,
+                        lastError = "replay attempt ${action.attempts + 1} failed",
                     )
+                    if (bumped.attempts >= maxAttempts) {
+                        // Insert before delete so a crash between the two steps
+                        // can never lose the action.
+                        store.put(
+                            QUEUE_SCOPE, DEAD_TYPE, bumped.actionId.value, bumped,
+                            QueuedAction.serializer(),
+                        )
+                        store.delete(QUEUE_SCOPE, QUEUE_TYPE, bumped.actionId.value)
+                        failedTerminally++
+                    } else {
+                        store.put(
+                            QUEUE_SCOPE, QUEUE_TYPE, bumped.actionId.value, bumped,
+                            QueuedAction.serializer(),
+                        )
+                    }
                 }
             }
+            return succeeded to failedTerminally
+        } finally {
+            replayGate.unlock()
         }
-        return succeeded to failedTerminally
     }
 
     override suspend fun remove(actionId: ActionId) {

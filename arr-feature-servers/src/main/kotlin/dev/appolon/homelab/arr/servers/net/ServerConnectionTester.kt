@@ -8,6 +8,7 @@ import dev.appolon.homelab.arr.net.DefaultArrClientFactory
 import dev.appolon.homelab.arr.net.ServerEndpoint
 import dev.appolon.homelab.arr.net.arrError
 import dev.appolon.homelab.arr.servers.logic.StatusEndpoint
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
@@ -37,25 +38,30 @@ class ServerConnectionTester(
 
     override suspend fun test(endpoint: ServerEndpoint, appType: AppType): ConnectionOutcome =
         withContext(Dispatchers.IO) {
-            val response = try {
+            // Response consumption (body.string) stays inside the try: a
+            // read failure mid-body is as much a failed probe as a failed
+            // execute.
+            try {
                 val request = Request.Builder()
                     .url(StatusEndpoint.urlFor(endpoint.baseUrl, appType))
                     .get()
                     .build()
-clientFactory.clientFor(endpoint.copy(serverId = PROBE_ID)).newCall(request)
+                clientFactory.clientFor(endpoint.copy(serverId = PROBE_ID))
+                    .newCall(request)
                     .execute()
+                    .use { r ->
+                        if (r.isSuccessful) {
+                            val body = r.body?.string().orEmpty()
+                            ConnectionOutcome.Success(StatusEndpoint.extractVersion(body))
+                        } else {
+                            ConnectionOutcome.Failure(r.arrError())
+                        }
+                    }
             } catch (t: Throwable) {
-                return@withContext ConnectionOutcome.Failure(t.arrError())
+                if (t is CancellationException) throw t
+                ConnectionOutcome.Failure(t.arrError())
             } finally {
                 clientFactory.invalidate(PROBE_ID)
-            }
-            response.use { r ->
-                if (r.isSuccessful) {
-                    val body = r.body?.string().orEmpty()
-                    ConnectionOutcome.Success(StatusEndpoint.extractVersion(body))
-                } else {
-                    ConnectionOutcome.Failure(r.arrError())
-                }
             }
         }
 

@@ -8,6 +8,7 @@ import dev.appolon.homelab.arr.data.ActionQueue
 import dev.appolon.homelab.arr.data.QueuedAction
 import dev.appolon.homelab.arr.net.arrError
 import dev.appolon.homelab.arr.ui.lce.LceState
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +25,10 @@ import kotlinx.coroutines.launch
  * "Retry now" runs one action through the injected executor (and removes it
  * on success without touching its attempt count), while "Retry all" goes
  * through the queue's own replay so its attempt and dead-letter bookkeeping
- * stays in one place.
+ * stays in one place. "Retry now" also resolves dead letters: they requeue
+ * with a fresh attempt budget before their immediate attempt. While any
+ * retry runs, [UiState.working] disables the retry buttons so a replay and
+ * a manual retry cannot double-execute the same action.
  */
 class SyncStatusViewModel(
     private val queue: ActionQueue,
@@ -95,13 +99,44 @@ class SyncStatusViewModel(
 
     /** Runs one action immediately; on success it leaves the queue, on failure it stays. */
     fun retryOne(actionId: ActionId) {
+        if (_state.value.working) return
         viewModelScope.launch {
-            val action = _state.value.pending.firstOrNull { it.actionId == actionId }
+            val current = _state.value
+            val deadAction = current.dead.firstOrNull { it.actionId == actionId }
+            val action = current.pending.firstOrNull { it.actionId == actionId }
+                ?: deadAction
                 ?: return@launch
             _state.update { it.copy(working = true) }
-            val succeeded = runCatching { executor(action) }.getOrDefault(false)
+            if (deadAction != null) {
+                // A dead letter requeues explicitly with a fresh attempt
+                // budget so later replays pick it up again; remove() also
+                // clears the dead-row copy, leaving exactly one entry.
+                try {
+                    queue.remove(actionId)
+                    queue.enqueue(deadAction.copy(attempts = 0, lastError = null))
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (t: Throwable) {
+                    _state.update { it.copy(working = false, loadError = t.arrError()) }
+                    return@launch
+                }
+            }
+            val succeeded = try {
+                executor(action)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (t: Throwable) {
+                false
+            }
             if (succeeded) {
-                runCatching { queue.remove(actionId) }
+                try {
+                    queue.remove(actionId)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (t: Throwable) {
+                    _state.update { it.copy(working = false, loadError = t.arrError()) }
+                    return@launch
+                }
             }
             _state.update { it.copy(working = false) }
             refresh()

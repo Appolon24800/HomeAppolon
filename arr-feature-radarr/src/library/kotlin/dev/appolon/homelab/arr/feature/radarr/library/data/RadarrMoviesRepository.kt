@@ -17,11 +17,17 @@ import dev.appolon.homelab.arr.data.QueuedAction
 import dev.appolon.homelab.arr.net.ArrJson
 import dev.appolon.homelab.arr.net.arrError
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import retrofit2.HttpException
 import retrofit2.Response
 
@@ -98,6 +104,10 @@ class RadarrMoviesRepository(
             MovieResource.serializer(),
             fetchedAtMillis = now(),
         )
+        // A successful refresh proves this server reachable, so queued
+        // library writes replay right here instead of waiting for the sync
+        // screen's manual retry.
+        replayQueuedActions()
         ArrResult.ok(Unit)
     }
 
@@ -213,7 +223,7 @@ class RadarrMoviesRepository(
         }
         val action = action(
             method = "POST",
-            path = "api/v3/command",
+            path = COMMAND_PATH,
             bodyJson = body,
             description = "Command ${command.wireName}",
         )
@@ -238,6 +248,86 @@ class RadarrMoviesRepository(
     /** Count of queued actions for this server, library wide indicator. */
     fun queuedCount(): Flow<Int> = actionQueue.observe().map { pending ->
         pending.count { it.serverId == serverId }
+    }
+
+    /**
+     * Replays this library's queued writes through the queue's own replay,
+     * so attempt counting and dead-lettering stay in one place. Runs only
+     * when every pending action belongs to this library: a foreign app's
+     * write must keep its attempt budget for the shared replay path instead
+     * of failing here and counting toward its dead-letter limit. Returns
+     * null when nothing was replayable.
+     */
+    suspend fun replayQueuedActions(): Pair<Int, Int>? = withContext(io) {
+        val queued = actionQueue.pending()
+        if (queued.isEmpty()) return@withContext null
+        if (queued.any { it.serverId != serverId || it.path !in REPLAYABLE_PATHS }) {
+            return@withContext null
+        }
+        try {
+            actionQueue.replay(::executeQueued)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (t: Throwable) {
+            null
+        }
+    }
+
+    /** Executes one of this repository's queued actions; false keeps it queued. */
+    private suspend fun executeQueued(action: QueuedAction): Boolean = try {
+        when {
+            action.method == "POST" && action.path == COMMAND_PATH -> replayCommand(action)
+
+            action.path == EDITOR_PATH -> replayEditor(action)
+
+            else -> false
+        }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (t: Throwable) {
+        false
+    }
+
+    /** Replays a queued Radarr command through the same runner the UI uses. */
+    private suspend fun replayCommand(action: QueuedAction): Boolean {
+        val body = ArrJson.parseToJsonElement(action.bodyJson.orEmpty()).jsonObject
+        val name = body["name"]?.jsonPrimitive?.contentOrNull ?: return false
+        val movieIds = body["movieIds"]
+            ?.jsonArray
+            ?.mapNotNull { it.jsonPrimitive.intOrNull }
+            ?.takeIf { it.isNotEmpty() }
+        return commandRunner.run(name, movieIds) is ArrResult.Ok
+    }
+
+    /** Replays a queued bulk edit or delete and reconciles the cache. */
+    private suspend fun replayEditor(action: QueuedAction): Boolean {
+        val editor = ArrJson.decodeFromString(
+            MovieEditorResource.serializer(),
+            action.bodyJson.orEmpty(),
+        )
+        when (action.method.uppercase()) {
+            "PUT" -> {
+                val response = movieEditorApi.update(editor)
+                if (!response.isSuccessful) return false
+                response.body().orEmpty().forEach { touched ->
+                    store.put(
+                        serverId, MOVIE_TYPE,
+                        touched.id.toString(), touched, MovieResource.serializer(),
+                    )
+                }
+                return true
+            }
+
+            "DELETE" -> {
+                movieEditorApi.delete(editor)
+                editor.movieIds.orEmpty().forEach { id ->
+                    store.delete(serverId, MOVIE_TYPE, id.toString())
+                }
+                return true
+            }
+
+            else -> return false
+        }
     }
 
     private suspend fun offlineOrErr(
@@ -309,6 +399,8 @@ class RadarrMoviesRepository(
         internal val MOVIE_TYPE = EntityType("radarr.movie")
         internal val PROFILE_TYPE = EntityType("radarr.qualityprofile")
         internal val EDITOR_PATH = "api/v3/movie/editor"
+        internal val COMMAND_PATH = "api/v3/command"
+        private val REPLAYABLE_PATHS = setOf(EDITOR_PATH, COMMAND_PATH)
 
         /** Shared library freshness limit. */
         const val MOVIE_TTL_MILLIS: Long = dev.appolon.homelab.arr.core.CacheTtl.LIBRARY
