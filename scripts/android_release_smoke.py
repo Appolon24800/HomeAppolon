@@ -118,7 +118,7 @@ def main():
             root = document()
             for node in root.iter('node'):
                 if text in (node.get('text', ''), node.get('content-desc', '')):
-                    return node
+                    return node, root
             time.sleep(0.3)
         (args.output / 'failure.png').write_bytes(adb('exec-out', 'screencap', '-p', binary=True))
         (args.output / 'failure.xml').write_text(ET.tostring(root, encoding='unicode'))
@@ -127,6 +127,24 @@ def main():
             (args.output / 'denied.json').write_text(json.dumps(Fixtures.denied))
         raise AssertionError(f'UI never displayed {text!r}')
 
+    def screen_height(root):
+        for node in root.iter('node'):
+            bounds = node.get('bounds', '')
+            if bounds == '[0,0][1080,2400]':
+                return int(re.findall(r'\d+', bounds)[3])
+        return None
+
+    def check_top_padding(node, root):
+        # One window inset band above the app bar is correct (cutout/
+        # status clearance). Two stacked insets left a dead band twice as
+        # tall before the ArrShell fix; a title starting lower than 10% of
+        # the screen means padding is being applied again.
+        height = screen_height(root) or 2400
+        top = int(re.findall(r'\d+', node.get('bounds'))[1])
+        assert top < height * 0.10, (
+            f'top bar title starts at {top}px of {height}px; '
+            'window insets are stacking again'
+        )
     def click(text):
         if text == 'Open settings':
             # With several servers, the settings button is at the end of the
@@ -144,7 +162,7 @@ def main():
                 x1, x2 = 0, width
                 adb('shell', 'input', 'swipe', str(int(x2 * 0.8)), str((y1 + y2) // 2),
                     str(int(x2 * 0.2)), str((y1 + y2) // 2), '300')
-        node = wait_text(text)
+        node, _ = wait_text(text)
         x1, y1, x2, y2 = map(int, re.findall(r'\d+', node.get('bounds')))
         adb('shell', 'input', 'tap', str((x1 + x2) // 2), str((y1 + y2) // 2))
 
@@ -156,7 +174,8 @@ def main():
             {'app': app, 'url': url, 'apikey': key},
         )
         adb('shell', 'am start -a android.intent.action.VIEW -d ' + shlex.quote(link))
-        wait_text('Series' if app == 'sonarr' else 'Movies')
+        title_node, root = wait_text('Series' if app == 'sonarr' else 'Movies')
+        check_top_padding(title_node, root)
         if not args.live_properties:
             wait_text(f'Release smoke {app}')
         else:

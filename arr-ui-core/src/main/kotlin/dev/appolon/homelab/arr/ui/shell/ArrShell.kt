@@ -2,6 +2,7 @@ package dev.appolon.homelab.arr.ui.shell
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -136,6 +137,12 @@ fun ArrShell(
 
     Scaffold(
         modifier = modifier,
+        // The shell adds no top bar, and every destination screen owns its
+        // own scaffold with a top app bar that clears the status bar and
+        // cutout. Default insets here would stack a second (or third) top
+        // inset onto the screen's own, leaving a dead band above the bar.
+        // The bottom switcher pads the navigation bar itself.
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             Surface(tonalElevation = 3.dp) {
                 ServerSwitcher(
