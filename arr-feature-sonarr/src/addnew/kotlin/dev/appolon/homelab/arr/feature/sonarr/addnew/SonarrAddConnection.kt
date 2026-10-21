@@ -79,6 +79,7 @@ class SonarrAddConnection(
             importListExclusionApi = SonarrDiscoveryApis.importListExclusion(retrofit),
             baseUrl = baseUrl,
             client = client,
+            imageClient = clientFactory.imageClientFor(endpoint),
         )
     }
 
@@ -109,14 +110,17 @@ class SonarrAddApis(
     val importListExclusionApi: ImportListExclusionApi,
     val baseUrl: String,
     val client: OkHttpClient,
+    /** Credential-free client for remote artwork; shares proxy and trust with [client]. */
+    val imageClient: OkHttpClient,
 ) {
     /**
-     * Coil loader riding the same authenticated OkHttp client as the API,
-     * required whenever a lookup result resolves to a local cover path. One
-     * instance per screen is enough; Coil deduplicates requests in flight.
+     * Coil loader for lookup result posters. Lookup results only ever carry
+     * remote art, so it rides the credential-free image client and the API
+     * key never travels to a third-party host. One instance per screen is
+     * enough; Coil deduplicates requests in flight.
      */
     fun imageLoader(context: Context): ImageLoader = ImageLoader.Builder(context)
-        .components { add(OkHttpNetworkFetcherFactory(client)) }
+        .components { add(OkHttpNetworkFetcherFactory(imageClient)) }
         .crossfade(true)
         .build()
 }

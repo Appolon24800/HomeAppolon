@@ -88,6 +88,7 @@ class RadarrAddNewConnection(
             commandRunner = OkHttpAddNewCommandRunner(client, baseUrl),
             baseUrl = baseUrl,
             client = client,
+            imageClient = clientFactory.imageClientFor(endpoint),
         )
     }
 
@@ -122,13 +123,16 @@ class RadarrAddNewApis(
     val commandRunner: AddNewCommandRunner,
     val baseUrl: String,
     val client: OkHttpClient,
+    /** Credential-free client for remote artwork; shares proxy and trust with [client]. */
+    val imageClient: OkHttpClient,
 ) {
     /**
-     * Coil loader whose calls ride the same authenticated OkHttp client as
-     * the API. Lookup and discovery posters are remote TMDB art, but the
-     * loader keeps every image on one connection path.
+     * Coil loader for lookup, discovery, and collection posters. Every URL
+     * it sees is remote TMDB art, so it rides the credential-free image
+     * client and the API key never travels to a third-party host. One
+     * instance per screen is enough; Coil deduplicates requests in flight.
      */
-    fun imageLoader(context: Context): ImageLoader = addNewImageLoader(context, client)
+    fun imageLoader(context: Context): ImageLoader = addNewImageLoader(context, imageClient)
 }
 
 /**
