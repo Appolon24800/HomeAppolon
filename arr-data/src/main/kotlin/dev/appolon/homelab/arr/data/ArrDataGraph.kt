@@ -38,7 +38,11 @@ class ArrDataGraph(
         DataStoreServerRegistry(preferencesStore, secrets)
     }
 
-    val settings: GlobalSettings by lazy { GlobalSettings(preferencesStore) }
+    val settings: GlobalSettings by lazy {
+        // Secrets wired so the global proxy password round-trips encrypted,
+        // matching the per-server registry behavior.
+        GlobalSettings(preferencesStore, secrets)
+    }
 
     private val databaseDelegate = lazy { PlatformArrDatabase.open(paths.database) }
 
