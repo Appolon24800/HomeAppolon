@@ -2,6 +2,9 @@ package dev.appolon.homelab.arr.data.store
 
 import dev.appolon.homelab.arr.core.EntityType
 import dev.appolon.homelab.arr.core.ServerId
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -129,18 +132,23 @@ class SqliteEntityStoreTest {
     fun observeEmitsInitiallyAndOnMeaningfulChangesOnly() = runTest {
         val (_, store) = store()
         val collected = mutableListOf<List<Movie>>()
+        val initialEmission = CompletableDeferred<Unit>()
 
-        val collector = launch {
-            store.observe(server, type, Movie.serializer()).take(3).toList(collected)
+        // The first emission must land before any write: the initial read
+        // may otherwise race a concurrent write and legitimately return the
+        // fresher snapshot, which changes the emission sequence below.
+        val collector = launch(start = CoroutineStart.UNDISPATCHED) {
+            store.observe(server, type, Movie.serializer())
+                .onEach { initialEmission.complete(Unit) }
+                .take(3)
+                .toList(collected)
         }
-        runCurrent()
+        initialEmission.await()
 
         store.put(server, type, "1", movie(1), Movie.serializer())
-        runCurrent()
         // Rewriting the identical value must not produce a new list emission.
         store.put(server, type, "1", movie(1), Movie.serializer())
         store.put(server, type, "2", movie(2), Movie.serializer())
-        runCurrent()
         collector.join()
 
         assertEquals(
