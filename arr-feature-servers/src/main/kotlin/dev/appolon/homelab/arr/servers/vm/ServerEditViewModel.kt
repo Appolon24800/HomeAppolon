@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.servers.vm
 
+import dev.appolon.homelab.arr.servers.PendingServerSetup
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.appolon.homelab.arr.core.ArrError
@@ -80,6 +81,23 @@ class ServerEditViewModel(
                 }.onFailure { t ->
                     _state.update { it.copy(loading = false, loadError = t.arrError()) }
                 }
+            }
+        } else {
+            // Deep-link prefill: the link already knows type, URL, and key,
+            // so the sheet opens ready and the connection test runs once.
+            val prefill = PendingServerSetup.consume()
+            if (prefill != null) {
+                _state.update {
+                    it.copy(
+                        form = ServerForm(
+                            name = prefill.appType.displayName,
+                            type = prefill.appType,
+                            baseUrl = prefill.baseUrl,
+                            apiKey = prefill.apiKey,
+                        ),
+                    )
+                }
+                testConnection()
             }
         }
     }

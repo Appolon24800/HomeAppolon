@@ -67,6 +67,7 @@ import dev.appolon.homelab.data.Favorites
 import dev.appolon.homelab.data.ServiceItem
 import dev.appolon.homelab.data.PocketId
 import dev.appolon.homelab.data.WebTarget
+import dev.appolon.homelab.arr.ArrHost
 import dev.appolon.homelab.data.Search
 import dev.appolon.homelab.ui.components.AccountAvatar
 import dev.appolon.homelab.ui.components.AccountAvatarTinted
@@ -92,10 +93,27 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    // Deep links (home.appolon.dev/...) open straight into the WebView.
+    // Deep links (home.appolon.dev/...) open straight into the WebView,
+    // unless the link carries an arr server URL plus an API key: those
+    // open the native setup sheet prefilled instead.
+    var setupLink by remember { mutableStateOf<Boolean>(false) }
     LaunchedEffect(externalUrl) {
         val root = dev.appolon.homelab.data.Homer.BASE_URL.trimEnd('/')
-        if (!externalUrl.isNullOrBlank() && externalUrl.trimEnd('/') != root) {
+        if (externalUrl.isNullOrBlank() || externalUrl.trimEnd('/') == root) {
+            return@LaunchedEffect
+        }
+        val parsed = dev.appolon.homelab.arr.ArrLinkParser.parse(externalUrl)
+        if (parsed != null) {
+            dev.appolon.homelab.arr.servers.PendingServerSetup.set(
+                dev.appolon.homelab.arr.servers.PendingServerSetup.Prefill(
+                    appType = parsed.appType
+                        ?: dev.appolon.homelab.arr.core.AppType.RADARR,
+                    baseUrl = parsed.baseUrl,
+                    apiKey = parsed.apiKey,
+                ),
+            )
+            setupLink = true
+        } else {
             vm.openWeb(externalUrl, null)
         }
     }
@@ -201,6 +219,17 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
             // exit animation still has a screen to slide out.
             var lastArrServer by remember { mutableStateOf<ServerId?>(null) }
             androidx.compose.runtime.SideEffect { arrServer?.let { lastArrServer = it } }
+            androidx.compose.animation.AnimatedVisibility(
+                visible = setupLink,
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
+                ArrHost(
+                    serverId = null,
+                    onExit = { setupLink = false },
+                    autoOpenSetup = true,
+                )
+            }
             AnimatedVisibility(
                 visible = arrServer != null,
                 enter = slideInHorizontally(tween(enterMillis)) { it } + fadeIn(tween(enterMillis)),
