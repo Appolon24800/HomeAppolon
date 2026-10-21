@@ -161,6 +161,9 @@ object ArrLinkParser {
         }
     }
 
+    /** Finds the arr app a plain URL points at, when it names one. */
+    fun appTypeForUrl(url: String): AppType? = appTypeFromUrl(url)
+
     /** Applies the same normalization the setup sheet uses for base URLs. */
     private fun normalizeBase(url: String): String =
         dev.appolon.homelab.arr.net.ServerEndpoint.normalizeBaseUrl(url)

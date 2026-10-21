@@ -148,3 +148,9 @@ the key was accepted but the request was refused. Check that the base URL
 points at the app the key came from and at the right path, and review the
 app's security settings (Settings > General > Security) for address
 restrictions.
+
+## Automatic first connect
+
+Tapping a Radarr, Sonarr, Lidarr, Prowlarr, or Bazarr service in the dashboard never opens the WebView. When the server is not configured yet, the app loads it once in an invisible WebView that shares the app's existing SSO session, reads the API key the web UI exposes for itself, verifies it against the server, and saves the server automatically. You see a short "connecting" screen, then the native screens.
+
+When the session has expired or the key cannot be read, the native setup sheet opens prefilled with the address and app type, so only the key paste remains. Links that carry the key directly (`...?apikey=...`, or `homelab://arr/add?app=radarr&url=...&apikey=...`) skip even that.

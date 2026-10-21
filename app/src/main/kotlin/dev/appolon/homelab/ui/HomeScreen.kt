@@ -1,5 +1,11 @@
 package dev.appolon.homelab.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -126,10 +132,44 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
     // the arr shell; every other URL keeps the WebView path unchanged.
     var arrServer by remember { mutableStateOf<ServerId?>(null) }
     val arrScope = rememberCoroutineScope()
+    // Auto-connect progress for arr links that have no server yet: the
+    // headless WebView session recovers the API key, then native opens.
+    var connectingTo by remember {
+        mutableStateOf<Pair<String, dev.appolon.homelab.arr.core.AppType>?>(null)
+    }
+
     val openService: (String, String?) -> Unit = { url, name ->
         arrScope.launch {
             val serverId = ArrIntegration.openFor(context, url)
-            if (serverId != null) arrServer = serverId else vm.openWeb(url, name)
+            if (serverId != null) {
+                arrServer = serverId
+                return@launch
+            }
+            // A plain link that names an arr app always gets the native
+            // engine; only genuinely foreign links fall to the WebView.
+            val appType = dev.appolon.homelab.arr.ArrLinkParser.appTypeForUrl(url)
+            if (appType == null) {
+                vm.openWeb(url, name)
+                return@launch
+            }
+            connectingTo = url to appType
+            when (val outcome = dev.appolon.homelab.arr.ArrAutoConnect.connect(context, url, appType)) {
+                is dev.appolon.homelab.arr.ArrAutoConnect.Outcome.Connected ->
+                    arrServer = outcome.serverId
+
+                dev.appolon.homelab.arr.ArrAutoConnect.Outcome.NeedSetup -> {
+                    // Native setup sheet, prefilled with what the link knows.
+                    dev.appolon.homelab.arr.servers.PendingServerSetup.set(
+                        dev.appolon.homelab.arr.servers.PendingServerSetup.Prefill(
+                            appType = appType,
+                            baseUrl = dev.appolon.homelab.arr.net.ServerEndpoint.normalizeBaseUrl(url),
+                            apiKey = "",
+                        ),
+                    )
+                    setupLink = true
+                }
+            }
+            connectingTo = null
         }
     }
 
@@ -219,6 +259,27 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
             // exit animation still has a screen to slide out.
             var lastArrServer by remember { mutableStateOf<ServerId?>(null) }
             androidx.compose.runtime.SideEffect { arrServer?.let { lastArrServer = it } }
+            androidx.compose.animation.AnimatedVisibility(
+                visible = connectingTo != null,
+                enter = fadeIn(),
+                exit = fadeOut(),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator()
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = connectingTo?.second?.displayName.orEmpty(),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+                }
+            }
             androidx.compose.animation.AnimatedVisibility(
                 visible = setupLink,
                 enter = fadeIn(),
