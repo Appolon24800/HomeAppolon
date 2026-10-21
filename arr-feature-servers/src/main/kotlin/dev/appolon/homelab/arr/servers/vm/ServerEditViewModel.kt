@@ -1,6 +1,6 @@
 package dev.appolon.homelab.arr.servers.vm
 
-import dev.appolon.homelab.arr.servers.PendingServerSetup
+import kotlinx.coroutines.Dispatchers
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.appolon.homelab.arr.core.ArrError
@@ -82,23 +82,6 @@ class ServerEditViewModel(
                     _state.update { it.copy(loading = false, loadError = t.arrError()) }
                 }
             }
-        } else {
-            // Deep-link prefill: the link already knows type, URL, and key,
-            // so the sheet opens ready and the connection test runs once.
-            val prefill = PendingServerSetup.consume()
-            if (prefill != null) {
-                _state.update {
-                    it.copy(
-                        form = ServerForm(
-                            name = prefill.appType.displayName,
-                            type = prefill.appType,
-                            baseUrl = prefill.baseUrl,
-                            apiKey = prefill.apiKey,
-                        ),
-                    )
-                }
-                testConnection()
-            }
         }
     }
 
@@ -154,14 +137,15 @@ class ServerEditViewModel(
                 val original = current.original
                 registry.upsert(
                     ArrServer(
-                        id = original?.id ?: ServerId(""),
+                        id = original?.id ?: ServerId(java.util.UUID.randomUUID().toString()),
                         type = form.type,
                         name = form.name.trim(),
                         baseUrl = form.toBaseUrl().orEmpty(),
-                        apiKeyEncrypted = form.apiKey.trim(),
+                        apiKeyEncrypted = secrets.encrypt(form.apiKey.trim()),
                         basicAuthUser = form.basicAuthUser.trim().takeIf { it.isNotEmpty() },
                         basicAuthPasswordEncrypted = form.basicAuthPassword
-                            .takeIf { it.isNotEmpty() },
+                            ?.takeIf { it.isNotEmpty() }
+                            ?.let { secrets.encrypt(it) },
                         proxy = original?.proxy,
                         trust = original?.trust,
                     ),

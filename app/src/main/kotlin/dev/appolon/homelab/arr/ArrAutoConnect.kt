@@ -74,29 +74,39 @@ object ArrAutoConnect {
             extractApiKey(context.applicationContext, serviceUrl)
         } ?: return Outcome.NeedSetup
         if (key.isNullOrBlank() || key.length < 16) return Outcome.NeedSetup
+        val id = provision(context, appType, ServerEndpoint.normalizeBaseUrl(serviceUrl), key)
+            ?: return Outcome.NeedSetup
+        return Outcome.Connected(id)
+    }
 
-        val base = ServerEndpoint.normalizeBaseUrl(serviceUrl)
-        return when (verify(base, key, context)) {
-            true -> {
-                val runtime = ArrBootstrap.runtime(context.applicationContext)
-                val graph = runtime.graph
-                val existing = graph.registry.servers().firstOrNull {
-                    it.type == appType && it.baseUrl.trimEnd('/') == base.trimEnd('/')
-                }
-                val server = graph.registry.upsert(
-                    existing?.copy(apiKeyEncrypted = graph.secrets.encrypt(key))
-                        ?: dev.appolon.homelab.arr.data.ArrServer(
-                            id = ServerId(java.util.UUID.randomUUID().toString()),
-                            type = appType,
-                            name = appType.displayName,
-                            baseUrl = base,
-                            apiKeyEncrypted = graph.secrets.encrypt(key),
-                        ),
-                )
-                Outcome.Connected(server.id)
-            }
-            false -> Outcome.NeedSetup
+    /**
+     * Verifies a known key against the server and persists the server.
+     * Returns its id, or null when verification fails. Used by both the
+     * WebView extraction and direct key links.
+     */
+    suspend fun provision(
+        context: Context,
+        appType: AppType,
+        baseUrl: String,
+        apiKey: String,
+    ): ServerId? = withContext(Dispatchers.IO) {
+        if (!verify(baseUrl, apiKey)) return@withContext null
+        val runtime = ArrBootstrap.runtime(context.applicationContext)
+        val graph = runtime.graph
+        val existing = graph.registry.servers().firstOrNull {
+            it.type == appType && it.baseUrl.trimEnd('/') == baseUrl.trimEnd('/')
         }
+        val server = graph.registry.upsert(
+            existing?.copy(apiKeyEncrypted = graph.secrets.encrypt(apiKey))
+                ?: dev.appolon.homelab.arr.data.ArrServer(
+                    id = ServerId(java.util.UUID.randomUUID().toString()),
+                    type = appType,
+                    name = appType.displayName,
+                    baseUrl = baseUrl,
+                    apiKeyEncrypted = graph.secrets.encrypt(apiKey),
+                ),
+        )
+        server.id
     }
 
     /** Loads the page invisibly and returns the apikey its UI exposes. */
@@ -160,7 +170,7 @@ object ArrAutoConnect {
     }
 
     /** One authenticated GET against the app's status endpoint. */
-    private fun verify(base: String, apiKey: String, @Suppress("UNUSED_PARAMETER") context: Context): Boolean = runCatching {
+    private fun verify(base: String, apiKey: String): Boolean = runCatching {
         val client = dev.appolon.homelab.data.Network.client.newBuilder()
             .callTimeout(10, TimeUnit.SECONDS)
             .build()

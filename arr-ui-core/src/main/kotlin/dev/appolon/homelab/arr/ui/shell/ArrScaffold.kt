@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.union
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,7 +44,11 @@ fun ArrScaffold(
     scrollBehavior: TopAppBarScrollBehavior? = null,
     actions: @Composable RowScope.() -> Unit = {},
     filterBar: @Composable ColumnScope.() -> Unit = {},
-    contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
+    // The activity hides the status bar, so the scaffold default collapses
+    // to zero and the top bar would sit under the camera cutout. Union the
+    // display cutout in so the bar clears the punch hole in every orientation.
+    contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets
+        .union(WindowInsets.displayCutout),
     content: @Composable (PaddingValues) -> Unit,
 ) {
     // Falls back to a screen-local enter-always behavior; M3 remembers the state.

@@ -1,6 +1,5 @@
 package dev.appolon.homelab.arr
 
-import dev.appolon.homelab.arr.servers.ServersFeature
 import dev.appolon.homelab.arr.feature.sonarr.SonarrPollAdapter
 import dev.appolon.homelab.arr.feature.radarr.RadarrPollAdapter
 import dev.appolon.homelab.arr.feature.prowlarr.ProwlarrPollAdapter
@@ -156,12 +155,7 @@ internal class ArrRuntime(context: Context) {
  * the host enters composition and stop when it leaves.
  */
 @Composable
-fun ArrHost(
-    serverId: ServerId?,
-    onExit: () -> Unit,
-    modifier: Modifier = Modifier,
-    autoOpenSetup: Boolean = false,
-) {
+fun ArrHost(serverId: ServerId, onExit: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val runtime = remember(context) { ArrBootstrap.runtime(context) }
     val servers by runtime.shellServers.collectAsStateWithLifecycle()
@@ -177,7 +171,6 @@ fun ArrHost(
     // The list destination is the first composed screen, which is why the
     // one-shot trigger rides inside its content slot.
     var pendingInitial by remember(serverId) { mutableStateOf<ServerId?>(serverId) }
-    var pendingSetup by remember(autoOpenSetup) { mutableStateOf(autoOpenSetup && serverId == null) }
     val base = runtime.content
     val content = if (pendingInitial == null) {
         base
@@ -188,13 +181,6 @@ fun ArrHost(
             serverList = { route ->
                 val navigator = LocalArrShellNavigator.current
                 LaunchedEffect(target, servers) {
-                    if (target == null) {
-                        if (pendingSetup) {
-                            ServersFeature.openEdit(navigator, null)
-                            pendingSetup = false
-                        }
-                        return@LaunchedEffect
-                    }
                     // Wait for the registry emission: a shell opened straight
                     // from a tap can compose before the collector lands.
                     val app: AppType = servers.firstOrNull { it.id == target }?.appType

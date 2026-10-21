@@ -118,7 +118,7 @@ fun ServerListScreen(
                             health = health[server.id] ?: ServerListViewModel.Health.UNKNOWN,
                             isFirst = index == 0,
                             isLast = index == servers.lastIndex,
-                            onEdit = { onEdit(server.id) },
+                            onEdit = { },
                             onMoveUp = { onMoveUp(server.id) },
                             onMoveDown = { onMoveDown(server.id) },
                             onRequestDelete = { pendingDelete = server },
@@ -127,19 +127,6 @@ fun ServerListScreen(
                     item { Spacer(Modifier.height(72.dp)) }
                 }
             }
-            ExtendedFloatingActionButton(
-                onClick = onAdd,
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.arr_servers_cd_add),
-                    )
-                },
-                text = { Text(stringResource(R.string.arr_servers_add)) },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp),
-            )
         }
     }
 

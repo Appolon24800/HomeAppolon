@@ -1,5 +1,9 @@
 package dev.appolon.homelab.ui
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -99,26 +103,22 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
+    var arrServer by remember { mutableStateOf<ServerId?>(null) }
     // Deep links (home.appolon.dev/...) open straight into the WebView,
     // unless the link carries an arr server URL plus an API key: those
     // open the native setup sheet prefilled instead.
-    var setupLink by remember { mutableStateOf<Boolean>(false) }
+    var autoFailed by remember { mutableStateOf<Pair<String, dev.appolon.homelab.arr.core.AppType>?>(null) }
     LaunchedEffect(externalUrl) {
         val root = dev.appolon.homelab.data.Homer.BASE_URL.trimEnd('/')
         if (externalUrl.isNullOrBlank() || externalUrl.trimEnd('/') == root) {
             return@LaunchedEffect
         }
         val parsed = dev.appolon.homelab.arr.ArrLinkParser.parse(externalUrl)
-        if (parsed != null) {
-            dev.appolon.homelab.arr.servers.PendingServerSetup.set(
-                dev.appolon.homelab.arr.servers.PendingServerSetup.Prefill(
-                    appType = parsed.appType
-                        ?: dev.appolon.homelab.arr.core.AppType.RADARR,
-                    baseUrl = parsed.baseUrl,
-                    apiKey = parsed.apiKey,
-                ),
+        if (parsed != null && parsed.appType != null) {
+            val id = dev.appolon.homelab.arr.ArrAutoConnect.provision(
+                context, parsed.appType, parsed.baseUrl, parsed.apiKey,
             )
-            setupLink = true
+            if (id != null) arrServer = id
         } else {
             vm.openWeb(externalUrl, null)
         }
@@ -130,7 +130,6 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
 
     // Native *arr screens: a service that maps to a configured server opens
     // the arr shell; every other URL keeps the WebView path unchanged.
-    var arrServer by remember { mutableStateOf<ServerId?>(null) }
     val arrScope = rememberCoroutineScope()
     // Auto-connect progress for arr links that have no server yet: the
     // headless WebView session recovers the API key, then native opens.
@@ -157,17 +156,8 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
                 is dev.appolon.homelab.arr.ArrAutoConnect.Outcome.Connected ->
                     arrServer = outcome.serverId
 
-                dev.appolon.homelab.arr.ArrAutoConnect.Outcome.NeedSetup -> {
-                    // Native setup sheet, prefilled with what the link knows.
-                    dev.appolon.homelab.arr.servers.PendingServerSetup.set(
-                        dev.appolon.homelab.arr.servers.PendingServerSetup.Prefill(
-                            appType = appType,
-                            baseUrl = dev.appolon.homelab.arr.net.ServerEndpoint.normalizeBaseUrl(url),
-                            apiKey = "",
-                        ),
-                    )
-                    setupLink = true
-                }
+                dev.appolon.homelab.arr.ArrAutoConnect.Outcome.NeedSetup ->
+                    autoFailed = url to appType
             }
             connectingTo = null
         }
@@ -281,15 +271,45 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
                 }
             }
             androidx.compose.animation.AnimatedVisibility(
-                visible = setupLink,
+                visible = autoFailed != null,
                 enter = fadeIn(),
                 exit = fadeOut(),
             ) {
-                ArrHost(
-                    serverId = null,
-                    onExit = { setupLink = false },
-                    autoOpenSetup = true,
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    val failed = autoFailed
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = failed?.second?.displayName.orEmpty(),
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "Could not sign in automatically. Unlock the web app once, then retry.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Row {
+                            androidx.compose.material3.OutlinedButton(onClick = {
+                                val target = failed
+                                autoFailed = null
+                                if (target != null) openService(target.first, null)
+                            }) { Text("Retry") }
+                            Spacer(Modifier.width(8.dp))
+                            androidx.compose.material3.Button(onClick = {
+                                val target = failed
+                                autoFailed = null
+                                if (target != null) vm.openWeb(target.first, null)
+                            }) { Text("Open web version") }
+                        }
+                    }
+                }
             }
             AnimatedVisibility(
                 visible = arrServer != null,
