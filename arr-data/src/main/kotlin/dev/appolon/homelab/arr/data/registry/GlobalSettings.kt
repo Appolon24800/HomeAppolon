@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.ArrDataJson
+import dev.appolon.homelab.arr.data.secrets.ArrSecrets
 import dev.appolon.homelab.arr.net.ProxyConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -28,16 +29,23 @@ data class NotificationChannels(
  * App-wide arr settings in preference storage under "arr_global_v1_" keys:
  * the default proxy applied when a server has none of its own, per-server
  * notification channel toggles, and the settings schema version.
+ *
+ * The default proxy's password is encrypted with [secrets] before it is
+ * written and decrypted on read. The secrets instance is optional only so
+ * existing wiring keeps compiling; production should pass the data graph's
+ * [ArrSecrets], and with it absent the password round-trips verbatim.
  */
 class GlobalSettings internal constructor(
     private val store: PreferencesStore,
+    private val secrets: ArrSecrets? = null,
 ) {
-    constructor(dataStore: DataStore<Preferences>) : this(DataStorePreferencesStore(dataStore))
+    constructor(dataStore: DataStore<Preferences>, secrets: ArrSecrets? = null) :
+        this(DataStorePreferencesStore(dataStore), secrets)
 
     /** The global proxy default; [ProxyConfig] with type NONE means "direct". */
     suspend fun defaultProxy(): ProxyConfig =
         store.string(KEY_DEFAULT_PROXY)
-            ?.let { ArrDataJson.decodeFromString(ProxyConfig.serializer(), it) }
+            ?.let { ArrDataJson.decodeFromString(ProxyConfig.serializer(), it).withDecryptedPassword() }
             ?: ProxyConfig()
 
     fun observeDefaultProxy(): Flow<ProxyConfig> =
@@ -49,8 +57,26 @@ class GlobalSettings internal constructor(
     suspend fun setDefaultProxy(proxy: ProxyConfig) {
         store.putString(
             KEY_DEFAULT_PROXY,
-            ArrDataJson.encodeToString(ProxyConfig.serializer(), proxy),
+            ArrDataJson.encodeToString(ProxyConfig.serializer(), proxy.withEncryptedPassword()),
         )
+    }
+
+    /** Encrypts the proxy password before persistence; envelopes pass through. */
+    private fun ProxyConfig.withEncryptedPassword(): ProxyConfig {
+        val password = password ?: return this
+        if (secrets == null || ArrSecrets.isEncrypted(password)) return this
+        return copy(password = secrets.encrypt(password))
+    }
+
+    /**
+     * Decrypts the stored password. An envelope that no longer opens (for
+     * example after a Keystore reset) drops the password so the proxy fails
+     * authentication instead of sending the envelope as a credential.
+     */
+    private fun ProxyConfig.withDecryptedPassword(): ProxyConfig {
+        val password = password ?: return this
+        if (secrets == null || !ArrSecrets.isEncrypted(password)) return this
+        return copy(password = runCatching { secrets.decrypt(password) }.getOrNull())
     }
 
     suspend fun notificationChannels(serverId: ServerId): NotificationChannels =

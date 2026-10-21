@@ -3,6 +3,7 @@ package dev.appolon.homelab.arr.net
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -20,13 +21,13 @@ class OrbotDetectorTest {
     }
 
     @Test
-    fun `routes direct when Orbot is toggled but not installed`() {
+    fun `fails closed when Orbot is toggled but not installed`() {
         val detector = OrbotDetector(isPackageInstalled = { false })
 
-        val resolved = detector.resolveProxy(ProxyConfig(useOrbot = true))
-
-        assertEquals(ProxyConfig.Type.NONE, resolved.type)
-        assertFalse(resolved.isConfigured)
+        val failure = assertThrows(OrbotUnavailableException::class.java) {
+            detector.resolveProxy(ProxyConfig(useOrbot = true))
+        }
+        assertTrue(failure.message!!.contains("org.torproject.android"))
     }
 
     @Test

@@ -19,10 +19,18 @@ import kotlinx.coroutines.flow.onStart
  * under "arr_server_v1_<id>". The versioned prefix keeps future migrations
  * additive (a v2 reader can coexist with v1 rows).
  *
- * Secret fields (API key, basic auth password) are encrypted with [secrets]
- * before anything is written. Values that already carry an envelope marker
- * pass through untouched, so read-modify-write cycles never double-encrypt.
- * Reads hand back the envelopes as stored; decrypting is the caller's job.
+ * Secret fields (API key, basic auth password, proxy password) are encrypted
+ * with [secrets] before anything is written. Values that already carry an
+ * envelope marker pass through untouched, so read-modify-write cycles never
+ * double-encrypt.
+ *
+ * Read asymmetry: API key and basic auth password are handed back as stored
+ * (envelopes; decrypting is the caller's job), while the proxy password is
+ * decrypted by the registry before it is returned. Endpoint construction
+ * passes `proxy` through verbatim, so only a decrypted password is usable
+ * there; an envelope that no longer opens (Keystore reset) drops just the
+ * password and lets that proxy fail authentication instead of taking every
+ * stored server offline.
  *
  * Upsert semantics: a blank [ArrServer.id] means "new server" and gets a UUID,
  * a creation timestamp, and the next display order. On update, zero-valued
@@ -64,7 +72,10 @@ class DataStoreServerRegistry internal constructor(
                 )
             }
         }
-        store.putString(key(stored.id), ArrDataJson.encodeToString(ArrServer.serializer(), stored))
+        store.putString(
+            key(stored.id),
+            ArrDataJson.encodeToString(ArrServer.serializer(), stored.withEncryptedProxyPassword()),
+        )
         return stored
     }
 
@@ -126,7 +137,31 @@ class DataStoreServerRegistry internal constructor(
     private fun key(id: ServerId): String = KEY_PREFIX + id.value
 
     private fun decode(json: String): ArrServer =
-        ArrDataJson.decodeFromString(ArrServer.serializer(), json)
+        ArrDataJson.decodeFromString(ArrServer.serializer(), json).withDecryptedProxyPassword()
+
+    /**
+     * Encrypts the proxy password at the persistence boundary so no proxy
+     * credential rests in storage as plaintext. Envelope markers pass
+     * through, so rewriting a row never double-encrypts.
+     */
+    private fun ArrServer.withEncryptedProxyPassword(): ArrServer =
+        withProxyPassword { password ->
+            if (ArrSecrets.isEncrypted(password)) password else secrets.encrypt(password)
+        }
+
+    /** See the class doc: read paths hand back a usable proxy password. */
+    private fun ArrServer.withDecryptedProxyPassword(): ArrServer =
+        withProxyPassword { password ->
+            if (!ArrSecrets.isEncrypted(password)) password
+            else runCatching { secrets.decrypt(password) }.getOrNull()
+        }
+
+    private inline fun ArrServer.withProxyPassword(transform: (String) -> String?): ArrServer {
+        val config = proxy ?: return this
+        val password = config.password ?: return this
+        val next = transform(password)
+        return copy(proxy = config.copy(password = next))
+    }
 
     private companion object {
         const val KEY_PREFIX = "arr_server_v1_"

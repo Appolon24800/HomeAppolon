@@ -1,6 +1,7 @@
 package dev.appolon.homelab.arr.net
 
 import dev.appolon.homelab.arr.core.ServerId
+import java.net.InetSocketAddress
 import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -9,17 +10,20 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class DefaultArrClientFactoryTest {
     private val server = MockWebServer()
     private val factory = DefaultArrClientFactory()
 
-    private val endpoint = ServerEndpoint(
-        serverId = ServerId("radarr-1"),
-        baseUrl = "http://localhost/",
-        apiKey = "test-key",
-    )
+    /** Base URL shares the mock server's origin so same-origin auth applies. */
+    private val endpoint: ServerEndpoint
+        get() = ServerEndpoint(
+            serverId = ServerId("radarr-1"),
+            baseUrl = server.url("/").toString(),
+            apiKey = "test-key",
+        )
 
     @After
     fun tearDown() {
@@ -32,7 +36,7 @@ class DefaultArrClientFactoryTest {
         factory.clientFor(endpoint).newCall(Request.Builder().url(url()).build()).execute()
 
     @Test
-    fun `sends the api key and user agent on every request`() {
+    fun `sends the api key and user agent on same-origin requests`() {
         server.enqueue(MockResponse().setBody("ok"))
 
         get(endpoint).use { response ->
@@ -62,6 +66,90 @@ class DefaultArrClientFactoryTest {
     }
 
     @Test
+    fun `third-party hosts never receive credentials`() {
+        val artwork = MockWebServer()
+        artwork.start()
+        try {
+            artwork.enqueue(MockResponse().setBody("image"))
+            val client = factory.clientFor(endpoint)
+
+            client.newCall(Request.Builder().url(artwork.url("/poster.jpg")).build())
+                .execute()
+                .use { response -> assertEquals(200, response.code) }
+
+            val recorded = artwork.takeRequest()
+            assertNull(recorded.getHeader("X-Api-Key"))
+            assertNull(recorded.getHeader("Authorization"))
+            assertEquals("HomelabArr/1.0 (android)", recorded.getHeader("User-Agent"))
+        } finally {
+            artwork.shutdown()
+        }
+    }
+
+    @Test
+    fun `cross-origin redirect strips the credentials`() {
+        val elsewhere = MockWebServer()
+        elsewhere.start()
+        try {
+            elsewhere.enqueue(MockResponse().setBody("moved"))
+            server.enqueue(
+                MockResponse().setResponseCode(302)
+                    .setHeader("Location", elsewhere.url("/leak.jpg")),
+            )
+
+            get(endpoint.copy(basicAuthUser = "media", basicAuthPassword = "homelab")).use { response ->
+                assertEquals(200, response.code)
+                assertEquals("moved", response.body!!.string())
+            }
+
+            server.takeRequest() // the original same-origin hop
+            val redirected = elsewhere.takeRequest()
+            assertNull(redirected.getHeader("X-Api-Key"))
+            assertNull(redirected.getHeader("Authorization"))
+        } finally {
+            elsewhere.shutdown()
+        }
+    }
+
+    @Test
+    fun `same-origin redirect keeps the credentials`() {
+        server.enqueue(
+            MockResponse().setResponseCode(302)
+                .setHeader("Location", server.url("/api/v3/health")),
+        )
+        server.enqueue(MockResponse().setBody("ok"))
+
+        get(endpoint).use { response ->
+            assertEquals(200, response.code)
+        }
+
+        server.takeRequest()
+        val followUp = server.takeRequest()
+        assertEquals("test-key", followUp.getHeader("X-Api-Key"))
+    }
+
+    @Test
+    fun `image client carries no credentials`() {
+        server.enqueue(MockResponse().setBody("img"))
+
+        factory.imageClientFor(endpoint)
+            .newCall(Request.Builder().url(url()).build())
+            .execute()
+            .use { response -> assertEquals(200, response.code) }
+
+        val recorded = server.takeRequest()
+        assertNull(recorded.getHeader("X-Api-Key"))
+        assertNull(recorded.getHeader("Authorization"))
+        assertEquals("HomelabArr/1.0 (android)", recorded.getHeader("User-Agent"))
+    }
+
+    @Test
+    fun `image clients cache separately from authenticated clients`() {
+        assertNotSame(factory.imageClientFor(endpoint), factory.clientFor(endpoint))
+        assertSame(factory.imageClientFor(endpoint), factory.imageClientFor(endpoint))
+    }
+
+    @Test
     fun `applies twenty second timeouts`() {
         val client = factory.clientFor(endpoint)
 
@@ -81,6 +169,14 @@ class DefaultArrClientFactoryTest {
         factory.invalidate(ServerId("radarr-1"))
 
         assertNotSame(first, factory.clientFor(endpoint))
+    }
+
+    @Test
+    fun `invalidate drops the image client too`() {
+        val first = factory.imageClientFor(endpoint)
+        factory.invalidate(ServerId("radarr-1"))
+
+        assertNotSame(first, factory.imageClientFor(endpoint))
     }
 
     @Test
@@ -115,7 +211,7 @@ class DefaultArrClientFactoryTest {
 
         // Each derived client carries exactly one identity interceptor,
         // regardless of how many clients were built before it.
-        assertEquals(1, second.interceptors.size)
+        assertEquals(1, second.networkInterceptors.size)
     }
 
     @Test
@@ -137,6 +233,56 @@ class DefaultArrClientFactoryTest {
 
         get(endpoint.copy(proxy = ProxyConfig(type = ProxyConfig.Type.NONE))).use { response ->
             assertEquals(200, response.code)
+        }
+    }
+
+    @Test
+    fun `global default proxy applies when the server has none`() {
+        val withGlobal = DefaultArrClientFactory(
+            globalProxy = { ProxyConfig(type = ProxyConfig.Type.HTTP, host = "global-proxy", port = 3128) },
+        )
+
+        val client = withGlobal.clientFor(endpoint)
+
+        assertEquals(
+            InetSocketAddress.createUnresolved("global-proxy", 3128),
+            client.proxy!!.address(),
+        )
+    }
+
+    @Test
+    fun `server proxy override wins over the global default`() {
+        val withGlobal = DefaultArrClientFactory(
+            globalProxy = { ProxyConfig(type = ProxyConfig.Type.HTTP, host = "global-proxy", port = 3128) },
+        )
+
+        val client = withGlobal.clientFor(
+            endpoint.copy(proxy = ProxyConfig(type = ProxyConfig.Type.HTTP, host = "server-proxy", port = 8888)),
+        )
+
+        assertEquals(
+            InetSocketAddress.createUnresolved("server-proxy", 8888),
+            client.proxy!!.address(),
+        )
+    }
+
+    @Test
+    fun `global default change rebuilds the cached client`() {
+        var host = "one"
+        val withGlobal = DefaultArrClientFactory(
+            globalProxy = { ProxyConfig(type = ProxyConfig.Type.HTTP, host = host, port = 3128) },
+        )
+        val first = withGlobal.clientFor(endpoint)
+
+        host = "two"
+
+        assertNotSame(first, withGlobal.clientFor(endpoint))
+    }
+
+    @Test
+    fun `useOrbot without Orbot installed fails closed`() {
+        assertThrows(OrbotUnavailableException::class.java) {
+            factory.clientFor(endpoint.copy(proxy = ProxyConfig(useOrbot = true)))
         }
     }
 }

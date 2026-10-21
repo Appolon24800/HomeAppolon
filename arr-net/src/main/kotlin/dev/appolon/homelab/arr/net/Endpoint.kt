@@ -3,7 +3,10 @@ package dev.appolon.homelab.arr.net
 import dev.appolon.homelab.arr.core.ServerId
 import kotlinx.serialization.Serializable
 
-/** Proxy configuration for one server, resolved against the global default. */
+/**
+ * Proxy configuration for one server. Resolution order is server override
+ * (when [isConfigured]), then the global default, then direct.
+ */
 @Serializable
 data class ProxyConfig(
     val type: Type = Type.NONE,
@@ -61,9 +64,25 @@ data class ServerEndpoint(
     }
 }
 
-/** Builds and caches one OkHttp client per server endpoint. Implement in :arr-net. */
+/**
+ * Builds and caches one OkHttp client per server endpoint. Implement in :arr-net.
+ */
 interface ArrClientFactory {
+    /**
+     * Authenticated client for API traffic. Credentials (API key, basic auth)
+     * are scoped to the endpoint's own origin, so cross-origin redirect
+     * follow-ups and third-party hosts never receive them.
+     */
     fun clientFor(endpoint: ServerEndpoint): okhttp3.OkHttpClient
+
+    /**
+     * Client without credentials for remote artwork and other non-API hosts,
+     * sharing the endpoint's proxy and TLS policy. Image loaders must use
+     * this, not [clientFor], so API keys are never stamped onto third-party
+     * requests. Defaults to [clientFor] so simple fakes keep compiling;
+     * [DefaultArrClientFactory] overrides it with a credential-free build.
+     */
+    fun imageClientFor(endpoint: ServerEndpoint): okhttp3.OkHttpClient = clientFor(endpoint)
 
     /** Clears cached clients, for example after a proxy or trust change. */
     fun invalidate(serverId: ServerId)
