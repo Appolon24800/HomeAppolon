@@ -61,6 +61,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.core.view.WindowCompat
@@ -95,6 +96,7 @@ import dev.appolon.homelab.ui.theme.ThemeSource
 import dev.appolon.homelab.ui.theme.contrastOn
 import dev.appolon.homelab.ui.theme.homerHeaderTextColor
 import dev.appolon.homelab.ui.theme.parseHexColor
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -136,9 +138,11 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
     var connectingTo by remember {
         mutableStateOf<Pair<String, dev.appolon.homelab.arr.core.AppType>?>(null)
     }
+    // The in-flight auto-connect, so Back can cancel it mid-probe.
+    var connectJob by remember { mutableStateOf<Job?>(null) }
 
     val openService: (String, String?) -> Unit = { url, name ->
-        arrScope.launch {
+        connectJob = arrScope.launch {
             val serverId = ArrIntegration.openFor(context, url)
             if (serverId != null) {
                 arrServer = serverId
@@ -152,14 +156,19 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
                 return@launch
             }
             connectingTo = url to appType
-            when (val outcome = dev.appolon.homelab.arr.ArrAutoConnect.connect(context, url, appType)) {
-                is dev.appolon.homelab.arr.ArrAutoConnect.Outcome.Connected ->
-                    arrServer = outcome.serverId
+            try {
+                when (val outcome = dev.appolon.homelab.arr.ArrAutoConnect.connect(context, url, appType)) {
+                    is dev.appolon.homelab.arr.ArrAutoConnect.Outcome.Connected ->
+                        arrServer = outcome.serverId
 
-                dev.appolon.homelab.arr.ArrAutoConnect.Outcome.NeedSetup ->
-                    autoFailed = url to appType
+                    dev.appolon.homelab.arr.ArrAutoConnect.Outcome.NeedSetup ->
+                        autoFailed = url to appType
+                }
+            } finally {
+                // Cancellation (Back, scope teardown) or a throw must never
+                // leave the progress overlay stuck on screen.
+                connectingTo = null
             }
-            connectingTo = null
         }
     }
 
@@ -249,6 +258,11 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
             // exit animation still has a screen to slide out.
             var lastArrServer by remember { mutableStateOf<ServerId?>(null) }
             androidx.compose.runtime.SideEffect { arrServer?.let { lastArrServer = it } }
+            // Back on the arr overlays: an in-flight auto-connect cancels
+            // its headless session, the failure card just dismisses. The
+            // automatic-only flow stays; there is no manual key entry.
+            BackHandler(enabled = connectingTo != null) { connectJob?.cancel() }
+            BackHandler(enabled = autoFailed != null) { autoFailed = null }
             androidx.compose.animation.AnimatedVisibility(
                 visible = connectingTo != null,
                 enter = fadeIn(),
