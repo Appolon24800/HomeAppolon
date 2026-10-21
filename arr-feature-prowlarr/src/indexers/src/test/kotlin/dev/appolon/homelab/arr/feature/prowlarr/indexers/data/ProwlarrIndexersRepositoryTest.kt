@@ -4,11 +4,13 @@ import dev.appolon.homelab.arr.api.prowlarr.FakeProwlarrIndexers
 import dev.appolon.homelab.arr.api.prowlarr.model.AppProfileResource
 import dev.appolon.homelab.arr.api.prowlarr.model.ApplicationResource
 import dev.appolon.homelab.arr.api.prowlarr.model.ApplyTags
+import dev.appolon.homelab.arr.api.prowlarr.model.Field
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerBulkResource
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerCategory
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerProxyResource
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerResource
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerStatusResource
+import dev.appolon.homelab.arr.api.prowlarr.model.PrivacyLevel
 import dev.appolon.homelab.arr.api.prowlarr.model.TagResource
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ArrResult
@@ -20,7 +22,9 @@ import java.io.IOException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -340,5 +344,145 @@ class ProwlarrIndexersRepositoryTest {
         assertTrue(outcome is ArrResult.Err)
         assertTrue((outcome as ArrResult.Err).error is ArrError.Http)
         assertTrue(queue.pending().isEmpty())
+    }
+
+    // --------------------------------------------------------------- secrets
+
+    private fun secretIndexer(id: Int = 0, name: String = "IPTorrents") = IndexerResource(
+        id = id,
+        name = name,
+        fields = listOf(
+            Field(name = "baseUrl", label = "URL", value = JsonPrimitive("https://iptorrents.com")),
+            Field(
+                name = "apiKey",
+                label = "Key",
+                value = JsonPrimitive("real-secret"),
+                privacy = PrivacyLevel.API_KEY,
+            ),
+        ),
+    )
+
+    @Test
+    fun `offline indexer update redacts the queued body and the cache row`() = runTest {
+        fake.indexers[3] = secretIndexer(id = 3, name = "Prowlarr")
+        repository.refresh()
+        fake.failure = { call -> if (call.operation == "updateIndexer") IOException("offline") else null }
+
+        val saved = repository.saveIndexer(repository.cachedIndexers().single { it.id == 3 }.copy(priority = 25))
+
+        assertTrue((saved as ArrResult.Ok).value is WriteOutcome.Queued)
+        val queuedBody = queue.pending().single().bodyJson.orEmpty()
+        assertFalse(queuedBody.contains("real-secret"))
+        assertTrue(queuedBody.contains("__SECRET__"))
+        assertEquals(
+            "__SECRET__",
+            (
+                repository.cachedIndexers().single { it.id == 3 }
+                    .fields!!.single { it.name == "apiKey" }.value as JsonPrimitive
+                ).content,
+        )
+    }
+
+    @Test
+    fun `offline indexer create queues a redacted body`() = runTest {
+        repository.refresh()
+        fake.failure = { call -> if (call.operation == "createIndexer") IOException("offline") else null }
+
+        val saved = repository.saveIndexer(secretIndexer())
+
+        assertTrue((saved as ArrResult.Ok).value is WriteOutcome.Queued)
+        val queuedBody = queue.pending().single().bodyJson.orEmpty()
+        assertFalse(queuedBody.contains("real-secret"))
+        assertTrue(queuedBody.contains("__SECRET__"))
+        assertTrue(queuedBody.contains("\"name\":\"IPTorrents\""))
+    }
+
+    @Test
+    fun `queued indexer replay substitutes the live secret and redacts the cache row`() = runTest {
+        repository.refresh()
+        fake.failure = { call -> if (call.operation == "createIndexer") IOException("offline") else null }
+        repository.saveIndexer(secretIndexer())
+
+        fake.failure = { null }
+        val replayed = repository.replayQueuedActions()
+
+        assertEquals(1 to 0, replayed)
+        assertTrue(queue.pending().isEmpty())
+        val sent = fake.indexers.values.single { it.name == "IPTorrents" }
+            .fields!!.single { it.name == "apiKey" }.value
+        assertEquals("real-secret", (sent as JsonPrimitive).content)
+        assertEquals(
+            "__SECRET__",
+            (
+                repository.cachedIndexers().single { it.name == "IPTorrents" }
+                    .fields!!.single { it.name == "apiKey" }.value as JsonPrimitive
+                ).content,
+        )
+    }
+
+    @Test
+    fun `queued indexer replay without the live secret drops the action without posting`() = runTest {
+        repository.refresh()
+        fake.failure = { call -> if (call.operation == "createIndexer") IOException("offline") else null }
+        repository.saveIndexer(secretIndexer())
+
+        // A fresh repository instance models an app restart: the in-memory
+        // secrets are gone but the queue survived.
+        fake.failure = { null }
+        val replayed = newRepository().replayQueuedActions()
+
+        assertEquals(0 to 1, replayed)
+        assertTrue(queue.pending().isEmpty())
+        assertEquals(setOf(1, 2), fake.indexers.keys)
+    }
+
+    @Test
+    fun `refresh caches provider rows without real secrets`() = runTest {
+        fake.indexers[3] = secretIndexer(id = 3, name = "Prowlarr")
+
+        val result = repository.refresh()
+
+        assertTrue(result is ArrResult.Ok)
+        assertEquals(
+            "__SECRET__",
+            (
+                repository.cachedIndexers().single { it.id == 3 }
+                    .fields!!.single { it.name == "apiKey" }.value as JsonPrimitive
+                ).content,
+        )
+    }
+
+    @Test
+    fun `saving a redacted cached row restores the remembered secret`() = runTest {
+        fake.indexers[3] = secretIndexer(id = 3, name = "Prowlarr")
+        repository.refresh()
+
+        val saved = repository.saveIndexer(repository.cachedIndexers().single { it.id == 3 }.copy(priority = 25))
+
+        assertTrue((saved as ArrResult.Ok).value is WriteOutcome.Synced)
+        val sent = fake.indexers.values.single { it.id == 3 }
+            .fields!!.single { it.name == "apiKey" }.value
+        assertEquals("real-secret", (sent as JsonPrimitive).content)
+    }
+
+    @Test
+    fun `saving with a redacted secret and no remembered value fails clearly`() = runTest {
+        val saved = repository.saveIndexer(
+            IndexerResource(
+                id = 7,
+                name = "Ghost",
+                fields = listOf(
+                    Field(
+                        name = "apiKey",
+                        value = JsonPrimitive("__SECRET__"),
+                        privacy = PrivacyLevel.API_KEY,
+                    ),
+                ),
+            ),
+        )
+
+        assertTrue(saved is ArrResult.Err)
+        assertTrue(queue.pending().isEmpty())
+        assertFalse(fake.indexers.containsKey(7))
     }
 }

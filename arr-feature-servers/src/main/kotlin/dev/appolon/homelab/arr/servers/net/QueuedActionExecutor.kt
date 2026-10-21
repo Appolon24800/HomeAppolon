@@ -21,6 +21,8 @@ import okhttp3.RequestBody.Companion.toRequestBody
  * keeps the action and bumps its attempt count; the response body carries no
  * meaning worth surfacing here.
  */
+private const val SECRET_SENTINEL = "__SECRET__"
+
 class QueuedActionExecutor(
     private val registry: ServerRegistry,
     private val secrets: ArrSecrets,
@@ -28,6 +30,11 @@ class QueuedActionExecutor(
 ) {
     suspend fun execute(action: QueuedAction): Boolean = withContext(Dispatchers.IO) {
         val server = registry.byId(action.serverId) ?: return@withContext false
+        // Provider secrets are redacted to a sentinel at rest and substituted
+        // only by their own repository's replay path. This generic executor
+        // must never send the sentinel to a server; fail the action instead
+        // so it retries or dead-letters visibly.
+        if (action.bodyJson?.contains(SECRET_SENTINEL) == true) return@withContext false
         val endpoint = endpointOf(server) ?: return@withContext false
         val url = server.baseUrl.trimEnd('/') + "/" + action.path.trimStart('/')
         val method = action.method.uppercase()

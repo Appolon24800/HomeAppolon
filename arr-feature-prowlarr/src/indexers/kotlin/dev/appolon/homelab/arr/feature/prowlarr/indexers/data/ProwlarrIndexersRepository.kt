@@ -2,11 +2,13 @@ package dev.appolon.homelab.arr.feature.prowlarr.indexers.data
 
 import dev.appolon.homelab.arr.api.prowlarr.model.AppProfileResource
 import dev.appolon.homelab.arr.api.prowlarr.model.ApplicationResource
+import dev.appolon.homelab.arr.api.prowlarr.model.Field
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerBulkResource
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerCategory
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerProxyResource
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerResource
 import dev.appolon.homelab.arr.api.prowlarr.model.IndexerStatusResource
+import dev.appolon.homelab.arr.api.prowlarr.model.PrivacyLevel
 import dev.appolon.homelab.arr.api.prowlarr.model.TagResource
 import dev.appolon.homelab.arr.core.ActionId
 import dev.appolon.homelab.arr.core.AppType
@@ -21,12 +23,18 @@ import dev.appolon.homelab.arr.feature.prowlarr.indexers.ProwlarrCommandRunner
 import dev.appolon.homelab.arr.net.ArrJson
 import dev.appolon.homelab.arr.net.arrError
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import retrofit2.HttpException
 import retrofit2.Response
 
@@ -85,6 +93,134 @@ class ProwlarrIndexersRepository(
     fun observeIndexers(): Flow<List<IndexerResource>> =
         store.observe(serverId, INDEXER_TYPE, IndexerResource.serializer())
 
+    // ----------------------------------------------------------------- secrets
+
+    /**
+     * Real secret field values for this process only, never persisted. Two
+     * key shapes: "action:&lt;actionId&gt;" holds the values captured when a
+     * queued write was enqueued, "provider:&lt;path&gt;" holds the latest
+     * known values per provider update path (from a refresh or a save), so a
+     * re-save of a redacted cached row can restore them.
+     */
+    private val liveSecrets = ConcurrentHashMap<String, Map<String, JsonElement>>()
+
+    /** True when the field spec marks the value secret (password, API key). */
+    private fun isSecret(field: Field): Boolean =
+        field.privacy == PrivacyLevel.PASSWORD || field.privacy == PrivacyLevel.API_KEY
+
+    /** True when the field value is the redaction placeholder. */
+    private fun isRedacted(field: Field): Boolean =
+        (field.value as? JsonPrimitive)?.contentOrNull == SECRET_SENTINEL
+
+    /** Real secret values keyed by field name; placeholders never qualify. */
+    private fun secretValuesOf(fields: List<Field>?): Map<String, JsonElement> =
+        fields.orEmpty()
+            .filter { it.name != null && isSecret(it) && !isRedacted(it) }
+            .filter { it.value != null && it.value !is JsonNull }
+            .associate { it.name!! to it.value!! }
+
+    /** Copies the field list with every secret value replaced by the sentinel. */
+    private fun redactedFields(fields: List<Field>?): List<Field>? =
+        fields?.map { field ->
+            if (isSecret(field) && field.value != null && field.value !is JsonNull) {
+                field.copy(value = JsonPrimitive(SECRET_SENTINEL))
+            } else {
+                field
+            }
+        }
+
+    /** Secret field names still carrying the placeholder in this body. */
+    private fun redactedSecretNames(fields: List<Field>?): Set<String> =
+        fields.orEmpty()
+            .filter { it.name != null && isSecret(it) && isRedacted(it) }
+            .mapTo(mutableSetOf()) { it.name!! }
+
+    private fun rememberProviderSecrets(path: String, fields: List<Field>?) {
+        val secrets = secretValuesOf(fields)
+        if (secrets.isNotEmpty()) liveSecrets["$PROVIDER_KEY_PREFIX$path"] = secrets
+    }
+
+    /**
+     * Restores redacted secret values in a live body from [liveSecrets].
+     * [rememberUnder] is the provider's update path for existing rows; null
+     * for creates, which have nothing earlier to draw from. A body with a
+     * placeholder that cannot be restored fails instead of saving, because
+     * the placeholder must never reach the server.
+     */
+    private fun <T> resolveSecrets(
+        body: T,
+        rememberUnder: String?,
+        fieldsOf: (T) -> List<Field>?,
+        withFields: (T, List<Field>?) -> T,
+    ): ArrResult<T> {
+        val fields = fieldsOf(body).orEmpty()
+        val redacted = redactedSecretNames(fields)
+        if (redacted.isEmpty()) {
+            rememberUnder?.let { rememberProviderSecrets(it, fields) }
+            return ArrResult.ok(body)
+        }
+        val remembered = rememberUnder?.let { liveSecrets["$PROVIDER_KEY_PREFIX$it"] }.orEmpty()
+        val unresolved = redacted - remembered.keys
+        if (unresolved.isNotEmpty()) {
+            return ArrResult.err(
+                ArrError.Unknown(
+                    IllegalStateException(
+                        "Secret fields ${unresolved.sorted()} are redacted in the cached copy and " +
+                            "were not re-entered; re-enter them and save again.",
+                    ),
+                ),
+            )
+        }
+        return ArrResult.ok(
+            withFields(
+                body,
+                fields.map { field ->
+                    val name = field.name
+                    if (name != null && isSecret(field) && isRedacted(field)) {
+                        field.copy(value = remembered.getValue(name))
+                    } else {
+                        field
+                    }
+                },
+            ),
+        )
+    }
+
+    /**
+     * Substitutes a queued body's placeholders from the values captured at
+     * enqueue time, or null when they are gone (the process restarted). Null
+     * means the action must fail rather than post placeholders.
+     */
+    private fun <T> resolveQueuedSecrets(
+        action: QueuedAction,
+        body: T,
+        fieldsOf: (T) -> List<Field>?,
+        withFields: (T, List<Field>?) -> T,
+    ): T? {
+        val fields = fieldsOf(body).orEmpty()
+        val redacted = redactedSecretNames(fields)
+        if (redacted.isEmpty()) return body
+        val remembered = liveSecrets["$ACTION_KEY_PREFIX${action.actionId.value}"].orEmpty()
+        if (!redacted.all(remembered::containsKey)) return null
+        return withFields(
+            body,
+            fields.map { field ->
+                val name = field.name
+                if (name != null && isSecret(field) && isRedacted(field)) {
+                    field.copy(value = remembered.getValue(name))
+                } else {
+                    field
+                }
+            },
+        )
+    }
+
+    private fun sanitizeIndexer(r: IndexerResource) = r.copy(fields = redactedFields(r.fields))
+
+    private fun sanitizeProxy(r: IndexerProxyResource) = r.copy(fields = redactedFields(r.fields))
+
+    private fun sanitizeApplication(r: ApplicationResource) = r.copy(fields = redactedFields(r.fields))
+
     suspend fun cachedIndexers(): List<IndexerResource> =
         store.getAll(serverId, INDEXER_TYPE, IndexerResource.serializer())
 
@@ -106,9 +242,17 @@ class ProwlarrIndexersRepository(
         } catch (e: Throwable) {
             return@withContext ArrResult.err(e.arrError())
         }
-        reconcile(INDEXER_TYPE, IndexerResource.serializer(), { it.id.toString() }, fetched)
+        // Fetched rows carry real secret values on the wire; remember them
+        // for this session and cache only redacted copies.
+        fetched.forEach { rememberProviderSecrets("$INDEXER_PATH/${it.id}", it.fields) }
+        reconcile(INDEXER_TYPE, IndexerResource.serializer(), { it.id.toString() }, fetched.map(::sanitizeIndexer))
         refreshStatuses()
         refreshTags()
+        // A successful refresh proves this server reachable, so this
+        // feature's queued provider writes replay right here, restoring
+        // their redacted secrets from the live vault, instead of waiting
+        // for the sync screen's generic executor that cannot.
+        replayQueuedActions()
         ArrResult.ok(Unit)
     }
 
@@ -197,6 +341,7 @@ class ProwlarrIndexersRepository(
         listWithTtl(
             indexerSchemasApi, SCHEMA_TYPE,
             IndexerResource.serializer(), { it.definitionName ?: it.id.toString() }, ttlMillis,
+            ::sanitizeIndexer,
         )
 
     /** Server default category tree backing the categories manager and editor. */
@@ -234,18 +379,33 @@ class ProwlarrIndexersRepository(
      */
     suspend fun saveIndexer(resource: IndexerResource): ArrResult<WriteOutcome> =
         withContext(io) {
+            val path = if (resource.id == 0) INDEXER_PATH else "$INDEXER_PATH/${resource.id}"
+            val resolved = when (
+                val r = resolveSecrets(
+                    resource,
+                    rememberUnder = if (resource.id == 0) null else path,
+                    fieldsOf = { it.fields },
+                    withFields = { res, fields -> res.copy(fields = fields) },
+                )
+            ) {
+                is ArrResult.Err -> return@withContext r
+                is ArrResult.Ok -> r.value
+            }
             try {
                 val saved = if (resource.id == 0) {
-                    createIndexerApi(resource)
+                    createIndexerApi(resolved)
                 } else {
-                    updateIndexerApi(resource.id, resource)
+                    updateIndexerApi(resolved.id, resolved)
                 }
-                putCarryingStamp(INDEXER_TYPE, IndexerResource.serializer(), saved.id.toString(), saved)
+                putCarryingStamp(
+                    INDEXER_TYPE, IndexerResource.serializer(),
+                    saved.id.toString(), sanitizeIndexer(saved),
+                )
                 ArrResult.ok(WriteOutcome.Synced)
             } catch (e: HttpException) {
-                offlineOrErr(e.toArrError()) { queueIndexerWrite(resource) }
+                offlineOrErr(e.toArrError()) { queueIndexerWrite(resolved) }
             } catch (e: Throwable) {
-                offlineOrErr(e.arrError()) { queueIndexerWrite(resource) }
+                offlineOrErr(e.arrError()) { queueIndexerWrite(resolved) }
             }
         }
 
@@ -331,7 +491,9 @@ class ProwlarrIndexersRepository(
         } catch (e: Throwable) {
             return@withContext ArrResult.err(e.arrError())
         }
-        reconcile(PROXY_TYPE, IndexerProxyResource.serializer(), { it.id.toString() }, fetched)
+        fetched.forEach { rememberProviderSecrets("$PROXY_PATH/${it.id}", it.fields) }
+        reconcile(PROXY_TYPE, IndexerProxyResource.serializer(), { it.id.toString() }, fetched.map(::sanitizeProxy))
+        replayQueuedActions()
         ArrResult.ok(Unit)
     }
 
@@ -340,24 +502,38 @@ class ProwlarrIndexersRepository(
     ): ArrResult<List<IndexerProxyResource>> = listWithTtl(
         proxySchemasApi, PROXY_SCHEMA_TYPE,
         IndexerProxyResource.serializer(), { it.implementation ?: it.id.toString() }, ttlMillis,
+        ::sanitizeProxy,
     )
 
     suspend fun saveProxy(resource: IndexerProxyResource): ArrResult<WriteOutcome> =
         withContext(io) {
+            val path = if (resource.id == 0) PROXY_PATH else "$PROXY_PATH/${resource.id}"
+            val resolved = when (
+                val r = resolveSecrets(
+                    resource,
+                    rememberUnder = if (resource.id == 0) null else path,
+                    fieldsOf = { it.fields },
+                    withFields = { res, fields -> res.copy(fields = fields) },
+                )
+            ) {
+                is ArrResult.Err -> return@withContext r
+                is ArrResult.Ok -> r.value
+            }
             try {
                 val saved = if (resource.id == 0) {
-                    createProxyApi(resource)
+                    createProxyApi(resolved)
                 } else {
-                    updateProxyApi(resource.id, resource)
+                    updateProxyApi(resolved.id, resolved)
                 }
                 putCarryingStamp(
-                    PROXY_TYPE, IndexerProxyResource.serializer(), saved.id.toString(), saved,
+                    PROXY_TYPE, IndexerProxyResource.serializer(),
+                    saved.id.toString(), sanitizeProxy(saved),
                 )
                 ArrResult.ok(WriteOutcome.Synced)
             } catch (e: HttpException) {
-                offlineOrErr(e.toArrError()) { queueProxyWrite(resource) }
+                offlineOrErr(e.toArrError()) { queueProxyWrite(resolved) }
             } catch (e: Throwable) {
-                offlineOrErr(e.arrError()) { queueProxyWrite(resource) }
+                offlineOrErr(e.arrError()) { queueProxyWrite(resolved) }
             }
         }
 
@@ -433,9 +609,12 @@ class ProwlarrIndexersRepository(
         } catch (e: Throwable) {
             return@withContext ArrResult.err(e.arrError())
         }
+        fetched.forEach { rememberProviderSecrets("$APPLICATION_PATH/${it.id}", it.fields) }
         reconcile(
-            APPLICATION_TYPE, ApplicationResource.serializer(), { it.id.toString() }, fetched,
+            APPLICATION_TYPE, ApplicationResource.serializer(), { it.id.toString() },
+            fetched.map(::sanitizeApplication),
         )
+        replayQueuedActions()
         ArrResult.ok(Unit)
     }
 
@@ -444,25 +623,38 @@ class ProwlarrIndexersRepository(
     ): ArrResult<List<ApplicationResource>> = listWithTtl(
         applicationSchemasApi, APPLICATION_SCHEMA_TYPE,
         ApplicationResource.serializer(), { it.implementation ?: it.id.toString() }, ttlMillis,
+        ::sanitizeApplication,
     )
 
     suspend fun saveApplication(resource: ApplicationResource): ArrResult<WriteOutcome> =
         withContext(io) {
+            val path = if (resource.id == 0) APPLICATION_PATH else "$APPLICATION_PATH/${resource.id}"
+            val resolved = when (
+                val r = resolveSecrets(
+                    resource,
+                    rememberUnder = if (resource.id == 0) null else path,
+                    fieldsOf = { it.fields },
+                    withFields = { res, fields -> res.copy(fields = fields) },
+                )
+            ) {
+                is ArrResult.Err -> return@withContext r
+                is ArrResult.Ok -> r.value
+            }
             try {
                 val saved = if (resource.id == 0) {
-                    createApplicationApi(resource)
+                    createApplicationApi(resolved)
                 } else {
-                    updateApplicationApi(resource.id, resource)
+                    updateApplicationApi(resolved.id, resolved)
                 }
                 putCarryingStamp(
                     APPLICATION_TYPE, ApplicationResource.serializer(),
-                    saved.id.toString(), saved,
+                    saved.id.toString(), sanitizeApplication(saved),
                 )
                 ArrResult.ok(WriteOutcome.Synced)
             } catch (e: HttpException) {
-                offlineOrErr(e.toArrError()) { queueApplicationWrite(resource) }
+                offlineOrErr(e.toArrError()) { queueApplicationWrite(resolved) }
             } catch (e: Throwable) {
-                offlineOrErr(e.arrError()) { queueApplicationWrite(resource) }
+                offlineOrErr(e.arrError()) { queueApplicationWrite(resolved) }
             }
         }
 
@@ -537,6 +729,145 @@ class ProwlarrIndexersRepository(
             .toSet()
     }
 
+    // ------------------------------------------------------------------ replay
+
+    /**
+     * Replays this feature's queued provider writes (indexers, proxies,
+     * applications) through the same APIs the editors use. Redacted secret
+     * values are restored from the values captured at enqueue time; a
+     * queued body whose secrets are gone (the process restarted before
+     * replay) is removed from the queue instead of posting placeholders to
+     * the server. Runs only when every pending action is one of this
+     * feature's provider writes, so a foreign action keeps its attempt
+     * budget for the shared replay path. Returns null when nothing was
+     * replayable.
+     */
+    suspend fun replayQueuedActions(): Pair<Int, Int>? = withContext(io) {
+        val queued = actionQueue.pending()
+        if (queued.isEmpty()) return@withContext null
+        if (queued.any { it.serverId != serverId || !isOwnProviderAction(it) }) {
+            return@withContext null
+        }
+        try {
+            actionQueue.replay(::executeQueued)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (t: Throwable) {
+            null
+        }
+    }
+
+    /** Matches this feature's provider creates, updates, and deletes only. */
+    private fun isOwnProviderAction(action: QueuedAction): Boolean {
+        val base = REPLAYABLE_PROVIDER_PATHS.firstOrNull {
+            action.path == it || action.path.startsWith("$it/")
+        } ?: return false
+        if (action.path == base) return action.method == "POST"
+        val id = action.path.removePrefix("$base/").substringBefore('/').toIntOrNull() ?: return false
+        return action.method == "PUT" || action.method == "DELETE"
+    }
+
+    private suspend fun executeQueued(action: QueuedAction): Boolean = try {
+        executeProviderAction(action)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (t: Throwable) {
+        false
+    }
+
+    private suspend fun executeProviderAction(action: QueuedAction): Boolean {
+        val base = REPLAYABLE_PROVIDER_PATHS.first { action.path == it || action.path.startsWith("$it/") }
+        val id = action.path.removePrefix("$base/").substringBefore('/').toIntOrNull()
+        return when (base) {
+            INDEXER_PATH -> when (action.method) {
+                "DELETE" -> id != null && deleteIndexerApi(id).isSuccessful.also {
+                    if (it) store.delete(serverId, INDEXER_TYPE, id.toString())
+                }
+
+                else -> replayProviderBody(
+                    action, IndexerResource.serializer(),
+                    { it.fields }, { r, f -> r.copy(fields = f) },
+                    { saved ->
+                        putCarryingStamp(
+                            INDEXER_TYPE, IndexerResource.serializer(),
+                            saved.id.toString(), saved,
+                        )
+                    },
+                ) { body ->
+                    if (id == null) createIndexerApi(body) else updateIndexerApi(id, body)
+                }
+            }
+
+            PROXY_PATH -> when (action.method) {
+                "DELETE" -> id != null && deleteProxyApi(id).isSuccessful.also {
+                    if (it) store.delete(serverId, PROXY_TYPE, id.toString())
+                }
+
+                else -> replayProviderBody(
+                    action, IndexerProxyResource.serializer(),
+                    { it.fields }, { r, f -> r.copy(fields = f) },
+                    { saved ->
+                        putCarryingStamp(
+                            PROXY_TYPE, IndexerProxyResource.serializer(),
+                            saved.id.toString(), saved,
+                        )
+                    },
+                ) { body ->
+                    if (id == null) createProxyApi(body) else updateProxyApi(id, body)
+                }
+            }
+
+            APPLICATION_PATH -> when (action.method) {
+                "DELETE" -> id != null && deleteApplicationApi(id).isSuccessful.also {
+                    if (it) store.delete(serverId, APPLICATION_TYPE, id.toString())
+                }
+
+                else -> replayProviderBody(
+                    action, ApplicationResource.serializer(),
+                    { it.fields }, { r, f -> r.copy(fields = f) },
+                    { saved ->
+                        putCarryingStamp(
+                            APPLICATION_TYPE, ApplicationResource.serializer(),
+                            saved.id.toString(), saved,
+                        )
+                    },
+                ) { body ->
+                    if (id == null) createApplicationApi(body) else updateApplicationApi(id, body)
+                }
+            }
+
+            else -> false
+        }
+    }
+
+    /**
+     * Decodes one queued provider body, restores its redacted secrets from
+     * the live vault, executes it, and caches the redacted server row.
+     * Returns false (and drops the action) when the real values are gone.
+     */
+    private suspend fun <T> replayProviderBody(
+        action: QueuedAction,
+        serializer: KSerializer<T>,
+        fieldsOf: (T) -> List<Field>?,
+        withFields: (T, List<Field>?) -> T,
+        cache: suspend (T) -> Unit,
+        execute: suspend (T) -> T?,
+    ): Boolean {
+        val queued = runCatching {
+            ArrJson.decodeFromString(serializer, action.bodyJson.orEmpty())
+        }.getOrNull() ?: return false
+        val resolved = resolveQueuedSecrets(action, queued, fieldsOf, withFields)
+        if (resolved == null) {
+            // The values left memory with the process that enqueued this
+            // action; failing outright beats posting placeholders.
+            actionQueue.remove(action.actionId)
+            return false
+        }
+        val saved = execute(resolved) ?: return false
+        cache(withFields(saved, redactedFields(fieldsOf(saved))))
+        return true
+    }
+
     /** Count of queued actions for this server, a whole screen indicator. */
     fun queuedCount(): Flow<Int> = actionQueue.observe().map { pending ->
         pending.count { it.serverId == serverId }
@@ -551,22 +882,32 @@ class ProwlarrIndexersRepository(
         if (resource.id != 0) {
             putCarryingStamp(
                 INDEXER_TYPE, IndexerResource.serializer(),
-                resource.id.toString(), resource,
+                resource.id.toString(), sanitizeIndexer(resource),
             )
         }
-        return if (resource.id == 0) {
+        // The queued copy and the optimistic cache row carry only the
+        // sentinel; the real secret values are vaulted in memory keyed by
+        // the action id, so replay can restore them without any persistent
+        // copy ever existing.
+        val redacted = sanitizeIndexer(resource)
+        val bodyJson = ArrJson.encodeToString(IndexerResource.serializer(), redacted)
+        val actionId = if (resource.id == 0) {
             enqueue(
                 method = "POST", path = INDEXER_PATH,
-                bodyJson = ArrJson.encodeToString(IndexerResource.serializer(), resource),
+                bodyJson = bodyJson,
                 description = "Add indexer ${resource.name.orEmpty()}",
             )
         } else {
             enqueue(
                 method = "PUT", path = "$INDEXER_PATH/${resource.id}",
-                bodyJson = ArrJson.encodeToString(IndexerResource.serializer(), resource),
+                bodyJson = bodyJson,
                 description = "Edit indexer ${resource.name.orEmpty()}",
             )
         }
+        secretValuesOf(resource.fields).takeIf { it.isNotEmpty() }?.let { secrets ->
+            liveSecrets["$ACTION_KEY_PREFIX${actionId.value}"] = secrets
+        }
+        return actionId
     }
 
     private suspend fun queueDelete(ids: List<Int>, single: Boolean): ActionId =
@@ -589,13 +930,14 @@ class ProwlarrIndexersRepository(
         if (resource.id != 0) {
             putCarryingStamp(
                 PROXY_TYPE, IndexerProxyResource.serializer(),
-                resource.id.toString(), resource,
+                resource.id.toString(), sanitizeProxy(resource),
             )
         }
         return queueEntityWrite(
             resource.id, IndexerProxyResource.serializer(), resource,
             PROXY_PATH, resource.name.orEmpty(), "indexer proxy",
-        )
+            ::sanitizeProxy,
+        ) { secretValuesOf(it.fields) }
     }
 
     private suspend fun queueProxyDelete(id: Int): ActionId {
@@ -625,13 +967,14 @@ class ProwlarrIndexersRepository(
         if (resource.id != 0) {
             putCarryingStamp(
                 APPLICATION_TYPE, ApplicationResource.serializer(),
-                resource.id.toString(), resource,
+                resource.id.toString(), sanitizeApplication(resource),
             )
         }
         return queueEntityWrite(
             resource.id, ApplicationResource.serializer(), resource,
             APPLICATION_PATH, resource.name.orEmpty(), "application",
-        )
+            ::sanitizeApplication,
+        ) { secretValuesOf(it.fields) }
     }
 
     private suspend fun queueApplicationDelete(id: Int): ActionId {
@@ -646,18 +989,30 @@ class ProwlarrIndexersRepository(
         path: String,
         name: String,
         what: String,
-    ): ActionId = if (id == 0) {
-        enqueue(
-            method = "POST", path = path,
-            bodyJson = ArrJson.encodeToString(serializer, resource),
-            description = "Add $what $name",
-        )
-    } else {
-        enqueue(
-            method = "PUT", path = "$path/$id",
-            bodyJson = ArrJson.encodeToString(serializer, resource),
-            description = "Edit $what $name",
-        )
+        sanitize: (T) -> T = { it },
+        secretsOf: (T) -> Map<String, JsonElement> = { emptyMap() },
+    ): ActionId {
+        // The queued copy carries only the sentinel; the real secret values
+        // are vaulted in memory keyed by the action id, so replay can
+        // restore them without any persistent copy ever existing.
+        val redacted = sanitize(resource)
+        val actionId = if (id == 0) {
+            enqueue(
+                method = "POST", path = path,
+                bodyJson = ArrJson.encodeToString(serializer, redacted),
+                description = "Add $what $name",
+            )
+        } else {
+            enqueue(
+                method = "PUT", path = "$path/$id",
+                bodyJson = ArrJson.encodeToString(serializer, redacted),
+                description = "Edit $what $name",
+            )
+        }
+        secretsOf(resource).takeIf { it.isNotEmpty() }?.let { secrets ->
+            liveSecrets["$ACTION_KEY_PREFIX${actionId.value}"] = secrets
+        }
+        return actionId
     }
 
     /** Merges a bulk edit into cached rows with the server's semantics. */
@@ -720,6 +1075,7 @@ class ProwlarrIndexersRepository(
         serializer: KSerializer<T>,
         idOf: (T) -> String,
         ttlMillis: Long,
+        sanitize: (T) -> T = { it },
     ): ArrResult<List<T>> = withContext(io) {
         val cached = store.getAll(serverId, type, serializer)
         val stamp = store.lastFetchedAt(serverId, type)
@@ -736,7 +1092,7 @@ class ProwlarrIndexersRepository(
         if (fetched.isEmpty()) {
             ArrResult.ok(cached)
         } else {
-            reconcile(type, serializer, idOf, fetched)
+            reconcile(type, serializer, idOf, fetched.map(sanitize))
             ArrResult.ok(fetched)
         }
     }
@@ -829,6 +1185,23 @@ class ProwlarrIndexersRepository(
         internal const val APP_PROFILE_PATH = "api/v1/appprofile"
         internal const val APPLICATION_PATH = "api/v1/applications"
         private const val COMMAND_PATH = "api/v1/command"
+
+        /**
+         * Placeholder written over secret field values in every cached or
+         * queued copy. Never send it to a server: restore the real value
+         * first or fail the write.
+         */
+        internal const val SECRET_SENTINEL = "__SECRET__"
+
+        private const val ACTION_KEY_PREFIX = "action:"
+        private const val PROVIDER_KEY_PREFIX = "provider:"
+
+        /** Provider write paths this repository can replay on its own. */
+        private val REPLAYABLE_PROVIDER_PATHS = listOf(
+            INDEXER_PATH,
+            PROXY_PATH,
+            APPLICATION_PATH,
+        )
 
         /** The command name Prowlarr uses to push indexers to applications. */
         const val SYNC_COMMAND = "ApplicationSync"

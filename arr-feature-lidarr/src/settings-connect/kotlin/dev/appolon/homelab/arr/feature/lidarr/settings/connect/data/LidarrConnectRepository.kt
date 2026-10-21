@@ -15,6 +15,7 @@ import dev.appolon.homelab.arr.api.lidarr.TagApi
 import dev.appolon.homelab.arr.api.lidarr.model.CommandResource
 import dev.appolon.homelab.arr.api.lidarr.model.DownloadClientConfigResource
 import dev.appolon.homelab.arr.api.lidarr.model.DownloadClientResource
+import dev.appolon.homelab.arr.api.lidarr.model.Field
 import dev.appolon.homelab.arr.api.lidarr.model.ImportListExclusionResource
 import dev.appolon.homelab.arr.api.lidarr.model.ImportListResource
 import dev.appolon.homelab.arr.api.lidarr.model.IndexerConfigResource
@@ -22,6 +23,7 @@ import dev.appolon.homelab.arr.api.lidarr.model.IndexerFlagResource
 import dev.appolon.homelab.arr.api.lidarr.model.IndexerResource
 import dev.appolon.homelab.arr.api.lidarr.model.MetadataResource
 import dev.appolon.homelab.arr.api.lidarr.model.NotificationResource
+import dev.appolon.homelab.arr.api.lidarr.model.PrivacyLevel
 import dev.appolon.homelab.arr.api.lidarr.model.RemotePathMappingResource
 import dev.appolon.homelab.arr.api.lidarr.model.TagResource
 import dev.appolon.homelab.arr.core.ActionId
@@ -37,12 +39,18 @@ import dev.appolon.homelab.arr.feature.lidarr.library.data.WriteOutcome
 import dev.appolon.homelab.arr.net.ArrJson
 import java.io.IOException
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import retrofit2.HttpException
 
 /**
@@ -88,6 +96,140 @@ class LidarrConnectRepository(
 
     /** Bumped per enqueue so queued writes replay in submission order. */
     private val writeSequence = AtomicLong(0L)
+
+    // ----------------------------------------------------------------- secrets
+
+    /**
+     * Real secret field values for this process only, never persisted. Two
+     * key shapes: "action:&lt;actionId&gt;" holds the values captured when a
+     * queued write was enqueued, "provider:&lt;path&gt;" holds the latest
+     * known values per provider update path (from a refresh or a save), so a
+     * re-save of a redacted cached row can restore them.
+     */
+    private val liveSecrets = ConcurrentHashMap<String, Map<String, JsonElement>>()
+
+    /** True when the field spec marks the value secret (password, API key). */
+    private fun isSecret(field: Field): Boolean =
+        field.privacy == PrivacyLevel.PASSWORD || field.privacy == PrivacyLevel.APIKEY
+
+    /** True when the field value is the redaction placeholder. */
+    private fun isRedacted(field: Field): Boolean =
+        (field.value as? JsonPrimitive)?.contentOrNull == SECRET_SENTINEL
+
+    /** Real secret values keyed by field name; placeholders never qualify. */
+    private fun secretValuesOf(fields: List<Field>?): Map<String, JsonElement> =
+        fields.orEmpty()
+            .filter { it.name != null && isSecret(it) && !isRedacted(it) }
+            .filter { it.value != null && it.value !is JsonNull }
+            .associate { it.name!! to it.value!! }
+
+    /** Copies the field list with every secret value replaced by the sentinel. */
+    private fun redactedFields(fields: List<Field>?): List<Field>? =
+        fields?.map { field ->
+            if (isSecret(field) && field.value != null && field.value !is JsonNull) {
+                field.copy(value = JsonPrimitive(SECRET_SENTINEL))
+            } else {
+                field
+            }
+        }
+
+    /** Secret field names still carrying the placeholder in this body. */
+    private fun redactedSecretNames(fields: List<Field>?): Set<String> =
+        fields.orEmpty()
+            .filter { it.name != null && isSecret(it) && isRedacted(it) }
+            .mapTo(mutableSetOf()) { it.name!! }
+
+    private fun rememberProviderSecrets(path: String, fields: List<Field>?) {
+        val secrets = secretValuesOf(fields)
+        if (secrets.isNotEmpty()) liveSecrets["$PROVIDER_KEY_PREFIX$path"] = secrets
+    }
+
+    /**
+     * Restores redacted secret values in a live body from [liveSecrets].
+     * [rememberUnder] is the provider's update path for existing rows; null
+     * for creates, which have nothing earlier to draw from. A body with a
+     * placeholder that cannot be restored fails instead of saving, because
+     * the placeholder must never reach the server.
+     */
+    private fun <T> resolveSecrets(
+        body: T,
+        rememberUnder: String?,
+        fieldsOf: (T) -> List<Field>?,
+        withFields: (T, List<Field>?) -> T,
+    ): ArrResult<T> {
+        val fields = fieldsOf(body).orEmpty()
+        val redacted = redactedSecretNames(fields)
+        if (redacted.isEmpty()) {
+            rememberUnder?.let { rememberProviderSecrets(it, fields) }
+            return ArrResult.ok(body)
+        }
+        val remembered = rememberUnder?.let { liveSecrets["$PROVIDER_KEY_PREFIX$it"] }.orEmpty()
+        val unresolved = redacted - remembered.keys
+        if (unresolved.isNotEmpty()) {
+            return ArrResult.err(
+                ArrError.Unknown(
+                    IllegalStateException(
+                        "Secret fields ${unresolved.sorted()} are redacted in the cached copy and " +
+                            "were not re-entered; re-enter them and save again.",
+                    ),
+                ),
+            )
+        }
+        return ArrResult.ok(
+            withFields(
+                body,
+                fields.map { field ->
+                    val name = field.name
+                    if (name != null && isSecret(field) && isRedacted(field)) {
+                        field.copy(value = remembered.getValue(name))
+                    } else {
+                        field
+                    }
+                },
+            ),
+        )
+    }
+
+    /**
+     * Substitutes a queued body's placeholders from the values captured at
+     * enqueue time, or null when they are gone (the process restarted). Null
+     * means the action must fail rather than post placeholders.
+     */
+    private fun <T> resolveQueuedSecrets(
+        action: QueuedAction,
+        body: T,
+        fieldsOf: (T) -> List<Field>?,
+        withFields: (T, List<Field>?) -> T,
+    ): T? {
+        val fields = fieldsOf(body).orEmpty()
+        val redacted = redactedSecretNames(fields)
+        if (redacted.isEmpty()) return body
+        val remembered = liveSecrets["$ACTION_KEY_PREFIX${action.actionId.value}"].orEmpty()
+        if (!redacted.all(remembered::containsKey)) return null
+        return withFields(
+            body,
+            fields.map { field ->
+                val name = field.name
+                if (name != null && isSecret(field) && isRedacted(field)) {
+                    field.copy(value = remembered.getValue(name))
+                } else {
+                    field
+                }
+            },
+        )
+    }
+
+    private fun sanitizeIndexer(r: IndexerResource) = r.copy(fields = redactedFields(r.fields))
+
+    private fun sanitizeDownloadClient(r: DownloadClientResource) =
+        r.copy(fields = redactedFields(r.fields))
+
+    private fun sanitizeImportList(r: ImportListResource) = r.copy(fields = redactedFields(r.fields))
+
+    private fun sanitizeNotification(r: NotificationResource) =
+        r.copy(fields = redactedFields(r.fields))
+
+    private fun sanitizeMetadata(r: MetadataResource) = r.copy(fields = redactedFields(r.fields))
 
     // ------------------------------------------------------------------ reads
 
@@ -178,15 +320,27 @@ class LidarrConnectRepository(
             is ArrResult.Ok -> r.value
         }
         val stamp = now()
-        replace(INDEXER_TYPE, indexers, IndexerResource.serializer(), stamp)
-        replace(DOWNLOAD_CLIENT_TYPE, clients, DownloadClientResource.serializer(), stamp)
+        // Fetched rows carry real secret values on the wire; remember them
+        // for this session and cache only redacted copies.
+        indexers.forEach { rememberProviderSecrets("$INDEXER_PATH/${it.id}", it.fields) }
+        clients.forEach { rememberProviderSecrets("$DOWNLOAD_CLIENT_PATH/${it.id}", it.fields) }
+        lists.forEach { rememberProviderSecrets("$IMPORT_LIST_PATH/${it.id}", it.fields) }
+        notifications.forEach { rememberProviderSecrets("$NOTIFICATION_PATH/${it.id}", it.fields) }
+        metadata.forEach { rememberProviderSecrets("$METADATA_PATH/${it.id}", it.fields) }
+        replace(INDEXER_TYPE, indexers.map(::sanitizeIndexer), IndexerResource.serializer(), stamp)
+        replace(DOWNLOAD_CLIENT_TYPE, clients.map(::sanitizeDownloadClient), DownloadClientResource.serializer(), stamp)
         replace(REMOTE_PATH_MAPPING_TYPE, mappings, RemotePathMappingResource.serializer(), stamp)
-        replace(IMPORT_LIST_TYPE, lists, ImportListResource.serializer(), stamp)
+        replace(IMPORT_LIST_TYPE, lists.map(::sanitizeImportList), ImportListResource.serializer(), stamp)
         replace(EXCLUSION_TYPE, exclusions, ImportListExclusionResource.serializer(), stamp)
-        replace(NOTIFICATION_TYPE, notifications, NotificationResource.serializer(), stamp)
-        replace(METADATA_TYPE, metadata, MetadataResource.serializer(), stamp)
+        replace(NOTIFICATION_TYPE, notifications.map(::sanitizeNotification), NotificationResource.serializer(), stamp)
+        replace(METADATA_TYPE, metadata.map(::sanitizeMetadata), MetadataResource.serializer(), stamp)
         refreshTags()
         refreshConfigs()
+        // A successful refresh proves this server reachable, so this
+        // group's queued provider writes replay right here, restoring their
+        // redacted secrets from the live vault, instead of waiting for the
+        // sync screen's generic executor that cannot.
+        replayQueuedActions()
         ArrResult.ok(Unit)
     }
 
@@ -266,7 +420,7 @@ class LidarrConnectRepository(
     suspend fun indexerSchemas(
         ttlMillis: Long = SCHEMA_TTL_MILLIS,
     ): ArrResult<List<IndexerResource>> = withContext(ioContext) {
-        listWithTtl(INDEXER_SCHEMA_TYPE, IndexerResource.serializer(), ttlMillis) {
+        listWithTtl(INDEXER_SCHEMA_TYPE, IndexerResource.serializer(), ttlMillis, ::sanitizeIndexer) {
             indexerApi.getIndexerSchema()
         }
     }
@@ -274,7 +428,7 @@ class LidarrConnectRepository(
     suspend fun downloadClientSchemas(
         ttlMillis: Long = SCHEMA_TTL_MILLIS,
     ): ArrResult<List<DownloadClientResource>> = withContext(ioContext) {
-        listWithTtl(DOWNLOAD_CLIENT_SCHEMA_TYPE, DownloadClientResource.serializer(), ttlMillis) {
+        listWithTtl(DOWNLOAD_CLIENT_SCHEMA_TYPE, DownloadClientResource.serializer(), ttlMillis, ::sanitizeDownloadClient) {
             downloadClientApi.getDownloadClientSchema()
         }
     }
@@ -282,7 +436,7 @@ class LidarrConnectRepository(
     suspend fun importListSchemas(
         ttlMillis: Long = SCHEMA_TTL_MILLIS,
     ): ArrResult<List<ImportListResource>> = withContext(ioContext) {
-        listWithTtl(IMPORT_LIST_SCHEMA_TYPE, ImportListResource.serializer(), ttlMillis) {
+        listWithTtl(IMPORT_LIST_SCHEMA_TYPE, ImportListResource.serializer(), ttlMillis, ::sanitizeImportList) {
             importListApi.getImportListSchema()
         }
     }
@@ -290,7 +444,7 @@ class LidarrConnectRepository(
     suspend fun notificationSchemas(
         ttlMillis: Long = SCHEMA_TTL_MILLIS,
     ): ArrResult<List<NotificationResource>> = withContext(ioContext) {
-        listWithTtl(NOTIFICATION_SCHEMA_TYPE, NotificationResource.serializer(), ttlMillis) {
+        listWithTtl(NOTIFICATION_SCHEMA_TYPE, NotificationResource.serializer(), ttlMillis, ::sanitizeNotification) {
             notificationApi.getNotificationSchema()
         }
     }
@@ -298,7 +452,7 @@ class LidarrConnectRepository(
     suspend fun metadataSchemas(
         ttlMillis: Long = SCHEMA_TTL_MILLIS,
     ): ArrResult<List<MetadataResource>> = withContext(ioContext) {
-        listWithTtl(METADATA_SCHEMA_TYPE, MetadataResource.serializer(), ttlMillis) {
+        listWithTtl(METADATA_SCHEMA_TYPE, MetadataResource.serializer(), ttlMillis, ::sanitizeMetadata) {
             metadataApi.getMetadataSchema()
         }
     }
@@ -307,6 +461,7 @@ class LidarrConnectRepository(
         type: EntityType,
         serializer: kotlinx.serialization.KSerializer<T>,
         ttlMillis: Long,
+        sanitize: (T) -> T = { it },
         fetcher: suspend () -> List<T>,
     ): ArrResult<List<T>> {
         if (!isTypeStale(type, ttlMillis)) {
@@ -326,7 +481,7 @@ class LidarrConnectRepository(
                 serverId,
                 type,
                 fetched.value.mapIndexed { index, value ->
-                    schemaKey(index, value) to value
+                    schemaKey(index, value) to sanitize(value)
                 },
                 serializer,
                 fetchedAtMillis = now(),
@@ -452,31 +607,45 @@ class LidarrConnectRepository(
     suspend fun saveIndexer(resource: IndexerResource): ArrResult<WriteOutcome> =
         withContext(ioContext) {
             val isNew = resource.id <= 0
+            val path = if (isNew) INDEXER_PATH else "$INDEXER_PATH/${resource.id}"
+            val resolved = when (
+                val r = resolveSecrets(
+                    resource,
+                    rememberUnder = if (isNew) null else path,
+                    fieldsOf = { it.fields },
+                    withFields = { res, fields -> res.copy(fields = fields) },
+                )
+            ) {
+                is ArrResult.Err -> return@withContext r
+                is ArrResult.Ok -> r.value
+            }
             writeThrough(
                 call = {
                     if (isNew) {
-                        indexerApi.addIndexer(resource = resource)
+                        indexerApi.addIndexer(resource = resolved)
                     } else {
-                        indexerApi.updateIndexer(id = resource.id, resource = resource)
+                        indexerApi.updateIndexer(id = resolved.id, resource = resolved)
                     }
                 },
                 method = if (isNew) POST_METHOD else PUT_METHOD,
-                path = if (isNew) INDEXER_PATH else "$INDEXER_PATH/${resource.id}",
-                body = resource,
+                path = path,
+                body = resolved,
                 serializer = IndexerResource.serializer(),
                 cache = { saved ->
                     store.put(serverId, INDEXER_TYPE, saved.id.toString(), saved, IndexerResource.serializer())
                 },
-                cacheQueued = {
+                cacheQueued = { redacted ->
                     putOptimistic(
                         INDEXER_TYPE,
                         isNew,
-                        resource,
+                        redacted,
                         IndexerResource.serializer(),
                         { it.id.toString() },
                     ) { r, id -> r.copy(id = id) }
                 },
                 description = "Save indexer ${resource.name.orEmpty()}",
+                secretsOf = { secretValuesOf(it.fields) },
+                sanitize = ::sanitizeIndexer,
             )
         }
 
@@ -503,17 +672,29 @@ class LidarrConnectRepository(
         resource: DownloadClientResource,
     ): ArrResult<WriteOutcome> = withContext(ioContext) {
         val isNew = resource.id <= 0
+        val path = if (isNew) DOWNLOAD_CLIENT_PATH else "$DOWNLOAD_CLIENT_PATH/${resource.id}"
+        val resolved = when (
+            val r = resolveSecrets(
+                resource,
+                rememberUnder = if (isNew) null else path,
+                fieldsOf = { it.fields },
+                withFields = { res, fields -> res.copy(fields = fields) },
+            )
+        ) {
+            is ArrResult.Err -> return@withContext r
+            is ArrResult.Ok -> r.value
+        }
         writeThrough(
             call = {
                 if (isNew) {
-                    downloadClientApi.addDownloadClient(resource = resource)
+                    downloadClientApi.addDownloadClient(resource = resolved)
                 } else {
-                    downloadClientApi.updateDownloadClient(id = resource.id, resource = resource)
+                    downloadClientApi.updateDownloadClient(id = resolved.id, resource = resolved)
                 }
             },
             method = if (isNew) POST_METHOD else PUT_METHOD,
-            path = if (isNew) DOWNLOAD_CLIENT_PATH else "$DOWNLOAD_CLIENT_PATH/${resource.id}",
-            body = resource,
+            path = path,
+            body = resolved,
             serializer = DownloadClientResource.serializer(),
             cache = { saved ->
                 store.put(
@@ -524,16 +705,18 @@ class LidarrConnectRepository(
                     DownloadClientResource.serializer(),
                 )
             },
-            cacheQueued = {
+            cacheQueued = { redacted ->
                 putOptimistic(
                     DOWNLOAD_CLIENT_TYPE,
                     isNew,
-                    resource,
+                    redacted,
                     DownloadClientResource.serializer(),
                     { it.id.toString() },
                 ) { r, id -> r.copy(id = id) }
             },
             description = "Save download client ${resource.name.orEmpty()}",
+            secretsOf = { secretValuesOf(it.fields) },
+            sanitize = ::sanitizeDownloadClient,
         )
     }
 
@@ -617,17 +800,29 @@ class LidarrConnectRepository(
     suspend fun saveImportList(resource: ImportListResource): ArrResult<WriteOutcome> =
         withContext(ioContext) {
             val isNew = resource.id <= 0
+            val path = if (isNew) IMPORT_LIST_PATH else "$IMPORT_LIST_PATH/${resource.id}"
+            val resolved = when (
+                val r = resolveSecrets(
+                    resource,
+                    rememberUnder = if (isNew) null else path,
+                    fieldsOf = { it.fields },
+                    withFields = { res, fields -> res.copy(fields = fields) },
+                )
+            ) {
+                is ArrResult.Err -> return@withContext r
+                is ArrResult.Ok -> r.value
+            }
             writeThrough(
                 call = {
                     if (isNew) {
-                        importListApi.addImportList(resource = resource)
+                        importListApi.addImportList(resource = resolved)
                     } else {
-                        importListApi.updateImportList(id = resource.id, resource = resource)
+                        importListApi.updateImportList(id = resolved.id, resource = resolved)
                     }
                 },
                 method = if (isNew) POST_METHOD else PUT_METHOD,
-                path = if (isNew) IMPORT_LIST_PATH else "$IMPORT_LIST_PATH/${resource.id}",
-                body = resource,
+                path = path,
+                body = resolved,
                 serializer = ImportListResource.serializer(),
                 cache = { saved ->
                     store.put(
@@ -638,16 +833,18 @@ class LidarrConnectRepository(
                         ImportListResource.serializer(),
                     )
                 },
-                cacheQueued = {
+                cacheQueued = { redacted ->
                     putOptimistic(
                         IMPORT_LIST_TYPE,
                         isNew,
-                        resource,
+                        redacted,
                         ImportListResource.serializer(),
                         { it.id.toString() },
                     ) { r, id -> r.copy(id = id) }
                 },
                 description = "Save import list ${resource.name.orEmpty()}",
+                secretsOf = { secretValuesOf(it.fields) },
+                sanitize = ::sanitizeImportList,
             )
         }
 
@@ -755,17 +952,29 @@ class LidarrConnectRepository(
         resource: NotificationResource,
     ): ArrResult<WriteOutcome> = withContext(ioContext) {
         val isNew = resource.id <= 0
+        val path = if (isNew) NOTIFICATION_PATH else "$NOTIFICATION_PATH/${resource.id}"
+        val resolved = when (
+            val r = resolveSecrets(
+                resource,
+                rememberUnder = if (isNew) null else path,
+                fieldsOf = { it.fields },
+                withFields = { res, fields -> res.copy(fields = fields) },
+            )
+        ) {
+            is ArrResult.Err -> return@withContext r
+            is ArrResult.Ok -> r.value
+        }
         writeThrough(
             call = {
                 if (isNew) {
-                    notificationApi.addNotification(resource = resource)
+                    notificationApi.addNotification(resource = resolved)
                 } else {
-                    notificationApi.updateNotification(id = resource.id, resource = resource)
+                    notificationApi.updateNotification(id = resolved.id, resource = resolved)
                 }
             },
             method = if (isNew) POST_METHOD else PUT_METHOD,
-            path = if (isNew) NOTIFICATION_PATH else "$NOTIFICATION_PATH/${resource.id}",
-            body = resource,
+            path = path,
+            body = resolved,
             serializer = NotificationResource.serializer(),
             cache = { saved ->
                 store.put(
@@ -776,16 +985,18 @@ class LidarrConnectRepository(
                     NotificationResource.serializer(),
                 )
             },
-            cacheQueued = {
+            cacheQueued = { redacted ->
                 putOptimistic(
                     NOTIFICATION_TYPE,
                     isNew,
-                    resource,
+                    redacted,
                     NotificationResource.serializer(),
                     { it.id.toString() },
                 ) { r, id -> r.copy(id = id) }
             },
             description = "Save notification ${resource.name.orEmpty()}",
+            secretsOf = { secretValuesOf(it.fields) },
+            sanitize = ::sanitizeNotification,
         )
     }
 
@@ -813,17 +1024,29 @@ class LidarrConnectRepository(
     suspend fun saveMetadata(resource: MetadataResource): ArrResult<WriteOutcome> =
         withContext(ioContext) {
             val isNew = resource.id <= 0
+            val path = if (isNew) METADATA_PATH else "$METADATA_PATH/${resource.id}"
+            val resolved = when (
+                val r = resolveSecrets(
+                    resource,
+                    rememberUnder = if (isNew) null else path,
+                    fieldsOf = { it.fields },
+                    withFields = { res, fields -> res.copy(fields = fields) },
+                )
+            ) {
+                is ArrResult.Err -> return@withContext r
+                is ArrResult.Ok -> r.value
+            }
             writeThrough(
                 call = {
                     if (isNew) {
-                        metadataApi.addMetadata(resource = resource)
+                        metadataApi.addMetadata(resource = resolved)
                     } else {
-                        metadataApi.updateMetadata(id = resource.id, resource = resource)
+                        metadataApi.updateMetadata(id = resolved.id, resource = resolved)
                     }
                 },
                 method = if (isNew) POST_METHOD else PUT_METHOD,
-                path = if (isNew) METADATA_PATH else "$METADATA_PATH/${resource.id}",
-                body = resource,
+                path = path,
+                body = resolved,
                 serializer = MetadataResource.serializer(),
                 cache = { saved ->
                     store.put(
@@ -834,16 +1057,18 @@ class LidarrConnectRepository(
                         MetadataResource.serializer(),
                     )
                 },
-                cacheQueued = {
+                cacheQueued = { redacted ->
                     putOptimistic(
                         METADATA_TYPE,
                         isNew,
-                        resource,
+                        redacted,
                         MetadataResource.serializer(),
                         { it.id.toString() },
                     ) { r, id -> r.copy(id = id) }
                 },
                 description = "Save metadata consumer ${resource.name.orEmpty()}",
+                secretsOf = { secretValuesOf(it.fields) },
+                sanitize = ::sanitizeMetadata,
             )
         }
 
@@ -864,6 +1089,199 @@ class LidarrConnectRepository(
 
     suspend fun testMetadata(resource: MetadataResource): ArrResult<Unit> = withContext(ioContext) {
         testThrough { metadataApi.testMetadata(resource = resource) }
+    }
+
+    // ------------------------------------------------------------------ replay
+
+    /**
+     * Replays this group's queued provider writes through the same APIs the
+     * editors use. Redacted secret values are restored from the values
+     * captured at enqueue time; a queued body whose secrets are gone (the
+     * process restarted before replay) is removed from the queue instead of
+     * posting placeholders to the server. Runs only when every pending
+     * action is one of this group's provider writes, so a foreign action
+     * keeps its attempt budget for the shared replay path. Returns null
+     * when nothing was replayable.
+     */
+    suspend fun replayQueuedActions(): Pair<Int, Int>? = withContext(ioContext) {
+        val queued = actionQueue.pending()
+        if (queued.isEmpty()) return@withContext null
+        if (queued.any { it.serverId != serverId || !isOwnProviderAction(it) }) {
+            return@withContext null
+        }
+        try {
+            actionQueue.replay(::executeQueued)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (t: Throwable) {
+            null
+        }
+    }
+
+    /** Matches this group's provider creates, updates, and deletes only. */
+    private fun isOwnProviderAction(action: QueuedAction): Boolean {
+        val base = REPLAYABLE_PROVIDER_PATHS.firstOrNull {
+            action.path == it || action.path.startsWith("$it/")
+        } ?: return false
+        if (action.path == base) return action.method == POST_METHOD
+        val id = action.path.removePrefix("$base/").substringBefore('/').toIntOrNull() ?: return false
+        return action.method == PUT_METHOD || action.method == DELETE_METHOD
+    }
+
+    private suspend fun executeQueued(action: QueuedAction): Boolean = try {
+        executeProviderAction(action)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (t: Throwable) {
+        false
+    }
+
+    private suspend fun executeProviderAction(action: QueuedAction): Boolean {
+        val base = REPLAYABLE_PROVIDER_PATHS.first { action.path == it || action.path.startsWith("$it/") }
+        val id = action.path.removePrefix("$base/").substringBefore('/').toIntOrNull()
+        return when (base) {
+            INDEXER_PATH -> when (action.method) {
+                DELETE_METHOD -> replayDelete(id, INDEXER_TYPE) { indexerApi.deleteIndexer(it) }
+
+                else -> replayProviderBody(
+                    action, IndexerResource.serializer(),
+                    { it.fields }, { r, f -> r.copy(fields = f) },
+                    { saved -> store.put(serverId, INDEXER_TYPE, saved.id.toString(), saved, IndexerResource.serializer()) },
+                ) { body ->
+                    if (id == null) {
+                        indexerApi.addIndexer(resource = body)
+                    } else {
+                        indexerApi.updateIndexer(id = id, resource = body)
+                    }
+                }
+            }
+
+            DOWNLOAD_CLIENT_PATH -> when (action.method) {
+                DELETE_METHOD -> replayDelete(id, DOWNLOAD_CLIENT_TYPE) { downloadClientApi.deleteDownloadClient(it) }
+
+                else -> replayProviderBody(
+                    action, DownloadClientResource.serializer(),
+                    { it.fields }, { r, f -> r.copy(fields = f) },
+                    { saved ->
+                        store.put(
+                            serverId, DOWNLOAD_CLIENT_TYPE, saved.id.toString(),
+                            saved, DownloadClientResource.serializer(),
+                        )
+                    },
+                ) { body ->
+                    if (id == null) {
+                        downloadClientApi.addDownloadClient(resource = body)
+                    } else {
+                        downloadClientApi.updateDownloadClient(id = id, resource = body)
+                    }
+                }
+            }
+
+            IMPORT_LIST_PATH -> when (action.method) {
+                DELETE_METHOD -> replayDelete(id, IMPORT_LIST_TYPE) { importListApi.deleteImportList(it) }
+
+                else -> replayProviderBody(
+                    action, ImportListResource.serializer(),
+                    { it.fields }, { r, f -> r.copy(fields = f) },
+                    { saved ->
+                        store.put(
+                            serverId, IMPORT_LIST_TYPE, saved.id.toString(),
+                            saved, ImportListResource.serializer(),
+                        )
+                    },
+                ) { body ->
+                    if (id == null) {
+                        importListApi.addImportList(resource = body)
+                    } else {
+                        importListApi.updateImportList(id = id, resource = body)
+                    }
+                }
+            }
+
+            NOTIFICATION_PATH -> when (action.method) {
+                DELETE_METHOD -> replayDelete(id, NOTIFICATION_TYPE) { notificationApi.deleteNotification(it) }
+
+                else -> replayProviderBody(
+                    action, NotificationResource.serializer(),
+                    { it.fields }, { r, f -> r.copy(fields = f) },
+                    { saved ->
+                        store.put(
+                            serverId, NOTIFICATION_TYPE, saved.id.toString(),
+                            saved, NotificationResource.serializer(),
+                        )
+                    },
+                ) { body ->
+                    if (id == null) {
+                        notificationApi.addNotification(resource = body)
+                    } else {
+                        notificationApi.updateNotification(id = id, resource = body)
+                    }
+                }
+            }
+
+            METADATA_PATH -> when (action.method) {
+                DELETE_METHOD -> replayDelete(id, METADATA_TYPE) { metadataApi.deleteMetadata(it) }
+
+                else -> replayProviderBody(
+                    action, MetadataResource.serializer(),
+                    { it.fields }, { r, f -> r.copy(fields = f) },
+                    { saved ->
+                        store.put(
+                            serverId, METADATA_TYPE, saved.id.toString(),
+                            saved, MetadataResource.serializer(),
+                        )
+                    },
+                ) { body ->
+                    if (id == null) {
+                        metadataApi.addMetadata(resource = body)
+                    } else {
+                        metadataApi.updateMetadata(id = id, resource = body)
+                    }
+                }
+            }
+
+            else -> false
+        }
+    }
+
+    /** Replays one queued provider delete; these APIs throw instead of answering a status. */
+    private suspend fun replayDelete(
+        id: Int?,
+        type: EntityType,
+        call: suspend (Int) -> Any?,
+    ): Boolean {
+        if (id == null) return false
+        call(id)
+        store.delete(serverId, type, id.toString())
+        return true
+    }
+
+    /**
+     * Decodes one queued provider body, restores its redacted secrets from
+     * the live vault, executes it, and caches the redacted server row.
+     * Returns false (and drops the action) when the real values are gone.
+     */
+    private suspend fun <T> replayProviderBody(
+        action: QueuedAction,
+        serializer: kotlinx.serialization.KSerializer<T>,
+        fieldsOf: (T) -> List<Field>?,
+        withFields: (T, List<Field>?) -> T,
+        cache: suspend (T) -> Unit,
+        execute: suspend (T) -> T?,
+    ): Boolean {
+        val queued = runCatching {
+            ArrJson.decodeFromString(serializer, action.bodyJson.orEmpty())
+        }.getOrNull() ?: return false
+        val resolved = resolveQueuedSecrets(action, queued, fieldsOf, withFields)
+        if (resolved == null) {
+            // The values left memory with the process that enqueued this
+            // action; failing outright beats posting placeholders.
+            actionQueue.remove(action.actionId)
+            return false
+        }
+        val saved = execute(resolved) ?: return false
+        cache(withFields(saved, redactedFields(fieldsOf(saved))))
+        return true
     }
 
     // ------------------------------------------------------------------ queue
@@ -911,19 +1329,26 @@ class LidarrConnectRepository(
         body: T,
         serializer: kotlinx.serialization.KSerializer<T>,
         cache: suspend (T) -> Unit,
-        cacheQueued: suspend () -> Unit,
+        cacheQueued: suspend (T) -> Unit,
         description: String,
+        secretsOf: (T) -> Map<String, JsonElement> = { emptyMap() },
+        sanitize: (T) -> T = { it },
     ): ArrResult<WriteOutcome> {
         val saved = try {
             call()
         } catch (e: IOException) {
-            return enqueueWrite(method, path, body, serializer, cacheQueued, description, ArrError.Network(e))
+            return enqueueWrite(
+                method, path, body, serializer, cacheQueued, description,
+                ArrError.Network(e), secretsOf, sanitize,
+            )
         } catch (e: HttpException) {
             return ArrResult.err(e.toArrError())
         } catch (e: Throwable) {
             return ArrResult.err(ArrError.Unknown(e))
         }
-        cache(saved)
+        // The server echoes real secret values back; only a redacted copy
+        // may enter the cache.
+        cache(sanitize(saved))
         return ArrResult.ok(WriteOutcome.Synced)
     }
 
@@ -963,25 +1388,35 @@ class LidarrConnectRepository(
         path: String,
         body: T,
         serializer: kotlinx.serialization.KSerializer<T>,
-        cache: suspend () -> Unit,
+        cache: suspend (T) -> Unit,
         description: String,
         error: ArrError,
+        secretsOf: (T) -> Map<String, JsonElement> = { emptyMap() },
+        sanitize: (T) -> T = { it },
     ): ArrResult<WriteOutcome> {
         if (!error.isRetryable()) return ArrResult.err(error)
+        // The queued copy and the optimistic cache row carry only the
+        // sentinel; the real secret values are vaulted in memory keyed by
+        // the action id, so replay can restore them without any persistent
+        // copy ever existing.
+        val redactedBody = sanitize(body)
         val action = QueuedAction(
             actionId = ActionId(UUID.randomUUID().toString()),
             serverId = serverId,
             appType = AppType.LIDARR,
             method = method,
             path = path,
-            bodyJson = ArrJson.encodeToString(serializer, body),
+            bodyJson = ArrJson.encodeToString(serializer, redactedBody),
             description = description,
             // The queue orders by timestamp and breaks ties on the random
             // action id, so rapid queued writes get a strictly increasing
             // stamp to keep their replay order.
             enqueuedAtMillis = now() + writeSequence.getAndIncrement(),
         )
-        cache()
+        secretsOf(body).takeIf { it.isNotEmpty() }?.let { secrets ->
+            liveSecrets["$ACTION_KEY_PREFIX${action.actionId.value}"] = secrets
+        }
+        cache(redactedBody)
         actionQueue.enqueue(action)
         return ArrResult.ok(WriteOutcome.Queued(action.actionId))
     }
@@ -1105,6 +1540,25 @@ class LidarrConnectRepository(
         internal const val EXCLUSION_PATH = "api/v1/importlistexclusion"
         internal const val NOTIFICATION_PATH = "api/v1/notification"
         internal const val METADATA_PATH = "api/v1/metadata"
+
+        /**
+         * Placeholder written over secret field values in every cached or
+         * queued copy. Never send it to a server: restore the real value
+         * first or fail the write.
+         */
+        internal const val SECRET_SENTINEL = "__SECRET__"
+
+        private const val ACTION_KEY_PREFIX = "action:"
+        private const val PROVIDER_KEY_PREFIX = "provider:"
+
+        /** Provider write paths this repository can replay on its own. */
+        private val REPLAYABLE_PROVIDER_PATHS = listOf(
+            INDEXER_PATH,
+            DOWNLOAD_CLIENT_PATH,
+            IMPORT_LIST_PATH,
+            NOTIFICATION_PATH,
+            METADATA_PATH,
+        )
         private val FEATURE_PATHS = listOf(
             INDEXER_PATH,
             INDEXER_CONFIG_PATH,
