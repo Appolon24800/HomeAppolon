@@ -28,12 +28,16 @@ class ArrPollWorker(
     private val bounds: IntervalBounds = IntervalBounds.DEFAULT,
 ) : CoroutineWorker(appContext, params) {
 
-    /** WorkManager's default factory reflectively builds this constructor. */
+    /**
+     * WorkManager's default factory reflectively builds this constructor. A
+     * process cold-started straight into a poll never ran app start, so the
+     * default adapters are registered here before they are read.
+     */
     constructor(appContext: Context, params: WorkerParameters) : this(
         appContext,
         params,
         SyncBootstrap.dataGraph(appContext),
-        SyncBootstrap.adapters(),
+        coldStartAdapters(appContext),
         SyncBootstrap.notificationPoster(appContext),
         SyncBootstrap.notificationDedupe(),
         SyncBootstrap.stateStore(appContext),
@@ -128,4 +132,10 @@ class ArrPollWorker(
     private companion object {
         const val TAG = "ArrPollWorker"
     }
+}
+
+/** Registers the process defaults, then reads the resulting adapter map. */
+private fun coldStartAdapters(context: Context): Map<AppType, PollAdapter> {
+    SyncBootstrap.ensureDefaultAdapters(context)
+    return SyncBootstrap.adapters()
 }

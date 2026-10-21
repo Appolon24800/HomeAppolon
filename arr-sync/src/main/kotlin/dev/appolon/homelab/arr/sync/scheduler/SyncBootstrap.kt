@@ -55,6 +55,7 @@ object SyncBootstrap {
     @Volatile private var syncState: SyncStateStore? = null
     @Volatile private var dedupe: NotificationDedupe? = null
     @Volatile private var scheduled = false
+    @Volatile private var defaultAdapterRegistrar: (() -> Unit)? = null
 
     fun registerAdapter(type: AppType, adapter: PollAdapter) {
         synchronized(adaptersByType) { adaptersByType[type] = adapter }
@@ -62,6 +63,39 @@ object SyncBootstrap {
 
     fun adapters(): Map<AppType, PollAdapter> =
         synchronized(adaptersByType) { adaptersByType.toMap() }
+
+    /**
+     * Installs the registrar that builds the five default per-app adapters.
+     * :app owns the adapter classes (they live in the feature modules), so it
+     * supplies this hook; the worker leans on it when its process never ran
+     * app start. Pass null to clear.
+     */
+    fun installDefaultAdapterRegistrar(registrar: (() -> Unit)?) {
+        defaultAdapterRegistrar = registrar
+    }
+
+    /**
+     * Registers the default adapters when none are registered, so a worker
+     * built in a cold process still polls. Prefers the registrar :app
+     * installed; when even that has not run (a process WorkManager started
+     * straight into a poll), resolves it reflectively through the :app
+     * bootstrap object, whose name the `@Keep` annotation pins. Registration
+     * is idempotent, so concurrent paths converge.
+     */
+    fun ensureDefaultAdapters(context: Context) {
+        synchronized(adaptersByType) {
+            if (adaptersByType.isNotEmpty()) return
+        }
+        defaultAdapterRegistrar?.let { registrar ->
+            registrar()
+            return
+        }
+        runCatching {
+            Class.forName(APP_BOOTSTRAP_CLASS)
+                .getMethod("registerSyncAdaptersForColdStart", Context::class.java)
+                .invoke(null, context.applicationContext)
+        }
+    }
 
     /** Call from app startup; repeat calls are no-ops. */
     fun initialize(context: Context, defaultInterval: Duration = IntervalBounds.DEFAULT_INTERVAL) {
@@ -143,6 +177,9 @@ object SyncBootstrap {
     }
 
     private const val STATE_FILE_NAME = "arr_sync.preferences.pb"
+
+    /** Reflective target of [ensureDefaultAdapters]; kept stable by `@Keep`. */
+    private const val APP_BOOTSTRAP_CLASS = "dev.appolon.homelab.arr.ArrBootstrap"
 }
 
 /**

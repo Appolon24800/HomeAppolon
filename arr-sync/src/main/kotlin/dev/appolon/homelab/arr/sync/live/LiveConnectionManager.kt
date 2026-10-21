@@ -86,6 +86,10 @@ class LiveConnectionManager(
 
     private val inflight = Channel<ArrEvent>(Channel.UNLIMITED)
     private val connections = mutableMapOf<ServerId, Managed>()
+
+    /** Every connection ever installed; stop tears all of them down, map or not. */
+    private val installed = LinkedHashSet<Managed>()
+
     private val mutex = Mutex()
     private val started = AtomicBoolean(false)
     private val notificationSeq = AtomicLong()
@@ -108,13 +112,16 @@ class LiveConnectionManager(
     /**
      * Reconciles connections with [specs]: stops connections for removed or
      * edited servers, starts connections for added ones. Safe to call anytime.
+     *
+     * The whole pass runs under the mutex. Concurrent calls would otherwise
+     * both observe the same missing server and install two sockets for it,
+     * and only one of them would ever be torn down.
      */
     suspend fun refresh() {
         if (!started.get()) return
-        val desired = specs().associateBy(LiveServerSpec::serverId)
-        val stale = mutableListOf<Managed>()
-        val fresh = mutableListOf<LiveServerSpec>()
         mutex.withLock {
+            val desired = specs().associateBy(LiveServerSpec::serverId)
+            val stale = mutableListOf<Managed>()
             val iterator = connections.entries.iterator()
             while (iterator.hasNext()) {
                 val entry = iterator.next()
@@ -126,14 +133,11 @@ class LiveConnectionManager(
                     iterator.remove()
                 }
             }
+            stale.forEach { managed -> teardown(managed) }
             desired.values.forEach { spec ->
-                if (spec.serverId !in connections) fresh += spec
+                if (spec.serverId !in connections) install(spec)
             }
         }
-        // Stopping can suspend on network teardown; keep it out of the lock so
-        // event pumps and state watchers keep making progress.
-        stale.forEach { managed -> teardown(managed) }
-        fresh.forEach { spec -> install(spec) }
     }
 
     /** Stops every connection and the gate; [start] may be called again later. */
@@ -141,14 +145,16 @@ class LiveConnectionManager(
         if (!started.compareAndSet(true, false)) return
         managerJob?.cancel()
         val all = mutex.withLock {
-            val copy = connections.values.toList()
+            val copy = (connections.values + installed).distinct()
             connections.clear()
+            installed.clear()
             copy
         }
         all.forEach { managed -> teardown(managed) }
         _states.value = emptyMap()
     }
 
+    /** Registers the connection with both trackers; the caller holds [mutex]. */
     private suspend fun install(spec: LiveServerSpec) {
         val connection = connectionFactory.create(spec)
         val pump = scope.launch {
@@ -159,7 +165,9 @@ class LiveConnectionManager(
                 _states.update { current -> current + (spec.serverId to state) }
             }
         }
-        mutex.withLock { connections[spec.serverId] = Managed(spec, connection, pump, watch) }
+        val managed = Managed(spec, connection, pump, watch)
+        connections[spec.serverId] = managed
+        installed += managed
         connection.start()
     }
 

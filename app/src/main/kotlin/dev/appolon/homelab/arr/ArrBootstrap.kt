@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.annotation.Keep
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.appolon.homelab.arr.core.AppType
 import dev.appolon.homelab.arr.core.ServerId
@@ -27,6 +28,7 @@ import dev.appolon.homelab.arr.net.ArrClientFactory
 import dev.appolon.homelab.arr.net.DefaultArrClientFactory
 import dev.appolon.homelab.arr.net.ServerEndpoint
 import dev.appolon.homelab.arr.net.TrustSpec
+import dev.appolon.homelab.arr.sync.ArrEvent
 import dev.appolon.homelab.arr.sync.live.LiveConnectionManager
 import dev.appolon.homelab.arr.sync.live.LiveServerSpec
 import dev.appolon.homelab.arr.sync.scheduler.ArrNotificationChannels
@@ -43,6 +45,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -52,6 +56,7 @@ import kotlinx.coroutines.launch
  * the data graph, route registry, merged shell content, and live connection
  * manager are singletons, and DataStore tolerates a single writer per file.
  */
+@Keep
 object ArrBootstrap {
 
     @Volatile
@@ -62,20 +67,54 @@ object ArrBootstrap {
             runtime ?: ArrRuntime(context.applicationContext).also { runtime = it }
         }
 
-    /** Channel registration plus graph warm-up; called through [ArrIntegration.onAppStart]. */
+    /**
+     * Channel registration, poll scheduling, and graph warm-up; called through
+     * [ArrIntegration.onAppStart].
+     */
     internal fun onAppStart(context: Context) {
         val app = context.applicationContext
         app.getSystemService(NotificationManager::class.java)?.let { manager ->
             ArrNotificationChannels.ensureCreated(app, manager)
         }
+        // Schedules the unique periodic poll; KEEP leaves an existing schedule.
+        SyncBootstrap.initialize(app)
         runtime(app)
+    }
+
+    /**
+     * Reflective target [SyncBootstrap.ensureDefaultAdapters] resolves when a
+     * process WorkManager cold-started straight into a poll never ran
+     * [onAppStart]. `@JvmStatic` plus the object's `@Keep` keep the entry
+     * reachable and named in minified builds.
+     */
+    @Keep
+    @JvmStatic
+    fun registerSyncAdaptersForColdStart(context: Context) {
+        registerDefaultSyncAdapters(
+            graph = SyncBootstrap.dataGraph(context),
+            clientFactory = DefaultArrClientFactory(),
+        )
     }
 }
 
 /**
+ * The five per-app poll adapters, built on the process graph. Both paths that
+ * need them call this: app start (through [ArrRuntime]) and the worker's cold
+ * start (through [ArrBootstrap.registerSyncAdaptersForColdStart]).
+ */
+internal fun registerDefaultSyncAdapters(graph: ArrDataGraph, clientFactory: ArrClientFactory) {
+    SyncBootstrap.registerAdapter(AppType.RADARR, RadarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+    SyncBootstrap.registerAdapter(AppType.SONARR, SonarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+    SyncBootstrap.registerAdapter(AppType.LIDARR, LidarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+    SyncBootstrap.registerAdapter(AppType.PROWLARR, ProwlarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+    SyncBootstrap.registerAdapter(AppType.BAZARR, BazarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+}
+
+/**
  * Owns the arr singletons and their background scope. Nothing here touches
- * disk until first access; construction is cheap enough to trigger lazily
- * from the first dashboard tap or app start.
+ * disk until first access: the graph's members are lazy, and the feature
+ * wiring (which fans them into shell contents) waits for the first
+ * [ArrHost] composition through [content].
  */
 internal class ArrRuntime(context: Context) {
     val graph: ArrDataGraph = SyncBootstrap.dataGraph(context)
@@ -83,27 +122,23 @@ internal class ArrRuntime(context: Context) {
     val registry: ArrRouteRegistry = ArrRouteRegistry()
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val wiring = ArrFeatureWiring(
-        graph = graph,
-        registry = registry,
-        clientFactory = clientFactory,
-        scope = scope,
-    )
 
-    /** Merged shell content for every configured app. */
-    val content: ArrShellContent = wiring.content
-
-    init {
-        // Background sync adapters: one per app type, sharing the graph and client factory.
-        SyncBootstrap.registerAdapter(AppType.RADARR, RadarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
-        SyncBootstrap.registerAdapter(AppType.SONARR, SonarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
-        SyncBootstrap.registerAdapter(AppType.LIDARR, LidarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
-        SyncBootstrap.registerAdapter(AppType.PROWLARR, ProwlarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
-        SyncBootstrap.registerAdapter(AppType.BAZARR, BazarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+    /** Deferred until the first [ArrHost] composition; see the class KDoc. */
+    private val wiring by lazy {
+        ArrFeatureWiring(
+            graph = graph,
+            registry = registry,
+            clientFactory = clientFactory,
+            scope = scope,
+            liveEvents = live.events,
+        )
     }
 
+    /** Merged shell content for every configured app. */
+    val content: ArrShellContent get() = wiring.content
+
     /** Switcher display data, kept live from the server registry. */
-    val shellServers = wiring.shellServers
+    val shellServers: MutableStateFlow<List<ShellServer>> get() = wiring.shellServers
 
     private val live = LiveConnectionManager(
         scope = scope,
@@ -112,14 +147,28 @@ internal class ArrRuntime(context: Context) {
         clientFactory = clientFactory,
     )
 
+    /** Every live event from every server; the wiring scopes it per feature. */
+    val liveEvents: SharedFlow<ArrEvent> get() = live.events
+
+    init {
+        // Background sync adapters: one per app type, sharing the graph and client factory.
+        registerDefaultSyncAdapters(graph, clientFactory)
+        SyncBootstrap.installDefaultAdapterRegistrar {
+            registerDefaultSyncAdapters(graph, clientFactory)
+        }
+    }
+
     init {
         scope.launch { graph.initialize() }
     }
 
-    /** Starts the SignalR/socket.io connections for every configured server. */
+    /**
+     * Starts the SignalR/socket.io connections for every configured server.
+     * [LiveConnectionManager.start] schedules the first reconcile itself; a
+     * second refresh here would race it and could install duplicates.
+     */
     fun startLive() {
         live.start()
-        scope.launch { live.refresh() }
     }
 
     /** Stops every live connection; [startLive] can bring them back later. */
@@ -186,10 +235,11 @@ fun ArrHost(serverId: ServerId, onExit: () -> Unit, modifier: Modifier = Modifie
                     val app: AppType = servers.firstOrNull { it.id == target }?.appType
                         ?: return@LaunchedEffect
                     val initial: ArrRoute = if (hasServerHome) {
+                        // The wiring fills the server-home slot with the
+                        // server's library screen, so this lands on content.
                         ArrRoute.ServerHome(target)
                     } else {
-                        // No feature bundle fills the server-home slot yet,
-                        // so land on the app's library screen instead.
+                        // Belt and braces for a wiring without the fallback.
                         ArrRoute.Library(target, app)
                     }
                     navigator.open(initial)
