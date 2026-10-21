@@ -32,8 +32,8 @@ import okhttp3.Response
 class DefaultArrClientFactory(
     private val orbotDetector: OrbotDetector = OrbotDetector(),
     base: OkHttpClient = OkHttpClient(),
-    private val globalProxy: () -> ProxyConfig? = { null },
-    private val cookieSource: CookieSource = CookieSource.None,
+    private val globalProxy: () -> ProxyConfig? = { ArrNetworkDefaults.globalProxy() },
+    private val cookieSource: CookieSource = CookieSource { ArrNetworkDefaults.cookieSource.cookiesFor(it) },
 ) : ArrClientFactory {
     private val baseClient = base
     private val cache = ConcurrentHashMap<CacheKey, CachedClient>()
@@ -117,7 +117,9 @@ class DefaultArrClientFactory(
                         UserAgentInterceptor
                     },
                 )
-                addInterceptor(SessionCookieInterceptor(endpoint.baseUrl, cookieSource))
+                if (authenticated) {
+                    addNetworkInterceptor(SessionCookieInterceptor(endpoint.baseUrl, cookieSource))
+                }
                 configureProxy(proxy)
                 configureTrust(endpoint.trust)
             }

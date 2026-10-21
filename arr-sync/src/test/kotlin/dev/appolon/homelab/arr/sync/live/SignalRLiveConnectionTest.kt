@@ -84,7 +84,7 @@ class SignalRLiveConnectionTest {
     @Test
     fun `hub url keeps the path prefix and url-encodes the access token`() {
         assertEquals(
-            "http://host:7878/radarr/signalr?access_token=abc%2F123",
+            "http://host:7878/radarr/signalr/messages?access_token=abc%2F123",
             signalRHubUrl("http://host:7878/radarr/", "abc/123"),
         )
     }

@@ -63,6 +63,10 @@ import kotlinx.coroutines.launch
 @Keep
 object ArrBootstrap {
 
+    fun configureSessionCookies() {
+        dev.appolon.homelab.arr.net.ArrNetworkDefaults.cookieSource = WebViewCookieSource()
+    }
+
     @Volatile
     private var runtime: ArrRuntime? = null
 
@@ -195,6 +199,7 @@ internal class ArrRuntime(context: Context) {
     val liveEvents: SharedFlow<ArrEvent> get() = live.events
 
     init {
+        dev.appolon.homelab.arr.net.ArrNetworkDefaults.globalProxy = globalProxySnapshot(graph, scope)
         // Reconnect = replay time: whenever connectivity returns, drain the
         // offline action queue once for every registered server.
         scope.launch {
@@ -265,7 +270,12 @@ internal class ArrRuntime(context: Context) {
  * the host enters composition and stop when it leaves.
  */
 @Composable
-fun ArrHost(serverId: ServerId, onExit: () -> Unit, modifier: Modifier = Modifier) {
+fun ArrHost(
+    serverId: ServerId,
+    onExit: () -> Unit,
+    modifier: Modifier = Modifier,
+    openGeneration: Long = 0L,
+) {
     val context = LocalContext.current
     val runtime = remember(context) { ArrBootstrap.runtime(context) }
     val servers by runtime.shellServers.collectAsStateWithLifecycle()
@@ -276,48 +286,10 @@ fun ArrHost(serverId: ServerId, onExit: () -> Unit, modifier: Modifier = Modifie
         onDispose { runtime.stopLive() }
     }
 
-    // The shell always starts on the server list; the dashboard tap already
-    // chose a server, so navigate to it once the shell's navigator exists.
-    // The list destination is the first composed screen, which is why the
-    // one-shot trigger rides inside its content slot.
-    var pendingInitial by remember(serverId) { mutableStateOf<ServerId?>(serverId) }
+    // The shell's server choice rides ArrShell's focus parameters: first
+    // open, re-open, and server switches all flow through the switcher's
+    // idempotent navigation policy there.
     val base = runtime.content
-    val content = if (pendingInitial == null) {
-        base
-    } else {
-        val target = serverId
-        val hasServerHome = base.serverHome != null
-        ArrShellContent(
-            serverList = { route ->
-                val navigator = LocalArrShellNavigator.current
-                LaunchedEffect(target, servers) {
-                    // Wait for the registry emission: a shell opened straight
-                    // from a tap can compose before the collector lands.
-                    val app: AppType = servers.firstOrNull { it.id == target }?.appType
-                        ?: return@LaunchedEffect
-                    val initial: ArrRoute = if (hasServerHome) {
-                        // The wiring fills the server-home slot with the
-                        // server's library screen, so this lands on content.
-                        ArrRoute.ServerHome(target)
-                    } else {
-                        // Belt and braces for a wiring without the fallback.
-                        ArrRoute.Library(target, app)
-                    }
-                    navigator.open(initial)
-                    pendingInitial = null
-                }
-                base.serverList?.invoke(route)
-            },
-            serverHome = base.serverHome,
-            library = base.library,
-            detail = base.detail,
-            add = base.add,
-            queue = base.queue,
-            calendar = base.calendar,
-            settings = base.settings,
-            feature = base.feature,
-        )
-    }
 
     ArrTheme {
         ArrShell(
@@ -326,7 +298,9 @@ fun ArrHost(serverId: ServerId, onExit: () -> Unit, modifier: Modifier = Modifie
             onExit = onExit,
             modifier = modifier,
             registry = runtime.registry,
-            content = content,
+            content = base,
+            focusServer = serverId,
+            focusGeneration = openGeneration,
         )
     }
 }

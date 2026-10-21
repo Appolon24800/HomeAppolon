@@ -8,8 +8,40 @@ import okhttp3.Request
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import dev.appolon.homelab.arr.core.ServerId
 
 class SessionCookiesTest {
+
+    @Test
+    fun `default feature factories use the application session policy without leaking on redirect`() {
+        val origin = MockWebServer()
+        val foreign = MockWebServer()
+        origin.start()
+        foreign.start()
+        val previous = ArrNetworkDefaults.cookieSource
+        try {
+            ArrNetworkDefaults.cookieSource = MapCookieSource(mapOf("sid" to "session"))
+            origin.enqueue(MockResponse().setResponseCode(302).setHeader("Location", foreign.url("/login")))
+            foreign.enqueue(MockResponse().setBody("ok"))
+            val factory = DefaultArrClientFactory()
+            val endpoint = ServerEndpoint(ServerId("cookie-test"), origin.url("/").toString(), "key")
+            factory.clientFor(endpoint).newCall(Request.Builder().url(origin.url("/api")).build())
+                .execute().use { assertTrue(it.isSuccessful) }
+            assertTrue(origin.takeRequest().getHeader("Cookie")?.contains("sid=session") == true)
+            val redirected = foreign.takeRequest()
+            assertNull(redirected.getHeader("Cookie"))
+            assertNull(redirected.getHeader("X-Api-Key"))
+
+            origin.enqueue(MockResponse().setBody("image"))
+            factory.imageClientFor(endpoint).newCall(Request.Builder().url(origin.url("/poster")).build())
+                .execute().close()
+            assertNull(origin.takeRequest().getHeader("Cookie"))
+        } finally {
+            ArrNetworkDefaults.cookieSource = previous
+            origin.shutdown()
+            foreign.shutdown()
+        }
+    }
 
     private class MapCookieSource(private val map: Map<String, String>) : CookieSource {
         override fun cookiesFor(url: String): List<Cookie> = map.entries.map { (name, value) ->

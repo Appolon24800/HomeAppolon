@@ -3,6 +3,7 @@ package dev.appolon.homelab.arr.sync.live
 import com.microsoft.signalr.Action1
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
+import com.microsoft.signalr.HubConnectionState
 import com.microsoft.signalr.TransportEnum
 import dev.appolon.homelab.arr.core.AppType
 import dev.appolon.homelab.arr.core.ServerId
@@ -15,6 +16,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -26,6 +29,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okhttp3.Credentials
 import okhttp3.OkHttpClient
 
@@ -57,6 +63,7 @@ internal class SignalRHubPort(
     endpoint: ServerEndpoint,
     httpClient: OkHttpClient,
 ) : HubPort {
+    private val lifecycle = Mutex()
     private val hub: HubConnection = HubConnectionBuilder.create(
         signalRHubUrl(endpoint.baseUrl, endpoint.apiKey),
     )
@@ -87,11 +94,21 @@ internal class SignalRHubPort(
     }
 
     override suspend fun start() {
-        hub.start().awaitCompletion()
+        // HubConnection.stop crashes inside Rx if negotiation fails while a
+        // stop waits for it. Let the hot start operation settle before stop.
+        withContext(NonCancellable) {
+            lifecycle.withLock { hub.start().awaitCompletion() }
+        }
     }
 
     override suspend fun stop() {
-        hub.stop().awaitCompletion()
+        withContext(NonCancellable) {
+            lifecycle.withLock {
+                if (hub.connectionState != HubConnectionState.DISCONNECTED) {
+                    hub.stop().awaitCompletion()
+                }
+            }
+        }
     }
 
     private fun nameOf(payload: Map<String, Any?>): String? = payload["name"] as? String
@@ -183,21 +200,20 @@ class SignalRLiveConnection(
                 attempt++
             }
         } finally {
+            withContext(NonCancellable) {
+                try {
+                    hubPort.stop()
+                } catch (_: Exception) {
+                    // A failed live transport must not crash the library UI.
+                }
+            }
             _state.value = LiveConnectionState.DISCONNECTED
         }
     }
 
     override suspend fun stop() {
         if (!running.compareAndSet(true, false)) return
-        try {
-            hubPort.stop()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            // Stopping a hub that never opened can still throw; it stays stopped.
-        } finally {
-            loopJob?.cancel()
-        }
+        loopJob?.cancelAndJoin()
     }
 
     private companion object {
@@ -206,13 +222,13 @@ class SignalRLiveConnection(
 }
 
 /**
- * Servarr serves its hub at `{base}/signalr` and authenticates it like the
+ * Servarr serves its hub at `{base}/signalr/messages` and authenticates it like the
  * REST API. The key rides both the header and the query string: the header is
  * what the API middleware validates, the query string is the standard SignalR
  * token channel and survives proxies that rewrite upgrade requests.
  */
 internal fun signalRHubUrl(baseUrl: String, apiKey: String): String =
-    baseUrl.trimEnd('/') + "/signalr?access_token=" + URLEncoder.encode(apiKey, "UTF-8")
+    baseUrl.trimEnd('/') + "/signalr/messages?access_token=" + URLEncoder.encode(apiKey, "UTF-8")
 
 /**
  * Stamps the server's identity on both the negotiate POST and the websocket
@@ -239,6 +255,9 @@ private fun identityHeaders(endpoint: ServerEndpoint): Map<String, String> {
  * upgrade request get exactly one copy each.
  */
 private fun OkHttpClient.Builder.mirrorNetworkPolicyOf(client: OkHttpClient) {
+    callTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+    client.interceptors.forEach(::addInterceptor)
+    client.networkInterceptors.forEach(::addNetworkInterceptor)
     client.proxy?.let { proxy(it) }
     client.sslSocketFactory?.let { factory ->
         client.x509TrustManager?.let { trustManager -> sslSocketFactory(factory, trustManager) }

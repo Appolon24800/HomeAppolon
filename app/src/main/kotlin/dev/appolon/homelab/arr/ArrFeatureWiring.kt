@@ -522,7 +522,7 @@ internal class ArrFeatureWiring(
                 shellServers.value = servers.map {
                     ShellServer(id = it.id, name = it.name, appType = it.type)
                 }
-                allSettingsBundles.forEach { it.refresh(servers) }
+                allSettingsBundles.forEach { it.retainServers(servers) }
             }
         }
     }
@@ -872,11 +872,8 @@ internal class ArrFeatureWiring(
             connect(id)?.let { value -> map = map + (id to value) }
         }
 
-        /** Reconnects every listed server and drops bundles of removed ones. */
-        suspend fun refresh(servers: List<ArrServer>) {
-            servers.forEach { server ->
-                connect(server.id)?.let { value -> map = map + (server.id to value) }
-            }
+        /** Drop removed servers. Connections are created by the owning screen. */
+        fun retainServers(servers: List<ArrServer>) {
             map = map.filterKeys { id -> servers.any { it.id == id } }
         }
     }

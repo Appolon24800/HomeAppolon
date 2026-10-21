@@ -46,5 +46,7 @@ fun serverSwitchDirective(current: ServerId?, target: ServerId): ServerSwitchDir
     if (current == target) {
         ServerSwitchDirective.None
     } else {
-        ServerSwitchDirective.SwitchTo(popToRoot = true, saveState = true, restoreState = true)
+        // Navigation restores by destination, not by its serverId argument.
+        // Restoring a saved ServerHome here reopens the previous server.
+        ServerSwitchDirective.SwitchTo(popToRoot = true, saveState = false, restoreState = false)
     }

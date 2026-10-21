@@ -41,7 +41,7 @@ internal class SessionCookieInterceptor(
         val request = chain.request()
         if (!request.url.sameOrigin(baseUrl.toHttpUrlOrNull())) {
             // Foreign origin: no session cookies leave the server's domain.
-            return chain.proceed(request)
+            return chain.proceed(request.newBuilder().removeHeader("Cookie").build())
         }
         val cookies = runCatching { source.cookiesFor(request.url.toString()) }
             .getOrDefault(emptyList())

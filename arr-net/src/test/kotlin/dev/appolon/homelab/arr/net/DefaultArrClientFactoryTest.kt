@@ -211,7 +211,7 @@ class DefaultArrClientFactoryTest {
 
         // Each derived client carries exactly one identity interceptor,
         // regardless of how many clients were built before it.
-        assertEquals(1, second.networkInterceptors.size)
+        assertEquals(2, second.networkInterceptors.size)
     }
 
     @Test

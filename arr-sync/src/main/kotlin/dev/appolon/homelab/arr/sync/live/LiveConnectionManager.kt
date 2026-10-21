@@ -212,8 +212,16 @@ class LiveConnectionManager(
     }
 
     private suspend fun connectivityLoop() {
+        var wasOffline = false
         connectivity.distinctUntilChanged().collect { online ->
-            if (!online) return@collect
+            if (!online) {
+                wasOffline = true
+                return@collect
+            }
+            // install() already starts each connection. The initial online
+            // emission must not stop it in the middle of negotiation.
+            if (!wasOffline) return@collect
+            wasOffline = false
             val stalled = mutex.withLock {
                 connections.values
                     .filter { it.connection.state.value != LiveConnectionState.CONNECTED }

@@ -12,6 +12,7 @@ class HomelabApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        dev.appolon.homelab.arr.ArrBootstrap.configureSessionCookies()
         val isDebuggable = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         if (isDebuggable) {
             android.webkit.WebView.setWebContentsDebuggingEnabled(true)

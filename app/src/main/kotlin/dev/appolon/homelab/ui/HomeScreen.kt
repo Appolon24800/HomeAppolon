@@ -101,30 +101,17 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
+fun HomeScreen(
+    externalUrl: String? = null,
+    vm: HomeViewModel = viewModel(),
+    externalRequestId: Long = 0L,
+) {
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     var arrServer by remember { mutableStateOf<ServerId?>(null) }
-    // Deep links (home.appolon.dev/...) open straight into the WebView,
-    // unless the link carries an arr server URL plus an API key: those
-    // open the native setup sheet prefilled instead.
+    var arrOpenGeneration by remember { mutableStateOf(0L) }
     var autoFailed by remember { mutableStateOf<Pair<String, dev.appolon.homelab.arr.core.AppType>?>(null) }
-    LaunchedEffect(externalUrl) {
-        val root = dev.appolon.homelab.data.Homer.BASE_URL.trimEnd('/')
-        if (externalUrl.isNullOrBlank() || externalUrl.trimEnd('/') == root) {
-            return@LaunchedEffect
-        }
-        val parsed = dev.appolon.homelab.arr.ArrLinkParser.parse(externalUrl)
-        if (parsed != null && parsed.appType != null) {
-            val id = dev.appolon.homelab.arr.ArrAutoConnect.provision(
-                context, parsed.appType, parsed.baseUrl, parsed.apiKey,
-            )
-            if (id != null) arrServer = id
-        } else {
-            vm.openWeb(externalUrl, null)
-        }
-    }
 
     // Arr notification channels and the arr data graph exist from the first
     // frame so a service tap resolves without a cold registry read.
@@ -146,6 +133,7 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
             val serverId = ArrIntegration.openFor(context, url)
             if (serverId != null) {
                 arrServer = serverId
+                arrOpenGeneration++
                 return@launch
             }
             // A plain link that names an arr app always gets the native
@@ -158,8 +146,10 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
             connectingTo = url to appType
             try {
                 when (val outcome = dev.appolon.homelab.arr.ArrAutoConnect.connect(context, url, appType)) {
-                    is dev.appolon.homelab.arr.ArrAutoConnect.Outcome.Connected ->
+                    is dev.appolon.homelab.arr.ArrAutoConnect.Outcome.Connected -> {
                         arrServer = outcome.serverId
+                        arrOpenGeneration++
+                    }
 
                     dev.appolon.homelab.arr.ArrAutoConnect.Outcome.NeedSetup ->
                         autoFailed = url to appType
@@ -169,6 +159,28 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
                 // leave the progress overlay stuck on screen.
                 connectingTo = null
             }
+        }
+    }
+
+    // External service links use the same automatic path as dashboard taps.
+    LaunchedEffect(externalUrl, externalRequestId) {
+        val root = dev.appolon.homelab.data.Homer.BASE_URL.trimEnd('/')
+        if (externalUrl.isNullOrBlank() || externalUrl.trimEnd('/') == root) {
+            return@LaunchedEffect
+        }
+        val parsed = dev.appolon.homelab.arr.ArrLinkParser.parse(externalUrl)
+        if (parsed != null && parsed.appType != null) {
+            val id = dev.appolon.homelab.arr.ArrAutoConnect.provision(
+                context, parsed.appType, parsed.baseUrl, parsed.apiKey,
+            )
+            if (id != null) {
+                arrServer = id
+                arrOpenGeneration++
+            } else {
+                autoFailed = parsed.baseUrl to parsed.appType
+            }
+        } else {
+            openService(externalUrl, null)
         }
     }
 
@@ -331,7 +343,11 @@ fun HomeScreen(externalUrl: String? = null, vm: HomeViewModel = viewModel()) {
                 exit = slideOutHorizontally(tween(exitMillis)) { it } + fadeOut(tween(exitMillis)),
             ) {
                 lastArrServer?.let { serverId ->
-                    ArrHost(serverId = serverId, onExit = { arrServer = null })
+                    ArrHost(
+                        serverId = serverId,
+                        onExit = { arrServer = null },
+                        openGeneration = arrOpenGeneration,
+                    )
                 }
             }
         }

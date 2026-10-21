@@ -31,6 +31,11 @@ class SqliteEntityStore internal constructor(
 ) : EntityStore {
 
     private val writeTick = MutableSharedFlow<Unit>(
+        // Replay 1: a collector subscribing while a write commits must still
+        // see that write. Without replay, the invalidation tick emitted
+        // before subscription is dropped and the subscriber's initial read
+        // can race the commit, leaving a stale empty list on screen forever.
+        replay = 1,
         extraBufferCapacity = INVALIDATION_BUFFER,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )

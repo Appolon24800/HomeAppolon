@@ -32,7 +32,10 @@ class LiveConnectionManagerTest {
         appType = AppType.SONARR,
     )
 
-    private class FakeConnection(private val spec: LiveServerSpec) : LiveConnection {
+    private class FakeConnection(
+        private val spec: LiveServerSpec,
+        private val connectImmediately: Boolean = true,
+    ) : LiveConnection {
         override val serverId get() = spec.serverId
         override val appType get() = spec.appType
         private val _state = MutableStateFlow(LiveConnectionState.DISCONNECTED)
@@ -44,7 +47,7 @@ class LiveConnectionManagerTest {
 
         override suspend fun start() {
             starts++
-            _state.value = LiveConnectionState.CONNECTED
+            _state.value = if (connectImmediately) LiveConnectionState.CONNECTED else LiveConnectionState.CONNECTING
         }
 
         override suspend fun stop() {
@@ -59,6 +62,7 @@ class LiveConnectionManagerTest {
         fun drop() {
             _state.value = LiveConnectionState.RETRYING
         }
+
     }
 
     @Test
@@ -259,6 +263,22 @@ class LiveConnectionManagerTest {
         runCurrent()
         assertEquals(2, fake.starts)
         assertEquals(1, fake.stops)
+    }
+
+    @Test
+    fun `initial online emission never restarts a negotiating connection`() = runTest {
+        val fake = FakeConnection(serverA, connectImmediately = false)
+        val manager = LiveConnectionManager(
+            scope = backgroundScope,
+            connectivity = flowOf(true),
+            specs = { listOf(serverA) },
+            connectionFactory = { fake },
+            clockMillis = testScheduler::currentTime,
+        )
+        manager.start()
+        runCurrent()
+        assertEquals(1, fake.starts)
+        assertEquals(0, fake.stops)
     }
 
     @Test

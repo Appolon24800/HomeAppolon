@@ -8,6 +8,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -35,6 +36,7 @@ import dev.appolon.homelab.arr.ui.nav.fillPattern
 import dev.appolon.homelab.arr.ui.nav.nestedNavPattern
 import dev.appolon.homelab.arr.ui.nav.patternParams
 import dev.appolon.homelab.arr.ui.nav.serverSwitchDirective
+import kotlinx.coroutines.flow.first
 
 /**
  * Navigation surface for nested arr screens. Screens read it through
@@ -99,6 +101,8 @@ fun ArrShell(
     modifier: Modifier = Modifier,
     registry: ArrRouteRegistry = remember { ArrRouteRegistry() },
     content: ArrShellContent = ArrShellContent(),
+    focusServer: ServerId? = null,
+    focusGeneration: Long = 0L,
 ) {
     val navController = rememberNavController()
     val navigator = remember(navController, registry) {
@@ -108,6 +112,20 @@ fun ArrShell(
     val currentRoute = backStackEntry?.toArrRoute(registry)
     val currentServerId = currentRoute?.let(ArrRoutes::serverIdOf)
     val currentServer = servers.firstOrNull { it.id == currentServerId }
+
+    // The host's chosen server: navigate to it whenever a new focus request
+    // arrives (first open or a re-open of the same server). This must live
+    // above the NavHost: a destination-scoped effect dies with its screen,
+    // and the server list is only composed at the stack root. Membership is
+    // awaited without re-keying on the list, so later registry changes never
+    // snap the user back while they browse elsewhere.
+    val currentServers by androidx.compose.runtime.rememberUpdatedState(servers)
+    LaunchedEffect(focusServer, focusGeneration) {
+        val target = focusServer ?: return@LaunchedEffect
+        androidx.compose.runtime.snapshotFlow { currentServers.any { it.id == target } }
+            .first { it }
+        navigator.openServer(target)
+    }
 
     BackHandler {
         when (arrBackDirective(navController.previousBackStackEntry != null)) {

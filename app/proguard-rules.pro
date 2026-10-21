@@ -57,6 +57,15 @@
 -keep,allowoptimization,allowshrinking,allowobfuscation class <3>
 -keep,allowobfuscation,allowshrinking class retrofit2.Response
 
+# Retrofit creates these implementations with java.lang.reflect.Proxy. Some
+# bundles construct APIs whose methods are not called yet. Conditional rules
+# stop matching after R8 removes those methods, so R8 can replace the proxy cast
+# with an unconditional ClassCastException. Keep the interfaces and methods even
+# when no current screen calls an endpoint. Names may still be obfuscated.
+-keep,allowobfuscation interface dev.appolon.homelab.arr.api.** {
+    *;
+}
+
 # https://github.com/square/okhttp/blob/parent-5.1.0/okhttp/okhttp3.pro
 # Optional JVM TLS providers are not part of the Android runtime.
 -dontwarn javax.annotation.**
