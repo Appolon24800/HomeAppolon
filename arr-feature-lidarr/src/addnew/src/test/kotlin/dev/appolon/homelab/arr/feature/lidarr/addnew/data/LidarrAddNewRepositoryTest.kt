@@ -77,14 +77,17 @@ class LidarrAddNewRepositoryTest {
     }
 
     @Test
-    fun `syncLibraryIfStale caches artists and albums under the shared entity types`() = runTest {
+    fun `syncLibraryIfStale caches artists and never requests the album list`() = runTest {
         val artist = libraryArtist(1)
         library.artists[1] = artist
         library.albums[10] = AlbumResource(id = 10, title = "Album", foreignAlbumId = "mb-al-10", artistId = 1)
         val result = repository.syncLibraryIfStale()
         assertTrue(result is ArrResult.Ok)
         assertEquals(listOf(artist), store.getAll(serverId, LidarrAddNewRepository.ARTIST_TYPE, ArtistResource.serializer()))
-        assertEquals(1, store.getAll(serverId, LidarrAddNewRepository.ALBUM_TYPE, AlbumResource.serializer()).size)
+        // The unfiltered album list OOM-killed the process on large
+        // libraries; albums only arrive through scoped fetches.
+        assertTrue(library.requested.none { it.startsWith("album") })
+        assertTrue(store.getAll(serverId, LidarrAddNewRepository.ALBUM_TYPE, AlbumResource.serializer()).isEmpty())
     }
 
     @Test
@@ -179,13 +182,25 @@ class LidarrAddNewRepositoryTest {
         )
     }
 
+
+    /** Seeds a cached album row the way scoped fetches do. */
+    private suspend fun seedCachedAlbum(album: AlbumResource) {
+        store.put(
+            serverId,
+            LidarrAddNewRepository.ALBUM_TYPE,
+            album.id.toString(),
+            album,
+            AlbumResource.serializer(),
+        )
+    }
+
     @Test
     fun `discography refreshes the artist albums and keeps other artists rows`() = runTest {
         library.artists[1] = libraryArtist(1)
         library.artists[2] = libraryArtist(2)
         library.albums[10] = AlbumResource(id = 10, title = "Mine", foreignAlbumId = "mb-10", artistId = 1)
         library.albums[20] = AlbumResource(id = 20, title = "Other", foreignAlbumId = "mb-20", artistId = 2)
-        repository.syncLibraryIfStale()
+        seedCachedAlbum(library.albums.getValue(20))
         val result = repository.discography(1)
         assertTrue(result is ArrResult.Ok)
         assertEquals(listOf("Mine"), (result as ArrResult.Ok).value.map { it.title })
@@ -203,7 +218,8 @@ class LidarrAddNewRepositoryTest {
         library.artists[1] = libraryArtist(1)
         library.albums[10] = AlbumResource(id = 10, title = "First", foreignAlbumId = "mb-10", artistId = 1)
         library.albums[11] = AlbumResource(id = 11, title = "Second", foreignAlbumId = "mb-11", artistId = 1)
-        repository.syncLibraryIfStale()
+        seedCachedAlbum(library.albums.getValue(10))
+        seedCachedAlbum(library.albums.getValue(11))
         val payload = AlbumStudioResource(
             artist = listOf(
                 dev.appolon.homelab.arr.api.lidarr.model.AlbumStudioArtistResource(
@@ -228,7 +244,7 @@ class LidarrAddNewRepositoryTest {
     fun `applyAlbumStudio offline applies optimistically and queues the POST`() = runTest {
         library.artists[1] = libraryArtist(1)
         library.albums[10] = AlbumResource(id = 10, title = "First", foreignAlbumId = "mb-10", artistId = 1)
-        repository.syncLibraryIfStale()
+        seedCachedAlbum(library.albums.getValue(10))
         library.error = { if (it == "updateAlbumStudio") IOException("plane mode") else null }
         val payload = AlbumStudioResource(
             artist = listOf(

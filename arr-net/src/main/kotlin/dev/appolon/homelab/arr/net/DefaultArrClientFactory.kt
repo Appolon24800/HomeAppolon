@@ -120,6 +120,7 @@ class DefaultArrClientFactory(
                 if (authenticated) {
                     addNetworkInterceptor(SessionCookieInterceptor(endpoint.baseUrl, cookieSource))
                 }
+                addInterceptor(OversizedResponseGuard)
                 configureProxy(proxy)
                 configureTrust(endpoint.trust)
             }

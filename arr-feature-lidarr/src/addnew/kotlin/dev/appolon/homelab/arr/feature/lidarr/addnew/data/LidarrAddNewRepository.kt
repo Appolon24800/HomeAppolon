@@ -122,9 +122,9 @@ class LidarrAddNewRepository(
                 return@withContext ArrResult.err(e.arrError())
             }
             reconcileArtists(fetchedArtists)
-            // Album failures degrade the existing-album badges to stale data;
-            // they never block the artist list.
-            runCatching { refreshAllAlbums() }
+            // Album badges degrade to whatever scoped fetches cached; the
+            // unfiltered album list is tens of megabytes on large libraries
+            // and one string materialization OOM-kills the process.
             ArrResult.ok(Unit)
         }
 
@@ -164,16 +164,6 @@ class LidarrAddNewRepository(
     private suspend fun cachedAlbumsOf(artistId: Int): List<AlbumResource> =
         store.getAll(serverId, ALBUM_TYPE, AlbumResource.serializer())
             .filter { it.artistId == artistId }
-
-    private suspend fun refreshAllAlbums() {
-        val fetched = albumApi.getAlbums(
-            artistId = null,
-            albumIds = null,
-            foreignAlbumId = null,
-            includeAllArtistAlbums = null,
-        )
-        reconcileAlbums(fetched)
-    }
 
     /** Root folders for the picker, cached with their own TTL. */
     suspend fun rootFolders(

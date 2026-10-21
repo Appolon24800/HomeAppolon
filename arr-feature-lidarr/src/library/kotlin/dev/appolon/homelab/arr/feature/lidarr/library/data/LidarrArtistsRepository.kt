@@ -91,17 +91,14 @@ class LidarrArtistsRepository(
         return now() - fetched > ttlMillis
     }
 
-    /** Fetches the artist library and, best effort, the album rollup source. */
+    /** Fetches the artist library; album caches fill from scoped fetches only. */
     suspend fun refresh(): ArrResult<Unit> = withContext(ioContext) {
-        when (val artists = refreshArtists()) {
-            is ArrResult.Err -> artists
-            is ArrResult.Ok -> {
-                // Album failures degrade the release-status counts to plain
-                // statistics; they never block the artist list.
-                refreshAlbums()
-                ArrResult.ok(Unit)
-            }
-        }
+        // Never fetch /api/v1/album unfiltered: a large library answers with
+        // tens of megabytes, and the JSON converter materializes the whole
+        // body as one string, which OOM-kills the process. Album data arrives
+        // through scoped fetches (wanted, calendar, detail) instead, and the
+        // artist statistics carry the counts the list shows.
+        refreshArtists()
     }
 
     /** Refresh only when the TTL expired; the steady-state path after the first load. */
@@ -133,36 +130,6 @@ class LidarrArtistsRepository(
             ARTIST_TYPE,
             fresh.map { it.id.toString() to it },
             ArtistResource.serializer(),
-            fetchedAtMillis = now(),
-        )
-        return ArrResult.ok(Unit)
-    }
-
-    private suspend fun refreshAlbums(): ArrResult<Unit> {
-        val fetched = try {
-            albumApi.getAlbums(artistId = null, albumIds = null, foreignAlbumId = null, includeAllArtistAlbums = null)
-        } catch (e: HttpException) {
-            return ArrResult.err(e.toArrError())
-        } catch (e: Throwable) {
-            return ArrResult.err(e.arrError())
-        }
-        val incoming = fetched.associateBy { it.id }
-        val existing = cachedAlbums()
-        existing.forEach { cached ->
-            val id = cached.id.toString()
-            val replacement = incoming[cached.id]
-            if (replacement != null) {
-                store.put(serverId, ALBUM_TYPE, id, replacement, AlbumResource.serializer())
-            } else {
-                store.delete(serverId, ALBUM_TYPE, id)
-            }
-        }
-        val fresh = fetched.filter { album -> existing.none { it.id == album.id } }
-        store.putAll(
-            serverId,
-            ALBUM_TYPE,
-            fresh.map { it.id.toString() to it },
-            AlbumResource.serializer(),
             fetchedAtMillis = now(),
         )
         return ArrResult.ok(Unit)

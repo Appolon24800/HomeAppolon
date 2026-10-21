@@ -154,6 +154,19 @@ def main():
             f'top bar title starts at {top}px of {height}px; '
             'window insets are stacking again'
         )
+    def click_through(target, appears, attempts=3):
+        # A tap can land while the hub is still settling; verify the target
+        # screen appeared and tap again when it did not.
+        for attempt in range(attempts):
+            click(target)
+            try:
+                wait_text(appears, timeout=15)
+                return
+            except AssertionError:
+                if attempt == attempts - 1:
+                    raise
+                wait_text('Add new', timeout=15)
+
     def click(text):
         if text == 'Open settings':
             # With several servers, the settings button is at the end of the
@@ -175,6 +188,23 @@ def main():
         x1, y1, x2, y2 = map(int, re.findall(r'\d+', node.get('bounds')))
         adb('shell', 'input', 'tap', str((x1 + x2) // 2), str((y1 + y2) // 2))
 
+    def ensure_hub(timeout=60):
+        # A warm re-open of the server already on screen does not re-enter
+        # the hub; pop once to the server home when it does not appear.
+        deadline = time.monotonic() + timeout
+        popped = False
+        while time.monotonic() < deadline:
+            try:
+                return wait_text('Add new', timeout=8)
+            except AssertionError:
+                if not popped:
+                    adb('shell', 'input', 'keyevent', '4')
+                    time.sleep(2)
+                    popped = True
+                else:
+                    continue
+        raise AssertionError('server home hub never appeared')
+
     def open_server(app, cold=False):
         if cold:
             adb('shell', 'am', 'force-stop', PACKAGE)
@@ -183,6 +213,14 @@ def main():
             {'app': app, 'url': url, 'apikey': key},
         )
         adb('shell', 'am start -a android.intent.action.VIEW -d ' + shlex.quote(link))
+        # The server home hub renders first; every main destination must be
+        # listed on it before the walk continues into the library.
+        _, hub_root = ensure_hub(timeout=90 if cold else 60)
+        for destination in ('Library', 'Queue', 'Calendar', 'Wanted', 'History'):
+            assert any(
+                n.get('text') == destination for n in hub_root.iter('node')
+            ), f'{app} hub is missing its {destination} entry'
+        click_through('Library', 'Series' if app == 'sonarr' else 'Movies')
         title_node, root = wait_text('Series' if app == 'sonarr' else 'Movies')
         check_top_padding(title_node, root)
         if not args.live_properties:
@@ -233,12 +271,29 @@ def main():
         open_server('radarr')
         # Server switching must change arguments, not restore the previous app.
         click('Sonarr')
+        wait_text('Add new')
+        click_through('Library', 'Series')
         wait_text('Series')
         click('Radarr')
+        wait_text('Add new')
+        click_through('Library', 'Movies')
         wait_text('Movies')
         print('PASS server switch in both directions', flush=True)
         for app in ('radarr', 'sonarr'):
             open_server(app)
+            # open_server leaves the library on screen; pop back to the hub
+            # deterministically for the destination walk.
+            adb('shell', 'input', 'keyevent', '4')
+            wait_text('Add new')
+            # Every hub destination must render without crashing: the queue
+            # and wanted screens ride client bundles that the startup warm
+            # used to provide.
+            for destination, marker in (('Queue', 'The queue is empty'), ('Wanted', 'Missing')):
+                click_through(destination, marker)
+                adb('shell', 'input', 'keyevent', '4')
+                time.sleep(2)
+                wait_text('Add new')
+            print(f'PASS {app} hub destinations render', flush=True)
             click('Open settings')
             click('Download clients')
             wait_text('Download clients')
@@ -261,7 +316,8 @@ def main():
                 base = f'http://localhost:18089/auto/{time.monotonic_ns()}/{app}/'
                 adb('shell', 'am start -n ' + PACKAGE + '/.MainActivity -a android.intent.action.VIEW -d '
                     + shlex.quote(base))
-                wait_text(f'Automatic smoke {app}')
+                wait_text('Add new')
+                click_through('Library', f'Automatic smoke {app}')
                 print(f'PASS {app} automatic discovery and cookie-gated native API', flush=True)
         # Allow pending live callbacks to run after repeated stop/start cycles.
         time.sleep(3)

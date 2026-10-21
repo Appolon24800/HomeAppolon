@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LaPlateforme</string>
+
+    <!-- Native arr server home destinations. -->
+    <string name="arr_home_library">Library</string>
+    <string name="arr_home_add">Add new</string>
+    <string name="arr_home_queue">Queue</string>
+    <string name="arr_home_calendar">Calendar</string>
+    <string name="arr_home_wanted">Wanted</string>
+    <string name="arr_home_history">History</string>
 </resources>

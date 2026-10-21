@@ -133,6 +133,15 @@ class ArtistLibraryViewModelTest {
 
     private fun runVm(block: suspend kotlinx.coroutines.test.TestScope.() -> Unit) = runTest {
         vm = build()
+        // Album data arrives through scoped fetches in production; seed the
+        // cache the same way instead of relying on the library refresh.
+        store.putAll(
+            ServerId("s1"),
+            LidarrArtistsRepository.ALBUM_TYPE,
+            fake.albums.values.map { it.id.toString() to it },
+            AlbumResource.serializer(),
+            fetchedAtMillis = 1_000L,
+        )
         val job = launch { vm.lce.collect {} }
         advanceUntilIdle()
         block()

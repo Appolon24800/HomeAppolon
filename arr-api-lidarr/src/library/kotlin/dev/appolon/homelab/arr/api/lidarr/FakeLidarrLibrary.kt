@@ -42,9 +42,13 @@ class FakeLidarrLibrary(
     val excludedAlbumIds: MutableSet<Int> = linkedSetOf()
     val deletedTrackFileIds: MutableSet<Int> = linkedSetOf()
 
+    /** Every API method invoked, in order; asserts which calls a flow makes. */
+    val requested: MutableList<String> = mutableListOf()
+
     private val empty = JsonObject(emptyMap())
 
     private suspend fun before(operation: String) {
+        requested += operation
         latency(operation)
         error(operation)?.let { throw it }
     }

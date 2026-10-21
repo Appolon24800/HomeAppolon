@@ -8,6 +8,9 @@ import dev.appolon.homelab.arr.net.ArrJson
 import dev.appolon.homelab.arr.net.ServerEndpoint
 import dev.appolon.homelab.arr.net.TrustSpec
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,6 +38,11 @@ import dev.appolon.homelab.arr.api.lidarr.LidarrQueueApis
 import dev.appolon.homelab.arr.api.radarr.RadarrQueueApis
 import dev.appolon.homelab.arr.api.radarr.RadarrSystemApis
 import dev.appolon.homelab.arr.api.sonarr.SonarrQueueApis
+import dev.appolon.homelab.R as AppR
+import dev.appolon.homelab.arr.feature.lidarr.calendar.LidarrCalendarRoutes
+import dev.appolon.homelab.arr.feature.lidarr.wanted.LidarrWantedRoutes
+import dev.appolon.homelab.arr.feature.sonarr.calendar.SonarrCalendarRoutes
+import dev.appolon.homelab.arr.feature.sonarr.wanted.SonarrWantedRoutes
 import dev.appolon.homelab.arr.core.AppType
 import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
@@ -472,11 +480,23 @@ internal class ArrFeatureWiring(
 
     /**
      * Radarr's built-in queue destination draws a foreign-app placeholder for
-     * other apps, so the fan-out only forwards Radarr routes to it.
+     * other apps, so the fan-out only forwards Radarr routes to it. The queue
+     * clients ride a settings bundle: this shell slot is outside
+     * [SettingsDispatch], so it applies the same connect-then-render gate
+     * itself instead of reading the provider before the bundle lands.
      */
     private val radarrQueueSlot: (@Composable (ArrRoute.Queue) -> Unit)? = { route ->
         if (route.app == AppType.RADARR) {
-            radarrQueueContent.queue?.invoke(route)
+            if (radarrQueueBundles.isReady(route.serverId)) {
+                radarrQueueContent.queue?.invoke(route)
+            } else {
+                LaunchedEffect(route.serverId) {
+                    radarrQueueBundles.connectNow(route.serverId)
+                }
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
         }
     }
 
@@ -492,7 +512,7 @@ internal class ArrFeatureWiring(
     /** The single merged content the shell renders. */
     val content: ArrShellContent = ArrShellContent(
         serverList = serversContent.serverList,
-        serverHome = { route -> ServerHomeFallback(route, librarySlot) },
+        serverHome = { route -> ServerHomeHub(route, librarySlot) },
         library = librarySlot,
         detail = fanOut(
             radarrDetail.detail,
@@ -671,19 +691,21 @@ internal class ArrFeatureWiring(
     // ---- shell destinations ----------------------------------------------
 
     /**
-     * Renders the server-home destination. No feature owns a server-home
-     * screen, so render the server's library for its app type; this is the
-     * same fallback [ArrHost] applies at initial entry, covering the server
-     * switcher's `openServer` navigation.
+     * Renders the server-home destination: the hub of everything this app
+     * offers for one server. The library, add, queue, and calendar slots are
+     * shell routes; wanted, history (activity), and app-specific calendar
+     * helpers open feature routes. Without this hub those screens were
+     * wired into the shell but reachable by nothing.
      */
+    @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
     @Composable
-    private fun ServerHomeFallback(
+    private fun ServerHomeHub(
         route: ArrRoute.ServerHome,
         library: (@Composable (ArrRoute.Library) -> Unit)?,
     ) {
         val servers by shellServers.collectAsStateWithLifecycle()
         val appType = servers.firstOrNull { it.id == route.serverId }?.appType
-        if (appType == null || library == null) {
+        if (appType == null) {
             EmptyState(
                 title = stringResource(dev.appolon.homelab.arr.ui.R.string.arr_shell_unavailable_title),
                 message = stringResource(
@@ -693,7 +715,84 @@ internal class ArrFeatureWiring(
             )
             return
         }
-        library(ArrRoute.Library(route.serverId, appType))
+        if (appType == AppType.PROWLARR || appType == AppType.BAZARR) {
+            // Their roots are single screens (indexers, subtitles); the
+            // library slot already is their home content.
+            if (library == null) {
+                EmptyState(
+                    title = stringResource(dev.appolon.homelab.arr.ui.R.string.arr_shell_unavailable_title),
+                    message = stringResource(
+                        dev.appolon.homelab.arr.ui.R.string.arr_shell_unavailable_message,
+                        appType.wireName,
+                    ),
+                )
+            } else {
+                library(ArrRoute.Library(route.serverId, appType))
+            }
+            return
+        }
+
+        val navigator = LocalArrShellNavigator.current
+        val id = route.serverId
+        val items: List<Pair<String, () -> Unit>> = listOf(
+            stringResource(AppR.string.arr_home_library) to {
+                navigator.open(ArrRoute.Library(id, appType))
+            },
+            stringResource(AppR.string.arr_home_add) to {
+                navigator.open(ArrRoute.Add(id, appType))
+            },
+            stringResource(AppR.string.arr_home_queue) to {
+                navigator.open(ArrRoute.Queue(id, appType))
+            },
+            stringResource(AppR.string.arr_home_calendar) to {
+                when (appType) {
+                    AppType.RADARR -> RadarrCalendarFeature.openCalendar(navigator, id)
+                    AppType.SONARR -> SonarrCalendarRoutes.openCalendar(navigator, id)
+                    else -> LidarrCalendarRoutes.openCalendar(navigator, id)
+                }
+            },
+            stringResource(AppR.string.arr_home_wanted) to {
+                when (appType) {
+                    AppType.RADARR -> RadarrWantedFeature.openWanted(navigator, id)
+                    AppType.SONARR -> SonarrWantedRoutes.openWanted(navigator, id)
+                    else -> LidarrWantedRoutes.openWanted(navigator, id)
+                }
+            },
+            stringResource(AppR.string.arr_home_history) to {
+                when (appType) {
+                    AppType.RADARR -> RadarrActivityFeature.openHistory(navigator, id)
+                    AppType.SONARR -> SonarrActivityFeature.openHistory(navigator, id)
+                    else -> LidarrActivityFeature.openHistory(navigator, id)
+                }
+            },
+        )
+        ArrScaffold(title = appType.displayName) { padding ->
+            LazyColumn(
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+            ) {
+                items(items) { (title, open) ->
+                    ListItem(
+                        headlineContent = {
+                            Text(title, style = MaterialTheme.typography.titleSmall)
+                        },
+                        trailingContent = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { open() },
+                    )
+                }
+            }
+        }
     }
 
     /**

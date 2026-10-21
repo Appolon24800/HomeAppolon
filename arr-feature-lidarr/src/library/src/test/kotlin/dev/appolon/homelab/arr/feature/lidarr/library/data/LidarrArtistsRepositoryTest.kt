@@ -94,34 +94,48 @@ class LidarrArtistsRepositoryTest {
         statistics = AlbumStatisticsResource(trackFileCount = trackFileCount, trackCount = 10),
     )
 
+
+    /** Seeds the album cache the way scoped fetches (wanted, detail) do. */
+    private suspend fun seedAlbumCache() {
+        store.putAll(
+            serverId,
+            LidarrArtistsRepository.ALBUM_TYPE,
+            fake.albums.values.map { it.id.toString() to it },
+            AlbumResource.serializer(),
+            fetchedAtMillis = 1_000L,
+        )
+    }
+
     @Test
-    fun `refresh fills the artist and album caches and stamps fetchedAt`() = runTest {
+    fun `refresh fills the artist cache and never requests the album list`() = runTest {
+        val operations = mutableListOf<String>()
+        fake.error = { operation -> operations += operation; null }
         val result = repository.refresh()
         assertTrue(result is ArrResult.Ok)
         assertEquals(listOf("Alpha", "Beta"), repository.cachedArtists().map { it.artistName })
-        assertEquals(3, repository.cachedAlbums().size)
+        assertTrue(repository.cachedAlbums().isEmpty())
         assertEquals(1_000L, store.lastFetchedAt(serverId, LidarrArtistsRepository.ARTIST_TYPE))
-        assertEquals(1_000L, store.lastFetchedAt(serverId, LidarrArtistsRepository.ALBUM_TYPE))
+        // The unfiltered album list is tens of megabytes on large libraries;
+        // one string materialization OOM-killed the process.
+        assertTrue("getAlbums" !in operations)
     }
 
     @Test
-    fun `refresh reconciles rows removed on the server`() = runTest {
+    fun `cached albums come from scoped fetches not the library refresh`() = runTest {
+        repository.refresh()
+        seedAlbumCache()
+        assertEquals(3, repository.cachedAlbums().size)
+    }
+
+    @Test
+    fun `refresh reconciles artist rows removed on the server`() = runTest {
         repository.refresh()
         fake.artists.remove(1)
-        fake.albums.keys.removeAll { it in setOf(11, 12) }
         repository.refresh()
         assertEquals(listOf("Beta"), repository.cachedArtists().map { it.artistName })
-        assertEquals(listOf(21), repository.cachedAlbums().map { it.id })
     }
 
-    @Test
-    fun `refresh succeeds when only the album fetch fails`() = runTest {
-        fake.error = { operation -> if (operation == "getAlbums") IOException("half offline") else null }
-        val result = repository.refresh()
-        assertTrue(result is ArrResult.Ok)
-        assertEquals(2, repository.cachedArtists().size)
-        assertTrue(repository.cachedAlbums().isEmpty())
-    }
+
 
     @Test
     fun `isStale honors the ttl`() = runTest {
@@ -189,6 +203,7 @@ class LidarrArtistsRepositoryTest {
     @Test
     fun `missing strategy also monitors missing albums and enqueues the studio call`() = runTest {
         repository.refresh()
+        seedAlbumCache()
         fake.error = { _ -> IOException("offline") }
         val editor = ArtistEditorResource(
             artistIds = listOf(1),
@@ -229,6 +244,7 @@ class LidarrArtistsRepositoryTest {
     @Test
     fun `delete offline removes rows optimistically and enqueues`() = runTest {
         repository.refresh()
+        seedAlbumCache()
         fake.error = { _ -> IOException("offline") }
         val outcome = repository.deleteArtists(listOf(1), deleteFiles = true, addImportListExclusion = false)
         assertTrue((outcome as ArrResult.Ok).value is WriteOutcome.Queued)
