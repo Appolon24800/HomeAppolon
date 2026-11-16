@@ -1,11 +1,38 @@
 package dev.appolon.homelab.arr
 
 import dev.appolon.homelab.arr.core.AppType
+import dev.appolon.homelab.arr.core.ServerId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
 class ArrLinkParserTest {
+
+    @Test
+    fun `notification link identifies a stored server without credentials`() {
+        assertEquals(ServerId("server-1"), ArrLinkParser.serverIdForUrl("homelab://arr/server/server-1"))
+    }
+
+    @Test
+    fun `notification links preserve reserved characters in the stored server id`() {
+        assertEquals(
+            ServerId("server + / %25 ü"),
+            ArrLinkParser.serverIdForUrl("homelab://arr/server/server%20%2B%20%2F%20%2525%20%C3%BC"),
+        )
+    }
+
+    @Test
+    fun `notification links reject other routes and malformed ids`() {
+        listOf(
+            "https://arr/server/server-1",
+            "homelab://other/server/server-1",
+            "homelab://arr/server/",
+            "homelab://arr/server/server-1/extra",
+            "homelab://arr/server/server-1?url=http://elsewhere",
+            "homelab://arr/server/server-1#fragment",
+            "homelab://user@arr/server/server-1",
+        ).forEach { assertNull(it, ArrLinkParser.serverIdForUrl(it)) }
+    }
 
     @Test
     fun `explicit connect link with all parameters`() {

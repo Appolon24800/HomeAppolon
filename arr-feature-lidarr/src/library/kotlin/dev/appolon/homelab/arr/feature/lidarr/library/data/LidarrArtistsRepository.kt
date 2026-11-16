@@ -26,9 +26,12 @@ import dev.appolon.homelab.arr.data.QueuedAction
 import dev.appolon.homelab.arr.net.ArrJson
 import dev.appolon.homelab.arr.net.arrError
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 
@@ -76,6 +79,8 @@ class LidarrArtistsRepository(
     private val ioContext: kotlin.coroutines.CoroutineContext = Dispatchers.IO,
 ) {
 
+    private val refreshMutex = Mutex()
+
     fun observeArtists(): Flow<List<ArtistResource>> =
         store.observe(serverId, ARTIST_TYPE, ArtistResource.serializer())
 
@@ -92,7 +97,9 @@ class LidarrArtistsRepository(
     }
 
     /** Fetches the artist library; album caches fill from scoped fetches only. */
-    suspend fun refresh(): ArrResult<Unit> = withContext(ioContext) {
+    suspend fun refresh(): ArrResult<Unit> = refreshMutex.withLock { refreshOnce() }
+
+    private suspend fun refreshOnce(): ArrResult<Unit> = withContext(ioContext) {
         // Never fetch /api/v1/album unfiltered: a large library answers with
         // tens of megabytes, and the JSON converter materializes the whole
         // body as one string, which OOM-kills the process. Album data arrives
@@ -110,28 +117,24 @@ class LidarrArtistsRepository(
             artistApi.getArtists(mbId = null)
         } catch (e: HttpException) {
             return ArrResult.err(e.toArrError())
-        } catch (e: Throwable) {
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
             return ArrResult.err(e.arrError())
         }
-        val incoming = fetched.associateBy { it.id }
-        val existing = cachedArtists()
-        existing.forEach { cached ->
-            val id = cached.id.toString()
-            val replacement = incoming[cached.id]
-            if (replacement != null) {
-                store.put(serverId, ARTIST_TYPE, id, replacement, ArtistResource.serializer())
-            } else {
-                store.delete(serverId, ARTIST_TYPE, id)
-            }
+        try {
+            store.replaceAll(
+                serverId,
+                ARTIST_TYPE,
+                fetched.map { it.id.toString() to it },
+                ArtistResource.serializer(),
+                fetchedAtMillis = now(),
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return ArrResult.err(e.arrError())
         }
-        val fresh = fetched.filter { artist -> existing.none { it.id == artist.id } }
-        store.putAll(
-            serverId,
-            ARTIST_TYPE,
-            fresh.map { it.id.toString() to it },
-            ArtistResource.serializer(),
-            fetchedAtMillis = now(),
-        )
         return ArrResult.ok(Unit)
     }
 
@@ -143,7 +146,7 @@ class LidarrArtistsRepository(
         withContext(ioContext) {
             val cached = store.getAll(serverId, QUALITY_PROFILE_TYPE, QualityProfileResource.serializer())
             val fetched = store.lastFetchedAt(serverId, QUALITY_PROFILE_TYPE)
-            if (fetched != null && now() - fetched <= ttlMillis && cached.isNotEmpty()) {
+            if (fetched != null && now() - fetched <= ttlMillis) {
                 return@withContext ArrResult.ok(cached)
             }
             val profiles = try {
@@ -153,18 +156,14 @@ class LidarrArtistsRepository(
             } catch (e: Throwable) {
                 return@withContext ArrResult.err(e.arrError())
             }
-            if (profiles.isNotEmpty()) {
-                store.putAll(
-                    serverId,
-                    QUALITY_PROFILE_TYPE,
-                    profiles.map { it.id.toString() to it },
-                    QualityProfileResource.serializer(),
-                    fetchedAtMillis = now(),
-                )
-                ArrResult.ok(profiles)
-            } else {
-                ArrResult.ok(cached)
-            }
+            store.replaceAll(
+                serverId,
+                QUALITY_PROFILE_TYPE,
+                profiles.map { it.id.toString() to it },
+                QualityProfileResource.serializer(),
+                fetchedAtMillis = now(),
+            )
+            ArrResult.ok(profiles)
         }
 
     /** Metadata profiles for filter labels and the editor dropdown. */
@@ -172,7 +171,7 @@ class LidarrArtistsRepository(
         withContext(ioContext) {
             val cached = store.getAll(serverId, METADATA_PROFILE_TYPE, MetadataProfileResource.serializer())
             val fetched = store.lastFetchedAt(serverId, METADATA_PROFILE_TYPE)
-            if (fetched != null && now() - fetched <= ttlMillis && cached.isNotEmpty()) {
+            if (fetched != null && now() - fetched <= ttlMillis) {
                 return@withContext ArrResult.ok(cached)
             }
             val profiles = try {
@@ -182,18 +181,14 @@ class LidarrArtistsRepository(
             } catch (e: Throwable) {
                 return@withContext ArrResult.err(e.arrError())
             }
-            if (profiles.isNotEmpty()) {
-                store.putAll(
-                    serverId,
-                    METADATA_PROFILE_TYPE,
-                    profiles.map { it.id.toString() to it },
-                    MetadataProfileResource.serializer(),
-                    fetchedAtMillis = now(),
-                )
-                ArrResult.ok(profiles)
-            } else {
-                ArrResult.ok(cached)
-            }
+            store.replaceAll(
+                serverId,
+                METADATA_PROFILE_TYPE,
+                profiles.map { it.id.toString() to it },
+                MetadataProfileResource.serializer(),
+                fetchedAtMillis = now(),
+            )
+            ArrResult.ok(profiles)
         }
 
     /**

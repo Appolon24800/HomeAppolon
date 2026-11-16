@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.feature.lidarr.queue
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -134,7 +135,7 @@ fun LidarrQueueFeatureSlot(
     modifier: Modifier = Modifier,
     fallback: (@Composable (ArrRoute.Feature) -> Unit)? = null,
 ) {
-    val segments = route.path.split('/').map(::decodeRouteSegment)
+    val segments = route.decodedPathSegments()
     val navigator = LocalArrShellNavigator.current
     val downloadMatch = matchRoutePattern(LidarrQueueFeature.MANUAL_IMPORT_DOWNLOAD_PATTERN, segments)
     val folderMatch = matchRoutePattern(LidarrQueueFeature.MANUAL_IMPORT_PATTERN, segments)

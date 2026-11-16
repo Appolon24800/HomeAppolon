@@ -1,16 +1,14 @@
 package dev.appolon.homelab.arr.feature.radarr.search
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.core.ArrResult
@@ -99,7 +97,7 @@ fun RadarrSearchFeatureSlot(
     modifier: Modifier = Modifier,
 ) {
     if (route.owner != RadarrSearchFeature.ROUTE_OWNER) return
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val releases = matchRoutePattern(RadarrSearchFeature.RELEASES_PATTERN, segments)
     val import = matchRoutePattern(RadarrSearchFeature.IMPORT_PATTERN, segments)
     when {
@@ -175,17 +173,11 @@ private fun ReleaseListDestination(
     modifier: Modifier = Modifier,
 ) {
     val repositories = rememberRepositories(graph, serverId)
-    var wired by remember(serverId) { mutableStateOf<SearchWiring?>(null) }
-    LaunchedEffect(serverId, movieId) {
-        wired = null
-        val releases = repositories.releases() ?: return@LaunchedEffect
-        val import = repositories.import() ?: return@LaunchedEffect
-        wired = SearchWiring(releases, import)
-    }
-    val pair = wired
-        ?: return Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
+    val pair = rememberServerConnection(serverId, movieId, modifier = modifier.fillMaxSize()) {
+        val releases = repositories.releases()
+        val import = repositories.import()
+        if (releases == null || import == null) null else SearchWiring(releases, import)
+    } ?: return
     val (releaseRepository, importRepository) = pair.let { it.releases to it.import }
     val vm: ReleaseListViewModel = viewModel(
         key = "radarr-releases-" + serverId.value + "-" + movieId,
@@ -243,16 +235,9 @@ private fun InteractiveImportDestination(
     modifier: Modifier = Modifier,
 ) {
     val repositories = rememberRepositories(graph, serverId)
-    var repository by remember(serverId) {
-        mutableStateOf<RadarrInteractiveImportRepository?>(null)
-    }
-    LaunchedEffect(serverId, movieId) {
-        repository = repositories.import()
-    }
-    val wiredRepository = repository
-        ?: return Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
+    val wiredRepository = rememberServerConnection(serverId, movieId, modifier = modifier.fillMaxSize()) {
+        repositories.import()
+    } ?: return
     val vm: InteractiveImportViewModel = viewModel(
         key = "radarr-import-flow-" + serverId.value + "-" + movieId,
     ) {

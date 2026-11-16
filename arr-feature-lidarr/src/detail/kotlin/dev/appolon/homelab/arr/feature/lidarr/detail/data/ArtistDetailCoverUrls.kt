@@ -33,7 +33,7 @@ object ArtistDetailCoverUrls {
             } else {
                 CoverType.FANART
             }
-            return baseUrl.trimEnd('/') + "/" +
+            return baseUrl.trimEnd('/') +
                 ArrImages.lidarrArtistCover(artist.id.toLong(), type, LOCAL_SIZE_PX)
         }
         return images.firstOrNull {
@@ -45,7 +45,7 @@ object ArtistDetailCoverUrls {
     fun albumCoverUrlOf(album: AlbumResource, baseUrl: String): String? {
         val hasLocal = album.images.orEmpty().any { it.coverType == MediaCoverTypes.COVER }
         if (hasLocal) {
-            return baseUrl.trimEnd('/') + "/" +
+            return baseUrl.trimEnd('/') +
                 ArrImages.lidarrAlbumCover(album.id.toLong(), CoverType.COVER, LOCAL_SIZE_PX)
         }
         return album.images.orEmpty()

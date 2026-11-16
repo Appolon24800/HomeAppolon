@@ -11,7 +11,9 @@ import java.net.URI
  * shell instead of the WebView. Pure JVM string logic on purpose: no Android
  * types, so the rules are unit tested without Robolectric.
  *
- * Rules, evaluated per server in registry order (first match wins):
+ * Exact origin matches take precedence over proxy aliases. Within each group,
+ * the longest matching base path wins. Registry order breaks ties.
+ * Matching rules:
  * 1. Strict: scheme, host, and effective port are equal, and the server's
  *    base path is empty, equal to, or a whole-segment prefix of the service
  *    path (`/radarr` matches `/radarr` and `/radarr/movie/12` but not
@@ -27,14 +29,14 @@ object ArrServerMatcher {
 
     /** The configured server the dashboard entry maps to, or null when it should stay a WebView page. */
     fun match(serviceUrl: String, servers: List<ArrServer>): ServerId? {
-        val trimmed = serviceUrl.trim()
-        val service = parse(trimmed) ?: return null
-        for (server in servers) {
-            val base = parse(ServerEndpoint.normalizeBaseUrl(server.baseUrl)) ?: continue
-            if (strictMatch(service, base)) return server.id
-            if (looseMatch(service, trimmed, base)) return server.id
+        val service = parse(serviceUrl.trim()) ?: return null
+        val candidates = servers.mapNotNull { server ->
+            parse(ServerEndpoint.normalizeBaseUrl(server.baseUrl))?.let { server to it }
         }
-        return null
+        return candidates.filter { (_, base) -> strictMatch(service, base) }
+            .maxByOrNull { (_, base) -> base.path.length }?.first?.id
+            ?: candidates.filter { (_, base) -> looseMatch(service, base) }
+                .maxByOrNull { (_, base) -> base.path.length }?.first?.id
     }
 
     /** Rule 1: same origin plus a path-prefix relationship. */
@@ -45,11 +47,11 @@ object ArrServerMatcher {
             pathPrefix(base.path, service.path)
 
     /** Rule 2: same host, compatible ports, base path contained in the raw service URL. */
-    private fun looseMatch(service: ParsedUrl, rawServiceUrl: String, base: ParsedUrl): Boolean =
+    private fun looseMatch(service: ParsedUrl, base: ParsedUrl): Boolean =
         base.path.isNotEmpty() &&
             service.host == base.host &&
             portsCompatible(service, base) &&
-            containsAtSegmentBoundary(rawServiceUrl, base.path)
+            containsAtSegmentBoundary(service.path, base.path)
 
     /** `/radarr` is a prefix of `/radarr/movie/12` but not of `/radarr2`. */
     private fun pathPrefix(basePath: String, servicePath: String): Boolean = when {
@@ -83,6 +85,7 @@ object ArrServerMatcher {
     private fun parse(raw: String): ParsedUrl? {
         val uri = runCatching { URI(raw) }.getOrNull() ?: return null
         val scheme = uri.scheme?.lowercase() ?: return null
+        if (scheme != "http" && scheme != "https") return null
         val host = uri.host?.lowercase() ?: return null
         val explicit = uri.port > 0
         val port = when {

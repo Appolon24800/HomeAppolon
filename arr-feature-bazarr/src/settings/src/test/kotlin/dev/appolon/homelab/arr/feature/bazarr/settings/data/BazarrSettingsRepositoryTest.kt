@@ -5,6 +5,7 @@ import dev.appolon.homelab.arr.api.bazarr.BazarrSystemCall
 import dev.appolon.homelab.arr.api.bazarr.FakeBazarrSystem
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ArrResult
+import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.bazarr.episodes.FakeActionQueue
 import dev.appolon.homelab.arr.feature.bazarr.episodes.FakeEntityStore
 import dev.appolon.homelab.arr.feature.bazarr.settings.backupRow
@@ -14,6 +15,7 @@ import dev.appolon.homelab.arr.feature.bazarr.settings.logRow
 import dev.appolon.homelab.arr.feature.bazarr.settings.model.BazarrJobRow
 import dev.appolon.homelab.arr.feature.bazarr.settings.newSettingsRepository
 import dev.appolon.homelab.arr.feature.bazarr.settings.providerRow
+import dev.appolon.homelab.arr.feature.bazarr.settings.profileRow
 import dev.appolon.homelab.arr.feature.bazarr.settings.settingsDataPayload
 import dev.appolon.homelab.arr.feature.bazarr.settings.taskRow
 import java.io.IOException
@@ -24,6 +26,8 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.junit.After
@@ -76,6 +80,7 @@ class BazarrSettingsRepositoryTest {
                 languageRow("de", "German"),
             ),
         )
+        system.responses["get_languages_profiles"] = settingsDataPayload(listOf(profileRow(1, "English")))
         system.responses["get_system_tasks"] = settingsDataPayload(
             listOf(taskRow(jobId = "update_series", name = "Update Series")),
         )
@@ -130,6 +135,80 @@ class BazarrSettingsRepositoryTest {
         repo.languages(ttlMillis = BazarrSettingsRepository.FORCE_REFRESH)
 
         assertEquals(listOf("en", "de"), repo.observeLanguages().first().map { it.code2 })
+    }
+
+    @Test
+    fun `successful empty lists clear stale settings and retain their ttl`() = runTest(main) {
+        seed()
+        val repo = repository()
+        repo.languages()
+        repo.profiles()
+        repo.providers()
+        repo.tasks()
+        repo.jobs()
+        repo.backups()
+        repo.logs()
+        listOf("get_languages", "get_languages_profiles", "get_system_tasks", "get_system_jobs", "get_system_backups", "get_system_logs").forEach {
+            system.responses[it] = settingsDataPayload(emptyList())
+        }
+        subtitles.responses["get_providers"] = settingsDataPayload(emptyList())
+        repo.languages(ttlMillis = 0)
+        repo.profiles(ttlMillis = 0)
+        repo.providers(ttlMillis = 0)
+        repo.tasks(ttlMillis = 0)
+        repo.jobs(ttlMillis = 0)
+        repo.backups(ttlMillis = 0)
+        repo.logs(ttlMillis = 0)
+        assertTrue(repo.observeLanguages().first().isEmpty())
+        assertTrue(repo.observeProfiles().first().isEmpty())
+        assertTrue(repo.observeProviders().first().isEmpty())
+        assertTrue(repo.observeTasks().first().isEmpty())
+        assertTrue(repo.observeJobs().first().isEmpty())
+        assertTrue(repo.observeBackups().first().isEmpty())
+        assertTrue(repo.observeLogs().first().isEmpty())
+        system.calls.clear()
+        val providerCallsBefore = subtitles.calls.size
+        repo.languages()
+        repo.profiles()
+        repo.providers()
+        repo.tasks()
+        repo.jobs()
+        repo.backups()
+        repo.logs()
+        assertTrue("Fresh empty settings should skip network requests", system.calls.isEmpty())
+        assertEquals(providerCallsBefore, subtitles.calls.size)
+    }
+
+    @Test
+    fun `malformed lists preserve cached data and return a parse error`() = runTest(main) {
+        seed()
+        var clock = 1_000L
+        val repo = repository { clock }
+        repo.jobs()
+        clock = 2_000L
+        for (payload in listOf(
+            buildJsonObject { },
+            buildJsonObject { put("data", "invalid") },
+            buildJsonObject { put("data", "invalid"); put("other", JsonArray(emptyList())) },
+            buildJsonObject { put("data", JsonArray(listOf(JsonNull))) },
+            settingsDataPayload(listOf(buildJsonObject { put("unrecognized", "row") })),
+        )) {
+            system.responses["get_system_jobs"] = payload
+            val result = repo.jobs(ttlMillis = 0)
+            assertTrue(result is ArrResult.Err && result.error is ArrError.Parse)
+            assertEquals(listOf(2, 3), repo.observeJobs().first().map { it.id })
+            assertEquals(1_000L, store.lastFetchedAt(ServerId("s1"), BazarrSettingsRepository.JOB_TYPE))
+        }
+    }
+
+    @Test
+    fun `an empty fallback list also clears the previous jobs`() = runTest(main) {
+        seed()
+        val repo = repository()
+        repo.jobs()
+        system.responses["get_system_jobs"] = buildJsonObject { put("items", JsonArray(emptyList())) }
+        assertTrue(repo.jobs(ttlMillis = 0) is ArrResult.Ok)
+        assertTrue(repo.observeJobs().first().isEmpty())
     }
 
     @Test

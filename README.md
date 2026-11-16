@@ -28,6 +28,9 @@ for every other service.
 
 Highlights:
 
+- Server home menus link libraries and the other implemented pages. Prowlarr
+  includes search, history, and statistics. Bazarr includes wanted subtitles,
+  history, and blacklist. Settings menus group every implemented settings page.
 - Offline caching with queued writes. Screens read from an on-device cache
   first, so libraries open without a connection and keep their last synced
   state. Changes made offline are stored and sent, oldest first, when the
@@ -106,6 +109,20 @@ the existing key for passkey authentication.
 
 Requirements: JDK 17+, Android SDK (path in `local.properties` or
 `ANDROID_HOME`). The Gradle wrapper handles the rest.
+
+Install SDK platform `android-37.0` and build tools `37.0.0`. This command runs
+unit tests and Android lint, then builds the debug app and Android test APK with
+bounded Java memory:
+
+```sh
+bash scripts/check_android.sh
+```
+
+This command builds the Android tests. Running them also needs a connected
+device or emulator. The script accepts Gradle tasks as arguments, for example
+`bash scripts/check_android.sh :arr-net:testDebugUnitTest`.
+The script uses one worker by default. Set `ANDROID_CHECK_WORKERS=2` if the
+machine has enough memory for concurrent feature compilation.
 
 ```sh
 ./gradlew assembleDebug          # app/build/outputs/apk/debug/app-debug.apk

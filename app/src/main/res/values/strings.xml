@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LaPlateforme</string>
+    <string name="arr_manage_servers">Manage servers</string>
+
+    <string name="arr_settings_connections">Connections</string>
+    <string name="arr_settings_system">System</string>
 
     <!-- Native arr server home destinations. -->
     <string name="arr_home_library">Library</string>
@@ -9,4 +13,7 @@
     <string name="arr_home_calendar">Calendar</string>
     <string name="arr_home_wanted">Wanted</string>
     <string name="arr_home_history">History</string>
+    <string name="arr_home_search">Search</string>
+    <string name="arr_home_search_history">Search history</string>
+    <string name="arr_home_search_stats">Search statistics</string>
 </resources>

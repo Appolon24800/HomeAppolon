@@ -58,6 +58,7 @@ class ArrDataGraph(
     /** Deletes a server everywhere it is referenced: registry, settings, cached entities. */
     suspend fun deleteServer(id: ServerId) {
         registry.delete(id)
+        actionQueue.removeForServer(id)
         settings.clearServer(id)
         entityStore.deleteAll(id)
     }

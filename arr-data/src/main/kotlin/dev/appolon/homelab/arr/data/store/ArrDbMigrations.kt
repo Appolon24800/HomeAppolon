@@ -12,6 +12,7 @@ internal object ArrDbMigrations {
             toVersion = 1,
             statements = listOf(EntitySql.CREATE_TABLE, EntitySql.CREATE_INDEX),
         ),
+        ArrDbMigration(toVersion = 2, statements = listOf(EntitySql.CREATE_REFRESH_TABLE)),
     )
 
     /** Current schema version; valid because versions stay contiguous from 1. */

@@ -46,8 +46,9 @@ sealed interface ArrRoute {
 
     /**
      * Opaque route holder for a nested destination owned by a feature module. The
-     * shell never inspects [path]; it only hands it back to the feature that
-     * registered the matching pattern in [ArrRouteRegistry].
+     * [path] has percent-encoded segments produced by [fillPattern]. Read its
+     * arguments through [decodedPathSegments] so an escaped slash stays inside
+     * its argument.
      */
     data class Feature(val owner: String, val path: String) : ArrRoute
 }
@@ -80,7 +81,7 @@ object ArrRoutes {
         is ArrRoute.Settings -> appScopedPath(route.serverId, route.app, "settings")
         is ArrRoute.Feature -> FEATURE_PREFIX_SEGMENT + "/" +
             RouteCodec.encode(route.owner) + "/" +
-            route.path.split('/').joinToString("/") { RouteCodec.encode(it) }
+            route.path
     }
 
     /**
@@ -150,6 +151,10 @@ object ArrRoutes {
         return build(ServerId(serverId), app)
     }
 }
+
+/** Decodes each feature argument once, after separating the path segments. */
+fun ArrRoute.Feature.decodedPathSegments(): List<String> =
+    path.split('/').map { RouteCodec.decode(it) ?: it }
 
 /**
  * Minimal RFC 3986 percent codec for single path segments. Slashes, spaces, and

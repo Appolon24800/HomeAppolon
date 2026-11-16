@@ -32,6 +32,72 @@ class SqliteEntityStoreTest {
         Movie(id, title, year)
 
     @Test
+    fun replacementRemovesDeletedRowsAndKeepsEmptyRefreshTime() = runTest {
+        val (_, store) = store()
+        val otherServer = ServerId("other")
+        val otherType = EntityType("other")
+        store.put(server, type, "1", movie(1), Movie.serializer())
+        store.put(otherServer, type, "1", movie(1), Movie.serializer())
+        store.put(server, otherType, "1", movie(1), Movie.serializer())
+        store.replaceAll(server, type, listOf("2" to movie(2)), Movie.serializer(), 100L)
+        assertEquals(listOf(movie(2)), store.getAll(server, type, Movie.serializer()))
+        assertEquals(100L, store.lastFetchedAt(server, type))
+        store.replaceAll(server, type, emptyList(), Movie.serializer(), 200L)
+        assertTrue(store.getAll(server, type, Movie.serializer()).isEmpty())
+        assertEquals(200L, store.lastFetchedAt(server, type))
+        assertEquals(listOf(movie(1)), store.getAll(otherServer, type, Movie.serializer()))
+        assertEquals(listOf(movie(1)), store.getAll(server, otherType, Movie.serializer()))
+        store.deleteAll(server, type)
+        assertNull(store.lastFetchedAt(server, type))
+        store.replaceAll(server, type, emptyList(), Movie.serializer(), 300L)
+        store.deleteAll(server)
+        assertNull(store.lastFetchedAt(server, type))
+    }
+
+    @Test
+    fun failedReplacementPreservesRowsAndPreviousRefreshTime() = runTest {
+        val db = InMemoryArrDatabase()
+        var fail = false
+        val failingDb = object : ArrDatabase by db {
+            override fun execute(sql: String, args: List<Any?>) {
+                if (fail && sql == EntitySql.UPSERT_REFRESH) throw java.io.IOException("Disk full")
+                db.execute(sql, args)
+            }
+        }
+        val store = SqliteEntityStore(failingDb, ioDispatcher = Dispatchers.Unconfined)
+        store.replaceAll(server, type, listOf("1" to movie(1)), Movie.serializer(), 100L)
+        fail = true
+        try {
+            store.replaceAll(server, type, listOf("2" to movie(2)), Movie.serializer(), 200L)
+            throw AssertionError("The replacement must fail")
+        } catch (_: java.io.IOException) {
+            assertEquals(listOf(movie(1)), store.getAll(server, type, Movie.serializer()))
+            assertEquals(100L, store.lastFetchedAt(server, type))
+        }
+    }
+
+    @Test
+    fun failedMoveRollsBackBothWrites() = runTest {
+        val db = InMemoryArrDatabase()
+        val failingDb = object : ArrDatabase by db {
+            override fun execute(sql: String, args: List<Any?>) {
+                if (sql == EntitySql.DELETE_ONE) throw java.io.IOException("Disk full during move")
+                db.execute(sql, args)
+            }
+        }
+        val store = SqliteEntityStore(failingDb, ioDispatcher = Dispatchers.Unconfined)
+        val target = EntityType("failed")
+        store.put(server, type, "42", movie(42), Movie.serializer())
+        try {
+            store.move(server, type, target, "42", movie(42, "updated"), Movie.serializer())
+            throw AssertionError("The move must fail")
+        } catch (_: java.io.IOException) {
+            assertEquals(movie(42), store.get(server, type, "42", Movie.serializer()))
+            assertNull(store.get(server, target, "42", Movie.serializer()))
+        }
+    }
+
+    @Test
     fun putAndGetRoundTripThroughTheJsonColumn() = runTest {
         val (db, store) = store()
 

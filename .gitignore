@@ -1,5 +1,6 @@
 *.iml
 .gradle/
+.kotlin/
 local.properties
 .idea/
 .DS_Store
@@ -12,5 +13,5 @@ captures/
 keystore/
 
 # arr live-test credentials (never commit)
-local.arr-test.properties
+local.arr-test.properties*
 docs/arr-api/fixtures/

@@ -1,16 +1,14 @@
 package dev.appolon.homelab.arr.feature.prowlarr.indexers
 
-import androidx.compose.foundation.layout.Box
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.core.AppType
@@ -113,17 +111,9 @@ fun ProwlarrIndexersDestination(
     val connection = remember(serverId) {
         ProwlarrIndexersConnection(graph.registry, graph.secrets)
     }
-    var connected by remember(serverId) { mutableStateOf<ProwlarrIndexersFeatureApis?>(null) }
-    LaunchedEffect(serverId) {
-        connected = connection.connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        connection.connect(serverId)
+    } ?: return
     val vm: IndexersViewModel = viewModel(key = "prowlarr-indexers-" + serverId.value) {
         IndexersViewModel(
             ProwlarrIndexersRepository(
@@ -216,7 +206,7 @@ fun ProwlarrIndexersFeatureSlot(
     modifier: Modifier = Modifier,
 ) {
     if (route.owner != ProwlarrIndexersFeature.ROUTE_OWNER) return
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val edit = matchRoutePattern(ProwlarrIndexersFeature.INDEXER_EDIT_PATTERN, segments)
     val add = matchRoutePattern(ProwlarrIndexersFeature.INDEXER_ADD_PATTERN, segments)
     val categories = matchRoutePattern(ProwlarrIndexersFeature.CATEGORIES_PATTERN, segments)
@@ -275,17 +265,9 @@ fun ProwlarrIndexerEditorDestination(
     val connection = remember(serverId) {
         ProwlarrIndexersConnection(graph.registry, graph.secrets)
     }
-    var connected by remember(serverId) { mutableStateOf<ProwlarrIndexersFeatureApis?>(null) }
-    LaunchedEffect(serverId) {
-        connected = connection.connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        connection.connect(serverId)
+    } ?: return
     val vm: IndexerEditorViewModel = viewModel(
         key = "prowlarr-indexer-editor-" + serverId.value + "-" + (editIndexerId ?: 0),
     ) {
@@ -343,17 +325,9 @@ fun ProwlarrCategoriesDestination(
     val connection = remember(serverId) {
         ProwlarrIndexersConnection(graph.registry, graph.secrets)
     }
-    var connected by remember(serverId) { mutableStateOf<ProwlarrIndexersFeatureApis?>(null) }
-    LaunchedEffect(serverId) {
-        connected = connection.connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        connection.connect(serverId)
+    } ?: return
     val vm: CategoriesViewModel = viewModel(key = "prowlarr-categories-" + serverId.value) {
         CategoriesViewModel(
             ProwlarrIndexersRepository(
@@ -394,17 +368,9 @@ fun ProwlarrProxiesDestination(
     val connection = remember(serverId) {
         ProwlarrIndexersConnection(graph.registry, graph.secrets)
     }
-    var connected by remember(serverId) { mutableStateOf<ProwlarrIndexersFeatureApis?>(null) }
-    LaunchedEffect(serverId) {
-        connected = connection.connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        connection.connect(serverId)
+    } ?: return
     val vm: ProxiesViewModel = viewModel(key = "prowlarr-proxies-" + serverId.value) {
         ProxiesViewModel(
             ProwlarrIndexersRepository(
@@ -456,17 +422,9 @@ fun ProwlarrApplicationsDestination(
     val connection = remember(serverId) {
         ProwlarrIndexersConnection(graph.registry, graph.secrets)
     }
-    var connected by remember(serverId) { mutableStateOf<ProwlarrIndexersFeatureApis?>(null) }
-    LaunchedEffect(serverId) {
-        connected = connection.connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        connection.connect(serverId)
+    } ?: return
     val vm: ApplicationsViewModel = viewModel(key = "prowlarr-applications-" + serverId.value) {
         ApplicationsViewModel(
             ProwlarrIndexersRepository(

@@ -24,10 +24,13 @@ import dev.appolon.homelab.arr.feature.sonarr.library.data.WriteOutcome
 import dev.appolon.homelab.arr.net.ArrJson
 import dev.appolon.homelab.arr.net.arrError
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 
@@ -59,6 +62,8 @@ class SonarrAddRepository(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
 
+    private val refreshMutex = Mutex()
+
     fun observeSeries(): Flow<List<SeriesResource>> =
         store.observe(serverId, SERIES_TYPE, SERIES_SER)
 
@@ -77,33 +82,25 @@ class SonarrAddRepository(
      * offline adds live under negative ids and are dropped here once the real
      * row (or its absence after a replay conflict) is authoritative.
      */
-    suspend fun refreshSeries(): ArrResult<Unit> = withContext(ioDispatcher) {
-        val fetched = try {
-            seriesApi.list()
+    suspend fun refreshSeries(): ArrResult<Unit> = refreshMutex.withLock { refreshSeriesOnce() }
+
+    private suspend fun refreshSeriesOnce(): ArrResult<Unit> = withContext(ioDispatcher) {
+        try {
+            val fetched = seriesApi.list()
+            store.replaceAll(
+                serverId,
+                SERIES_TYPE,
+                fetched.map { it.id.toString() to it },
+                SERIES_SER,
+                fetchedAtMillis = now(),
+            )
         } catch (e: HttpException) {
             return@withContext ArrResult.err(e.toArrError())
-        } catch (e: Throwable) {
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
             return@withContext ArrResult.err(e.arrError())
         }
-        val incoming = fetched.associateBy { it.id }
-        val existing = cachedSeries()
-        existing.forEach { cached ->
-            val key = cached.id.toString()
-            val replacement = incoming[cached.id]
-            if (replacement != null) {
-                store.put(serverId, SERIES_TYPE, key, replacement, SERIES_SER)
-            } else {
-                store.delete(serverId, SERIES_TYPE, key)
-            }
-        }
-        val fresh = fetched.filter { series -> existing.none { it.id == series.id } }
-        store.putAll(
-            serverId,
-            SERIES_TYPE,
-            fresh.map { it.id.toString() to it },
-            SERIES_SER,
-            fetchedAtMillis = now(),
-        )
         ArrResult.ok(Unit)
     }
 
@@ -163,19 +160,33 @@ class SonarrAddRepository(
             { it.id.toString() },
             { importListExclusionApi.list() },
             ttlMillis,
+            preserveLocal = ::pendingExclusions,
         )
 
-    /** Cache-first lookup with a TTL; an empty fetch keeps the previous cache. */
+    private suspend fun pendingExclusions(
+        cached: List<ImportListExclusionResource>,
+        remote: List<ImportListExclusionResource>,
+    ): List<ImportListExclusionResource> {
+        val acknowledged = remote.map { it.tvdbId }.toSet()
+        val pending = actionQueue.pending().asSequence()
+            .filter { it.serverId == serverId && it.method == "POST" && it.path == EXCLUSION_PATH }
+            .flatMap(::tvdbIdsOf)
+            .toSet()
+        return cached.filter { it.id < 0 && it.tvdbId in pending && it.tvdbId !in acknowledged }
+    }
+
+    /** Cache-first lookup with a TTL, including successful empty responses. */
     private suspend fun <T> lookupCached(
         type: EntityType,
         serializer: kotlinx.serialization.KSerializer<T>,
         keyOf: (T) -> String,
         fetch: suspend () -> List<T>,
         ttlMillis: Long,
+        preserveLocal: suspend (List<T>, List<T>) -> List<T> = { _, _ -> emptyList() },
     ): ArrResult<List<T>> = withContext(ioDispatcher) {
         val cached = store.getAll(serverId, type, serializer)
         val fetchedAt = store.lastFetchedAt(serverId, type)
-        if (fetchedAt != null && now() - fetchedAt <= ttlMillis && cached.isNotEmpty()) {
+        if (ttlMillis > 0 && fetchedAt != null && now() - fetchedAt <= ttlMillis) {
             return@withContext ArrResult.ok(cached)
         }
         val remote = try {
@@ -185,18 +196,15 @@ class SonarrAddRepository(
         } catch (e: Throwable) {
             return@withContext ArrResult.err(e.arrError())
         }
-        if (remote.isNotEmpty()) {
-            store.putAll(
-                serverId,
-                type,
-                remote.map { keyOf(it) to it },
-                serializer,
-                fetchedAtMillis = now(),
-            )
-            ArrResult.ok(remote)
-        } else {
-            ArrResult.ok(cached)
-        }
+        val complete = preserveLocal(cached, remote) + remote
+        store.replaceAll(
+            serverId,
+            type,
+            complete.map { keyOf(it) to it },
+            serializer,
+            fetchedAtMillis = now(),
+        )
+        ArrResult.ok(complete)
     }
 
     /**

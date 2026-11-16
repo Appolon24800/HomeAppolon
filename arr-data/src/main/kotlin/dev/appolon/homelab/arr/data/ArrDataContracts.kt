@@ -44,9 +44,23 @@ interface ServerRegistry {
 interface EntityStore {
     suspend fun <T> put(serverId: ServerId, type: EntityType, id: String, value: T, serializer: kotlinx.serialization.KSerializer<T>)
     suspend fun <T> putAll(serverId: ServerId, type: EntityType, values: List<Pair<String, T>>, serializer: kotlinx.serialization.KSerializer<T>, fetchedAtMillis: Long = System.currentTimeMillis())
+    /**
+     * Replaces a complete collection. SQLite commits the replacement atomically
+     * and retains the refresh time for empty collections.
+     */
+    suspend fun <T> replaceAll(serverId: ServerId, type: EntityType, values: List<Pair<String, T>>, serializer: kotlinx.serialization.KSerializer<T>, fetchedAtMillis: Long = System.currentTimeMillis()) {
+        deleteAll(serverId, type)
+        putAll(serverId, type, values, serializer, fetchedAtMillis)
+    }
     suspend fun <T> getAll(serverId: ServerId, type: EntityType, serializer: kotlinx.serialization.KSerializer<T>): List<T>
     suspend fun <T> get(serverId: ServerId, type: EntityType, id: String, serializer: kotlinx.serialization.KSerializer<T>): T?
     suspend fun delete(serverId: ServerId, type: EntityType, id: String)
+    /** Moves a row between types. SQLite commits both writes in one transaction. */
+    suspend fun <T> move(serverId: ServerId, from: EntityType, to: EntityType, id: String, value: T, serializer: kotlinx.serialization.KSerializer<T>) {
+        // Stores without transactions keep a copy if deletion fails.
+        put(serverId, to, id, value, serializer)
+        delete(serverId, from, id)
+    }
     suspend fun deleteAll(serverId: ServerId, type: EntityType? = null)
     suspend fun lastFetchedAt(serverId: ServerId, type: EntityType): Long?
     fun <T> observe(serverId: ServerId, type: EntityType, serializer: kotlinx.serialization.KSerializer<T>): kotlinx.coroutines.flow.Flow<List<T>>
@@ -76,4 +90,11 @@ interface ActionQueue {
     /** Replays oldest first, returns the actions that now succeeded or terminally failed. */
     suspend fun replay(executor: suspend (QueuedAction) -> Boolean): Pair<Int, Int>
     suspend fun remove(actionId: ActionId)
+}
+
+/** Queue controls used by the sync status screen. */
+interface RetryableActionQueue : ActionQueue {
+    suspend fun deadLetters(): List<QueuedAction>
+    /** Shares the replay lock. Restores failed actions before attempting them. */
+    suspend fun retryOne(actionId: ActionId, executor: suspend (QueuedAction) -> Boolean): Boolean
 }

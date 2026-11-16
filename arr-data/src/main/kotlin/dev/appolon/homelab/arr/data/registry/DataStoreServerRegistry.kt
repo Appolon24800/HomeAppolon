@@ -99,7 +99,7 @@ class DataStoreServerRegistry internal constructor(
                     key(server.id),
                     ArrDataJson.encodeToString(
                         ArrServer.serializer(),
-                        server.copy(order = index + 1),
+                        server.copy(order = index + 1).withEncryptedProxyPassword(),
                     ),
                 )
             }

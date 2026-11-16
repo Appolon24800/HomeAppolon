@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import dev.appolon.homelab.arr.core.ServerId
+import dev.appolon.homelab.arr.core.ArrServerLinks
 import dev.appolon.homelab.arr.data.ArrServer
 import dev.appolon.homelab.arr.data.registry.NotificationChannels
 import dev.appolon.homelab.arr.sync.R
@@ -33,12 +34,17 @@ fun NotificationKind.isEnabled(toggles: NotificationChannels): Boolean = when (t
  */
 class NotificationDedupe(private val capacity: Int = DEFAULT_CAPACITY) {
 
+    init {
+        require(capacity > 0) { "capacity must be positive" }
+    }
+
     private val seen = LinkedHashMap<Key, Unit>(16, 0.75f, true)
 
     /**
      * Returns the subset of [events] not yet notified for [serverId], and
      * records them as notified. Callers post exactly what comes back.
      */
+    @Synchronized
     fun filter(serverId: ServerId, events: List<PollEvent>): List<PollEvent> {
         val fresh = ArrayList<PollEvent>(events.size)
         for (event in events) {
@@ -51,6 +57,13 @@ class NotificationDedupe(private val capacity: Int = DEFAULT_CAPACITY) {
         return fresh
     }
 
+    /** A blocked channel or failed post must allow the next poll to try again. */
+    @Synchronized
+    fun retryLater(serverId: ServerId, event: PollEvent) {
+        seen.remove(Key(serverId.value, event.kind, event.dedupeKey))
+    }
+
+    @Synchronized
     fun clear() = seen.clear()
 
     private data class Key(val serverId: String, val kind: NotificationKind, val dedupeKey: String)
@@ -144,7 +157,7 @@ object ArrNotificationChannels {
 class NotificationFactory(private val context: Context) {
 
     fun create(server: ArrServer, event: PollEvent): Notification {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(DEEP_LINK_PREFIX + server.id.value))
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(ArrServerLinks.encode(server.id)))
             .setPackage(context.packageName)
         val contentIntent = PendingIntent.getActivity(
             context,
@@ -171,12 +184,8 @@ class NotificationFactory(private val context: Context) {
     }
 
     companion object {
-        /**
-         * Placeholder deep link until :app owns the arr shell navigation
-         * route. The intent stays in this app's package so it can only
-         * resolve to our own activity.
-         */
-        const val DEEP_LINK_PREFIX = "homelab://arr/server/"
+        /** The intent is restricted to this app's package. */
+        const val DEEP_LINK_PREFIX = ArrServerLinks.PREFIX
     }
 }
 

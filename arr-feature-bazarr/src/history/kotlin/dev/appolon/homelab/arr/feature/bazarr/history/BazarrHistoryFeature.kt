@@ -1,15 +1,12 @@
 package dev.appolon.homelab.arr.feature.bazarr.history
 
-import androidx.compose.foundation.layout.Box
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -95,7 +92,7 @@ fun BazarrHistoryFeatureSlot(
     graph: ArrDataGraph,
     modifier: Modifier = Modifier,
 ) {
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val history = matchRoutePattern(BazarrHistoryFeature.HISTORY_PATTERN, segments)
     val blacklist = matchRoutePattern(BazarrHistoryFeature.BLACKLIST_PATTERN, segments)
     when {
@@ -124,17 +121,9 @@ fun BazarrHistoryDestination(
     graph: ArrDataGraph,
     modifier: Modifier = Modifier,
 ) {
-    var connected by remember(serverId) { mutableStateOf<BazarrHistoryApis?>(null) }
-    LaunchedEffect(serverId) {
-        connected = BazarrHistoryConnection(graph.registry, graph.secrets).connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        BazarrHistoryConnection(graph.registry, graph.secrets).connect(serverId)
+    } ?: return
     val repository = remember(serverId, apis) {
         BazarrHistoryRepository(
             serverId = serverId,
@@ -175,17 +164,9 @@ fun BazarrBlacklistDestination(
     graph: ArrDataGraph,
     modifier: Modifier = Modifier,
 ) {
-    var connected by remember(serverId) { mutableStateOf<BazarrHistoryApis?>(null) }
-    LaunchedEffect(serverId) {
-        connected = BazarrHistoryConnection(graph.registry, graph.secrets).connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        BazarrHistoryConnection(graph.registry, graph.secrets).connect(serverId)
+    } ?: return
     val repository = remember(serverId, apis) {
         BazarrHistoryRepository(
             serverId = serverId,

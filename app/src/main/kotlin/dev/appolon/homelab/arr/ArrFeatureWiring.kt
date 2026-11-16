@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import retrofit2.Retrofit
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -8,9 +9,6 @@ import dev.appolon.homelab.arr.net.ArrJson
 import dev.appolon.homelab.arr.net.ServerEndpoint
 import dev.appolon.homelab.arr.net.TrustSpec
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
-import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.ui.Alignment
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,9 +25,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -163,6 +162,7 @@ import dev.appolon.homelab.arr.servers.ServersFeature
 import dev.appolon.homelab.arr.servers.serversShellContent
 import dev.appolon.homelab.arr.sync.ArrEvent
 import dev.appolon.homelab.arr.ui.components.EmptyState
+import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.nav.ArrRoute
 import dev.appolon.homelab.arr.ui.nav.ArrRouteRegistry
 import dev.appolon.homelab.arr.ui.nav.fillPattern
@@ -177,6 +177,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -487,15 +488,8 @@ internal class ArrFeatureWiring(
      */
     private val radarrQueueSlot: (@Composable (ArrRoute.Queue) -> Unit)? = { route ->
         if (route.app == AppType.RADARR) {
-            if (radarrQueueBundles.isReady(route.serverId)) {
+            ConnectedBundle(radarrQueueBundles, route.serverId) {
                 radarrQueueContent.queue?.invoke(route)
-            } else {
-                LaunchedEffect(route.serverId) {
-                    radarrQueueBundles.connectNow(route.serverId)
-                }
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
             }
         }
     }
@@ -512,7 +506,7 @@ internal class ArrFeatureWiring(
     /** The single merged content the shell renders. */
     val content: ArrShellContent = ArrShellContent(
         serverList = serversContent.serverList,
-        serverHome = { route -> ServerHomeHub(route, librarySlot) },
+        serverHome = { route -> ServerHomeHub(route) },
         library = librarySlot,
         detail = fanOut(
             radarrDetail.detail,
@@ -537,12 +531,24 @@ internal class ArrFeatureWiring(
         ProwlarrFeatureRoot.registerRoutes(registry)
         BazarrFeatureRoot.registerRoutes(registry)
 
+        val connectionVersions = ServerConnectionVersions()
         scope.launch {
-            graph.registry.observe().collect { servers ->
-                shellServers.value = servers.map {
-                    ShellServer(id = it.id, name = it.name, appType = it.type)
+            combine(graph.registry.observe(), graph.settings.observeDefaultProxy()) { servers, proxy ->
+                // Publish proxy policy before changed screens build replacement clients.
+                dev.appolon.homelab.arr.net.ArrNetworkDefaults.globalProxy = { proxy }
+                servers to connectionVersions.update(servers, proxy)
+            }.collect { (servers, versions) ->
+                withContext(Dispatchers.Main.immediate) {
+                    allSettingsBundles.forEach { it.retainVersions(versions) }
+                    shellServers.value = servers.map {
+                        ShellServer(
+                            id = it.id,
+                            name = it.name,
+                            appType = it.type,
+                            connectionVersion = versions.getValue(it.id),
+                        )
+                    }
                 }
-                allSettingsBundles.forEach { it.retainServers(servers) }
             }
         }
     }
@@ -588,7 +594,7 @@ internal class ArrFeatureWiring(
      */
     @Composable
     private fun RadarrFeatureDispatch(route: ArrRoute.Feature) {
-        val segments = route.path.split('/')
+        val segments = route.decodedPathSegments()
         val plain = radarrPlainGroups.firstOrNull { (patterns, _) ->
             patterns.any { matchRoutePattern(it, segments) != null }
         }
@@ -601,7 +607,7 @@ internal class ArrFeatureWiring(
 
     @Composable
     private fun SonarrFeatureDispatch(route: ArrRoute.Feature) {
-        val segments = route.path.split('/')
+        val segments = route.decodedPathSegments()
         val isSettings = sonarrSettingsGroups.any { group ->
             group.patterns.any { matchRoutePattern(it, segments) != null }
         }
@@ -615,7 +621,7 @@ internal class ArrFeatureWiring(
 
     @Composable
     private fun LidarrFeatureDispatch(route: ArrRoute.Feature) {
-        val segments = route.path.split('/')
+        val segments = route.decodedPathSegments()
         if (lidarrSettingsGroups.any { group ->
                 group.patterns.any { matchRoutePattern(it, segments) != null }
             }) {
@@ -667,7 +673,7 @@ internal class ArrFeatureWiring(
      */
     @Composable
     private fun SettingsDispatch(route: ArrRoute.Feature, groups: List<SettingsGroup<*>>) {
-        val segments = route.path.split('/')
+        val segments = route.decodedPathSegments()
         val group = groups.firstOrNull { group ->
             group.patterns.any { matchRoutePattern(it, segments) != null }
         }
@@ -678,14 +684,13 @@ internal class ArrFeatureWiring(
         val serverId = group.patterns.firstNotNullOfOrNull { pattern ->
             matchRoutePattern(pattern, segments)?.get("serverId")
         }?.let(::ServerId)
-        if (serverId == null || !group.bundles.isReady(serverId)) {
-            if (serverId != null) {
-                LaunchedEffect(serverId) { group.bundles.connectNow(serverId) }
-            }
+        if (serverId == null) {
             ShellUnavailable(route)
             return
         }
-        group.content.feature?.invoke(route)
+        ConnectedBundle(group.bundles, serverId) {
+            group.content.feature?.invoke(route)
+        }
     }
 
     // ---- shell destinations ----------------------------------------------
@@ -701,7 +706,6 @@ internal class ArrFeatureWiring(
     @Composable
     private fun ServerHomeHub(
         route: ArrRoute.ServerHome,
-        library: (@Composable (ArrRoute.Library) -> Unit)?,
     ) {
         val servers by shellServers.collectAsStateWithLifecycle()
         val appType = servers.firstOrNull { it.id == route.serverId }?.appType
@@ -715,26 +719,13 @@ internal class ArrFeatureWiring(
             )
             return
         }
-        if (appType == AppType.PROWLARR || appType == AppType.BAZARR) {
-            // Their roots are single screens (indexers, subtitles); the
-            // library slot already is their home content.
-            if (library == null) {
-                EmptyState(
-                    title = stringResource(dev.appolon.homelab.arr.ui.R.string.arr_shell_unavailable_title),
-                    message = stringResource(
-                        dev.appolon.homelab.arr.ui.R.string.arr_shell_unavailable_message,
-                        appType.wireName,
-                    ),
-                )
-            } else {
-                library(ArrRoute.Library(route.serverId, appType))
-            }
-            return
-        }
 
         val navigator = LocalArrShellNavigator.current
         val id = route.serverId
-        val items: List<Pair<String, () -> Unit>> = listOf(
+        val extraEntries = additionalServerHomeEntries(appType, id)
+        val items: List<Pair<String, () -> Unit>> = if (extraEntries.isNotEmpty()) {
+            extraEntries.map { entry -> stringResource(entry.title) to { navigator.open(entry.route) } }
+        } else listOf(
             stringResource(AppR.string.arr_home_library) to {
                 navigator.open(ArrRoute.Library(id, appType))
             },
@@ -803,12 +794,13 @@ internal class ArrFeatureWiring(
     @Composable
     private fun SettingsLanding(route: ArrRoute.Settings, modifier: Modifier = Modifier) {
         val navigator = LocalArrShellNavigator.current
-        val links = settingsLinks(route)
+        val sections = settingsSections(route.app, route.serverId)
         ArrScaffold(
             title = stringResource(R.string.arr_bazarr_settings_title),
+            onBack = { navigator.back() },
             modifier = modifier,
         ) { padding ->
-            if (links.isEmpty()) {
+            if (sections.isEmpty()) {
                 EmptyState(
                     title = stringResource(dev.appolon.homelab.arr.ui.R.string.arr_shell_unavailable_title),
                     message = stringResource(
@@ -828,84 +820,30 @@ internal class ArrFeatureWiring(
                     .fillMaxSize()
                     .padding(padding),
             ) {
-                items(links) { link ->
-                    ListItem(
-                        headlineContent = {
-                            Text(link.title, style = MaterialTheme.typography.titleSmall)
-                        },
-                        trailingContent = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { navigator.open(link.route) },
-                    )
+                sections.forEach { section ->
+                    item {
+                        dev.appolon.homelab.arr.ui.components.SectionHeader(stringResource(section.title))
+                    }
+                    items(section.entries) { link ->
+                        ListItem(
+                            headlineContent = {
+                                Text(stringResource(link.title), style = MaterialTheme.typography.titleSmall)
+                            },
+                            trailingContent = {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { navigator.open(link.route) },
+                        )
+                    }
                 }
             }
         }
-    }
-
-    /** One navigation entry on the settings landing. */
-    private data class SettingsLink(val title: String, val route: ArrRoute.Feature)
-
-    /** The settings-group entry links for [route]'s app; empty when none are wireable. */
-    @Composable
-    private fun settingsLinks(route: ArrRoute.Settings): List<SettingsLink> {
-        val id = route.serverId
-        val links: List<Pair<String, ArrRoute.Feature?>> = when (route.app) {
-            AppType.RADARR -> listOf(
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_mm_title) to
-                    RadarrMediaManagementFeature.mediaManagementRoute(id),
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_quality) to
-                    RadarrSettingsQualityFeature.qualityProfilesRoute(id),
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_clients_title) to
-                    RadarrSettingsConnectFeature.downloadClientsRoute(id),
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_general_title) to
-                    RadarrSettingsSystemFeature.generalRoute(id),
-            )
-
-            AppType.SONARR -> listOf(
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_mm_title) to
-                    SonarrMediaManagementFeature.mediaManagementRoute(id),
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_quality) to
-                    SonarrSettingsQualityFeature.qualityProfilesRoute(id),
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_clients_title) to
-                    SonarrSettingsConnectFeature.downloadClientsRoute(id),
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_general_title) to
-                    SonarrSettingsSystemFeature.generalRoute(id),
-            )
-
-            AppType.LIDARR -> listOf(
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_mm_title) to
-                    LidarrMediaManagementFeature.mediaManagementRoute(id),
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_quality) to
-                    LidarrSettingsQualityFeature.qualityProfilesRoute(id),
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_clients_title) to
-                    LidarrSettingsConnectFeature.downloadClientsRoute(id),
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_general_title) to
-                    LidarrSettingsSystemFeature.generalRoute(id),
-            )
-
-            AppType.PROWLARR -> listOf(
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_clients_title) to
-                    ProwlarrSettingsFeature.downloadClientsRoute(id),
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_notifications_title) to
-                    ProwlarrSettingsFeature.notificationsRoute(id),
-                stringResource(dev.appolon.homelab.arr.ui.R.string.arr_common_general_title) to
-                    ProwlarrSettingsFeature.generalRoute(id),
-            )
-
-            AppType.BAZARR -> listOf(
-                stringResource(R.string.arr_bazarr_settings_title) to
-                    fillPattern(BazarrSettingsFeature.HOME_PATTERN, mapOf("serverId" to id.value))
-                        ?.let { ArrRoute.Feature(BazarrSettingsFeature.ROUTE_OWNER, it) },
-            )
-        }
-        return links.mapNotNull { (title, target) -> target?.let { SettingsLink(title, it) } }
     }
 
     // ---- helpers ---------------------------------------------------------
@@ -955,26 +893,21 @@ internal class ArrFeatureWiring(
         )
     }
 
-    /**
-     * Per-server client bundles for one settings group. The map is snapshot
-     * state so a dispatch reading [isReady] recomposes when a bundle lands.
-     */
-    private class SettingsBundles<T>(private val connect: suspend (ServerId) -> T?) {
-
-        private var map by mutableStateOf<Map<ServerId, T>>(emptyMap())
-
-        fun get(id: ServerId): T? = map[id]
-
-        fun isReady(id: ServerId): Boolean = map.containsKey(id)
-
-        suspend fun connectNow(id: ServerId) {
-            connect(id)?.let { value -> map = map + (id to value) }
+    @Composable
+    private fun ConnectedBundle(
+        bundles: SettingsBundles<*>,
+        serverId: ServerId,
+        content: @Composable () -> Unit,
+    ) {
+        var attempt by remember(bundles, serverId) { mutableIntStateOf(0) }
+        LaunchedEffect(bundles, serverId, attempt) {
+            if (!bundles.isReady(serverId)) bundles.connectNow(serverId)
         }
-
-        /** Drop removed servers. Connections are created by the owning screen. */
-        fun retainServers(servers: List<ArrServer>) {
-            map = map.filterKeys { id -> servers.any { it.id == id } }
-        }
+        ArrLceBox(
+            state = bundles.stateOf(serverId),
+            onRetry = { attempt++ },
+            modifier = Modifier.fillMaxSize(),
+        ) { content() }
     }
 
     private class SettingsGroup<T>(

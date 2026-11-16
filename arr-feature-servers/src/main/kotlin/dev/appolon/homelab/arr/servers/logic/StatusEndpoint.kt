@@ -4,6 +4,8 @@ import dev.appolon.homelab.arr.core.AppType
 import dev.appolon.homelab.arr.net.ArrJson
 import dev.appolon.homelab.arr.net.ServerEndpoint
 import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -36,10 +38,21 @@ object StatusEndpoint {
      * when the server omits the field.
      */
     fun extractVersion(responseBody: String): String? = runCatching {
-        val primitive = ArrJson.parseToJsonElement(responseBody).jsonObject["version"]
+        val root = ArrJson.parseToJsonElement(responseBody).jsonObject
+        val data = root["data"] as? JsonObject
+        val primitive = (root["version"] ?: data?.get("version") ?: data?.get("bazarr_version"))
             ?.jsonPrimitive
         if (primitive is JsonNull) null else primitive?.content
     }
         .getOrNull()
         ?.takeIf { it.isNotBlank() }
+
+    /** A login page or another service must not produce a successful connection test. */
+    fun isStatusResponse(responseBody: String, appType: AppType): Boolean {
+        val root = runCatching { ArrJson.parseToJsonElement(responseBody) }.getOrNull()
+            as? JsonObject ?: return false
+        val name = (root["appName"] as? JsonPrimitive)?.content
+        if (name != null) return name.equals(appType.wireName, ignoreCase = true)
+        return extractVersion(responseBody) != null
+    }
 }

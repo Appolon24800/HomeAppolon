@@ -1,5 +1,7 @@
 package dev.appolon.homelab.arr.ui.nav
 
+import dev.appolon.homelab.arr.core.ServerId
+
 /**
  * Registration for one nested destination owned by a feature module.
  *
@@ -63,7 +65,23 @@ class ArrRouteRegistry {
         // breaks ties so a feature can shadow its own earlier generic patterns.
         val nested = matches.minByOrNull { matchRoutePattern(it.pattern, decoded)!!.size }
             ?: return null
-        return ArrRoute.Feature(owner, decoded.joinToString("/"))
+        return ArrRoute.Feature(owner, pathSegments.joinToString("/"))
+    }
+
+    /** Returns the server id captured by a feature route, when it declares `{serverId}`. */
+    internal fun serverIdOfFeature(route: ArrRoute.Feature): ServerId? {
+        val segments = route.path.split('/').map { RouteCodec.decode(it) ?: return null }
+        val matches = synchronized(lock) {
+            routes.filter { it.owner == route.owner }
+                .mapNotNull { pattern ->
+                    matchRoutePattern(pattern.pattern, segments)?.let { pattern to it }
+                }
+        }
+        return matches.minByOrNull { it.second.size }
+            ?.second
+            ?.get("serverId")
+            ?.takeIf { it.isNotBlank() }
+            ?.let(::ServerId)
     }
 }
 

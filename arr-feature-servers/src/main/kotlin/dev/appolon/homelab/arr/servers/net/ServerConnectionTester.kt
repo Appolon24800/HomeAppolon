@@ -52,7 +52,14 @@ class ServerConnectionTester(
                     .use { r ->
                         if (r.isSuccessful) {
                             val body = r.body?.string().orEmpty()
-                            ConnectionOutcome.Success(StatusEndpoint.extractVersion(body))
+                            if (StatusEndpoint.isStatusResponse(body, appType)) {
+                                ConnectionOutcome.Success(StatusEndpoint.extractVersion(body))
+                            } else {
+                                ConnectionOutcome.Failure(
+                                    IllegalArgumentException("The address did not return the selected app's status.")
+                                        .arrError(),
+                                )
+                            }
                         } else {
                             ConnectionOutcome.Failure(r.arrError())
                         }

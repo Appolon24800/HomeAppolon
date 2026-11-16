@@ -20,6 +20,7 @@ import dev.appolon.homelab.arr.feature.lidarr.library.data.LidarrArtistsReposito
 import dev.appolon.homelab.arr.feature.lidarr.library.data.SavedArtistFiltersStore
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
+import kotlinx.coroutines.CompletableDeferred
 import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -147,6 +148,28 @@ class ArtistLibraryViewModelTest {
         block()
         advanceUntilIdle()
         job.cancel()
+    }
+
+    @Test
+    fun `repeated refreshes share the active initial request and can refresh again`() = runTest {
+        val release = CompletableDeferred<Unit>()
+        var calls = 0
+        val pending = build {
+            latency = { operation ->
+                if (operation == "getArtists") { calls++; release.await() }
+            }
+        }
+        assertTrue(pending.state.value.refreshing)
+        pending.refresh()
+        pending.refresh()
+        assertEquals(1, calls)
+        release.complete(Unit)
+        advanceUntilIdle()
+        assertFalse(pending.state.value.refreshing)
+        pending.refresh()
+        advanceUntilIdle()
+        assertEquals(2, calls)
+        assertFalse(pending.state.value.refreshing)
     }
 
     @Test

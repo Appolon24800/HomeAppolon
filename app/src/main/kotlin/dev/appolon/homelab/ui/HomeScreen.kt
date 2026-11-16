@@ -78,7 +78,6 @@ import dev.appolon.homelab.data.Favorites
 import dev.appolon.homelab.data.ServiceItem
 import dev.appolon.homelab.data.PocketId
 import dev.appolon.homelab.data.WebTarget
-import dev.appolon.homelab.arr.ArrHost
 import dev.appolon.homelab.data.Search
 import dev.appolon.homelab.ui.components.AccountAvatar
 import dev.appolon.homelab.ui.components.AccountAvatarTinted
@@ -110,6 +109,7 @@ fun HomeScreen(
     val context = LocalContext.current
 
     var arrServer by remember { mutableStateOf<ServerId?>(null) }
+    var arrOpen by remember { mutableStateOf(false) }
     var arrOpenGeneration by remember { mutableStateOf(0L) }
     var autoFailed by remember { mutableStateOf<Pair<String, dev.appolon.homelab.arr.core.AppType>?>(null) }
 
@@ -128,58 +128,56 @@ fun HomeScreen(
     // The in-flight auto-connect, so Back can cancel it mid-probe.
     var connectJob by remember { mutableStateOf<Job?>(null) }
 
+    var connectGeneration by remember { mutableStateOf(0L) }
     val openService: (String, String?) -> Unit = { url, name ->
+        connectJob?.cancel()
+        val generation = ++connectGeneration
+        autoFailed = null
         connectJob = arrScope.launch {
-            val serverId = ArrIntegration.openFor(context, url)
-            if (serverId != null) {
-                arrServer = serverId
-                arrOpenGeneration++
-                return@launch
-            }
-            // A plain link that names an arr app always gets the native
-            // engine; only genuinely foreign links fall to the WebView.
-            val appType = dev.appolon.homelab.arr.ArrLinkParser.appTypeForUrl(url)
-            if (appType == null) {
-                vm.openWeb(url, name)
-                return@launch
-            }
-            connectingTo = url to appType
+            val parsed = dev.appolon.homelab.arr.ArrLinkParser.parse(url)
+            val appType = parsed?.appType
+                ?: dev.appolon.homelab.arr.ArrLinkParser.appTypeForUrl(url)
             try {
-                when (val outcome = dev.appolon.homelab.arr.ArrAutoConnect.connect(context, url, appType)) {
-                    is dev.appolon.homelab.arr.ArrAutoConnect.Outcome.Connected -> {
-                        arrServer = outcome.serverId
-                        arrOpenGeneration++
+                val id = if (parsed?.appType != null) {
+                    connectingTo = parsed.baseUrl to parsed.appType
+                    dev.appolon.homelab.arr.ArrAutoConnect.provision(
+                        context, parsed.appType, parsed.baseUrl, parsed.apiKey,
+                    ).also { if (it == null) autoFailed = parsed.baseUrl to parsed.appType }
+                } else {
+                    ArrIntegration.openFor(context, url) ?: if (appType != null) {
+                        connectingTo = url to appType
+                        when (val outcome = dev.appolon.homelab.arr.ArrAutoConnect.connect(context, url, appType)) {
+                            is dev.appolon.homelab.arr.ArrAutoConnect.Outcome.Connected -> outcome.serverId
+                            dev.appolon.homelab.arr.ArrAutoConnect.Outcome.NeedSetup -> {
+                                autoFailed = url to appType
+                                null
+                            }
+                        }
+                    } else {
+                        vm.openWeb(url, name)
+                        null
                     }
-
-                    dev.appolon.homelab.arr.ArrAutoConnect.Outcome.NeedSetup ->
-                        autoFailed = url to appType
                 }
+                if (id != null) {
+                    arrServer = id
+                    arrOpen = true
+                    arrOpenGeneration++
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                if (appType != null) autoFailed = (parsed?.baseUrl ?: url) to appType
+                else vm.openWeb(url, name)
             } finally {
-                // Cancellation (Back, scope teardown) or a throw must never
-                // leave the progress overlay stuck on screen.
-                connectingTo = null
+                if (generation == connectGeneration) connectingTo = null
             }
         }
     }
 
-    // External service links use the same automatic path as dashboard taps.
+    // External links and dashboard taps share cancellation and progress state.
     LaunchedEffect(externalUrl, externalRequestId) {
         val root = dev.appolon.homelab.data.Homer.BASE_URL.trimEnd('/')
-        if (externalUrl.isNullOrBlank() || externalUrl.trimEnd('/') == root) {
-            return@LaunchedEffect
-        }
-        val parsed = dev.appolon.homelab.arr.ArrLinkParser.parse(externalUrl)
-        if (parsed != null && parsed.appType != null) {
-            val id = dev.appolon.homelab.arr.ArrAutoConnect.provision(
-                context, parsed.appType, parsed.baseUrl, parsed.apiKey,
-            )
-            if (id != null) {
-                arrServer = id
-                arrOpenGeneration++
-            } else {
-                autoFailed = parsed.baseUrl to parsed.appType
-            }
-        } else {
+        if (!externalUrl.isNullOrBlank() && externalUrl.trimEnd('/') != root) {
             openService(externalUrl, null)
         }
     }
@@ -211,6 +209,11 @@ fun HomeScreen(
                 vm = vm,
                 homerBarActive = homerBarActive,
                 onServiceClick = openService,
+                onOpenServers = {
+                    connectJob?.cancel()
+                    arrServer = null
+                    arrOpen = true
+                },
             )
             if (state.accountSheetOpen) {
                 AccountSheet(state = state, vm = vm)
@@ -265,11 +268,6 @@ fun HomeScreen(
                 }
             }
 
-            // Native arr shell overlay. Back at the shell's root exits here;
-            // the last-target dance mirrors the WebView overlay above so the
-            // exit animation still has a screen to slide out.
-            var lastArrServer by remember { mutableStateOf<ServerId?>(null) }
-            androidx.compose.runtime.SideEffect { arrServer?.let { lastArrServer = it } }
             // Back on the arr overlays: an in-flight auto-connect cancels
             // its headless session, the failure card just dismisses. The
             // automatic-only flow stays; there is no manual key entry.
@@ -338,17 +336,15 @@ fun HomeScreen(
                 }
             }
             AnimatedVisibility(
-                visible = arrServer != null,
+                visible = arrOpen,
                 enter = slideInHorizontally(tween(enterMillis)) { it } + fadeIn(tween(enterMillis)),
                 exit = slideOutHorizontally(tween(exitMillis)) { it } + fadeOut(tween(exitMillis)),
             ) {
-                lastArrServer?.let { serverId ->
-                    ArrHost(
-                        serverId = serverId,
-                        onExit = { arrServer = null },
-                        openGeneration = arrOpenGeneration,
-                    )
-                }
+                ArrHost(
+                    serverId = arrServer,
+                    onExit = { arrOpen = false },
+                    openGeneration = arrOpenGeneration,
+                )
             }
         }
     }
@@ -361,6 +357,7 @@ private fun HomeScreenBody(
     vm: HomeViewModel,
     homerBarActive: Boolean,
     onServiceClick: (String, String?) -> Unit,
+    onOpenServers: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -393,6 +390,7 @@ private fun HomeScreenBody(
                     onLink = { url, name -> vm.openWeb(url, name) },
                     onToggleTheme = vm::toggleTheme,
                     onOpenAccount = vm::openAccountSheet,
+                    onOpenServers = onOpenServers,
                 )
             }
         },
@@ -422,6 +420,7 @@ internal fun HomeTopBar(
     onToggleTheme: () -> Unit,
     onOpenAccount: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenServers: () -> Unit = {},
 ) {
     val homerColors = if (homerBarActive) state.config?.colors else null
     val accountLabel = state.activeAccount?.label
@@ -485,6 +484,13 @@ internal fun HomeTopBar(
                     Icon(Icons.Filled.MoreVert, contentDescription = "Links")
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(dev.appolon.homelab.R.string.arr_manage_servers)) },
+                        onClick = {
+                            menuOpen = false
+                            onOpenServers()
+                        },
+                    )
                     DropdownMenuItem(
                         text = {
                             Text(

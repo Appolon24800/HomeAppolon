@@ -260,6 +260,29 @@ class DataStoreServerRegistryTest {
     }
 
     @Test
+    fun reorderKeepsProxyPasswordsEncryptedAtRest() = runTest {
+        val registry = registry()
+        val first = registry.upsert(
+            server(name = "first").copy(
+                proxy = ProxyConfig(
+                    type = ProxyConfig.Type.HTTP,
+                    host = "proxy.lan",
+                    port = 8080,
+                    password = "proxy-password",
+                ),
+            ),
+        )
+        val second = registry.upsert(server(name = "second"))
+
+        registry.reorder(listOf(second.id, first.id))
+
+        val blob = writeRecorder.strings.getValue("arr_server_v1_${first.id.value}")
+        val atRest = ArrDataJson.decodeFromString(ArrServer.serializer(), blob)
+        assertEquals("v1:fake:proxy-password", atRest.proxy!!.password)
+        assertEquals("proxy-password", registry.byId(first.id)!!.proxy!!.password)
+    }
+
+    @Test
     fun undecryptableProxyPasswordIsDroppedInsteadOfFailingReads() = runTest {
         val store = FakePreferencesStore()
         val writer = DataStoreServerRegistry(store, FakeArrSecrets())

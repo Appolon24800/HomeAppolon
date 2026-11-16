@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.feature.lidarr.activity
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.appolon.homelab.arr.api.lidarr.BlocklistApi
@@ -116,7 +117,7 @@ fun LidarrActivityFeatureSlot(
         }
         return
     }
-    val segments = route.path.split('/').map(::decodeRouteSegment)
+    val segments = route.decodedPathSegments()
     val navigator = LocalArrShellNavigator.current
     val historyMatch = matchRoutePattern(LidarrActivityFeature.HISTORY_PATTERN, segments)
     val blocklistMatch = matchRoutePattern(LidarrActivityFeature.BLOCKLIST_PATTERN, segments)

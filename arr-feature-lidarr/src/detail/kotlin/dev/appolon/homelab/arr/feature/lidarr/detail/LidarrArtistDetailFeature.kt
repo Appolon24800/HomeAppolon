@@ -1,10 +1,10 @@
 package dev.appolon.homelab.arr.feature.lidarr.detail
 
 import androidx.compose.foundation.layout.fillMaxSize
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -24,8 +24,6 @@ import dev.appolon.homelab.arr.feature.lidarr.detail.ui.ArtistDetailContent
 import dev.appolon.homelab.arr.feature.lidarr.detail.vm.ArtistDetailViewModel
 import dev.appolon.homelab.arr.net.ArrClientFactory
 import dev.appolon.homelab.arr.net.DefaultArrClientFactory
-import dev.appolon.homelab.arr.ui.lce.ArrLceBox
-import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrShellContent
 import dev.appolon.homelab.arr.ui.shell.LocalArrShellNavigator
 
@@ -96,19 +94,13 @@ fun LidarrArtistDetail(
     artistId: Int,
     deps: LidarrArtistDetailDeps,
 ) {
-    var apis by remember(serverId) { mutableStateOf<LidarrArtistDetailApis?>(null) }
-    LaunchedEffect(serverId) {
-        apis = LidarrArtistDetailConnection(
+    val connected = rememberServerConnection(serverId, modifier = Modifier.fillMaxSize()) {
+        LidarrArtistDetailConnection(
             registry = deps.registry,
             secrets = deps.secrets,
             clientFactory = deps.clientFactory,
         ).connect(serverId)
-    }
-    val connected = apis
-    if (connected == null) {
-        ArrLceBox(state = LceState.Loading, modifier = Modifier.fillMaxSize()) {}
-        return
-    }
+    } ?: return
     val repository = remember(serverId, connected) {
         LidarrArtistDetailRepository(
             serverId = serverId,

@@ -22,6 +22,7 @@ import dev.appolon.homelab.arr.api.lidarr.model.TagResource
 import dev.appolon.homelab.arr.api.lidarr.model.TrackFileResource
 import dev.appolon.homelab.arr.api.lidarr.model.TrackResource
 import dev.appolon.homelab.arr.core.ArrResult
+import dev.appolon.homelab.arr.core.EntityType
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.lidarr.detail.FakeActionQueue
 import dev.appolon.homelab.arr.feature.lidarr.detail.FakeEntityStore
@@ -157,6 +158,33 @@ class ArtistDetailViewModelTest {
     fun tearDown() {
         collectors.cancel()
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `fresh library artist still loads its missing albums tracks and history`() = runTest {
+        store.deleteAll(serverId, EntityType("lidarr.album"))
+        store.deleteAll(serverId, EntityType("lidarr.track"))
+        store.deleteAll(serverId, EntityType("lidarr.history"))
+        assertFalse(repository.artistStale())
+
+        val reopened = ArtistDetailViewModel(7, repository)
+
+        assertEquals(setOf(50, 51, 52), reopened.state.value.albums.map { it.id }.toSet())
+        assertEquals(setOf(101, 102), reopened.state.value.tracks.map { it.id }.toSet())
+        assertEquals(listOf(1), reopened.state.value.history.map { it.id })
+    }
+
+    @Test
+    fun `reopening a fresh artist updates related data independently of the library TTL`() = runTest {
+        library.albums.remove(51)
+        library.tracks.remove(102)
+        queue.history.clear()
+
+        val reopened = ArtistDetailViewModel(7, repository)
+
+        assertEquals(setOf(50, 52), reopened.state.value.albums.map { it.id }.toSet())
+        assertEquals(listOf(101), reopened.state.value.tracks.map { it.id })
+        assertTrue(reopened.state.value.history.isEmpty())
     }
 
     @Test

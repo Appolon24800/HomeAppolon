@@ -7,6 +7,7 @@ import dev.appolon.homelab.arr.sync.ArrEvent
 import dev.appolon.homelab.arr.sync.LiveConnectionState
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -87,8 +88,8 @@ class LiveConnectionManager(
     private val inflight = Channel<ArrEvent>(Channel.UNLIMITED)
     private val connections = mutableMapOf<ServerId, Managed>()
 
-    /** Every connection ever installed; stop tears all of them down, map or not. */
-    private val installed = LinkedHashSet<Managed>()
+    /** Includes connections whose interrupted teardown still needs a later stop. */
+    private val installed = ConcurrentHashMap.newKeySet<Managed>()
 
     private val mutex = Mutex()
     private val started = AtomicBoolean(false)
@@ -120,6 +121,7 @@ class LiveConnectionManager(
     suspend fun refresh() {
         if (!started.get()) return
         mutex.withLock {
+            if (!started.get()) return
             val desired = specs().associateBy(LiveServerSpec::serverId)
             val stale = mutableListOf<Managed>()
             val iterator = connections.entries.iterator()
@@ -175,6 +177,7 @@ class LiveConnectionManager(
         managed.pump.cancel()
         managed.watch.cancel()
         withTimeoutOrNull(STOP_TIMEOUT_MILLIS) { managed.connection.stop() }
+        installed.remove(managed)
         _states.update { current -> current - managed.spec.serverId }
     }
 
@@ -184,7 +187,7 @@ class LiveConnectionManager(
      * events queued behind it. Arrival order of first writes is the emit order.
      */
     private suspend fun conflationLoop() {
-        val pending = LinkedHashMap<String, ArrEvent>()
+        val pending = LinkedHashMap<Pair<ServerId, String>, ArrEvent>()
         while (currentCoroutineContext().isActive) {
             val first = inflight.receive()
             pending[conflationKey(first)] = first
@@ -200,7 +203,7 @@ class LiveConnectionManager(
         }
     }
 
-    private fun conflationKey(event: ArrEvent): String = when (event) {
+    private fun conflationKey(event: ArrEvent): Pair<ServerId, String> = event.serverId to when (event) {
         // Notifications are user-facing messages, not cache invalidations.
         // Collapsing them would silently drop alerts, so every one is unique.
         is ArrEvent.NotificationIssued -> "notification:" + notificationSeq.incrementAndGet()

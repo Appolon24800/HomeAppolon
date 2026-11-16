@@ -28,6 +28,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.IOException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RadarrIndexersViewModelTest {
@@ -35,6 +36,38 @@ class RadarrIndexersViewModelTest {
     private lateinit var api: FakeRadarrConnect
     private lateinit var store: FakeEntityStore
     private lateinit var queue: FakeConnectActionQueue
+
+    @Test
+    fun `successful retry with no indexers clears the earlier error`() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        api.errorFor = { IOException("offline") }
+        val vm = RadarrIndexersViewModel(ServerId("s1"), repository(testScheduler))
+        vm.lce.collectWhileActive(this)
+        advanceUntilIdle()
+        assertTrue(vm.lce.value is LceState.Error)
+
+        api.errorFor = { null }
+        vm.refresh()
+        advanceUntilIdle()
+
+        assertEquals(LceState.Empty, vm.lce.value)
+    }
+
+    @Test
+    fun `successful retry with no download clients clears the earlier error`() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        api.errorFor = { IOException("offline") }
+        val vm = RadarrDownloadClientsViewModel(ServerId("s1"), repository(testScheduler))
+        vm.lce.collectWhileActive(this)
+        advanceUntilIdle()
+        assertTrue(vm.lce.value is LceState.Error)
+
+        api.errorFor = { null }
+        vm.refresh()
+        advanceUntilIdle()
+
+        assertEquals(LceState.Empty, vm.lce.value)
+    }
 
     @Before
     fun setUp() {

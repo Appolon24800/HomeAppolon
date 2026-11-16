@@ -143,7 +143,7 @@ class AddSeriesViewModel(
         }
         viewModelScope.launch { repository.refreshSeriesIfStale() }
         refreshDefaults()
-        refreshLists()
+        loadLists(SonarrAddRepository.LOOKUP_TTL_MILLIS)
     }
 
     /** Updates the query and schedules a debounced search; typing settles it. */
@@ -222,11 +222,13 @@ class AddSeriesViewModel(
     }
 
     /** Reloads import lists and exclusions for the lists tab. */
-    fun refreshLists() {
+    fun refreshLists() = loadLists(ttlMillis = -1)
+
+    private fun loadLists(ttlMillis: Long) {
         viewModelScope.launch {
             _state.update { it.copy(listsLoading = true) }
-            val lists = repository.importLists()
-            val exclusions = repository.exclusions()
+            val lists = repository.importLists(ttlMillis)
+            val exclusions = repository.exclusions(ttlMillis)
             _state.update { s ->
                 var next = s.copy(listsLoading = false)
                 when (lists) {

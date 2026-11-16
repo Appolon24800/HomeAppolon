@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.ui.nav
 
+import dev.appolon.homelab.arr.core.ServerId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -7,6 +8,51 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ArrRouteRegistryTest {
+
+    @Test
+    fun featureTransportAndDispatcherReadTheSameCanonicalServerId() {
+        val registry = ArrRouteRegistry().apply { register("test", "settings/{serverId}") }
+        val id = dev.appolon.homelab.arr.core.ServerId("server + / %25 ü")
+        val path = fillPattern("settings/{serverId}", mapOf("serverId" to id.value))!!
+        val route = registry.decodeFeature(ArrRoutes.encode(ArrRoute.Feature("test", path)))!!
+        assertEquals(path, route.path)
+        assertEquals(id, registry.serverIdOfFeature(route))
+        assertEquals(
+            id.value,
+            matchRoutePattern("settings/{serverId}", route.decodedPathSegments())!!["serverId"],
+        )
+    }
+
+    @Test
+    fun featureRoutesExposeTheirServerSelectionToTheShell() {
+        val registry = ArrRouteRegistry()
+        registry.register("radarr", "settings/{serverId}/clients")
+
+        assertEquals(
+            ServerId("server-1"),
+            registry.serverIdOfFeature(ArrRoute.Feature("radarr", "settings/server-1/clients")),
+        )
+    }
+
+    @Test
+    fun featureRoutesWithoutAserverParameterHaveNoSelection() {
+        val registry = ArrRouteRegistry()
+        registry.register("radarr", "settings")
+
+        assertNull(registry.serverIdOfFeature(ArrRoute.Feature("radarr", "settings")))
+    }
+
+    @Test
+    fun featureServerSelectionDecodesTheCapturedSegment() {
+        val registry = ArrRouteRegistry()
+        registry.register("radarr", "settings/{serverId}/clients")
+
+        assertEquals(
+            ServerId("server one"),
+            registry.serverIdOfFeature(ArrRoute.Feature("radarr", "settings/server%20one/clients")),
+        )
+        assertNull(registry.serverIdOfFeature(ArrRoute.Feature("radarr", "settings/bad%zz/clients")))
+    }
 
     @Test
     fun decodeFeatureRoundTripsEncodedFeatureRoutes() {
@@ -63,14 +109,16 @@ class ArrRouteRegistryTest {
     }
 
     @Test
-    fun decodeFeatureDecodesPercentEncodedParameters() {
+    fun decodeFeaturePreservesEncodedParametersForFeatureDispatch() {
         val registry = ArrRouteRegistry()
         registry.register("sonarr", "series/{titleSlug}")
 
         assertEquals(
             ArrRoute.Feature("sonarr", "series/Blue%20Beetle"),
-            registry.decodeFeature("f/sonarr/series/Blue%2520Beetle"),
+            registry.decodeFeature("f/sonarr/series/Blue%20Beetle"),
         )
+        val literalEscape = registry.decodeFeature("f/sonarr/series/Blue%2520Beetle")!!
+        assertEquals(listOf("series", "Blue%20Beetle"), literalEscape.decodedPathSegments())
         assertNull(registry.decodeFeature("f/sonarr/series/Blue%2G"))
     }
 

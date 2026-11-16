@@ -1,16 +1,13 @@
 package dev.appolon.homelab.arr.feature.prowlarr.settings
 
-import androidx.compose.foundation.layout.Box
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.core.ServerId
@@ -186,7 +183,7 @@ fun ProwlarrSettingsFeatureSlot(
     modifier: Modifier = Modifier,
 ) {
     if (route.owner != ProwlarrSettingsFeature.ROUTE_OWNER) return
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val clients = matchRoutePattern(ProwlarrSettingsFeature.DOWNLOAD_CLIENTS_PATTERN, segments)
     val clientEditor =
         matchRoutePattern(ProwlarrSettingsFeature.DOWNLOAD_CLIENT_EDITOR_PATTERN, segments)
@@ -251,11 +248,8 @@ private fun rememberSettingsRepository(
     val connection = remember(serverId) {
         ProwlarrSettingsConnection(graph.registry, graph.secrets)
     }
-    var repository by remember(serverId) {
-        mutableStateOf<ProwlarrSettingsRepository?>(null)
-    }
-    LaunchedEffect(serverId) {
-        repository = connection.connect(serverId)?.let { apis ->
+    return rememberServerConnection(serverId) {
+        connection.connect(serverId)?.let { apis ->
             ProwlarrSettingsRepository(
                 serverId = serverId,
                 store = graph.entityStore,
@@ -264,7 +258,6 @@ private fun rememberSettingsRepository(
             )
         }
     }
-    return repository
 }
 
 @Composable
@@ -274,12 +267,7 @@ private fun RepositoryGate(
     content: @Composable (ProwlarrSettingsRepository) -> Unit,
 ) {
     val repo = repository
-    if (repo == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    if (repo == null) return
     content(repo)
 }
 

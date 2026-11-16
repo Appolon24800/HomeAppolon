@@ -55,9 +55,14 @@ import dev.appolon.homelab.data.WebTarget
 private class TouchGatedWebView(context: Context) : WebView(context) {
     private var userTouched = false
 
-    override fun onTouchEvent(event: MotionEvent): Boolean {
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         userTouched = true
-        return super.onTouchEvent(event)
+        return super.dispatchTouchEvent(event)
+    }
+
+    override fun performClick(): Boolean {
+        userTouched = true
+        return super.performClick()
     }
 
     override fun onCheckIsTextEditor(): Boolean = userTouched && super.onCheckIsTextEditor()

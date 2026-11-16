@@ -1,15 +1,12 @@
 package dev.appolon.homelab.arr.feature.bazarr.settings
 
-import androidx.compose.foundation.layout.Box
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -144,7 +141,7 @@ fun BazarrSettingsFeatureSlot(
     graph: ArrDataGraph,
     modifier: Modifier = Modifier,
 ) {
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val pattern = BazarrSettingsFeature.PATTERNS
         .firstOrNull { matchRoutePattern(it, segments) != null }
         ?: return
@@ -174,9 +171,8 @@ private fun rememberSettingsRepository(
     serverId: ServerId,
     graph: ArrDataGraph,
 ): BazarrSettingsRepository? {
-    var repository by remember(serverId) { mutableStateOf<BazarrSettingsRepository?>(null) }
-    LaunchedEffect(serverId) {
-        repository = BazarrSettingsConnection(graph.registry, graph.secrets)
+    return rememberServerConnection(serverId) {
+        BazarrSettingsConnection(graph.registry, graph.secrets)
             .connect(serverId)
             ?.let { apis ->
                 BazarrSettingsRepository(
@@ -194,15 +190,6 @@ private fun rememberSettingsRepository(
                     actionQueue = graph.actionQueue,
                 )
             }
-    }
-    return repository
-}
-
-/** Spinner pane shown while the per-server connection resolves. */
-@Composable
-private fun SettingsConnecting(modifier: Modifier = Modifier) {
-    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
     }
 }
 
@@ -239,10 +226,7 @@ fun LanguagesDestination(
     modifier: Modifier = Modifier,
 ) {
     val repository = rememberSettingsRepository(serverId, graph)
-    if (repository == null) {
-        SettingsConnecting(modifier)
-        return
-    }
+    if (repository == null) return
     val vm: LanguagesViewModel = viewModel(
         key = "bazarr-settings-languages-" + serverId.value,
         factory = viewModelFactory { initializer { LanguagesViewModel(repository) } },
@@ -268,10 +252,7 @@ fun ProfilesDestination(
     modifier: Modifier = Modifier,
 ) {
     val repository = rememberSettingsRepository(serverId, graph)
-    if (repository == null) {
-        SettingsConnecting(modifier)
-        return
-    }
+    if (repository == null) return
     val vm: ProfilesViewModel = viewModel(
         key = "bazarr-settings-profiles-" + serverId.value,
         factory = viewModelFactory { initializer { ProfilesViewModel(repository) } },
@@ -297,10 +278,7 @@ fun ProvidersDestination(
     modifier: Modifier = Modifier,
 ) {
     val repository = rememberSettingsRepository(serverId, graph)
-    if (repository == null) {
-        SettingsConnecting(modifier)
-        return
-    }
+    if (repository == null) return
     val vm: ProvidersViewModel = viewModel(
         key = "bazarr-settings-providers-" + serverId.value,
         factory = viewModelFactory { initializer { ProvidersViewModel(repository) } },
@@ -328,10 +306,7 @@ fun NotificationsDestination(
     modifier: Modifier = Modifier,
 ) {
     val repository = rememberSettingsRepository(serverId, graph)
-    if (repository == null) {
-        SettingsConnecting(modifier)
-        return
-    }
+    if (repository == null) return
     val vm: NotificationsViewModel = viewModel(
         key = "bazarr-settings-notifications-" + serverId.value,
         factory = viewModelFactory { initializer { NotificationsViewModel(repository) } },
@@ -358,10 +333,7 @@ fun SchedulerDestination(
     modifier: Modifier = Modifier,
 ) {
     val repository = rememberSettingsRepository(serverId, graph)
-    if (repository == null) {
-        SettingsConnecting(modifier)
-        return
-    }
+    if (repository == null) return
     val vm: SchedulerViewModel = viewModel(
         key = "bazarr-settings-scheduler-" + serverId.value,
         factory = viewModelFactory { initializer { SchedulerViewModel(repository) } },
@@ -389,10 +361,7 @@ fun GeneralDestination(
     modifier: Modifier = Modifier,
 ) {
     val repository = rememberSettingsRepository(serverId, graph)
-    if (repository == null) {
-        SettingsConnecting(modifier)
-        return
-    }
+    if (repository == null) return
     val vm: GeneralViewModel = viewModel(
         key = "bazarr-settings-general-" + serverId.value,
         factory = viewModelFactory { initializer { GeneralViewModel(repository) } },
@@ -418,10 +387,7 @@ fun SystemDestination(
     modifier: Modifier = Modifier,
 ) {
     val repository = rememberSettingsRepository(serverId, graph)
-    if (repository == null) {
-        SettingsConnecting(modifier)
-        return
-    }
+    if (repository == null) return
     val vm: SystemViewModel = viewModel(
         key = "bazarr-settings-system-" + serverId.value,
         factory = viewModelFactory { initializer { SystemViewModel(repository) } },

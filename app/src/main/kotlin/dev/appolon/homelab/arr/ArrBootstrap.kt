@@ -23,6 +23,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.annotation.Keep
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.appolon.homelab.arr.core.AppType
 import dev.appolon.homelab.arr.core.ServerId
@@ -45,6 +48,7 @@ import dev.appolon.homelab.arr.ui.shell.LocalArrShellNavigator
 import dev.appolon.homelab.arr.ui.shell.ShellServer
 import dev.appolon.homelab.arr.ui.theme.ArrTheme
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
@@ -149,11 +153,17 @@ private fun globalProxySnapshot(graph: ArrDataGraph, scope: CoroutineScope): () 
  * start (through [ArrBootstrap.registerSyncAdaptersForColdStart]).
  */
 internal fun registerDefaultSyncAdapters(graph: ArrDataGraph, clientFactory: ArrClientFactory) {
-    SyncBootstrap.registerAdapter(AppType.RADARR, RadarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
-    SyncBootstrap.registerAdapter(AppType.SONARR, SonarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
-    SyncBootstrap.registerAdapter(AppType.LIDARR, LidarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
-    SyncBootstrap.registerAdapter(AppType.PROWLARR, ProwlarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
-    SyncBootstrap.registerAdapter(AppType.BAZARR, BazarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+    fun register(type: AppType, adapter: dev.appolon.homelab.arr.sync.scheduler.PollAdapter) {
+        SyncBootstrap.registerAdapter(
+            type,
+            dev.appolon.homelab.arr.sync.scheduler.ProxyAwarePollAdapter(adapter, graph.settings::defaultProxy),
+        )
+    }
+    register(AppType.RADARR, RadarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+    register(AppType.SONARR, SonarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+    register(AppType.LIDARR, LidarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+    register(AppType.PROWLARR, ProwlarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
+    register(AppType.BAZARR, BazarrPollAdapter(graph.secrets, graph.entityStore, clientFactory))
 }
 
 /**
@@ -165,6 +175,14 @@ internal fun registerDefaultSyncAdapters(graph: ArrDataGraph, clientFactory: Arr
 internal class ArrRuntime(context: Context) {
     val graph: ArrDataGraph = SyncBootstrap.dataGraph(context)
     val clientFactory: ArrClientFactory = DefaultArrClientFactory(cookieSource = WebViewCookieSource())
+    val provisioner by lazy {
+        ArrServerProvisioner(
+            graph.registry,
+            graph.secrets,
+            dev.appolon.homelab.arr.servers.net.ServerConnectionTester(clientFactory),
+            graph.settings::defaultProxy,
+        )
+    }
     val registry: ArrRouteRegistry = ArrRouteRegistry()
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -197,6 +215,28 @@ internal class ArrRuntime(context: Context) {
 
     /** Every live event from every server; the wiring scopes it per feature. */
     val liveEvents: SharedFlow<ArrEvent> get() = live.events
+
+    private val liveRequested = MutableStateFlow(false)
+
+    init {
+        // A quick close and reopen must wait for the preceding stop to finish.
+        scope.launch {
+            liveRequested.collect { requested ->
+                try {
+                    if (requested) live.start() else live.stop()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    // A later lifecycle transition can retry the connection operation.
+                }
+            }
+        }
+        scope.launch {
+            graph.registry.observe().collect {
+                live.refresh()
+            }
+        }
+    }
 
     init {
         dev.appolon.homelab.arr.net.ArrNetworkDefaults.globalProxy = globalProxySnapshot(graph, scope)
@@ -234,12 +274,12 @@ internal class ArrRuntime(context: Context) {
      * second refresh here would race it and could install duplicates.
      */
     fun startLive() {
-        live.start()
+        liveRequested.value = true
     }
 
     /** Stops every live connection; [startLive] can bring them back later. */
     fun stopLive() {
-        scope.launch { live.stop() }
+        liveRequested.value = false
     }
 
     private fun liveSpecOf(server: ArrServer): LiveServerSpec? {
@@ -271,7 +311,7 @@ internal class ArrRuntime(context: Context) {
  */
 @Composable
 fun ArrHost(
-    serverId: ServerId,
+    serverId: ServerId?,
     onExit: () -> Unit,
     modifier: Modifier = Modifier,
     openGeneration: Long = 0L,
@@ -280,10 +320,20 @@ fun ArrHost(
     val runtime = remember(context) { ArrBootstrap.runtime(context) }
     val servers by runtime.shellServers.collectAsStateWithLifecycle()
 
-    // Live sockets live exactly as long as the host does.
-    DisposableEffect(runtime) {
-        runtime.startLive()
-        onDispose { runtime.stopLive() }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(runtime, lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> runtime.startLive()
+                Lifecycle.Event.ON_STOP -> runtime.stopLive()
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            runtime.stopLive()
+        }
     }
 
     // The shell's server choice rides ArrShell's focus parameters: first

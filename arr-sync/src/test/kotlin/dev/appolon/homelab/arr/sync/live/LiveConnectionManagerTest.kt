@@ -161,6 +161,41 @@ class LiveConnectionManagerTest {
     }
 
     @Test
+    fun `simultaneous updates from different servers both reach collectors`() = runTest {
+        val first = FakeConnection(serverA)
+        val second = FakeConnection(serverB)
+        val manager = LiveConnectionManager(
+            scope = backgroundScope,
+            connectivity = flowOf(true),
+            specs = { listOf(serverA, serverB) },
+            connectionFactory = { if (it.serverId == serverA.serverId) first else second },
+            clockMillis = testScheduler::currentTime,
+        )
+        val out = mutableListOf<ArrEvent>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            manager.events.collect { out += it }
+        }
+        manager.start()
+        runCurrent()
+
+        val expected = listOf(
+            ArrEvent.QueueChanged(serverA.serverId),
+            ArrEvent.QueueChanged(serverB.serverId),
+            ArrEvent.EntitiesChanged(serverA.serverId, "movie", "updated"),
+            ArrEvent.EntitiesChanged(serverB.serverId, "movie", "updated"),
+        )
+        first.emit(expected[0])
+        second.emit(expected[1])
+        first.emit(expected[2])
+        second.emit(expected[3])
+        advanceTimeBy(250)
+        runCurrent()
+
+        assertEquals(expected.toSet(), out.toSet())
+        assertEquals(expected.size, out.size)
+    }
+
+    @Test
     fun `events flow carries no replay`() = runTest {
         val fake = FakeConnection(serverA)
         val manager = LiveConnectionManager(
@@ -239,6 +274,28 @@ class LiveConnectionManagerTest {
         assertEquals(2, created.size)
         assertEquals(1, created[0].stops)
         assertEquals(1, created[1].starts)
+    }
+
+    @Test
+    fun `stopping after an edit does not stop the retired connection again`() = runTest {
+        var current = listOf(serverA)
+        val created = mutableListOf<FakeConnection>()
+        val manager = LiveConnectionManager(
+            scope = backgroundScope,
+            connectivity = flowOf(true),
+            specs = { current },
+            connectionFactory = { spec -> FakeConnection(spec).also { created += it } },
+            clockMillis = testScheduler::currentTime,
+        )
+        manager.start()
+        runCurrent()
+        current = listOf(serverA.copy(endpoint = serverA.endpoint.copy(apiKey = "rotated")))
+        manager.refresh()
+        runCurrent()
+
+        manager.stop()
+
+        assertEquals(listOf(1, 1), created.map { it.stops })
     }
 
     @Test

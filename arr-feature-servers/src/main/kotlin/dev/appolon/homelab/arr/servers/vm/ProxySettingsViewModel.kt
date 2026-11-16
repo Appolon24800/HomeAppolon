@@ -8,6 +8,7 @@ import dev.appolon.homelab.arr.data.ArrServer
 import dev.appolon.homelab.arr.data.ServerRegistry
 import dev.appolon.homelab.arr.data.registry.GlobalSettings
 import dev.appolon.homelab.arr.net.arrError
+import dev.appolon.homelab.arr.net.ProxyConfig
 import dev.appolon.homelab.arr.servers.logic.ProxyForm
 import dev.appolon.homelab.arr.ui.lce.LceState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -77,9 +78,9 @@ class ProxySettingsViewModel(
                             loaded = true,
                             global = ProxyForm.fromConfig(defaultProxy),
                             servers = servers.map { server ->
-                                val storedForm = server.proxy
-                                    ?.let(ProxyForm::fromConfig)
-                                    ?: ProxyForm()
+                                val storedForm = ProxyForm.fromConfig(
+                                    server.proxy ?: ProxyConfig(), server.trust,
+                                )
                                 ServerProxyState(
                                     server = server,
                                     form = storedForm,
@@ -112,14 +113,18 @@ class ProxySettingsViewModel(
      */
     fun save() {
         val current = _state.value
+        if (!current.loaded || current.saving || current.loadError != null) return
         val globalInvalid = current.global.problems.isNotEmpty()
-        val serverInvalid = current.servers.any { it.override && it.form.problems.isNotEmpty() }
+        val serverInvalid = current.servers.any {
+            if (it.override) it.form.problems.isNotEmpty()
+            else ProxyForm.Problem.FINGERPRINT_INVALID in it.form.problems
+        }
         if (globalInvalid || serverInvalid) {
             _state.update { it.copy(showErrors = true) }
             return
         }
+        _state.update { it.copy(saving = true, saveError = null) }
         viewModelScope.launch {
-            _state.update { it.copy(saving = true) }
             runCatching {
                 settings.setDefaultProxy(current.global.toProxyConfig())
                 current.servers.forEach { row ->

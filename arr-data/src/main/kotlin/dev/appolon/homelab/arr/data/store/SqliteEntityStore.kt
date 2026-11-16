@@ -82,6 +82,28 @@ class SqliteEntityStore internal constructor(
         invalidate()
     }
 
+    override suspend fun <T> replaceAll(
+        serverId: ServerId,
+        type: EntityType,
+        values: List<Pair<String, T>>,
+        serializer: KSerializer<T>,
+        fetchedAtMillis: Long,
+    ) {
+        val encoded = values.map { (id, value) -> id to json.encodeToString(serializer, value) }
+        writeMutex.withLock {
+            withContext(ioDispatcher) {
+                db.inTransaction {
+                    db.execute(EntitySql.DELETE_SCOPE, listOf(serverId.value, type.value))
+                    encoded.forEach { (id, value) ->
+                        db.execute(EntitySql.UPSERT, listOf(serverId.value, type.value, id, value, fetchedAtMillis))
+                    }
+                    db.execute(EntitySql.UPSERT_REFRESH, listOf(serverId.value, type.value, fetchedAtMillis))
+                }
+            }
+        }
+        invalidate()
+    }
+
     override suspend fun <T> getAll(
         serverId: ServerId,
         type: EntityType,
@@ -111,11 +133,37 @@ class SqliteEntityStore internal constructor(
         invalidate()
     }
 
+    override suspend fun <T> move(
+        serverId: ServerId,
+        from: EntityType,
+        to: EntityType,
+        id: String,
+        value: T,
+        serializer: KSerializer<T>,
+    ) {
+        val encoded = json.encodeToString(serializer, value)
+        writeMutex.withLock {
+            withContext(ioDispatcher) {
+                db.inTransaction {
+                    db.execute(
+                        EntitySql.UPSERT,
+                        listOf(serverId.value, to.value, id, encoded, System.currentTimeMillis()),
+                    )
+                    db.execute(EntitySql.DELETE_ONE, listOf(serverId.value, from.value, id))
+                }
+            }
+        }
+        invalidate()
+    }
+
     override suspend fun deleteAll(serverId: ServerId, type: EntityType?) {
         writeMutex.withLock {
             withContext(ioDispatcher) {
                 val args = listOfNotNull(serverId.value, type?.value)
-                db.execute(EntitySql.deleteAllFor(type?.value), args)
+                db.inTransaction {
+                    db.execute(EntitySql.deleteAllFor(type?.value), args)
+                    db.execute(if (type == null) EntitySql.DELETE_REFRESH_SERVER else EntitySql.DELETE_REFRESH_SCOPE, args)
+                }
             }
         }
         invalidate()
@@ -123,9 +171,10 @@ class SqliteEntityStore internal constructor(
 
     override suspend fun lastFetchedAt(serverId: ServerId, type: EntityType): Long? =
         withContext(ioDispatcher) {
-            db.query(EntitySql.MAX_FETCHED_AT, listOf(serverId.value, type.value))
-                .firstOrNull()
-                ?.get(0) as? Long
+            val args = listOf(serverId.value, type.value)
+            val rowsTime = db.query(EntitySql.MAX_FETCHED_AT, args).firstOrNull()?.get(0) as? Number
+            val refreshTime = db.query(EntitySql.SELECT_REFRESH, args).firstOrNull()?.get(0) as? Number
+            listOfNotNull(rowsTime?.toLong(), refreshTime?.toLong()).maxOrNull()
         }
 
     override fun <T> observe(

@@ -9,9 +9,11 @@ import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ArrResult
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.radarr.addnew.FakeActionQueue
-import dev.appolon.homelab.arr.feature.radarr.addnew.FakeEntityStore
+import dev.appolon.homelab.arr.feature.radarr.library.FakeEntityStore
 import java.io.IOException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -76,6 +78,47 @@ class RadarrCollectionsRepositoryTest {
                 collection = MovieCollectionResource(tmdbId = 10),
             ),
         )
+    }
+
+    @Test
+    fun `failed collection refresh retains old rows and returns an error`() = runTest {
+        repository.refresh()
+        val previous = repository.cachedCollections()
+        discovery.collections.clear()
+        discovery.collections += CollectionResource(id = 2, title = "Replacement")
+        store.writeFailure = IOException("Disk full")
+
+        val result = runCatching { repository.refresh() }
+
+        assertEquals(previous, repository.cachedCollections())
+        assertTrue(result.getOrNull() is ArrResult.Err)
+        assertEquals(1_000L, store.lastFetchedAt(serverId, RadarrCollectionsRepository.COLLECTION_TYPE))
+    }
+
+    @Test
+    fun `collection observers receive only complete replacements`() = runTest {
+        repository.refresh()
+        val snapshots = mutableListOf<List<Int>>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            repository.observeCollections().collect { snapshots += it.map { row -> row.id } }
+        }
+        discovery.collections.clear()
+        discovery.collections += CollectionResource(id = 2, title = "Replacement")
+
+        repository.refresh()
+
+        assertEquals(listOf(listOf(1), listOf(2)), snapshots)
+    }
+
+    @Test
+    fun `cancelled collection fetch propagates cancellation and preserves cache`() = runTest {
+        repository.refresh()
+        discovery.errorFor = { CancellationException("Cancelled refresh") }
+
+        val result = runCatching { repository.refresh() }
+
+        assertTrue(result.exceptionOrNull() is CancellationException)
+        assertEquals(listOf(1), repository.cachedCollections().map { it.id })
     }
 
     @Test

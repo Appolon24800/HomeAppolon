@@ -49,6 +49,7 @@ class LidarrArtistDetailRepositoryTest {
     private val store = FakeEntityStore()
     private val actionQueue = FakeActionQueue()
     private val serverId = ServerId("server-1")
+    private var profiles = listOf(QualityProfileResource(id = 1, name = "High quality"))
     private var profileFetches = 0
     private var posterResult: ArrResult<Unit> = ArrResult.ok(Unit)
 
@@ -66,7 +67,7 @@ class LidarrArtistDetailRepositoryTest {
         manualImportApi = queue,
         qualityProfileApi = {
             profileFetches++
-            listOf(QualityProfileResource(id = 1, name = "High quality"))
+            profiles
         },
         qualityDefinitionApi = {
             listOf(
@@ -112,6 +113,16 @@ class LidarrArtistDetailRepositoryTest {
         )
         library.error = { null }
         queue.error = { null }
+    }
+
+    @Test
+    fun `empty profile refresh removes old labels and retains its ttl`() = runTest {
+        repository.qualityProfiles()
+        profiles = emptyList()
+        assertTrue((repository.qualityProfiles(ttlMillis = -1) as ArrResult.Ok).value.isEmpty())
+        profiles = listOf(QualityProfileResource(id = 2, name = "Not fetched yet"))
+        assertTrue((repository.qualityProfiles() as ArrResult.Ok).value.isEmpty())
+        assertEquals(2, profileFetches)
     }
 
     @Test

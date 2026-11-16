@@ -261,7 +261,7 @@ class SonarrSeriesDetailRepository(
     ): ArrResult<List<T>> = withContext(ioDispatcher) {
         val cached = store.getAll(serverId, type, serializer)
         val fetchedAt = store.lastFetchedAt(serverId, type)
-        if (fetchedAt != null && now() - fetchedAt <= ttlMillis && cached.isNotEmpty()) {
+        if (fetchedAt != null && now() - fetchedAt <= ttlMillis) {
             return@withContext ArrResult.ok(cached)
         }
         val remote = try {
@@ -271,18 +271,14 @@ class SonarrSeriesDetailRepository(
         } catch (e: Throwable) {
             return@withContext ArrResult.err(e.arrError())
         }
-        if (remote.isNotEmpty()) {
-            store.putAll(
-                serverId,
-                type,
-                remote.map { idOf(it) to it },
-                serializer,
-                fetchedAtMillis = now(),
-            )
-            ArrResult.ok(remote)
-        } else {
-            ArrResult.ok(cached)
-        }
+        store.replaceAll(
+            serverId,
+            type,
+            remote.map { idOf(it) to it },
+            serializer,
+            fetchedAtMillis = now(),
+        )
+        ArrResult.ok(remote)
     }
 
     /**

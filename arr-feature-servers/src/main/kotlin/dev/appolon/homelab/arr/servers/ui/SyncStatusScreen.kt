@@ -225,7 +225,7 @@ private fun ActionCard(
                     Text(stringResource(R.string.arr_servers_sync_retry))
                 }
                 Spacer(Modifier.weight(1f))
-                IconButton(onClick = { onDiscard(action.actionId) }) {
+                IconButton(onClick = { onDiscard(action.actionId) }, enabled = retryEnabled) {
                     Icon(
                         imageVector = Icons.Default.DeleteOutline,
                         contentDescription = stringResource(

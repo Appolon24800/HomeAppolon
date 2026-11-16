@@ -1,11 +1,11 @@
 package dev.appolon.homelab.arr.feature.lidarr.search
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -29,8 +29,6 @@ import dev.appolon.homelab.arr.feature.lidarr.search.vm.InteractiveImportViewMod
 import dev.appolon.homelab.arr.feature.lidarr.search.vm.ReleaseListViewModel
 import dev.appolon.homelab.arr.net.ArrClientFactory
 import dev.appolon.homelab.arr.net.DefaultArrClientFactory
-import dev.appolon.homelab.arr.ui.lce.ArrLceBox
-import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.nav.ArrRoute
 import dev.appolon.homelab.arr.ui.nav.ArrRouteRegistry
 import dev.appolon.homelab.arr.ui.nav.fillPattern
@@ -170,7 +168,7 @@ fun LidarrSearchFeatureSlot(
     modifier: Modifier = Modifier,
 ) {
     if (route.owner != LidarrSearchFeature.ROUTE_OWNER) return
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val artistReleases = matchRoutePattern(LidarrSearchFeature.ARTIST_RELEASES_PATTERN, segments)
     val albumReleases = matchRoutePattern(LidarrSearchFeature.ALBUM_RELEASES_PATTERN, segments)
     val import = matchRoutePattern(LidarrSearchFeature.IMPORT_PATTERN, segments)
@@ -213,24 +211,13 @@ private fun rememberApis(
     deps: LidarrSearchDeps,
     serverId: ServerId,
 ): LidarrSearchApis? {
-    var apis by remember(serverId) { mutableStateOf<LidarrSearchApis?>(null) }
-    LaunchedEffect(serverId) {
-        apis = LidarrSearchConnection(
+    return rememberServerConnection(serverId) {
+        LidarrSearchConnection(
             registry = deps.registry,
             secrets = deps.secrets,
             clientFactory = deps.clientFactory,
         ).apis(serverId)
     }
-    return apis
-}
-
-/** Loading pane shown while the per-server connection resolves. */
-@Composable
-private fun SearchLoading(modifier: Modifier = Modifier) {
-    ArrLceBox(
-        state = LceState.Loading,
-        modifier = modifier.fillMaxSize(),
-    ) {}
 }
 
 /**
@@ -245,7 +232,7 @@ private fun ReleasesDestination(
     deps: LidarrSearchDeps,
     modifier: Modifier = Modifier,
 ) {
-    val apis = rememberApis(deps, serverId) ?: return SearchLoading(modifier)
+    val apis = rememberApis(deps, serverId) ?: return
     val wiring = remember(serverId, apis) {
         SearchWiring(
             releases = LidarrReleaseRepository(
@@ -345,7 +332,7 @@ private fun ImportDestination(
     deps: LidarrSearchDeps,
     modifier: Modifier = Modifier,
 ) {
-    val apis = rememberApis(deps, serverId) ?: return SearchLoading(modifier)
+    val apis = rememberApis(deps, serverId) ?: return
     val repository = remember(serverId, apis, artistId) {
         LidarrInteractiveImportRepository(
             serverId = serverId,

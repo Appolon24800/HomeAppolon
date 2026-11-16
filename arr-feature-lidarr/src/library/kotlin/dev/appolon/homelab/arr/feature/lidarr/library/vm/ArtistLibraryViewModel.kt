@@ -29,6 +29,7 @@ import dev.appolon.homelab.arr.feature.lidarr.library.data.toFilterState
 import dev.appolon.homelab.arr.net.arrError
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.time.Instant
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -150,6 +151,8 @@ class ArtistLibraryViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LceState.Loading)
 
+    private var refreshJob: Job? = null
+
     init {
         viewModelScope.launch {
             repository.observeArtists()
@@ -202,7 +205,8 @@ class ArtistLibraryViewModel(
 
     /** Pull-to-refresh and error retry entry point. */
     fun refresh() {
-        viewModelScope.launch {
+        if (refreshJob?.isActive == true) return
+        refreshJob = viewModelScope.launch {
             _state.update { it.copy(refreshing = true) }
             when (val result = repository.refresh()) {
                 is ArrResult.Ok -> _state.update { it.copy(refreshing = false, loadError = null) }

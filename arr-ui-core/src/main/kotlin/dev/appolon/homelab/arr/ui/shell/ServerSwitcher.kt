@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Settings
@@ -20,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -58,11 +60,23 @@ fun ServerSwitcher(
     modifier: Modifier = Modifier,
     maxVisible: Int = 4,
 ) {
-    val (visible, overflow) = splitServers(servers, maxVisible)
+    val (initialVisible, initialOverflow) = splitServers(servers, maxVisible)
+    val selectedOverflow = initialOverflow.firstOrNull { it.id == selectedId }
+    val visible = if (selectedOverflow != null && maxVisible > 0) {
+        initialVisible.dropLast(1) + selectedOverflow
+    } else initialVisible
+    val visibleIds = visible.map { it.id }.toSet()
+    val overflow = servers.filterNot { it.id in visibleIds }
+    val listState = rememberLazyListState()
+    val selectedIndex = visible.indexOfFirst { it.id == selectedId }
+    LaunchedEffect(selectedId, selectedIndex) {
+        if (selectedIndex >= 0) listState.animateScrollToItem(selectedIndex)
+    }
     var menuOpen by rememberSaveable { mutableStateOf(false) }
     val moreLabel = stringResource(R.string.arr_shell_more_servers, overflow.size)
 
     LazyRow(
+        state = listState,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
         modifier = modifier.fillMaxWidth(),

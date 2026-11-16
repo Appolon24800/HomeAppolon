@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.feature.lidarr.settings.connect
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -232,7 +233,7 @@ fun LidarrSettingsConnectFeatureSlot(
         ForeignOwnerPlaceholder(route.owner, modifier)
         return
     }
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val navigator = LocalArrShellNavigator.current
 
     val indexers = matchRoutePattern(LidarrSettingsConnectFeature.INDEXERS_PATTERN, segments)

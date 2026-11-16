@@ -15,6 +15,7 @@ import dev.appolon.homelab.data.WebTarget
 import dev.appolon.homelab.data.MessageInfo
 import dev.appolon.homelab.data.MessagePoller
 import dev.appolon.homelab.data.PocketId
+import dev.appolon.homelab.data.awaitPocketIdApproval
 import dev.appolon.homelab.ui.theme.ThemeSource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -212,79 +213,92 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun closeLogin() {
+        accountRequestGeneration++
+        accountLoginJob?.cancel()
+        accountLoginJob = null
         cancelDeviceLogin()
         _state.update {
             it.copy(loginOpen = false, accountBusy = false, codeSentTo = null, accountError = null)
         }
     }
 
-    /** User picked a Credential Manager assertion; finish it server-side. */
-    fun finishPasskeyLogin(challenge: PocketId.PasskeyChallenge, assertionJson: String) {
-        viewModelScope.launch {
-            _state.update { it.copy(accountBusy = true, accountError = null) }
-            runCatching { PocketId.finishPasskeyLogin(_state.value.accountUrl, challenge, assertionJson) }
-                .onSuccess { user -> completeLogin(user) }
-                .onFailure { e ->
-                    _state.update { it.copy(accountBusy = false, accountError = e.message ?: "Sign-in failed") }
-                }
+    private var accountLoginJob: Job? = null
+    private var accountRequestGeneration = 0L
+
+    /** Starts one foreground login request and cancels it when the sheet closes. */
+    private fun runAccountRequest(block: suspend () -> Unit) {
+        if (!_state.value.loginOpen || _state.value.accountBusy) return
+        cancelDeviceLogin()
+        _state.update { it.copy(accountBusy = true, accountError = null) }
+        val generation = ++accountRequestGeneration
+        accountLoginJob = viewModelScope.launch {
+            try {
+                block()
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.update { it.copy(accountError = e.message ?: "Sign-in failed") }
+            } finally {
+                if (generation == accountRequestGeneration) _state.update { it.copy(accountBusy = false) }
+            }
         }
+    }
+
+    /** Finishes the Credential Manager assertion with the login challenge cookie. */
+    fun finishPasskeyLogin(challenge: PocketId.PasskeyChallenge, assertionJson: String) = runAccountRequest {
+        completeLogin(PocketId.finishPasskeyLogin(effectiveAccountUrl(), challenge, assertionJson))
     }
 
     /** Device cookie from the last emailed-code request, for the exchange. */
     private var oneTimeDeviceCookie: String? = null
 
     /** Asks PocketID to email a one-time access code to [email]. */
-    fun requestOneTimeCodeEmail(email: String) {
-        viewModelScope.launch {
-            _state.update { it.copy(accountBusy = true, accountError = null) }
-            runCatching { PocketId.requestOneTimeCodeEmail(_state.value.accountUrl, email) }
-                .onSuccess { cookie ->
-                    oneTimeDeviceCookie = cookie
-                    _state.update {
-                        it.copy(accountBusy = false, codeSentTo = email.trim(), accountError = null)
-                    }
-                }
-                .onFailure { e ->
-                    _state.update { it.copy(accountBusy = false, accountError = e.message ?: "Request failed") }
-                }
-        }
+    fun requestOneTimeCodeEmail(email: String) = runAccountRequest {
+        oneTimeDeviceCookie = PocketId.requestOneTimeCodeEmail(effectiveAccountUrl(), email)
+        _state.update { it.copy(codeSentTo = email.trim(), accountError = null) }
     }
 
     /** Device login ("other device") polling job, if one is running. */
     private var deviceLoginJob: Job? = null
 
     /** Starts a device login: shows the code, waits for the other device. */
-    fun startDeviceLogin() {
-        if (deviceLoginJob?.isActive == true) return
+    fun startDeviceLogin() = beginDeviceApproval(openBrowser = false)
+
+    /** The system browser supplies PocketID's HTTPS WebAuthn origin. */
+    fun startBrowserPasskeyLogin() = beginDeviceApproval(openBrowser = true)
+
+    private fun beginDeviceApproval(openBrowser: Boolean) {
+        if (!_state.value.loginOpen || _state.value.accountBusy || deviceLoginJob?.isActive == true) return
         deviceLoginJob = viewModelScope.launch {
             _state.update { it.copy(accountError = null) }
-            runCatching { PocketId.beginDeviceLogin(_state.value.accountUrl) }
+            runCatching { PocketId.beginDeviceLogin(effectiveAccountUrl()) }
                 .onFailure { e ->
                     if (e is kotlinx.coroutines.CancellationException) throw e
                     _state.update { it.copy(accountError = e.message ?: "Device login failed") }
                 }
                 .onSuccess { session ->
                     _state.update { it.copy(deviceLogin = session.request) }
-                    while (kotlin.coroutines.coroutineContext.isActive) {
-                        // The exchange call blocks server-side until a decision
-                        // (or its window closes); poll again right after.
+                    if (openBrowser) {
                         try {
-                            val user = PocketId.awaitDeviceLogin(_state.value.accountUrl, session)
-                            if (user != null) {
-                                completeLogin(user)
-                                return@launch
-                            }
-                        } catch (e: kotlinx.coroutines.CancellationException) {
-                            // Cancel/close is a normal exit, not an error.
-                            throw e
-                        } catch (e: Exception) {
-                            _state.update {
-                                it.copy(
-                                    deviceLogin = null,
-                                    accountError = e.message ?: "Device login failed",
-                                )
-                            }
-                            return@launch
+                            val intent = android.content.Intent(
+                                android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse(session.request.verificationUriComplete),
+                            ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                            getApplication<Application>().startActivity(intent)
+                        } catch (_: android.content.ActivityNotFoundException) {
+                            _state.update { it.copy(accountError = "No browser is installed. Approve this request on another device") }
+                        }
+                    }
+                    try {
+                        val user = awaitPocketIdApproval(session.request.interval) {
+                            PocketId.awaitDeviceLogin(effectiveAccountUrl(), session)
+                        }
+                        completeLogin(user)
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        _state.update {
+                            it.copy(deviceLogin = null, accountError = e.message ?: "Device login failed")
                         }
                     }
                 }
@@ -298,17 +312,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** One-time access code login: exchanges the code and bridges the session. */
-    fun signInWithOneTimeCode(code: String) {
-        viewModelScope.launch {
-            _state.update { it.copy(accountBusy = true, accountError = null) }
-            runCatching {
-                PocketId.signInWithOneTimeCode(_state.value.accountUrl, code, oneTimeDeviceCookie)
-            }
-                .onSuccess { user -> completeLogin(user) }
-                .onFailure { e ->
-                    _state.update { it.copy(accountBusy = false, accountError = e.message ?: "Sign-in failed") }
-                }
-        }
+    fun signInWithOneTimeCode(code: String) = runAccountRequest {
+        completeLogin(PocketId.signInWithOneTimeCode(effectiveAccountUrl(), code, oneTimeDeviceCookie))
     }
 
     /**
@@ -325,7 +330,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         }
         deviceLoginJob = null
         oneTimeDeviceCookie = null
-        val url = _state.value.accountUrl
+        val url = effectiveAccountUrl()
         val cookies = PocketId.sessionCookies(url)
         val newState = _state.value.let { s ->
             val account = PocketIdAccount(
@@ -424,6 +429,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Clears the active session; saved accounts remain for quick switching. */
     fun signOut() {
+        closeLogin()
         val s = _state.value
         viewModelScope.launch {
             PocketId.wipeCookieJar()
@@ -452,8 +458,12 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Web login fallback: opens the PocketID page in the in-app WebView. */
     fun openWebLogin() {
+        accountRequestGeneration++
+        accountLoginJob?.cancel()
+        accountLoginJob = null
+        cancelDeviceLogin()
         _state.update {
-            it.copy(loginOpen = false, webTarget = WebTarget(effectiveAccountUrl(), webLogin = true))
+            it.copy(loginOpen = false, accountBusy = false, webTarget = WebTarget(effectiveAccountUrl(), webLogin = true))
         }
     }
 

@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.feature.sonarr.settings.connect
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -233,7 +234,7 @@ fun SonarrSettingsConnectFeatureSlot(
         ForeignOwnerPlaceholder(route.owner, modifier)
         return
     }
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val navigator = LocalArrShellNavigator.current
 
     val indexers = matchRoutePattern(SonarrSettingsConnectFeature.INDEXERS_PATTERN, segments)

@@ -176,7 +176,7 @@ object SyncBootstrap {
         notificationBus.tryEmit(event)
     }
 
-    private const val STATE_FILE_NAME = "arr_sync.preferences.pb"
+    internal const val STATE_FILE_NAME = "arr_sync.preferences_pb"
 
     /** Reflective target of [ensureDefaultAdapters]; kept stable by `@Keep`. */
     private const val APP_BOOTSTRAP_CLASS = "dev.appolon.homelab.arr.ArrBootstrap"

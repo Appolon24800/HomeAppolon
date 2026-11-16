@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.feature.prowlarr
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.runtime.Composable
 import dev.appolon.homelab.arr.core.AppType
 import dev.appolon.homelab.arr.data.ArrDataGraph
@@ -85,7 +86,7 @@ private fun searchPatterns(): List<String> = listOf(
 private fun featureSlot(
     vararg groups: Pair<List<String>, ArrShellContent>,
 ): (@Composable (ArrRoute.Feature) -> Unit)? = { route ->
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     groups.firstOrNull { (patterns, _) ->
         patterns.any { matchRoutePattern(it, segments) != null }
     }?.second?.feature?.invoke(route)

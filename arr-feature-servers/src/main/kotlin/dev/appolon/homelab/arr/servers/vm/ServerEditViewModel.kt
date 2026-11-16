@@ -1,6 +1,5 @@
 package dev.appolon.homelab.arr.servers.vm
 
-import kotlinx.coroutines.Dispatchers
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.appolon.homelab.arr.core.ArrError
@@ -15,6 +14,7 @@ import dev.appolon.homelab.arr.servers.logic.ServerForm
 import dev.appolon.homelab.arr.servers.net.ConnectionOutcome
 import dev.appolon.homelab.arr.servers.net.ConnectionTester
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -58,6 +58,7 @@ class ServerEditViewModel(
 
     private val _state = MutableStateFlow(UiState(loading = serverId != null))
     val state: StateFlow<UiState> = _state.asStateFlow()
+    private var testJob: Job? = null
 
     init {
         val id = serverId
@@ -80,6 +81,7 @@ class ServerEditViewModel(
                 }.onSuccess { (server, form) ->
                     _state.update { it.copy(loading = false, form = form, original = server) }
                 }.onFailure { t ->
+                    if (t is CancellationException) throw t
                     _state.update { it.copy(loading = false, loadError = t.arrError()) }
                 }
             }
@@ -87,7 +89,14 @@ class ServerEditViewModel(
     }
 
     fun update(transform: (ServerForm) -> ServerForm) {
-        _state.update { it.copy(form = transform(it.form)) }
+        if (_state.value.saving || _state.value.loading) return
+        testJob?.cancel()
+        _state.update {
+            it.copy(
+                form = transform(it.form), testing = false, test = TestState.Idle,
+                saveError = null,
+            )
+        }
     }
 
     /**
@@ -100,6 +109,7 @@ class ServerEditViewModel(
      */
     fun testConnection() {
         val current = _state.value
+        if (current.testing || current.loading || current.saving || current.loadError != null) return
         val form = current.form
         if (form.parsedUrl() == null) {
             _state.update { it.copy(showErrors = true) }
@@ -114,8 +124,8 @@ class ServerEditViewModel(
             proxy = current.original?.proxy,
             trust = current.original?.trust ?: TrustSpec.System,
         )
-        viewModelScope.launch {
-            _state.update { it.copy(testing = true) }
+        _state.update { it.copy(testing = true, test = TestState.Idle) }
+        testJob = viewModelScope.launch {
             val test = try {
                 when (val outcome = tester.test(endpoint, form.type)) {
                     is ConnectionOutcome.Success -> TestState.Succeeded(outcome.version)
@@ -132,14 +142,15 @@ class ServerEditViewModel(
 
     fun save() {
         val current = _state.value
+        if (current.saving || current.saved || current.loading || current.loadError != null) return
         if (!current.form.isValid) {
             _state.update { it.copy(showErrors = true) }
             return
         }
+        _state.update { it.copy(saving = true, saveError = null) }
         viewModelScope.launch {
-            _state.update { it.copy(saving = true) }
             runCatching {
-                val form = _state.value.form
+                val form = current.form
                 val original = current.original
                 registry.upsert(
                     ArrServer(
@@ -150,7 +161,7 @@ class ServerEditViewModel(
                         apiKeyEncrypted = secrets.encrypt(form.apiKey.trim()),
                         basicAuthUser = form.basicAuthUser.trim().takeIf { it.isNotEmpty() },
                         basicAuthPasswordEncrypted = form.basicAuthPassword
-                            ?.takeIf { it.isNotEmpty() }
+                            .takeIf { it.isNotEmpty() }
                             ?.let { secrets.encrypt(it) },
                         proxy = original?.proxy,
                         trust = original?.trust,
@@ -159,6 +170,7 @@ class ServerEditViewModel(
             }.onSuccess {
                 _state.update { it.copy(saving = false, saved = true) }
             }.onFailure { t ->
+                if (t is CancellationException) throw t
                 _state.update { it.copy(saving = false, saveError = t.arrError()) }
             }
         }

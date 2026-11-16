@@ -3,10 +3,12 @@ package dev.appolon.homelab.arr.servers.vm
 import dev.appolon.homelab.arr.core.ActionId
 import dev.appolon.homelab.arr.core.AppType
 import dev.appolon.homelab.arr.core.ServerId
-import dev.appolon.homelab.arr.data.ActionQueue
+import dev.appolon.homelab.arr.data.RetryableActionQueue
 import dev.appolon.homelab.arr.data.QueuedAction
 import dev.appolon.homelab.arr.ui.lce.LceState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -18,6 +20,7 @@ import kotlinx.coroutines.launch
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 
@@ -31,9 +34,10 @@ class SyncStatusViewModelTest {
      * remove, false means keep. The dead-letter list is a separate mutable
      * source like the real DEAD_TYPE scope.
      */
-    private class FakeActionQueue : ActionQueue {
+    private class FakeActionQueue : RetryableActionQueue {
         val pendingFlow = MutableStateFlow<List<QueuedAction>>(emptyList())
         var dead: List<QueuedAction> = emptyList()
+        var failRead = false
 
         override suspend fun enqueue(action: QueuedAction) {
             pendingFlow.value += action
@@ -57,7 +61,23 @@ class SyncStatusViewModelTest {
             return succeeded to failed
         }
 
+        override suspend fun deadLetters(): List<QueuedAction> {
+            if (failRead) throw java.io.IOException("Unavailable")
+            return dead
+        }
+
+        override suspend fun retryOne(actionId: ActionId, executor: suspend (QueuedAction) -> Boolean): Boolean {
+            val action = pending().firstOrNull { it.actionId == actionId }
+                ?: dead.firstOrNull { it.actionId == actionId }?.copy(attempts = 0, lastError = null)?.also {
+                    dead = dead.filterNot { it.actionId == actionId }
+                    enqueue(it)
+                }
+                ?: return false
+            return executor(action).also { if (it) remove(actionId) }
+        }
+
         override suspend fun remove(actionId: ActionId) {
+            dead = dead.filterNot { it.actionId == actionId }
             pendingFlow.value = pendingFlow.value.filterNot { it.actionId == actionId }
         }
     }
@@ -87,9 +107,70 @@ class SyncStatusViewModelTest {
         executor: suspend (QueuedAction) -> Boolean,
     ): SyncStatusViewModel = SyncStatusViewModel(
         queue = queue,
-        deadLetterSource = { queue.dead },
         executor = executor,
     )
+
+    @Test
+    fun `refresh recovers from a failed initial queue read`() = runTest {
+        val queue = FakeActionQueue().apply { failRead = true }
+        val vm = vm(queue) { true }
+        assertTrue(vm.state.value.loadError != null)
+
+        queue.failRead = false
+        queue.enqueue(action("a1", "/ok"))
+        vm.refresh()
+        advanceUntilIdle()
+
+        assertEquals(null, vm.state.value.loadError)
+        assertEquals(listOf("a1"), vm.state.value.pending.map { it.actionId.value })
+    }
+
+    @Test
+    fun `cancellation clears working state and does not become a load error`() = runTest {
+        val queue = FakeActionQueue().apply { enqueue(action("a1", "/ok")) }
+        val vm = vm(queue) { throw CancellationException("Cancelled") }
+
+        vm.retryOne(ActionId("a1"))
+        advanceUntilIdle()
+
+        assertFalse(vm.state.value.working)
+        assertEquals(null, vm.state.value.loadError)
+        assertEquals(1, queue.pending().size)
+    }
+
+    @Test
+    fun `working state rejects another retry and discard`() = runTest {
+        val queue = FakeActionQueue().apply { enqueue(action("a1", "/ok")) }
+        val release = CompletableDeferred<Unit>()
+        var calls = 0
+        val vm = vm(queue) { calls++; release.await(); true }
+
+        vm.retryOne(ActionId("a1"))
+        vm.retryOne(ActionId("a1"))
+        vm.retryAll()
+        vm.discard(ActionId("a1"))
+        assertTrue(vm.state.value.working)
+        assertEquals(1, calls)
+        assertEquals(1, queue.pending().size)
+        release.complete(Unit)
+        advanceUntilIdle()
+        assertFalse(vm.state.value.working)
+        assertTrue(queue.pending().isEmpty())
+    }
+
+    @Test
+    fun `retrying a failed action restores it with a fresh attempt budget`() = runTest {
+        val queue = FakeActionQueue().apply { dead = listOf(action("d1", "/ok").copy(attempts = 5)) }
+        var attempted: QueuedAction? = null
+        val vm = vm(queue) { attempted = it; false }
+
+        vm.retryOne(ActionId("d1"))
+        advanceUntilIdle()
+
+        assertEquals(0, attempted!!.attempts)
+        assertTrue(vm.state.value.dead.isEmpty())
+        assertEquals(0, vm.state.value.pending.single().attempts)
+    }
 
     @Test
     fun `no pending and no dead letters renders empty`() = runTest {

@@ -92,6 +92,36 @@ class RadarrAddNewRepositoryTest {
     )
 
     @Test
+    fun `empty catalogs remove old choices and remain fresh`() = runTest {
+        repository.rootFolders()
+        repository.qualityProfiles()
+        repository.tags()
+        system.rootFolderItems.clear()
+        calendar.qualityProfiles.clear()
+        system.tagItems.clear()
+        now += RadarrAddNewRepository.CATALOG_TTL_MILLIS + 1
+        assertTrue((repository.rootFolders() as ArrResult.Ok).value.isEmpty())
+        assertTrue((repository.qualityProfiles() as ArrResult.Ok).value.isEmpty())
+        assertTrue((repository.tags() as ArrResult.Ok).value.isEmpty())
+        system.errorFor = { IOException("offline") }
+        calendar.errorFor = { IOException("offline") }
+        assertTrue((repository.rootFolders() as ArrResult.Ok).value.isEmpty())
+        assertTrue((repository.qualityProfiles() as ArrResult.Ok).value.isEmpty())
+        assertTrue((repository.tags() as ArrResult.Ok).value.isEmpty())
+    }
+
+    @Test
+    fun `catalog refresh removes rows deleted from a nonempty root folder list`() = runTest {
+        system.rootFolderItems += dev.appolon.homelab.arr.api.radarr.model.RootFolderResource(id = 2, path = "/other")
+        repository.rootFolders()
+        system.rootFolderItems.removeAll { it.id == 1 }
+        now += RadarrAddNewRepository.CATALOG_TTL_MILLIS + 1
+        repository.rootFolders()
+        system.errorFor = { IOException("offline") }
+        assertEquals(listOf(2), (repository.rootFolders() as ArrResult.Ok).value.map { it.id })
+    }
+
+    @Test
     fun `search strips the disambiguation year and ranks it first`() = runTest {
         val result = repository.search("Dune (1984)")
         assertTrue(result is ArrResult.Ok)

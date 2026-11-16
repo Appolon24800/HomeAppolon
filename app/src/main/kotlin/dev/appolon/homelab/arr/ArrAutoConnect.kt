@@ -11,15 +11,12 @@ import android.webkit.WebViewClient
 import dev.appolon.homelab.arr.core.AppType
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.net.ServerEndpoint
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
 
 /**
@@ -48,11 +45,6 @@ object ArrAutoConnect {
         data object NeedSetup : Outcome
     }
 
-    /** The WebView's Cookie header for [url], or null when there is none. */
-    private fun webSessionCookie(url: String): String? = runCatching {
-        android.webkit.CookieManager.getInstance().getCookie(url)
-    }.getOrNull()
-
     /** Wall-clock budget for the whole invisible round trip. */
     private val TIMEOUT_MS = 15_000L
 
@@ -60,21 +52,20 @@ object ArrAutoConnect {
     private const val MAX_PROBES = 12
     private const val PROBE_RETRY_MS = 700L
 
-    /** Status endpoint candidates across the supported app generations. */
-    private val STATUS_PATHS = listOf(
-        "/api/v3/system/status",
-        "/api/v1/system/status",
-        "/api/system/status",
-    )
-
     /**
      * Resolves [serviceUrl] to a configured server, creating one when the
      * key extraction succeeds. Runs the WebView on the main thread; safe
      * to call from any coroutine scope.
      */
     suspend fun connect(context: Context, serviceUrl: String, appType: AppType): Outcome {
-        val key = withTimeoutOrNull(TIMEOUT_MS) {
-            extractApiKey(context.applicationContext, serviceUrl, appType)
+        val key = try {
+            withTimeoutOrNull(TIMEOUT_MS) {
+                extractApiKey(context.applicationContext, serviceUrl, appType)
+            }
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            null
         } ?: return Outcome.NeedSetup
         if (key.isNullOrBlank() || key.length < 16) return Outcome.NeedSetup
         val id = provision(context, appType, ServerEndpoint.normalizeBaseUrl(serviceUrl), key)
@@ -93,31 +84,7 @@ object ArrAutoConnect {
         baseUrl: String,
         apiKey: String,
     ): ServerId? = withContext(Dispatchers.IO) {
-        if (!verify(baseUrl, apiKey, appType)) return@withContext null
-        runCatching {
-            val runtime = ArrBootstrap.runtime(context.applicationContext)
-            val graph = runtime.graph
-            val existing = graph.registry.servers().firstOrNull {
-                it.type == appType && it.baseUrl.trimEnd('/') == baseUrl.trimEnd('/')
-            }
-            val server = graph.registry.upsert(
-                existing?.copy(apiKeyEncrypted = graph.secrets.encrypt(apiKey))
-                    ?: dev.appolon.homelab.arr.data.ArrServer(
-                        id = ServerId(java.util.UUID.randomUUID().toString()),
-                        type = appType,
-                        name = appType.displayName,
-                        baseUrl = baseUrl,
-                        apiKeyEncrypted = graph.secrets.encrypt(apiKey),
-                    ),
-            )
-            server.id
-        }.getOrElse { e ->
-            // Keystore or registry failures (keychain unavailable, disk
-            // full) read as "could not connect"; cancellation still
-            // propagates so the caller's cleanup runs.
-            if (e is CancellationException) throw e
-            null
-        }
+        ArrBootstrap.runtime(context.applicationContext).provisioner.provision(appType, baseUrl, apiKey)
     }
 
     /** Loads the page invisibly and returns the apikey its UI exposes. */
@@ -233,57 +200,4 @@ object ArrAutoConnect {
         else -> 80
     }
 
-    /**
-     * One authenticated GET against the app's status endpoint. Redirects
-     * are refused (a 3xx here is an SSO login bounce) and only the app's
-     * own JSON identity counts, so an HTML login page never passes.
-     */
-    private fun verify(base: String, apiKey: String, appType: AppType): Boolean = runCatching {
-        // Built for this call alone: the dashboard client shares pools and
-        // redirect behavior with the UI, which this check must not inherit.
-        val client = okhttp3.OkHttpClient.Builder()
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS)
-            .callTimeout(10, TimeUnit.SECONDS)
-            .followRedirects(false)
-            .followSslRedirects(false)
-            // SSO-fronted servers only serve JSON to the browser session;
-            // attach the WebView cookie for this origin like the factory does.
-            .addInterceptor(
-                dev.appolon.homelab.arr.net.SessionCookieInterceptorAccessible
-                    .forBase(baseUrl = base, cookieHeaderProvider = ::webSessionCookie),
-            )
-            .build()
-        try {
-            STATUS_PATHS.any { path ->
-                val request = okhttp3.Request.Builder()
-                    .url(base.trimEnd('/') + path)
-                    .header("X-Api-Key", apiKey)
-                    .build()
-                client.newCall(request).execute().use { response ->
-                    response.isSuccessful &&
-                        response.body?.string()?.let { isAppStatus(it, appType) } == true
-                }
-            }
-        } finally {
-            client.dispatcher.executorService.shutdown()
-            client.connectionPool.evictAll()
-        }
-    }.getOrDefault(false)
-
-    /**
-     * A genuine status payload is JSON naming the app itself: `appName`
-     * for the four Servarr apps, a `data` envelope for Bazarr. HTML and
-     * login pages fail the JSON parse or the identity check.
-     */
-    private fun isAppStatus(body: String, appType: AppType): Boolean {
-        val root = runCatching { Json.parseToJsonElement(body) }.getOrNull() as? JsonObject
-            ?: return false
-        return if (appType == AppType.BAZARR) {
-            root["data"] is JsonObject
-        } else {
-            (root["appName"] as? JsonPrimitive)?.content
-                ?.equals(appType.wireName, ignoreCase = true) == true
-        }
-    }
 }

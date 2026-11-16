@@ -25,6 +25,11 @@ class ArrDbMigrationsTest {
     }
 
     @Test
+    fun versionOneUpgradeOnlyAddsRefreshTimes() {
+        assertEquals(listOf(EntitySql.CREATE_REFRESH_TABLE), ArrDbMigrations.statementsFor(1))
+    }
+
+    @Test
     fun currentVersionRunsNothing() {
         assertTrue(ArrDbMigrations.statementsFor(ArrDbMigrations.VERSION).isEmpty())
     }

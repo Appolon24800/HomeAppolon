@@ -124,6 +124,25 @@ class ProxyFormTest {
     }
 
     @Test
+    fun `loading a proxy preserves the stored certificate pin`() {
+        val pin = TrustSpec.Pinned("a".repeat(64))
+        val proxy = ProxyConfig(type = ProxyConfig.Type.HTTP, host = "proxy.lan", port = 8080)
+
+        val form = ProxyForm.fromConfig(proxy, pin)
+
+        assertEquals(pin, form.toTrustSpec())
+        assertEquals(proxy, form.toProxyConfig())
+    }
+
+    @Test
+    fun `self signed acceptance survives loading without a proxy`() {
+        val form = ProxyForm.fromConfig(ProxyConfig(), TrustSpec.AcceptAny)
+
+        assertTrue(form.problems.isEmpty())
+        assertEquals(TrustSpec.AcceptAny, form.toTrustSpec())
+    }
+
+    @Test
     fun `fromConfig maps a zero port to a blank field`() {
         val form = ProxyForm.fromConfig(ProxyConfig())
         assertEquals("", form.port)

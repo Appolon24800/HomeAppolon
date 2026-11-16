@@ -83,8 +83,26 @@ class LanguagesViewModelTest {
     }
 
     @Test
-    fun `an empty server surfaces the empty state`() = runVm {
+    fun `an empty server surfaces the empty state`() = runVm(
+        seed = { it.responses["get_languages"] = settingsDataPayload(emptyList()) },
+    ) {
         assertTrue(vm.lce.value is LceState.Empty)
+    }
+
+    @Test
+    fun `a successful empty refresh removes stale languages from the screen`() = runVm(
+        seed = { it.responses["get_languages"] = settingsDataPayload(listOf(languageRow("en", "English"))) },
+    ) {
+        assertTrue(vm.lce.value is LceState.Content)
+        system.responses["get_languages"] = settingsDataPayload(emptyList())
+        vm.refresh()
+        assertTrue(vm.state.value.languages.isEmpty())
+        assertTrue(vm.lce.value is LceState.Empty)
+    }
+
+    @Test
+    fun `a malformed response surfaces a load error`() = runVm {
+        assertTrue(vm.lce.value is LceState.Error)
     }
 
     @Test

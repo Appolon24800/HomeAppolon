@@ -120,7 +120,7 @@ class LidarrIndexersViewModel(
             _state.update { it.copy(refreshing = true) }
             when (val result = repository.refreshIfStale()) {
                 is ArrResult.Ok -> _state.update {
-                    it.copy(refreshing = false, options = it.options ?: repository.cachedIndexerConfig())
+                    it.copy(loaded = true, loadError = null, refreshing = false, options = it.options ?: repository.cachedIndexerConfig())
                 }
 
                 is ArrResult.Err -> _state.update {

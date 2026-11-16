@@ -25,7 +25,7 @@ object ArtistPosterUrls {
         val hasLocalPoster = artist.images.orEmpty()
             .any { it.coverType == MediaCoverTypes.POSTER }
         if (hasLocalPoster) {
-            return baseUrl.trimEnd('/') + "/" +
+            return baseUrl.trimEnd('/') +
                 ArrImages.lidarrArtistCover(artist.id.toLong(), CoverType.POSTER, LOCAL_SIZE_PX)
         }
         val remote = artist.images.orEmpty()

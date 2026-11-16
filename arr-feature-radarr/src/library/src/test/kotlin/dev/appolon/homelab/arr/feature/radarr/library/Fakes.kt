@@ -19,6 +19,8 @@ import kotlinx.serialization.KSerializer
  */
 class FakeEntityStore : EntityStore {
 
+    var writeFailure: Throwable? = null
+
     private data class Row(
         val serverId: ServerId,
         val type: EntityType,
@@ -46,6 +48,7 @@ class FakeEntityStore : EntityStore {
         serializer: KSerializer<T>,
         fetchedAtMillis: Long,
     ) {
+        writeFailure?.let { throw it }
         val encoded = values.map { (id, value) ->
             Row(
                 serverId, type, id,
@@ -56,6 +59,21 @@ class FakeEntityStore : EntityStore {
             row.serverId == serverId && row.type == type && row.id in values.map { it.first }
         } + encoded
         fetchedAt[serverId to type] = fetchedAtMillis
+    }
+
+    override suspend fun <T> replaceAll(
+        serverId: ServerId,
+        type: EntityType,
+        values: List<Pair<String, T>>,
+        serializer: KSerializer<T>,
+        fetchedAtMillis: Long,
+    ) {
+        writeFailure?.let { throw it }
+        val encoded = values.map { (id, value) ->
+            Row(serverId, type, id, dev.appolon.homelab.arr.net.ArrJson.encodeToString(serializer, value))
+        }
+        fetchedAt[serverId to type] = fetchedAtMillis
+        rows.value = rows.value.filterNot { it.serverId == serverId && it.type == type } + encoded
     }
 
     override suspend fun <T> getAll(

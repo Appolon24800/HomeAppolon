@@ -69,6 +69,9 @@ interface ArrShellNavigator {
 /** Navigator for the closest enclosing [ArrShell]. */
 val LocalArrShellNavigator = compositionLocalOf<ArrShellNavigator> { ArrShellNavigator.Noop }
 
+private val LocalServerVersions = compositionLocalOf<Map<ServerId, Long>> { emptyMap() }
+private val LocalRouteRegistry = compositionLocalOf<ArrRouteRegistry?> { null }
+
 /**
  * Composable content slots for each shell destination. A null slot renders the
  * shell's "screen not available" placeholder, so partially wired integrations
@@ -111,7 +114,11 @@ fun ArrShell(
     }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.toArrRoute(registry)
-    val currentServerId = currentRoute?.let(ArrRoutes::serverIdOf)
+    val currentServerId = when (val route = currentRoute) {
+        is ArrRoute.Feature -> registry.serverIdOfFeature(route)
+        null -> null
+        else -> ArrRoutes.serverIdOf(route)
+    }
     val currentServer = servers.firstOrNull { it.id == currentServerId }
 
     // The host's chosen server: navigate to it whenever a new focus request
@@ -125,6 +132,8 @@ fun ArrShell(
         val target = focusServer ?: return@LaunchedEffect
         androidx.compose.runtime.snapshotFlow { currentServers.any { it.id == target } }
             .first { it }
+        // Cached servers can arrive before NavHost installs its graph.
+        navController.currentBackStackEntryFlow.first()
         navigator.openServer(target)
     }
 
@@ -167,7 +176,11 @@ fun ArrShell(
             }
         },
     ) { padding ->
-        CompositionLocalProvider(LocalArrShellNavigator provides navigator) {
+        CompositionLocalProvider(
+            LocalArrShellNavigator provides navigator,
+            LocalServerVersions provides servers.associate { it.id to it.connectionVersion },
+            LocalRouteRegistry provides registry,
+        ) {
             NavHost(
                 navController = navController,
                 startDestination = ArrRoutes.SERVER_LIST_ROUTE,
@@ -259,7 +272,17 @@ private fun <T : ArrRoute> shellSlot(
     slot: (@Composable (T) -> Unit)?,
 ) {
     if (route != null && slot != null) {
-        slot(route)
+        val serverId = if (route is ArrRoute.Feature) {
+            LocalRouteRegistry.current?.serverIdOfFeature(route)
+        } else {
+            ArrRoutes.serverIdOf(route)
+        }
+        val version = LocalServerVersions.current[serverId]
+        if (version != null && !(route is ArrRoute.Feature && route.owner == "servers")) {
+            ServerConnectionScope(version) { slot(route) }
+        } else {
+            slot(route)
+        }
     } else {
         ArrShellPlaceholder(pattern)
     }
@@ -276,7 +299,12 @@ private class NavControllerArrShellNavigator(
 
     override fun openServer(serverId: ServerId) {
         val current = navController.currentBackStackEntry?.toArrRoute(registry)
-            ?.let(ArrRoutes::serverIdOf)
+            ?.let { route ->
+                when (route) {
+                    is ArrRoute.Feature -> registry.serverIdOfFeature(route)
+                    else -> ArrRoutes.serverIdOf(route)
+                }
+            }
         when (val directive = serverSwitchDirective(current, serverId)) {
             ServerSwitchDirective.None -> Unit
             is ServerSwitchDirective.SwitchTo -> navController.navigate(

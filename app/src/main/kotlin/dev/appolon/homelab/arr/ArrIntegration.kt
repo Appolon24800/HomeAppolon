@@ -20,6 +20,9 @@ object ArrIntegration {
     suspend fun openFor(context: Context, serviceUrl: String): ServerId? {
         if (serviceUrl.isBlank()) return null
         val servers = ArrBootstrap.runtime(context).graph.registry.servers()
+        ArrLinkParser.serverIdForUrl(serviceUrl)?.let { id ->
+            return servers.firstOrNull { it.id == id }?.id
+        }
         return ArrServerMatcher.match(serviceUrl, servers)
     }
 

@@ -20,10 +20,13 @@ import dev.appolon.homelab.arr.data.QueuedAction
 import dev.appolon.homelab.arr.net.ArrJson
 import dev.appolon.homelab.arr.net.arrError
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -81,6 +84,8 @@ class SonarrSeriesRepository(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
 
+    private val refreshMutex = Mutex()
+
     fun observeSeries(): Flow<List<SeriesResource>> =
         store.observe(serverId, SERIES_TYPE, SeriesResource.serializer())
 
@@ -93,34 +98,32 @@ class SonarrSeriesRepository(
         return now() - fetched > ttlMillis
     }
 
-    /** Fetches the full library, reconciling the cache row by row. */
-    suspend fun refresh(): ArrResult<Unit> = withContext(ioDispatcher) {
+    /** Fetches and atomically replaces the full library cache. */
+    suspend fun refresh(): ArrResult<Unit> = refreshMutex.withLock { refreshOnce() }
+
+    private suspend fun refreshOnce(): ArrResult<Unit> = withContext(ioDispatcher) {
         val fetched = try {
             seriesApi.list()
         } catch (e: HttpException) {
             return@withContext ArrResult.err(e.toArrError())
-        } catch (e: Throwable) {
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
             return@withContext ArrResult.err(e.arrError())
         }
-        val incoming = fetched.associateBy { it.id }
-        val existing = cachedSeries()
-        existing.forEach { cached ->
-            val id = cached.id.toString()
-            val replacement = incoming[cached.id]
-            if (replacement != null) {
-                store.put(serverId, SERIES_TYPE, id, replacement, SeriesResource.serializer())
-            } else {
-                store.delete(serverId, SERIES_TYPE, id)
-            }
+        try {
+            store.replaceAll(
+                serverId,
+                SERIES_TYPE,
+                fetched.map { it.id.toString() to it },
+                SeriesResource.serializer(),
+                fetchedAtMillis = now(),
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return@withContext ArrResult.err(e.arrError())
         }
-        val fresh = fetched.filter { series -> existing.none { it.id == series.id } }
-        store.putAll(
-            serverId,
-            SERIES_TYPE,
-            fresh.map { it.id.toString() to it },
-            SeriesResource.serializer(),
-            fetchedAtMillis = now(),
-        )
         ArrResult.ok(Unit)
     }
 
@@ -139,7 +142,7 @@ class SonarrSeriesRepository(
     suspend fun tags(ttlMillis: Long = LOOKUP_TTL_MILLIS) =
         lookup(TAG_TYPE, TagResource.serializer(), { it.id.toString() }, tagApi, ttlMillis)
 
-    /** Cache-first lookup with a TTL; an empty fetch keeps the previous cache. */
+    /** Cache-first lookup with a TTL; a successful fetch replaces the previous cache. */
     private suspend fun <T> lookup(
         type: EntityType,
         serializer: kotlinx.serialization.KSerializer<T>,
@@ -149,7 +152,7 @@ class SonarrSeriesRepository(
     ): ArrResult<List<T>> = withContext(ioDispatcher) {
         val cached = store.getAll(serverId, type, serializer)
         val fetchedAt = store.lastFetchedAt(serverId, type)
-        if (fetchedAt != null && now() - fetchedAt <= ttlMillis && cached.isNotEmpty()) {
+        if (fetchedAt != null && now() - fetchedAt <= ttlMillis) {
             return@withContext ArrResult.ok(cached)
         }
         val remote = try {
@@ -159,18 +162,14 @@ class SonarrSeriesRepository(
         } catch (e: Throwable) {
             return@withContext ArrResult.err(e.arrError())
         }
-        if (remote.isNotEmpty()) {
-            store.putAll(
-                serverId,
-                type,
-                remote.map { keyOf(it) to it },
-                serializer,
-                fetchedAtMillis = now(),
-            )
-            ArrResult.ok(remote)
-        } else {
-            ArrResult.ok(cached)
-        }
+        store.replaceAll(
+            serverId,
+            type,
+            remote.map { keyOf(it) to it },
+            serializer,
+            fetchedAtMillis = now(),
+        )
+        ArrResult.ok(remote)
     }
 
     /**

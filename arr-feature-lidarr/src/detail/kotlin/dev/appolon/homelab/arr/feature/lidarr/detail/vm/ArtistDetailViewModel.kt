@@ -290,13 +290,13 @@ class ArtistDetailViewModel(
         viewModelScope.launch { initialLoad() }
     }
 
-    /** Cache-first entry: refreshes only when the shared cache is absent or stale. */
+    /** Reuses a fresh artist row and loads its related data on every opening. */
     private suspend fun initialLoad() {
         val cached = repository.cachedArtist(artistId)
         if (cached == null || repository.artistStale()) {
             refreshAll()
         } else {
-            refreshLookups()
+            refreshRelatedData()
         }
     }
 
@@ -313,12 +313,21 @@ class ArtistDetailViewModel(
             }
 
             is ArrResult.Ok -> {
-                _state.update { it.copy(refreshing = false, loadError = null) }
-                refreshAlbums()
-                refreshTracks()
-                refreshHistoryFeed()
-                refreshLookups()
+                _state.update { it.copy(loadError = null) }
+                refreshRelatedData()
             }
+        }
+    }
+
+    private suspend fun refreshRelatedData() {
+        _state.update { it.copy(refreshing = true) }
+        try {
+            refreshAlbums()
+            refreshTracks()
+            refreshHistoryFeed()
+            refreshLookups()
+        } finally {
+            _state.update { it.copy(refreshing = false) }
         }
     }
 

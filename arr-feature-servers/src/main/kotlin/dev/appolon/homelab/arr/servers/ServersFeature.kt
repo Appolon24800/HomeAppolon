@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.servers
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -116,8 +117,8 @@ fun ServerListDestination(
         lce = lce,
         health = state.health,
         probing = state.probing,
-        onAdd = { },
-        onEdit = { },
+        onAdd = { ServersFeature.openEdit(navigator, null) },
+        onEdit = { ServersFeature.openEdit(navigator, it) },
         onMoveUp = vm::moveUp,
         onMoveDown = vm::moveDown,
         onDelete = vm::delete,
@@ -144,7 +145,7 @@ fun ServersFeatureSlot(
         )
         return
     }
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val navigator = LocalArrShellNavigator.current
     val onBack: () -> Unit = { navigator.back() }
     when {
@@ -288,7 +289,6 @@ fun SyncStatusDestination(
     val vm: SyncStatusViewModel = viewModel(key = "server-sync") {
         SyncStatusViewModel(
             queue = graph.actionQueue,
-            deadLetterSource = { graph.actionQueue.deadLetters() },
             executor = executor::execute,
         )
     }

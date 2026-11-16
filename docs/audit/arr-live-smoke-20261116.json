@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-16",
+  "mode": "read-only",
+  "radarr": {"tests": 6, "skipped": 0, "failures": 0, "version": "7.0.2.10888"},
+  "sonarr": {"tests": 6, "skipped": 0, "failures": 0, "version": "4.0.20.3014"},
+  "lidarr": {"tests": 11, "skipped": 0, "failures": 0, "version": "3.2.1.5196"},
+  "prowlarr": {"tests": 3, "skipped": 0, "failures": 0, "version": "3.0.2.5777"},
+  "bazarr": {"tests": 3, "skipped": 0, "failures": 0, "version": "1.6.2"},
+  "notes": [
+    "All requests were read-only GET/status checks.",
+    "API keys and response bodies were omitted."
+  ]
+}

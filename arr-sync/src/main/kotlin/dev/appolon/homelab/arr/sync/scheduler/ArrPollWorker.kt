@@ -8,8 +8,10 @@ import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.AppType
 import dev.appolon.homelab.arr.data.ArrDataGraph
 import dev.appolon.homelab.arr.data.ArrServer
+import dev.appolon.homelab.arr.data.notifications.NotificationPreferencesStore
 import dev.appolon.homelab.arr.sync.ArrEvent
 import java.time.Duration
+import kotlinx.coroutines.CancellationException
 
 /**
  * One background pass over every registered server: run the matching
@@ -49,6 +51,7 @@ class ArrPollWorker(
         val servers = try {
             graph.registry.servers()
         } catch (t: Throwable) {
+            if (t is CancellationException) throw t
             // Registry storage failed: let WorkManager backoff retry the pass
             // instead of silently stalling the schedule.
             Log.w(TAG, "Could not read server registry; retrying", t)
@@ -64,6 +67,7 @@ class ArrPollWorker(
             val result = try {
                 adapter.poll(server)
             } catch (t: Throwable) {
+                if (t is CancellationException) throw t
                 // The adapter contract says no throwing; one violating
                 // adapter must not take down the other servers' poll.
                 Log.w(TAG, "Poll adapter for ${server.type} threw", t)
@@ -96,8 +100,10 @@ class ArrPollWorker(
 
     private suspend fun notifyFor(server: ArrServer, result: PollResult) {
         val toggles = try {
+            if (!NotificationPreferencesStore(graph.entityStore).notificationsEnabled()) return
             graph.settings.notificationChannels(server.id)
         } catch (t: Throwable) {
+            if (t is CancellationException) throw t
             // Fail closed: a settings read glitch must not resurrect channels
             // the user explicitly turned off.
             Log.w(TAG, "Could not read channel toggles for ${server.id.value}", t)
@@ -113,6 +119,7 @@ class ArrPollWorker(
                 val id = factory.notificationId(server, event)
                 poster.post(id, event.kind, factory.create(server, event))
             } catch (t: Throwable) {
+                if (t is CancellationException) throw t
                 Log.w(TAG, "Failed to post notification for ${server.id.value}", t)
                 false
             }
@@ -125,6 +132,8 @@ class ArrPollWorker(
                         body = event.body,
                     ),
                 )
+            } else {
+                dedupe.retryLater(server.id, event)
             }
         }
     }

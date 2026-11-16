@@ -1,5 +1,12 @@
 package dev.appolon.homelab.arr.servers.ui
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,12 +24,19 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.servers.R
 import dev.appolon.homelab.arr.servers.notify.NotificationPreview
@@ -49,7 +63,20 @@ fun NotificationPrefsScreen(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val canNotify = remember { NotificationPreview.canNotify(context) }
+    var canNotify by remember(context) { mutableStateOf(NotificationPreview.canNotify(context)) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val permissionRequest = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { canNotify = NotificationPreview.canNotify(context) }
+    DisposableEffect(lifecycleOwner, context) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                canNotify = NotificationPreview.canNotify(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     ArrScaffold(
         title = stringResource(R.string.arr_servers_notify_title),
@@ -74,6 +101,18 @@ fun NotificationPrefsScreen(
                     onSetKillSwitch = onSetKillSwitch,
                     onSetChannel = onSetChannel,
                     onPreview = onPreview,
+                    onRequestPermission = {
+                        permissionRequest.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    },
+                    canRequestPermission = Build.VERSION.SDK_INT >= 33 &&
+                        context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                        PackageManager.PERMISSION_GRANTED,
+                    onOpenSettings = {
+                        context.startActivity(
+                            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName),
+                        )
+                    },
                 )
             }
         }
@@ -97,6 +136,9 @@ private fun NotificationPrefsContent(
     onSetKillSwitch: (Boolean) -> Unit,
     onSetChannel: (ServerId, NotificationPrefsViewModel.Kind, Boolean) -> Unit,
     onPreview: (String) -> Unit,
+    onRequestPermission: () -> Unit,
+    canRequestPermission: Boolean,
+    onOpenSettings: () -> Unit,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
@@ -121,6 +163,20 @@ private fun NotificationPrefsContent(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         )
+                        if (canRequestPermission) {
+                            OutlinedButton(
+                                onClick = onRequestPermission,
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                            ) {
+                                Text(stringResource(R.string.arr_servers_notify_allow))
+                            }
+                        }
+                        OutlinedButton(
+                            onClick = onOpenSettings,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        ) {
+                            Text(stringResource(R.string.arr_servers_notify_system_settings))
+                        }
                     }
                 }
             }

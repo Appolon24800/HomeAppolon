@@ -68,6 +68,42 @@ class LidarrAddNewRepositoryTest {
     ) = ArtistResource(id = id, artistName = name, foreignArtistId = foreignId)
 
     @Test
+    fun `empty catalogs remove stale choices and keep an empty root folder cache fresh`() = runTest {
+        system.rootFolders[1] = dev.appolon.homelab.arr.api.lidarr.model.RootFolderResource(id = 1, path = "/music")
+        calendar.qualityProfiles[1] = dev.appolon.homelab.arr.api.lidarr.model.QualityProfileResource(id = 1, name = "Lossless")
+        calendar.metadataProfiles[1] = dev.appolon.homelab.arr.api.lidarr.model.MetadataProfileResource(id = 1, name = "Standard")
+        system.tags[1] = dev.appolon.homelab.arr.api.lidarr.model.TagResource(id = 1, label = "old")
+        discovery.importLists[1] = ImportListResource(id = 1, name = "Old list")
+        repository.rootFolders()
+        repository.qualityProfiles()
+        repository.metadataProfiles()
+        repository.tags()
+        repository.importLists()
+        system.rootFolders.clear()
+        calendar.qualityProfiles.clear()
+        calendar.metadataProfiles.clear()
+        system.tags.clear()
+        discovery.importLists.clear()
+        assertTrue((repository.rootFolders(ttlMillis = -1) as ArrResult.Ok).value.isEmpty())
+        assertTrue((repository.qualityProfiles(ttlMillis = -1) as ArrResult.Ok).value.isEmpty())
+        assertTrue((repository.metadataProfiles(ttlMillis = -1) as ArrResult.Ok).value.isEmpty())
+        assertTrue((repository.tags(ttlMillis = -1) as ArrResult.Ok).value.isEmpty())
+        assertTrue((repository.importLists(ttlMillis = -1) as ArrResult.Ok).value.isEmpty())
+        system.rootFolders[2] = dev.appolon.homelab.arr.api.lidarr.model.RootFolderResource(id = 2, path = "/new")
+        assertTrue((repository.rootFolders() as ArrResult.Ok).value.isEmpty())
+    }
+
+    @Test
+    fun `catalog refresh removes folders missing from a nonempty response`() = runTest {
+        system.rootFolders[1] = dev.appolon.homelab.arr.api.lidarr.model.RootFolderResource(id = 1, path = "/old")
+        system.rootFolders[2] = dev.appolon.homelab.arr.api.lidarr.model.RootFolderResource(id = 2, path = "/kept")
+        repository.rootFolders()
+        system.rootFolders.remove(1)
+        repository.rootFolders(ttlMillis = -1)
+        assertEquals(listOf(2), (repository.rootFolders() as ArrResult.Ok).value.map { it.id })
+    }
+
+    @Test
     fun `searchArtists hits the lookup endpoint and passes the term through`() = runTest {
         library.artists[1] = libraryArtist(1, name = "Aurora")
         library.artists[2] = libraryArtist(2, name = "Autechre")

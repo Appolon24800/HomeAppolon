@@ -21,6 +21,20 @@ internal object EntitySql {
         "INSERT OR REPLACE INTO entities (serverId, type, id, json, fetchedAt) " +
             "VALUES (?, ?, ?, ?, ?)"
 
+    const val CREATE_REFRESH_TABLE =
+        "CREATE TABLE IF NOT EXISTS entity_refreshes (" +
+            "serverId TEXT NOT NULL, type TEXT NOT NULL, fetchedAt INTEGER NOT NULL, " +
+            "PRIMARY KEY (serverId, type))"
+
+    const val UPSERT_REFRESH =
+        "INSERT OR REPLACE INTO entity_refreshes (serverId, type, fetchedAt) VALUES (?, ?, ?)"
+    const val SELECT_REFRESH =
+        "SELECT fetchedAt FROM entity_refreshes WHERE serverId = ? AND type = ?"
+    const val DELETE_REFRESH_SCOPE =
+        "DELETE FROM entity_refreshes WHERE serverId = ? AND type = ?"
+    const val DELETE_REFRESH_SERVER =
+        "DELETE FROM entity_refreshes WHERE serverId = ?"
+
     /** Ordered by id so refreshes (which replace rows) yield stable list output. */
     const val SELECT_BY_SCOPE =
         "SELECT serverId, type, id, json, fetchedAt FROM entities " +

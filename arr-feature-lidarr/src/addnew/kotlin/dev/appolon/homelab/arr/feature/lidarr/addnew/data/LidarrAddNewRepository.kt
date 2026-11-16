@@ -166,103 +166,80 @@ class LidarrAddNewRepository(
             .filter { it.artistId == artistId }
 
     /** Root folders for the picker, cached with their own TTL. */
-    suspend fun rootFolders(
-        ttlMillis: Long = CATALOG_TTL_MILLIS,
-    ): ArrResult<List<RootFolderResource>> = withContext(io) {
-        val cached = store.getAll(serverId, ROOT_FOLDER_TYPE, RootFolderResource.serializer())
-        val fetchedAt = store.lastFetchedAt(serverId, ROOT_FOLDER_TYPE)
-        if (isFresh(ttlMillis, fetchedAt) && cached.isNotEmpty()) {
-            return@withContext ArrResult.ok(cached)
+    suspend fun rootFolders(ttlMillis: Long = CATALOG_TTL_MILLIS): ArrResult<List<RootFolderResource>> =
+        withContext(io) {
+            val cached = store.getAll(serverId, ROOT_FOLDER_TYPE, RootFolderResource.serializer())
+            val fetchedAt = store.lastFetchedAt(serverId, ROOT_FOLDER_TYPE)
+            if (isFresh(ttlMillis, fetchedAt)) return@withContext ArrResult.ok(cached)
+            val fetched = try {
+                rootFolderApi.getRootFolders()
+            } catch (e: HttpException) {
+                return@withContext serveOrErr(cached, e.toArrError())
+            } catch (e: Throwable) {
+                return@withContext serveOrErr(cached, e.arrError())
+            }
+            store.replaceAll(
+                serverId,
+                ROOT_FOLDER_TYPE,
+                fetched.map { it.id.toString() to it },
+                RootFolderResource.serializer(),
+                fetchedAtMillis = now(),
+            )
+            ArrResult.ok(fetched)
         }
-        val folders = try {
-            rootFolderApi.getRootFolders()
-        } catch (e: HttpException) {
-            return@withContext serveOrErr(cached, e.toArrError())
-        } catch (e: Throwable) {
-            return@withContext serveOrErr(cached, e.arrError())
-        }
-        store.putAll(
-            serverId,
-            ROOT_FOLDER_TYPE,
-            folders.map { it.id.toString() to it },
-            RootFolderResource.serializer(),
-            fetchedAtMillis = now(),
-        )
-        ArrResult.ok(folders)
-    }
 
-    /** Quality profiles for the add sheet; rows shared with the library editor. */
-    suspend fun qualityProfiles(
-        ttlMillis: Long = CATALOG_TTL_MILLIS,
-    ): ArrResult<List<QualityProfileResource>> = withContext(io) {
-        val cached = store.getAll(serverId, QUALITY_PROFILE_TYPE, QualityProfileResource.serializer())
-        val fetchedAt = store.lastFetchedAt(serverId, QUALITY_PROFILE_TYPE)
-        if (isFresh(ttlMillis, fetchedAt) && cached.isNotEmpty()) {
-            return@withContext ArrResult.ok(cached)
-        }
-        val profiles = try {
-            qualityProfileApi.getQualityProfiles()
-        } catch (e: HttpException) {
-            return@withContext serveOrErr(cached, e.toArrError())
-        } catch (e: Throwable) {
-            return@withContext serveOrErr(cached, e.arrError())
-        }
-        if (profiles.isNotEmpty()) {
-            store.putAll(
+    /** Quality profiles shared with the library editor. */
+    suspend fun qualityProfiles(ttlMillis: Long = CATALOG_TTL_MILLIS): ArrResult<List<QualityProfileResource>> =
+        withContext(io) {
+            val cached = store.getAll(serverId, QUALITY_PROFILE_TYPE, QualityProfileResource.serializer())
+            val fetchedAt = store.lastFetchedAt(serverId, QUALITY_PROFILE_TYPE)
+            if (isFresh(ttlMillis, fetchedAt)) return@withContext ArrResult.ok(cached)
+            val fetched = try {
+                qualityProfileApi.getQualityProfiles()
+            } catch (e: HttpException) {
+                return@withContext serveOrErr(cached, e.toArrError())
+            } catch (e: Throwable) {
+                return@withContext serveOrErr(cached, e.arrError())
+            }
+            store.replaceAll(
                 serverId,
                 QUALITY_PROFILE_TYPE,
-                profiles.map { it.id.toString() to it },
+                fetched.map { it.id.toString() to it },
                 QualityProfileResource.serializer(),
                 fetchedAtMillis = now(),
             )
-            ArrResult.ok(profiles)
-        } else {
-            ArrResult.ok(cached)
+            ArrResult.ok(fetched)
         }
-    }
 
-    /** Metadata profiles for the add sheet; Lidarr-specific catalog. */
-    suspend fun metadataProfiles(
-        ttlMillis: Long = CATALOG_TTL_MILLIS,
-    ): ArrResult<List<MetadataProfileResource>> = withContext(io) {
-        val cached = store.getAll(
-            serverId,
-            METADATA_PROFILE_TYPE,
-            MetadataProfileResource.serializer(),
-        )
-        val fetchedAt = store.lastFetchedAt(serverId, METADATA_PROFILE_TYPE)
-        if (isFresh(ttlMillis, fetchedAt) && cached.isNotEmpty()) {
-            return@withContext ArrResult.ok(cached)
-        }
-        val profiles = try {
-            metadataProfileApi.getMetadataProfiles()
-        } catch (e: HttpException) {
-            return@withContext serveOrErr(cached, e.toArrError())
-        } catch (e: Throwable) {
-            return@withContext serveOrErr(cached, e.arrError())
-        }
-        if (profiles.isNotEmpty()) {
-            store.putAll(
+    /** Metadata profiles for the add sheet. */
+    suspend fun metadataProfiles(ttlMillis: Long = CATALOG_TTL_MILLIS): ArrResult<List<MetadataProfileResource>> =
+        withContext(io) {
+            val cached = store.getAll(serverId, METADATA_PROFILE_TYPE, MetadataProfileResource.serializer())
+            val fetchedAt = store.lastFetchedAt(serverId, METADATA_PROFILE_TYPE)
+            if (isFresh(ttlMillis, fetchedAt)) return@withContext ArrResult.ok(cached)
+            val fetched = try {
+                metadataProfileApi.getMetadataProfiles()
+            } catch (e: HttpException) {
+                return@withContext serveOrErr(cached, e.toArrError())
+            } catch (e: Throwable) {
+                return@withContext serveOrErr(cached, e.arrError())
+            }
+            store.replaceAll(
                 serverId,
                 METADATA_PROFILE_TYPE,
-                profiles.map { it.id.toString() to it },
+                fetched.map { it.id.toString() to it },
                 MetadataProfileResource.serializer(),
                 fetchedAtMillis = now(),
             )
-            ArrResult.ok(profiles)
-        } else {
-            ArrResult.ok(cached)
+            ArrResult.ok(fetched)
         }
-    }
 
     /** Tags for the add sheet chips. */
     suspend fun tags(ttlMillis: Long = CATALOG_TTL_MILLIS): ArrResult<List<TagResource>> =
         withContext(io) {
             val cached = store.getAll(serverId, TAG_TYPE, TagResource.serializer())
             val fetchedAt = store.lastFetchedAt(serverId, TAG_TYPE)
-            if (isFresh(ttlMillis, fetchedAt) && cached.isNotEmpty()) {
-                return@withContext ArrResult.ok(cached)
-            }
+            if (isFresh(ttlMillis, fetchedAt)) return@withContext ArrResult.ok(cached)
             val fetched = try {
                 tagApi.getTags()
             } catch (e: HttpException) {
@@ -270,38 +247,30 @@ class LidarrAddNewRepository(
             } catch (e: Throwable) {
                 return@withContext serveOrErr(cached, e.arrError())
             }
-            if (fetched.isNotEmpty()) {
-                store.putAll(
-                    serverId,
-                    TAG_TYPE,
-                    fetched.map { it.id.toString() to it },
-                    TagResource.serializer(),
-                    fetchedAtMillis = now(),
-                )
-                ArrResult.ok(fetched)
-            } else {
-                ArrResult.ok(cached)
-            }
+            store.replaceAll(
+                serverId,
+                TAG_TYPE,
+                fetched.map { it.id.toString() to it },
+                TagResource.serializer(),
+                fetchedAtMillis = now(),
+            )
+            ArrResult.ok(fetched)
         }
 
-    /** Import lists for the browse tab, cached under a short TTL. */
-    suspend fun importLists(
-        ttlMillis: Long = LIST_TTL_MILLIS,
-    ): ArrResult<List<ImportListResource>> = withContext(io) {
-        val cached = store.getAll(serverId, IMPORT_LIST_TYPE, ImportListResource.serializer())
-        val fetchedAt = store.lastFetchedAt(serverId, IMPORT_LIST_TYPE)
-        if (isFresh(ttlMillis, fetchedAt) && cached.isNotEmpty()) {
-            return@withContext ArrResult.ok(cached)
-        }
-        val fetched = try {
-            importListApi.getImportLists()
-        } catch (e: HttpException) {
-            return@withContext serveOrErr(cached, e.toArrError())
-        } catch (e: Throwable) {
-            return@withContext serveOrErr(cached, e.arrError())
-        }
-        if (fetched.isNotEmpty()) {
-            store.putAll(
+    /** Configured import lists for the browse tab. */
+    suspend fun importLists(ttlMillis: Long = LIST_TTL_MILLIS): ArrResult<List<ImportListResource>> =
+        withContext(io) {
+            val cached = store.getAll(serverId, IMPORT_LIST_TYPE, ImportListResource.serializer())
+            val fetchedAt = store.lastFetchedAt(serverId, IMPORT_LIST_TYPE)
+            if (isFresh(ttlMillis, fetchedAt)) return@withContext ArrResult.ok(cached)
+            val fetched = try {
+                importListApi.getImportLists()
+            } catch (e: HttpException) {
+                return@withContext serveOrErr(cached, e.toArrError())
+            } catch (e: Throwable) {
+                return@withContext serveOrErr(cached, e.arrError())
+            }
+            store.replaceAll(
                 serverId,
                 IMPORT_LIST_TYPE,
                 fetched.map { it.id.toString() to it },
@@ -309,10 +278,7 @@ class LidarrAddNewRepository(
                 fetchedAtMillis = now(),
             )
             ArrResult.ok(fetched)
-        } else {
-            ArrResult.ok(cached)
         }
-    }
 
     /**
      * Adds one artist (POST /api/v1/artist). On success the created artist

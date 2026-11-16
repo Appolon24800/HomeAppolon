@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import retrofit2.HttpException
 import retrofit2.Response
@@ -129,10 +130,8 @@ class BazarrSettingsRepository(
             .map { rows -> rows.sortedByDescending { it.timestampMillis } }
 
     /**
-     * Cache-first section loader shared by every read: serves the store when
-     * fresh, otherwise fetches, parses, and replaces the cache. A parse that
-     * yields no rows keeps the previous cache so a glitched payload never
-     * blanks a settings screen.
+     * Refreshes complete settings collections, including successful empty lists.
+     * Malformed payloads preserve the previous cache and return a parse error.
      */
     private suspend fun <T> loadSection(
         type: EntityType,
@@ -143,10 +142,9 @@ class BazarrSettingsRepository(
         ids: (List<T>) -> List<Pair<String, T>>,
     ): ArrResult<Unit> = withContext(ioDispatcher) {
         if (ttlMillis > 0) {
-            val cached = store.getAll(serverId, type, serializer)
             val fresh = store.lastFetchedAt(serverId, type)
                 ?.let { now() - it <= ttlMillis } == true
-            if (cached.isNotEmpty() && fresh) return@withContext ArrResult.ok(Unit)
+            if (fresh) return@withContext ArrResult.ok(Unit)
         }
         val fetched = try {
             apiCall()
@@ -156,11 +154,21 @@ class BazarrSettingsRepository(
             return@withContext ArrResult.err(e.arrError())
         }
         val rows = parse(fetched)
-        if (rows.isNotEmpty()) {
-            store.deleteAll(serverId, type)
-            store.putAll(serverId, type, ids(rows), serializer, fetchedAtMillis = now())
+        if (rows.isEmpty() && !fetched.isEmptyListResponse()) {
+            return@withContext ArrResult.err(ArrError.Parse(IllegalArgumentException("Invalid Bazarr settings response")))
         }
+        store.replaceAll(serverId, type, ids(rows), serializer, fetchedAtMillis = now())
         ArrResult.ok(Unit)
+    }
+
+    /** Uses the same list-wrapper selection as the settings row parsers. */
+    private fun JsonObject.isEmptyListResponse(): Boolean {
+        val rows = if (containsKey("data")) {
+            this["data"] as? JsonArray
+        } else {
+            values.firstOrNull { it is JsonArray } as? JsonArray
+        }
+        return rows?.isEmpty() == true
     }
 
     /** Loads the enabled-language settings list under [ttlMillis]. */

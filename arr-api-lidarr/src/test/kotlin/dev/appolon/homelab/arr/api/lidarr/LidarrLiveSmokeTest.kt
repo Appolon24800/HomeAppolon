@@ -106,4 +106,52 @@ class LidarrLiveSmokeTest {
             assertNotNull("profile name", it.name)
         }
     }
+    @Test fun artistDetailAndAlbumsParse() = runTest {
+        val client = retrofit(liveServer())
+        val artists = LidarrLibraryApis.artist(client)
+        val library = artists.getArtists()
+        val artist = library.firstOrNull { (it.statistics?.albumCount ?: 0) > 0 }
+            ?: library.firstOrNull()
+            ?: throw AssumptionViolatedException("no artist available for a detail check")
+        val id = artist.id
+        assertEquals(id, artists.getArtist(id).id)
+        val albums = LidarrLibraryApis.album(client).getAlbums(artistId = id)
+        if ((artist.statistics?.albumCount ?: 0) > 0) {
+            assertTrue("expected albums for the populated artist", albums.isNotEmpty())
+        }
+        albums.forEach {
+            assertTrue("album id", it.id > 0)
+            assertEquals("album artist", id, it.artistId)
+            assertNotNull("album title", it.title)
+        }
+    }
+
+    @Test fun queuePageParses() = runTest {
+        val page = LidarrQueueApis.queue(retrofit(liveServer())).getQueue(page = 1, pageSize = 10)
+        assertTrue(page.totalRecords >= 0)
+    }
+
+    @Test fun historyPageParses() = runTest {
+        val page = LidarrQueueApis.history(retrofit(liveServer())).getHistory(page = 1, pageSize = 10)
+        assertTrue(page.totalRecords >= 0)
+    }
+
+    @Test fun metadataProfilesParse() = runTest {
+        val client = retrofit(liveServer()).create(MetadataProfileApi::class.java)
+        client.getMetadataProfiles().forEach { assertTrue("metadata profile id", it.id > 0) }
+    }
+
+    @Test fun configuredProvidersParse() = runTest {
+        val client = retrofit(liveServer())
+        LidarrSystemApis.downloadClient(client).getDownloadClients().forEach {
+            assertTrue("download client id", it.id > 0)
+        }
+        LidarrSystemApis.indexer(client).getIndexers().forEach {
+            assertTrue("indexer id", it.id > 0)
+        }
+        LidarrSystemApis.notification(client).getNotifications().forEach {
+            assertTrue("notification id", it.id > 0)
+        }
+    }
+
 }

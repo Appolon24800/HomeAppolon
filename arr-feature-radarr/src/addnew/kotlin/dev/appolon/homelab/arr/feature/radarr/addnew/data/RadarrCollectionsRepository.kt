@@ -16,10 +16,13 @@ import dev.appolon.homelab.arr.data.QueuedAction
 import dev.appolon.homelab.arr.net.ArrJson
 import dev.appolon.homelab.arr.net.arrError
 import java.util.UUID
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
@@ -47,34 +50,34 @@ class RadarrCollectionsRepository(
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) {
 
+    private val refreshMutex = Mutex()
+
     fun observeCollections(): Flow<List<CollectionResource>> =
         store.observe(serverId, COLLECTION_TYPE, CollectionResource.serializer())
 
     suspend fun cachedCollections(): List<CollectionResource> =
         store.getAll(serverId, COLLECTION_TYPE, CollectionResource.serializer())
 
-    /** Fetches every collection and reconciles the cache row by row. */
-    suspend fun refresh(): ArrResult<Unit> = withContext(io) {
-        val fetched = try {
-            collectionApi.collections()
+    /** Fetches every collection and atomically replaces the cache. */
+    suspend fun refresh(): ArrResult<Unit> = refreshMutex.withLock { refreshOnce() }
+
+    private suspend fun refreshOnce(): ArrResult<Unit> = withContext(io) {
+        try {
+            val fetched = collectionApi.collections()
+            store.replaceAll(
+                serverId,
+                COLLECTION_TYPE,
+                fetched.map { it.id.toString() to it },
+                CollectionResource.serializer(),
+                fetchedAtMillis = now(),
+            )
         } catch (e: HttpException) {
             return@withContext ArrResult.err(e.toArrError())
-        } catch (e: Throwable) {
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
             return@withContext ArrResult.err(e.arrError())
         }
-        val incomingIds = fetched.map { it.id.toString() }.toSet()
-        cachedCollections().forEach { cached ->
-            if (cached.id.toString() !in incomingIds) {
-                store.delete(serverId, COLLECTION_TYPE, cached.id.toString())
-            }
-        }
-        store.putAll(
-            serverId,
-            COLLECTION_TYPE,
-            fetched.map { it.id.toString() to it },
-            CollectionResource.serializer(),
-            fetchedAtMillis = now(),
-        )
         ArrResult.ok(Unit)
     }
 
@@ -198,7 +201,7 @@ class RadarrCollectionsRepository(
 
     private suspend fun refreshMovies(): ArrResult<Unit> = try {
         val fetched = movieApi.list()
-        store.putAll(
+        store.replaceAll(
             serverId,
             MOVIE_TYPE,
             fetched.map { it.id.toString() to it },
@@ -208,7 +211,9 @@ class RadarrCollectionsRepository(
         ArrResult.ok(Unit)
     } catch (e: HttpException) {
         ArrResult.err(e.toArrError())
-    } catch (e: Throwable) {
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
         ArrResult.err(e.arrError())
     }
 

@@ -19,8 +19,10 @@ import dev.appolon.homelab.arr.feature.sonarr.library.FakeActionQueue
 import dev.appolon.homelab.arr.feature.sonarr.library.FakeEntityStore
 import dev.appolon.homelab.arr.feature.sonarr.library.data.WriteOutcome
 import java.io.IOException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -48,6 +50,7 @@ class SonarrAddRepositoryTest {
     private val discovery = FakeSonarrDiscovery()
     private val store = FakeEntityStore()
     private val queue = FakeActionQueue()
+    private var clock = 1_000L
 
     private var lookupResult: ArrResult<List<SeriesResource>> =
         ArrResult.ok(emptyList())
@@ -64,6 +67,7 @@ class SonarrAddRepositoryTest {
         importListApi = discovery.importList,
         importListExclusionApi = discovery.importListExclusion,
         actionQueue = queue,
+        now = { clock },
         ioDispatcher = dispatcher,
     )
 
@@ -83,6 +87,43 @@ class SonarrAddRepositoryTest {
             year = 2020,
             seasons = seasons.map { SeasonResource(seasonNumber = it) },
         )
+
+    @Test
+    fun `exclusion refresh drops a temporary row after the server acknowledges it`() = runTest {
+        discovery.error = { IOException("offline") }
+        repository.addExclusion(100, "Pending")
+        discovery.error = { null }
+        discovery.importListExclusionStore[5] = ImportListExclusionResource(id = 5, tvdbId = 100, title = "Pending")
+        val refreshed = repository.exclusions(ttlMillis = -1)
+        assertEquals(listOf(5), (refreshed as ArrResult.Ok).value.map { it.id })
+    }
+
+    @Test
+    fun `exclusion refresh drops a temporary row after its queued action is discarded`() = runTest {
+        discovery.error = { IOException("offline") }
+        repository.addExclusion(100, "Pending")
+        queue.pending().forEach { queue.remove(it.actionId) }
+        discovery.error = { null }
+        assertTrue((repository.exclusions(ttlMillis = -1) as ArrResult.Ok).value.isEmpty())
+    }
+
+    @Test
+    fun `empty catalog refresh clears folders and keeps the empty cache fresh`() = runTest {
+        repository.rootFolders()
+        system.rootFolderStore.clear()
+        assertTrue((repository.rootFolders(ttlMillis = -1) as ArrResult.Ok).value.isEmpty())
+        system.rootFolderStore[2] = RootFolderResource(id = 2, path = "/new")
+        assertTrue((repository.rootFolders() as ArrResult.Ok).value.isEmpty())
+    }
+
+    @Test
+    fun `catalog refresh removes folders deleted from a nonempty response`() = runTest {
+        system.rootFolderStore[2] = RootFolderResource(id = 2, path = "/other")
+        repository.rootFolders()
+        system.rootFolderStore.remove(1)
+        repository.rootFolders(ttlMillis = -1)
+        assertEquals(listOf(2), (repository.rootFolders() as ArrResult.Ok).value.map { it.id })
+    }
 
     @Test
     fun `lookup passes the term through untouched`() = runTest {
@@ -164,6 +205,66 @@ class SonarrAddRepositoryTest {
         assertTrue((outcome as ArrResult.Err).error is ArrError.Auth)
         assertTrue(queue.enqueued.isEmpty())
         assertEquals(0, store.getAll(serverId, SERIES_TYPE, SeriesResource.serializer()).size)
+    }
+
+    @Test
+    fun `failed series refresh preserves all cached rows and returns an error`() = runTest {
+        library.seriesStore[1] = SeriesResource(id = 1)
+        library.seriesStore[2] = SeriesResource(id = 2)
+        repository.refreshSeries()
+        val previous = repository.cachedSeries()
+        library.seriesStore.remove(1)
+        store.writeFailure = IOException("Disk full")
+
+        val result = runCatching { repository.refreshSeries() }
+
+        assertEquals(previous, repository.cachedSeries())
+        assertTrue(result.getOrNull() is ArrResult.Err)
+        assertEquals(1_000L, store.lastFetchedAt(serverId, SERIES_TYPE))
+    }
+
+    @Test
+    fun `series refresh observers receive only complete libraries`() = runTest {
+        library.seriesStore[1] = SeriesResource(id = 1)
+        library.seriesStore[2] = SeriesResource(id = 2)
+        repository.refreshSeries()
+        val snapshots = mutableListOf<List<Int>>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            repository.observeSeries().collect { snapshots += it.map { row -> row.id } }
+        }
+        library.seriesStore.clear()
+        library.seriesStore[3] = SeriesResource(id = 3)
+
+        repository.refreshSeries()
+
+        assertEquals(listOf(listOf(1, 2), listOf(3)), snapshots)
+    }
+
+    @Test
+    fun `series refresh records its clock for existing and empty libraries`() = runTest {
+        library.seriesStore[1] = SeriesResource(id = 1)
+        repository.refreshSeries()
+        clock = 2_000L
+        repository.refreshSeries()
+        assertEquals(2_000L, store.lastFetchedAt(serverId, SERIES_TYPE))
+        library.seriesStore.clear()
+        clock = 3_000L
+        repository.refreshSeries()
+        assertEquals(3_000L, store.lastFetchedAt(serverId, SERIES_TYPE))
+        library.error = { IOException("Must use the fresh empty cache") }
+        assertTrue(repository.refreshSeriesIfStale() is ArrResult.Ok)
+    }
+
+    @Test
+    fun `cancelled series fetch propagates cancellation without changing cached rows`() = runTest {
+        library.seriesStore[1] = SeriesResource(id = 1)
+        repository.refreshSeries()
+        library.error = { CancellationException("Cancelled refresh") }
+
+        val result = runCatching { repository.refreshSeries() }
+
+        assertTrue(result.exceptionOrNull() is CancellationException)
+        assertEquals(listOf(1), repository.cachedSeries().map { it.id })
     }
 
     @Test

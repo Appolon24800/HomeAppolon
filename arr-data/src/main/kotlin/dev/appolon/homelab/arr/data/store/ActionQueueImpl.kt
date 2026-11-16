@@ -6,9 +6,12 @@ import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.ActionQueue
 import dev.appolon.homelab.arr.data.EntityStore
 import dev.appolon.homelab.arr.data.QueuedAction
+import dev.appolon.homelab.arr.data.RetryableActionQueue
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * [ActionQueue] persisted through the [EntityStore] under a synthetic server
@@ -24,7 +27,7 @@ import kotlinx.coroutines.sync.Mutex
 class ActionQueueImpl(
     private val store: EntityStore,
     private val maxAttempts: Int = DEFAULT_MAX_ATTEMPTS,
-) : ActionQueue {
+) : RetryableActionQueue {
 
     /** Serializes replays queue-wide; see [replay]. */
     private val replayGate = Mutex()
@@ -50,8 +53,21 @@ class ActionQueueImpl(
             var succeeded = 0
             var failedTerminally = 0
             pending().forEach { action ->
-                if (executor(action)) {
-                    remove(action.actionId)
+                // Older builds could stop after copying a terminal failure
+                // but before deleting its pending row. Keep the failed copy.
+                if (store.get(QUEUE_SCOPE, DEAD_TYPE, action.actionId.value, QueuedAction.serializer()) != null) {
+                    store.delete(QUEUE_SCOPE, QUEUE_TYPE, action.actionId.value)
+                    return@forEach
+                }
+                val succeededNow = try {
+                    executor(action)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    false
+                }
+                if (succeededNow) {
+                    removeNow(action.actionId)
                     succeeded++
                 } else {
                     val bumped = action.copy(
@@ -59,13 +75,10 @@ class ActionQueueImpl(
                         lastError = "replay attempt ${action.attempts + 1} failed",
                     )
                     if (bumped.attempts >= maxAttempts) {
-                        // Insert before delete so a crash between the two steps
-                        // can never lose the action.
-                        store.put(
-                            QUEUE_SCOPE, DEAD_TYPE, bumped.actionId.value, bumped,
+                        store.move(
+                            QUEUE_SCOPE, QUEUE_TYPE, DEAD_TYPE, bumped.actionId.value, bumped,
                             QueuedAction.serializer(),
                         )
-                        store.delete(QUEUE_SCOPE, QUEUE_TYPE, bumped.actionId.value)
                         failedTerminally++
                     } else {
                         store.put(
@@ -82,13 +95,60 @@ class ActionQueueImpl(
     }
 
     override suspend fun remove(actionId: ActionId) {
+        replayGate.withLock { removeNow(actionId) }
+    }
+
+    private suspend fun removeNow(actionId: ActionId) {
         store.delete(QUEUE_SCOPE, QUEUE_TYPE, actionId.value)
         store.delete(QUEUE_SCOPE, DEAD_TYPE, actionId.value)
     }
 
     /** Actions that exhausted [maxAttempts], oldest first. */
-    suspend fun deadLetters(): List<QueuedAction> =
+    override suspend fun deadLetters(): List<QueuedAction> =
         store.getAll(QUEUE_SCOPE, DEAD_TYPE, QueuedAction.serializer()).oldestFirst()
+
+    override suspend fun retryOne(
+        actionId: ActionId,
+        executor: suspend (QueuedAction) -> Boolean,
+    ): Boolean {
+        if (!replayGate.tryLock()) return false
+        try {
+            val dead = store.get(QUEUE_SCOPE, DEAD_TYPE, actionId.value, QueuedAction.serializer())
+            val action = if (dead != null) {
+                dead.copy(attempts = 0, lastError = null).also { restored ->
+                    store.move(
+                        QUEUE_SCOPE, DEAD_TYPE, QUEUE_TYPE, actionId.value, restored,
+                        QueuedAction.serializer(),
+                    )
+                }
+            } else {
+                store.get(QUEUE_SCOPE, QUEUE_TYPE, actionId.value, QueuedAction.serializer())
+                    ?: return false
+            }
+            val succeeded = try {
+                executor(action)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                false
+            }
+            if (succeeded) removeNow(actionId)
+            return succeeded
+        } finally {
+            replayGate.unlock()
+        }
+    }
+
+    /** Removes pending and failed writes when their server is deleted. */
+    suspend fun removeForServer(serverId: ServerId) {
+        replayGate.withLock {
+            (pending() + deadLetters())
+                .filter { it.serverId == serverId }
+                .map { it.actionId }
+                .distinct()
+                .forEach { removeNow(it) }
+        }
+    }
 
     private fun List<QueuedAction>.oldestFirst(): List<QueuedAction> =
         sortedWith(compareBy({ it.enqueuedAtMillis }, { it.actionId.value }))

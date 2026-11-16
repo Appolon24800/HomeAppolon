@@ -10,6 +10,7 @@ internal class InMemoryArrDatabase : ArrDatabase {
     val executedDdl = mutableListOf<String>()
     val rows = LinkedHashMap<RowKey, Array<Any?>>()
 
+    private val refreshes = LinkedHashMap<Pair<String, String>, Long>()
     private val lock = Any()
 
     override fun exec(sql: String) {
@@ -20,6 +21,9 @@ internal class InMemoryArrDatabase : ArrDatabase {
         synchronized(lock) {
             executedStatements += sql to args
             when (sql) {
+                EntitySql.UPSERT_REFRESH -> refreshes[args[0] as String to args[1] as String] = (args[2] as Number).toLong()
+                EntitySql.DELETE_REFRESH_SCOPE -> refreshes.remove(args[0] as String to args[1] as String)
+                EntitySql.DELETE_REFRESH_SERVER -> refreshes.keys.removeAll { it.first == args[0] }
                 EntitySql.UPSERT -> rows[rowKey(args)] = args.toTypedArray()
                 EntitySql.DELETE_ONE -> rows.remove(rowKey(args))
                 EntitySql.DELETE_SCOPE -> removeMatching { key ->
@@ -31,10 +35,24 @@ internal class InMemoryArrDatabase : ArrDatabase {
         }
     }
 
-    override fun <R> inTransaction(block: () -> R): R = block()
+    override fun <R> inTransaction(block: () -> R): R = synchronized(lock) {
+        val before = rows.mapValues { it.value.copyOf() }
+        val refreshesBefore = refreshes.toMap()
+        try {
+            block()
+        } catch (e: Throwable) {
+            rows.clear()
+            rows.putAll(before)
+            refreshes.clear()
+            refreshes.putAll(refreshesBefore)
+            throw e
+        }
+    }
 
     override fun query(sql: String, args: List<Any?>): List<Array<Any?>> = synchronized(lock) {
         when (sql) {
+            EntitySql.SELECT_REFRESH -> refreshes[args[0] as String to args[1] as String]
+                ?.let { listOf(arrayOf<Any?>(it)) }.orEmpty()
             EntitySql.SELECT_BY_SCOPE -> rows.values
                 .filter { row -> row[0] == args[0] && row[1] == args[1] }
                 .sortedBy { row -> row[2] as String }

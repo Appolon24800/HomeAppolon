@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.feature.radarr.detail
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -140,7 +141,7 @@ fun RadarrDetailFeatureSlot(
         ForeignFeature(route.owner, modifier)
         return
     }
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val params = matchRoutePattern(RadarrDetailFeature.IMPORT_PATTERN, segments)
     if (params == null) {
         ForeignFeature(route.owner, modifier)

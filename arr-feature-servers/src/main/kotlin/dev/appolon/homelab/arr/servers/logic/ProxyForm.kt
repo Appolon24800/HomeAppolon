@@ -106,13 +106,15 @@ data class ProxyForm(
         private const val HEX_DIGITS = "0123456789abcdef"
 
         /** Round-trip helper for loading a stored [ProxyConfig] into the form. */
-        fun fromConfig(config: ProxyConfig): ProxyForm = ProxyForm(
+        fun fromConfig(config: ProxyConfig, trust: TrustSpec? = null): ProxyForm = ProxyForm(
             type = config.type,
             host = config.host,
             port = if (config.port > 0) config.port.toString() else "",
             username = config.username.orEmpty(),
             password = config.password.orEmpty(),
             useOrbot = config.useOrbot,
+            acceptSelfSigned = trust == TrustSpec.AcceptAny || trust is TrustSpec.Pinned,
+            fingerprint = (trust as? TrustSpec.Pinned)?.sha256FingerprintHex.orEmpty(),
         )
     }
 }

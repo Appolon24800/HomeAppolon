@@ -26,6 +26,7 @@ import dev.appolon.homelab.arr.feature.radarr.library.data.toFilterState
 import dev.appolon.homelab.arr.net.arrError
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.time.Year
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -137,6 +138,8 @@ class MovieLibraryViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LceState.Loading)
 
+    private var refreshJob: Job? = null
+
     init {
         viewModelScope.launch {
             repository.observeMovies()
@@ -173,7 +176,8 @@ class MovieLibraryViewModel(
 
     /** Pull-to-refresh and error retry entry point. */
     fun refresh() {
-        viewModelScope.launch {
+        if (refreshJob?.isActive == true) return
+        refreshJob = viewModelScope.launch {
             _state.update { it.copy(refreshing = true) }
             // The whole repository operation is guarded, cache reads and
             // writes included: a storage failure maps to the error LCE

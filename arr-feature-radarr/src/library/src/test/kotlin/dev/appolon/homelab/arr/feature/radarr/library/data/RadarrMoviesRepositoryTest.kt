@@ -11,6 +11,13 @@ import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.radarr.library.FakeActionQueue
 import dev.appolon.homelab.arr.feature.radarr.library.FakeEntityStore
 import java.io.IOException
+import dev.appolon.homelab.arr.api.radarr.api.MovieApi
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.async
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -35,6 +42,7 @@ class RadarrMoviesRepositoryTest {
     private var commandCalls = mutableListOf<Pair<String, List<Int>?>>()
     private var commandResult: ArrResult<Unit> = ArrResult.ok(Unit)
 
+    private var profiles = listOf(QualityProfileResource(id = 1, name = "HD"), QualityProfileResource(id = 2, name = "UHD"))
     @Before
     fun setUp() {
         fake = FakeRadarrLibrary()
@@ -46,12 +54,7 @@ class RadarrMoviesRepositoryTest {
             store = store,
             movieApi = fake.movie,
             movieEditorApi = fake.movieEditor,
-            qualityProfileApi = {
-                listOf(
-                    QualityProfileResource(id = 1, name = "HD"),
-                    QualityProfileResource(id = 2, name = "UHD"),
-                )
-            },
+            qualityProfileApi = { profiles },
             commandRunner = { command, ids ->
                 commandCalls += command to ids
                 commandResult
@@ -64,6 +67,121 @@ class RadarrMoviesRepositoryTest {
             MovieResource(id = 1, title = "Alpha", monitored = true, qualityProfileId = 1),
             MovieResource(id = 2, title = "Beta", monitored = false, qualityProfileId = 2),
         )
+    }
+
+    private fun repositoryWithResponses(fetch: suspend () -> List<MovieResource>): RadarrMoviesRepository {
+        val api = object : MovieApi by fake.movie {
+            override suspend fun list(tmdbId: Int?, excludeLocalCovers: Boolean?, languageId: Int?): List<MovieResource> = fetch()
+        }
+        return RadarrMoviesRepository(
+            serverId = serverId, store = store,
+            movieApi = api, movieEditorApi = fake.movieEditor,
+            qualityProfileApi = { profiles }, commandRunner = { _, _ -> ArrResult.ok(Unit) },
+            actionQueue = queue, io = io,
+        )
+    }
+
+    @Test
+    fun `cancelling an active refresh lets the waiting refresh finish`() = runTest {
+        val firstStarted = CompletableDeferred<Unit>()
+        var calls = 0
+        val concurrent = repositoryWithResponses {
+            if (++calls == 1) {
+                firstStarted.complete(Unit)
+                CompletableDeferred<Unit>().await()
+            }
+            listOf(MovieResource(id = 2))
+        }
+        val first = async(UnconfinedTestDispatcher(testScheduler)) { concurrent.refresh() }
+        firstStarted.await()
+        val waiting = async(UnconfinedTestDispatcher(testScheduler)) { concurrent.refresh() }
+        runCurrent()
+        first.cancelAndJoin()
+        assertTrue(waiting.await() is ArrResult.Ok)
+        assertEquals(listOf(2), concurrent.cachedMovies().map { it.id })
+    }
+
+    @Test
+    fun `an older overlapping refresh cannot overwrite the newer library`() = runTest {
+        val firstStarted = CompletableDeferred<Unit>()
+        val releaseFirst = CompletableDeferred<Unit>()
+        var calls = 0
+        val concurrent = repositoryWithResponses {
+            if (++calls == 1) {
+                firstStarted.complete(Unit)
+                releaseFirst.await()
+                listOf(MovieResource(id = 1))
+            } else {
+                listOf(MovieResource(id = 2))
+            }
+        }
+        val older = async(UnconfinedTestDispatcher(testScheduler)) { concurrent.refresh() }
+        firstStarted.await()
+        val newer = async(UnconfinedTestDispatcher(testScheduler)) { concurrent.refresh() }
+        runCurrent()
+        releaseFirst.complete(Unit)
+        assertTrue(older.await() is ArrResult.Ok)
+        assertTrue(newer.await() is ArrResult.Ok)
+        assertEquals(listOf(2), concurrent.cachedMovies().map { it.id })
+    }
+
+    @Test
+    fun `observers see a complete replacement without partial lists`() = runTest {
+        repository.refresh()
+        val snapshots = mutableListOf<List<Int>>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            repository.observeMovies().collect { rows -> snapshots += rows.map { it.id } }
+        }
+        fake.movies.clear()
+        fake.movies += MovieResource(id = 3, title = "Replacement")
+        repository.refresh()
+        assertEquals(listOf(listOf(1, 2), listOf(3)), snapshots)
+    }
+
+    @Test
+    fun `cancelled library request preserves the cache and propagates cancellation`() = runTest {
+        repository.refresh()
+        val previous = repository.cachedMovies()
+        fake.error = CancellationException("Refresh cancelled")
+        val result = runCatching { repository.refresh() }
+        assertTrue(result.exceptionOrNull() is CancellationException)
+        assertEquals(previous, repository.cachedMovies())
+    }
+
+    @Test
+    fun `cancelled cache write preserves the library and propagates cancellation`() = runTest {
+        repository.refresh()
+        val previous = repository.cachedMovies()
+        fake.movies.clear()
+        fake.movies += MovieResource(id = 3, title = "Replacement")
+        store.writeFailure = CancellationException("Refresh cancelled")
+        val result = runCatching { repository.refresh() }
+        assertTrue(result.exceptionOrNull() is CancellationException)
+        assertEquals(previous, repository.cachedMovies())
+    }
+
+    @Test
+    fun `failed cache refresh preserves the complete previous library`() = runTest {
+        repository.refresh()
+        val previous = repository.cachedMovies()
+        fake.movies.removeAll { it.id == 1 }
+        store.writeFailure = IOException("Disk full")
+        val result = runCatching { repository.refresh() }
+        assertEquals(previous, repository.cachedMovies())
+        assertTrue("Storage failure should return an error", result.getOrNull() is ArrResult.Err)
+    }
+
+    @Test
+    fun `profile refresh removes deleted entries and accepts an empty response`() = runTest {
+        repository.qualityProfiles()
+        profiles = profiles.take(1)
+        repository.qualityProfiles(ttlMillis = -1)
+        assertEquals(profiles, store.getAll(serverId, RadarrMoviesRepository.PROFILE_TYPE, QualityProfileResource.serializer()))
+        profiles = emptyList()
+        assertEquals(emptyList<QualityProfileResource>(), (repository.qualityProfiles(ttlMillis = -1) as ArrResult.Ok).value)
+        assertTrue(store.getAll(serverId, RadarrMoviesRepository.PROFILE_TYPE, QualityProfileResource.serializer()).isEmpty())
+        profiles = listOf(QualityProfileResource(id = 9, name = "Unfetched"))
+        assertEquals(emptyList<QualityProfileResource>(), (repository.qualityProfiles() as ArrResult.Ok).value)
     }
 
     @Test

@@ -20,6 +20,7 @@ import dev.appolon.homelab.arr.api.sonarr.model.SeriesTypes
 import dev.appolon.homelab.arr.api.sonarr.model.TagResource
 import dev.appolon.homelab.arr.core.ArrError
 import dev.appolon.homelab.arr.core.ArrResult
+import dev.appolon.homelab.arr.core.EntityType
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.feature.sonarr.detail.data.SonarrSeriesDetailRepository
 import dev.appolon.homelab.arr.feature.sonarr.library.FakeActionQueue
@@ -130,6 +131,29 @@ class SeriesDetailViewModelTest {
     fun tearDown() {
         collectors.cancel()
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `fresh library series still loads its missing episodes and history`() = runTest {
+        store.deleteAll(serverId, EntityType("sonarr.episode"))
+        store.deleteAll(serverId, EntityType("sonarr.history"))
+        assertFalse(repository.seriesStale())
+
+        val reopened = SeriesDetailViewModel(5, repository)
+
+        assertEquals(setOf(11, 12), reopened.state.value.episodes.map { it.id }.toSet())
+        assertEquals(listOf(1), reopened.state.value.history.map { it.id })
+    }
+
+    @Test
+    fun `reopening a fresh series updates related data independently of the library TTL`() = runTest {
+        library.episodeStore.remove(12)
+        queue.historyStore.clear()
+
+        val reopened = SeriesDetailViewModel(5, repository)
+
+        assertEquals(listOf(11), reopened.state.value.episodes.map { it.id })
+        assertTrue(reopened.state.value.history.isEmpty())
     }
 
     @Test

@@ -1051,24 +1051,16 @@ class ProwlarrIndexersRepository(
         idOf: (T) -> String,
         fetched: List<T>,
     ) {
-        val incomingIds = fetched.map(idOf).toSet()
-        val existingIds = store.getAll(serverId, type, serializer).map(idOf).toSet()
-        existingIds.filter { it !in incomingIds }.forEach { id ->
-            store.delete(serverId, type, id)
-        }
-        store.putAll(
-            serverId, type,
+        store.replaceAll(
+            serverId,
+            type,
             fetched.map { idOf(it) to it },
             serializer,
             fetchedAtMillis = now(),
         )
     }
 
-    /**
-     * Cached list with TTL for rarely changing reference data. A fetch
-     * failure falls back to stale rows when any exist; the screens keep
-     * working offline.
-     */
+    /** Cached reference lists, including successful empty results, retain their refresh TTL. */
     private suspend fun <T> listWithTtl(
         fetch: suspend () -> List<T>,
         type: EntityType,
@@ -1079,7 +1071,7 @@ class ProwlarrIndexersRepository(
     ): ArrResult<List<T>> = withContext(io) {
         val cached = store.getAll(serverId, type, serializer)
         val stamp = store.lastFetchedAt(serverId, type)
-        if (stamp != null && now() - stamp <= ttlMillis && cached.isNotEmpty()) {
+        if (stamp != null && now() - stamp <= ttlMillis) {
             return@withContext ArrResult.ok(cached)
         }
         val fetched = try {
@@ -1089,12 +1081,15 @@ class ProwlarrIndexersRepository(
         } catch (e: Throwable) {
             return@withContext staleOrErr(cached, e.arrError())
         }
-        if (fetched.isEmpty()) {
-            ArrResult.ok(cached)
-        } else {
-            reconcile(type, serializer, idOf, fetched.map(sanitize))
-            ArrResult.ok(fetched)
-        }
+        val sanitized = fetched.map(sanitize)
+        store.replaceAll(
+            serverId,
+            type,
+            sanitized.map { idOf(it) to it },
+            serializer,
+            fetchedAtMillis = now(),
+        )
+        ArrResult.ok(fetched)
     }
 
     private fun <T> staleOrErr(cached: List<T>, error: ArrError): ArrResult<List<T>> =

@@ -1,6 +1,7 @@
 package dev.appolon.homelab.arr
 
 import dev.appolon.homelab.arr.core.AppType
+import dev.appolon.homelab.arr.core.ServerId
 import java.net.URI
 import java.net.URLDecoder
 
@@ -38,6 +39,10 @@ object ArrLinkParser {
         val baseUrl: String,
         val apiKey: String,
     )
+
+    /** Reads the stored server id carried by an in-app notification. */
+    fun serverIdForUrl(raw: String): ServerId? =
+        dev.appolon.homelab.arr.core.ArrServerLinks.decode(raw)
 
     fun parse(raw: String): Result? {
         val trimmed = raw.trim()
@@ -88,7 +93,7 @@ object ArrLinkParser {
                 if (idx > 0) {
                     val key = pair.substring(0, idx).lowercase()
                     val value = runCatching {
-                        URLDecoder.decode(pair.substring(idx + 1), Charsets.UTF_8)
+                        URLDecoder.decode(pair.substring(idx + 1), Charsets.UTF_8.name())
                     }.getOrDefault(pair.substring(idx + 1))
                     if (key !in map) map[key] = value
                 }

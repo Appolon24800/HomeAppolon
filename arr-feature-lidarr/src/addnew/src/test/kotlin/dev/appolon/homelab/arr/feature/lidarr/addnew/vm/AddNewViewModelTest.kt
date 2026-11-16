@@ -383,8 +383,7 @@ class AddNewViewModelTest {
         discovery.importLists.clear()
         vm.refreshLists()
         val lists = vm.state.value.listsLce
-        // The cleared feed falls back to the cached copy; the cache survives.
-        assertTrue(lists is LceState.Content)
-        assertEquals(1, (lists as LceState.Content).data.size)
+        // The explicit refresh fetched an empty feed, so the stale list disappears.
+        assertTrue(lists is LceState.Empty)
     }
 }

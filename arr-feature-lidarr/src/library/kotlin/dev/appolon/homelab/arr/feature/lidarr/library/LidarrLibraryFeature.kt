@@ -1,16 +1,14 @@
 package dev.appolon.homelab.arr.feature.lidarr.library
 
-import androidx.compose.foundation.layout.Box
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -88,17 +86,9 @@ fun LidarrLibraryDestination(
     val connection = remember(serverId) {
         LidarrLibraryConnection(graph.registry, graph.secrets)
     }
-    var connected by remember(serverId) { mutableStateOf<LidarrLibraryClient?>(null) }
-    LaunchedEffect(serverId) {
-        connected = connection.connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        connection.connect(serverId)
+    } ?: return
     val context = LocalContext.current
     val imageLoader = remember(apis) { apis.imageLoader(context) }
     val vm: ArtistLibraryViewModel = viewModel(key = "lidarr-library-" + serverId.value) {
@@ -176,7 +166,7 @@ fun LidarrLibraryFeatureSlot(
     modifier: Modifier = Modifier,
 ) {
     if (route.owner != LidarrLibraryFeature.ROUTE_OWNER) return
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val filtered = matchRoutePattern(LidarrLibraryFeature.ARTISTS_FILTER_PATTERN, segments)
     val artists = matchRoutePattern(LidarrLibraryFeature.ARTISTS_PATTERN, segments)
     when {

@@ -198,6 +198,34 @@ class DefaultArrClientFactoryTest {
     }
 
     @Test
+    fun `editing a server address sends credentials to the new origin`() {
+        val first = factory.clientFor(endpoint)
+        val moved = MockWebServer()
+        moved.start()
+        try {
+            moved.enqueue(MockResponse().setBody("ok"))
+            val updated = endpoint.copy(baseUrl = moved.url("/radarr/").toString())
+            val client = factory.clientFor(updated)
+
+            client.newCall(Request.Builder().url(moved.url("/radarr/api/v3/health")).build())
+                .execute()
+                .use { response -> assertEquals(200, response.code) }
+
+            assertEquals("test-key", moved.takeRequest().getHeader("X-Api-Key"))
+            assertNotSame(first, client)
+        } finally {
+            moved.shutdown()
+        }
+    }
+
+    @Test
+    fun `editing a server path rebuilds its session cookie interceptor`() {
+        val first = factory.clientFor(endpoint)
+
+        assertNotSame(first, factory.clientFor(endpoint.copy(baseUrl = endpoint.baseUrl + "radarr/")))
+    }
+
+    @Test
     fun `different servers get different clients`() {
         val other = endpoint.copy(serverId = ServerId("sonarr-1"))
 
@@ -277,6 +305,17 @@ class DefaultArrClientFactoryTest {
         host = "two"
 
         assertNotSame(first, withGlobal.clientFor(endpoint))
+    }
+
+    @Test
+    fun `an explicit direct override bypasses the global proxy`() {
+        val withGlobal = DefaultArrClientFactory(
+            globalProxy = { ProxyConfig(type = ProxyConfig.Type.HTTP, host = "global-proxy", port = 3128) },
+        )
+
+        val client = withGlobal.clientFor(endpoint.copy(proxy = ProxyConfig()))
+
+        assertEquals(java.net.Proxy.NO_PROXY, client.proxy)
     }
 
     @Test

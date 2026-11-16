@@ -1,10 +1,10 @@
 package dev.appolon.homelab.arr.feature.sonarr.search
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.fillMaxSize
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -231,7 +231,7 @@ fun SonarrSearchFeatureSlot(
     modifier: Modifier = Modifier,
 ) {
     if (route.owner != SonarrSearchFeature.ROUTE_OWNER) return
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val seriesReleases = matchRoutePattern(SonarrSearchFeature.SERIES_RELEASES_PATTERN, segments)
     val seasonReleases = matchRoutePattern(SonarrSearchFeature.SEASON_RELEASES_PATTERN, segments)
     val episodeReleases = matchRoutePattern(SonarrSearchFeature.EPISODE_RELEASES_PATTERN, segments)
@@ -296,24 +296,13 @@ private fun rememberApis(
     deps: SonarrSearchDeps,
     serverId: ServerId,
 ): SonarrSearchApis? {
-    var apis by remember(serverId) { mutableStateOf<SonarrSearchApis?>(null) }
-    LaunchedEffect(serverId) {
-        apis = SonarrSearchConnection(
+    return rememberServerConnection(serverId) {
+        SonarrSearchConnection(
             registry = deps.registry,
             secrets = deps.secrets,
             clientFactory = deps.clientFactory,
         ).apis(serverId)
     }
-    return apis
-}
-
-/** Loading pane shown while the per-server connection resolves. */
-@Composable
-private fun SearchLoading(modifier: Modifier = Modifier) {
-    dev.appolon.homelab.arr.ui.lce.ArrLceBox(
-        state = dev.appolon.homelab.arr.ui.lce.LceState.Loading,
-        modifier = modifier.fillMaxSize(),
-    ) {}
 }
 
 /**
@@ -328,7 +317,7 @@ private fun ReleasesDestination(
     deps: SonarrSearchDeps,
     modifier: Modifier = Modifier,
 ) {
-    val apis = rememberApis(deps, serverId) ?: return SearchLoading(modifier)
+    val apis = rememberApis(deps, serverId) ?: return
     val wiring = remember(serverId, apis) {
         SearchWiring(
             releases = SonarrReleaseRepository(
@@ -413,7 +402,7 @@ private fun ImportDestination(
     deps: SonarrSearchDeps,
     modifier: Modifier = Modifier,
 ) {
-    val apis = rememberApis(deps, serverId) ?: return SearchLoading(modifier)
+    val apis = rememberApis(deps, serverId) ?: return
     val repository = remember(serverId, apis, seasonNumber) {
         SonarrInteractiveImportRepository(
             seasonNumber = seasonNumber,

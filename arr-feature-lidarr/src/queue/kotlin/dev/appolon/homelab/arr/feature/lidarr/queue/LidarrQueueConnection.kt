@@ -1,10 +1,11 @@
 package dev.appolon.homelab.arr.feature.lidarr.queue
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.fillMaxSize
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -35,8 +36,6 @@ import dev.appolon.homelab.arr.net.ArrJson
 import dev.appolon.homelab.arr.net.DefaultArrClientFactory
 import dev.appolon.homelab.arr.net.ServerEndpoint
 import dev.appolon.homelab.arr.net.TrustSpec
-import dev.appolon.homelab.arr.ui.lce.ArrLceBox
-import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.nav.ArrRoute
 import dev.appolon.homelab.arr.ui.nav.ArrRouteRegistry
 import dev.appolon.homelab.arr.ui.nav.matchRoutePattern
@@ -181,7 +180,7 @@ fun ArrShellContent.withLidarrQueue(
 /** Server id and download id of a manual import route, or null for any other route. */
 private fun lidarrQueueRouteTarget(route: ArrRoute.Feature): Pair<ServerId, String?>? {
     if (route.owner != LidarrQueueFeature.ROUTE_OWNER) return null
-    val segments = route.path.split('/').map(::decodeRouteSegment)
+    val segments = route.decodedPathSegments()
     val downloadMatch = matchRoutePattern(LidarrQueueFeature.MANUAL_IMPORT_DOWNLOAD_PATTERN, segments)
     if (downloadMatch != null) {
         return ServerId(downloadMatch.getValue("serverId")) to downloadMatch.getValue("downloadId")
@@ -207,21 +206,15 @@ fun LidarrQueue(
     onOverallProgress: (ServerId, Float?) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
-    var clients by remember(serverId) { mutableStateOf<LidarrQueueClients?>(null) }
-    LaunchedEffect(serverId) {
-        clients = LidarrQueueConnection(
+    val connected = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        LidarrQueueConnection(
             registry = deps.registry,
             secrets = deps.secrets,
             store = deps.entityStore,
             actionQueue = deps.actionQueue,
             clientFactory = deps.clientFactory,
         ).connect(serverId)
-    }
-    val connected = clients
-    if (connected == null) {
-        ArrLceBox(state = LceState.Loading, modifier = modifier.fillMaxSize()) {}
-        return
-    }
+    } ?: return
     val repository = remember(serverId, connected) {
         LidarrQueueRepository(
             serverId = serverId,
@@ -281,21 +274,15 @@ fun LidarrManualImport(
     serverName: String? = null,
     modifier: Modifier = Modifier,
 ) {
-    var clients by remember(serverId) { mutableStateOf<LidarrQueueClients?>(null) }
-    LaunchedEffect(serverId) {
-        clients = LidarrQueueConnection(
+    val connected = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        LidarrQueueConnection(
             registry = deps.registry,
             secrets = deps.secrets,
             store = deps.entityStore,
             actionQueue = deps.actionQueue,
             clientFactory = deps.clientFactory,
         ).connect(serverId)
-    }
-    val connected = clients
-    if (connected == null) {
-        ArrLceBox(state = LceState.Loading, modifier = modifier.fillMaxSize()) {}
-        return
-    }
+    } ?: return
     val repository = remember(serverId, connected) {
         LidarrManualImportRepository(
             serverId = serverId,

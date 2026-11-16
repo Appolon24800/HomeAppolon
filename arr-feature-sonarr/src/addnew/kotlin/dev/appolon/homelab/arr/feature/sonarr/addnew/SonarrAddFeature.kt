@@ -1,10 +1,10 @@
 package dev.appolon.homelab.arr.feature.sonarr.addnew
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.fillMaxSize
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -25,8 +25,6 @@ import dev.appolon.homelab.arr.feature.sonarr.addnew.ui.AddSeriesContent
 import dev.appolon.homelab.arr.feature.sonarr.addnew.vm.AddSeriesViewModel
 import dev.appolon.homelab.arr.net.ArrClientFactory
 import dev.appolon.homelab.arr.net.DefaultArrClientFactory
-import dev.appolon.homelab.arr.ui.lce.ArrLceBox
-import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.nav.ArrRoute
 import dev.appolon.homelab.arr.ui.nav.ArrRouteRegistry
 import dev.appolon.homelab.arr.ui.nav.fillPattern
@@ -58,7 +56,7 @@ object SonarrAddRoutes {
         if (route.owner != OWNER) return null
         // Nested paths travel percent-encoded; decode before matching so the
         // extracted id equals the stored ServerId.
-        val segments = route.path.split('/').map(::decodeSegment)
+        val segments = route.decodedPathSegments()
         val params = matchRoutePattern(ADD_PATTERN, segments) ?: return null
         return params["serverId"]?.let(::ServerId)
     }
@@ -160,19 +158,13 @@ fun SonarrAddNew(
     serverId: ServerId,
     deps: SonarrAddDeps,
 ) {
-    var apis by remember(serverId) { mutableStateOf<SonarrAddApis?>(null) }
-    LaunchedEffect(serverId) {
-        apis = SonarrAddConnection(
+    val connected = rememberServerConnection(serverId, modifier = Modifier.fillMaxSize()) {
+        SonarrAddConnection(
             registry = deps.registry,
             secrets = deps.secrets,
             clientFactory = deps.clientFactory,
         ).connect(serverId)
-    }
-    val connected = apis
-    if (connected == null) {
-        ArrLceBox(state = LceState.Loading, modifier = Modifier.fillMaxSize()) {}
-        return
-    }
+    } ?: return
     val repository = remember(serverId, connected) {
         SonarrAddRepository(
             serverId = serverId,

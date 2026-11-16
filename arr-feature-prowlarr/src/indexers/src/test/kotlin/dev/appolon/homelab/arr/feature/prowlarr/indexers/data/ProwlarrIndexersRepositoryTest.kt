@@ -89,6 +89,36 @@ class ProwlarrIndexersRepositoryTest {
     }
 
     @Test
+    fun `empty tag responses clear deleted tags and remain fresh`() = runTest {
+        repository.tags()
+        fake.tags.clear()
+        val empty = repository.tags(ttlMillis = -1)
+        assertEquals(emptyList<TagResource>(), (empty as ArrResult.Ok).value)
+        assertTrue(repository.observeTags().first().isEmpty())
+        fake.tags[20] = TagResource(id = 20, label = "Not fetched yet")
+        assertEquals(emptyList<TagResource>(), (repository.tags() as ArrResult.Ok).value)
+    }
+
+    @Test
+    fun `empty schema responses remove obsolete provider choices`() = runTest {
+        fake.indexerSchemas += IndexerResource(definitionName = "old", name = "Old provider")
+        repository.schemas()
+        fake.indexerSchemas.clear()
+        assertEquals(emptyList<IndexerResource>(), (repository.schemas(ttlMillis = -1) as ArrResult.Ok).value)
+        fake.indexerSchemas += IndexerResource(definitionName = "new", name = "New provider")
+        assertEquals(emptyList<IndexerResource>(), (repository.schemas() as ArrResult.Ok).value)
+    }
+
+    @Test
+    fun `empty default category responses remove obsolete category choices`() = runTest {
+        repository.defaultCategories()
+        fake.defaultCategories.clear()
+        assertEquals(emptyList<IndexerCategory>(), (repository.defaultCategories(ttlMillis = -1) as ArrResult.Ok).value)
+        fake.defaultCategories += IndexerCategory(id = 3, name = "Not fetched yet")
+        assertEquals(emptyList<IndexerCategory>(), (repository.defaultCategories() as ArrResult.Ok).value)
+    }
+
+    @Test
     fun `refresh fills the cache stamps it and reconciles removals`() = runTest {
         val result = repository.refresh()
         assertTrue(result is ArrResult.Ok)

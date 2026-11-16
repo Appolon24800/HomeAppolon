@@ -15,6 +15,32 @@ class ServerConnectionTesterTest {
 
     private val tester = ServerConnectionTester()
 
+    @Test
+    fun `a successful html login page does not pass the connection test`() = runTest {
+        val server = MockWebServer()
+        server.enqueue(MockResponse().setBody("<html><title>Sign in</title></html>"))
+        server.start()
+        try {
+            val outcome = tester.test(endpoint(server.url("/").toString()), AppType.RADARR)
+            assertTrue(outcome is ConnectionOutcome.Failure)
+        } finally {
+            server.shutdown()
+        }
+    }
+
+    @Test
+    fun `a different arr app does not pass the selected app connection test`() = runTest {
+        val server = MockWebServer()
+        server.enqueue(MockResponse().setBody("""{"appName":"Sonarr","version":"4.0"}"""))
+        server.start()
+        try {
+            val outcome = tester.test(endpoint(server.url("/").toString()), AppType.RADARR)
+            assertTrue(outcome is ConnectionOutcome.Failure)
+        } finally {
+            server.shutdown()
+        }
+    }
+
     private fun endpoint(baseUrl: String) = ServerEndpoint(
         serverId = ServerId("test"),
         baseUrl = baseUrl,

@@ -16,6 +16,7 @@ import dev.appolon.homelab.arr.feature.radarr.library.data.RadarrMoviesRepositor
 import dev.appolon.homelab.arr.feature.radarr.library.data.SavedMovieFiltersStore
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -52,8 +53,8 @@ class MovieLibraryViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun newFakes() {
-        fake = FakeRadarrLibrary()
+    private fun newFakes(library: FakeRadarrLibrary = FakeRadarrLibrary()) {
+        fake = library
         store = FakeEntityStore()
         queue = FakeActionQueue()
         fake.movies += listOf(
@@ -110,6 +111,25 @@ class MovieLibraryViewModelTest {
         block()
         advanceUntilIdle()
         job.cancel()
+    }
+
+    @Test
+    fun `repeated refreshes share the active initial request and can refresh again`() = runTest {
+        val release = CompletableDeferred<Unit>()
+        var calls = 0
+        newFakes(FakeRadarrLibrary(latencyMs = 1, sleep = { calls++; release.await() }))
+        vm = newVm()
+        assertTrue(vm.state.value.refreshing)
+        vm.refresh()
+        vm.refresh()
+        assertEquals(1, calls)
+        release.complete(Unit)
+        advanceUntilIdle()
+        assertFalse(vm.state.value.refreshing)
+        vm.refresh()
+        advanceUntilIdle()
+        assertEquals(2, calls)
+        assertFalse(vm.state.value.refreshing)
     }
 
     @Test

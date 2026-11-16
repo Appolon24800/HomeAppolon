@@ -75,6 +75,12 @@ fun ServerListScreen(
         subtitle = if (probing) stringResource(R.string.arr_servers_probing) else null,
         modifier = modifier,
         actions = {
+            IconButton(onClick = onAdd) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.arr_servers_add),
+                )
+            }
             IconButton(onClick = onOpenProxy) {
                 Icon(
                     imageVector = Icons.Outlined.VpnLock,
@@ -118,7 +124,7 @@ fun ServerListScreen(
                             health = health[server.id] ?: ServerListViewModel.Health.UNKNOWN,
                             isFirst = index == 0,
                             isLast = index == servers.lastIndex,
-                            onEdit = { },
+                            onEdit = { onEdit(server.id) },
                             onMoveUp = { onMoveUp(server.id) },
                             onMoveDown = { onMoveDown(server.id) },
                             onRequestDelete = { pendingDelete = server },

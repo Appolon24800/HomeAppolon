@@ -13,4 +13,6 @@ data class ShellServer(
     val name: String,
     val appType: AppType,
     val healthy: Boolean = true,
+    /** Changes when saved connection details change, including inherited proxy settings. */
+    val connectionVersion: Long = 0L,
 )

@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.feature.prowlarr.search
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -76,7 +77,7 @@ fun ProwlarrSearchFeatureSlot(route: ArrRoute.Feature, graph: ArrDataGraph) {
         ProwlarrSearchFeature.HISTORY_PATTERN to SearchPage.HISTORY,
         ProwlarrSearchFeature.STATS_PATTERN to SearchPage.STATS,
     ).firstNotNullOfOrNull { (pattern, page) ->
-        matchRoutePattern(pattern, route.path.split('/'))?.let { it to page }
+        matchRoutePattern(pattern, route.decodedPathSegments())?.let { it to page }
     } ?: return
     val serverId = ServerId(match.first.getValue("serverId"))
     val connection = remember(graph, serverId) { ProwlarrSearchConnection(graph) }

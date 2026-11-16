@@ -134,7 +134,7 @@ class RadarrImportListsViewModel(
             _state.update { it.copy(refreshing = true) }
             when (val result = repository.refreshIfStale()) {
                 is ArrResult.Ok -> _state.update {
-                    it.copy(refreshing = false, options = it.options ?: repository.cachedImportListConfig())
+                    it.copy(loaded = true, loadError = null, refreshing = false, options = it.options ?: repository.cachedImportListConfig())
                 }
 
                 is ArrResult.Err -> _state.update {

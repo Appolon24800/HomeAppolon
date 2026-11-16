@@ -15,6 +15,8 @@ import dev.appolon.homelab.arr.feature.sonarr.library.data.SeriesLibraryFilters
 import dev.appolon.homelab.arr.feature.sonarr.library.data.SonarrSeriesRepository
 import dev.appolon.homelab.arr.ui.lce.LceState
 import java.io.IOException
+import org.junit.Assert.assertFalse
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -104,6 +106,25 @@ class SeriesLibraryViewModelTest {
         ),
         tags = if (id == 1) setOf(10) else null,
     )
+
+    @Test
+    fun `repeated refreshes share the active request and can refresh again`() = runTest {
+        val release = CompletableDeferred<Unit>()
+        var calls = 0
+        fake.latency = { operation ->
+            if (operation == "Series.list") { calls++; release.await() }
+        }
+        val pending = SeriesLibraryViewModel(repository, savedFilters)
+        assertTrue(pending.state.value.refreshing)
+        pending.refresh()
+        pending.refresh()
+        assertEquals(1, calls)
+        release.complete(Unit)
+        assertFalse(pending.state.value.refreshing)
+        pending.refresh()
+        assertEquals(2, calls)
+        assertFalse(pending.state.value.refreshing)
+    }
 
     @Test
     fun `initial state loads content with series`() {

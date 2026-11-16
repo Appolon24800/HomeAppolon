@@ -1,19 +1,17 @@
 package dev.appolon.homelab.arr.feature.bazarr.series
 
-import androidx.compose.foundation.layout.Box
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -129,17 +127,9 @@ fun BazarrLibraryDestination(
     val connection = remember(serverId) {
         BazarrLibraryConnection(graph.registry, graph.secrets)
     }
-    var connected by remember(serverId) { mutableStateOf<BazarrLibraryApiBundle?>(null) }
-    LaunchedEffect(serverId) {
-        connected = connection.connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        connection.connect(serverId)
+    } ?: return
     val context = LocalContext.current
     val imageLoader = remember(apis) { apis.imageLoader(context) }
     var kind by remember(serverId) { mutableStateOf(initialKind) }
@@ -267,17 +257,9 @@ fun BazarrEpisodesDestination(
     val connection = remember(serverId) {
         BazarrLibraryConnection(graph.registry, graph.secrets)
     }
-    var connected by remember(serverId) { mutableStateOf<BazarrLibraryApiBundle?>(null) }
-    LaunchedEffect(serverId) {
-        connected = connection.connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        connection.connect(serverId)
+    } ?: return
     val vm: BazarrEpisodesViewModel = viewModel(
         key = "bazarr-episodes-$seriesId-" + serverId.value,
     ) {
@@ -311,7 +293,7 @@ fun BazarrLibraryFeatureSlot(
     modifier: Modifier = Modifier,
 ) {
     if (route.owner != BazarrLibraryFeature.ROUTE_OWNER) return
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val episodes = matchRoutePattern(BazarrLibraryFeature.EPISODES_PATTERN, segments)
     val series = matchRoutePattern(BazarrLibraryFeature.SERIES_PATTERN, segments)
     val movies = matchRoutePattern(BazarrLibraryFeature.MOVIES_PATTERN, segments)

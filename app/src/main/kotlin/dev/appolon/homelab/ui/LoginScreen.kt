@@ -34,71 +34,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialRequest
-import androidx.credentials.GetPublicKeyCredentialOption
-import androidx.credentials.PublicKeyCredential
-import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.appolon.homelab.data.PocketId
 import dev.appolon.homelab.ui.components.ErrorText
-import kotlinx.coroutines.launch
 
 /** Auth methods all shown at once; no mode switching. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(vm: HomeViewModel) {
     val state by vm.state.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
     BackHandler(onBack = vm::closeLogin)
 
     var code by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var emailCode by remember { mutableStateOf("") }
-    var passkeyBusy by remember { mutableStateOf(false) }
-    var passkeyError by remember { mutableStateOf<String?>(null) }
-
-    fun startPasskey() {
-        val activity = context as? android.app.Activity
-        if (activity == null) {
-            passkeyError = "Passkeys need an activity context"
-            return
-        }
-        scope.launch {
-            passkeyBusy = true
-            passkeyError = null
-            runCatching {
-                val challenge = PocketId.beginPasskeyLogin(state.accountUrl)
-                val manager = CredentialManager.create(activity)
-                val response = manager.getCredential(
-                    activity,
-                    GetCredentialRequest(listOf(GetPublicKeyCredentialOption(challenge.requestJson))),
-                )
-                val credential = response.credential as? PublicKeyCredential
-                    ?: error("The authenticator did not return a passkey")
-                vm.finishPasskeyLogin(challenge, credential.authenticationResponseJson)
-            }.onFailure { e ->
-                // The user backed out of the system dialog — not an error.
-                if (e !is GetCredentialCancellationException) {
-                    passkeyError = e.message ?: "Passkey sign-in failed"
-                }
-            }
-            passkeyBusy = false
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -143,20 +102,16 @@ fun LoginScreen(vm: HomeViewModel) {
             }
 
             Button(
-                onClick = ::startPasskey,
-                enabled = !passkeyBusy && !state.accountBusy,
+                onClick = vm::startBrowserPasskeyLogin,
+                enabled = !state.accountBusy && state.deviceLogin == null,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                if (passkeyBusy) {
-                    CircularProgressIndicator(modifier = Modifier.size(18.dp))
-                } else {
-                    Text("Sign in with a passkey")
-                }
+                Text("Sign in with a passkey")
             }
-            ErrorText(passkeyError)
+
             OutlinedButton(
                 onClick = vm::startDeviceLogin,
-                enabled = state.deviceLogin == null,
+                enabled = state.deviceLogin == null && !state.accountBusy,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Sign in with other device")

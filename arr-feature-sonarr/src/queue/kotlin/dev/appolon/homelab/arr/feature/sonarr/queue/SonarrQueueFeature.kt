@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.feature.sonarr.queue
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -134,7 +135,7 @@ fun SonarrQueueFeatureSlot(
     modifier: Modifier = Modifier,
     fallback: (@Composable (ArrRoute.Feature) -> Unit)? = null,
 ) {
-    val segments = route.path.split('/').map(::decodeRouteSegment)
+    val segments = route.decodedPathSegments()
     val navigator = LocalArrShellNavigator.current
     val downloadMatch = matchRoutePattern(SonarrQueueFeature.MANUAL_IMPORT_DOWNLOAD_PATTERN, segments)
     val folderMatch = matchRoutePattern(SonarrQueueFeature.MANUAL_IMPORT_PATTERN, segments)

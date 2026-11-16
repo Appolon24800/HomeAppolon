@@ -4,8 +4,8 @@ import dev.appolon.homelab.arr.core.ServerId
 import kotlinx.serialization.Serializable
 
 /**
- * Proxy configuration for one server. Resolution order is server override
- * (when [isConfigured]), then the global default, then direct.
+ * Proxy configuration for one server. A null server override inherits the global
+ * default. An explicit NONE override connects directly.
  */
 @Serializable
 data class ProxyConfig(

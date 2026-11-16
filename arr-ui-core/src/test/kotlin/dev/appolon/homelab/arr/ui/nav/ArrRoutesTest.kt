@@ -67,6 +67,16 @@ class ArrRoutesTest {
     }
 
     @Test
+    fun featurePathsReachNavigationWithExactlyOneEncodingLayer() {
+        val value = "server + / %25 ü"
+        val path = fillPattern("settings/{serverId}", mapOf("serverId" to value))!!
+        val route = ArrRoute.Feature("test", path)
+        assertEquals("f/test/$path", ArrRoutes.encode(route))
+        assertEquals(listOf("settings", value), route.decodedPathSegments())
+        assertEquals(value, matchRoutePattern("settings/{serverId}", route.decodedPathSegments())!!["serverId"])
+    }
+
+    @Test
     fun decodeRejectsMalformedInput() {
         listOf(
             "",

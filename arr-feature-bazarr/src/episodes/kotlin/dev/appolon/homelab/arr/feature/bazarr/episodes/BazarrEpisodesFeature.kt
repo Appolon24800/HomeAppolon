@@ -1,15 +1,12 @@
 package dev.appolon.homelab.arr.feature.bazarr.episodes
 
-import androidx.compose.foundation.layout.Box
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -116,7 +113,7 @@ fun BazarrEpisodesFeatureSlot(
     graph: ArrDataGraph,
     modifier: Modifier = Modifier,
 ) {
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val series = matchRoutePattern(BazarrEpisodesFeature.SERIES_PATTERN, segments)
     val movie = matchRoutePattern(BazarrEpisodesFeature.MOVIE_PATTERN, segments)
     val wanted = matchRoutePattern(BazarrEpisodesFeature.WANTED_PATTERN, segments)
@@ -162,17 +159,9 @@ fun EpisodeSubtitlesDestination(
     graph: ArrDataGraph,
     modifier: Modifier = Modifier,
 ) {
-    var connected by remember(serverId) { mutableStateOf<BazarrEpisodesApis?>(null) }
-    LaunchedEffect(serverId) {
-        connected = BazarrEpisodesConnection(graph.registry, graph.secrets).connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        BazarrEpisodesConnection(graph.registry, graph.secrets).connect(serverId)
+    } ?: return
     val repository = remember(serverId, seriesId, apis) {
         apis.repository(serverId, graph)
     }
@@ -218,17 +207,9 @@ fun MovieSubtitlesDestination(
     graph: ArrDataGraph,
     modifier: Modifier = Modifier,
 ) {
-    var connected by remember(serverId) { mutableStateOf<BazarrEpisodesApis?>(null) }
-    LaunchedEffect(serverId) {
-        connected = BazarrEpisodesConnection(graph.registry, graph.secrets).connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        BazarrEpisodesConnection(graph.registry, graph.secrets).connect(serverId)
+    } ?: return
     val repository = remember(serverId, radarrId, apis) { apis.repository(serverId, graph) }
     val vm: MovieSubtitlesViewModel = viewModel(
         key = "bazarr-movie-$radarrId-" + serverId.value,
@@ -269,17 +250,9 @@ fun WantedSubtitlesDestination(
     graph: ArrDataGraph,
     modifier: Modifier = Modifier,
 ) {
-    var connected by remember(serverId) { mutableStateOf<BazarrEpisodesApis?>(null) }
-    LaunchedEffect(serverId) {
-        connected = BazarrEpisodesConnection(graph.registry, graph.secrets).connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        BazarrEpisodesConnection(graph.registry, graph.secrets).connect(serverId)
+    } ?: return
     val repository = remember(serverId, apis) { apis.repository(serverId, graph) }
     val vm: WantedSubtitlesViewModel = viewModel(
         key = "bazarr-wanted-" + serverId.value,
@@ -316,17 +289,9 @@ fun SubtitleHistoryDestination(
     graph: ArrDataGraph,
     modifier: Modifier = Modifier,
 ) {
-    var connected by remember(serverId) { mutableStateOf<BazarrEpisodesApis?>(null) }
-    LaunchedEffect(serverId) {
-        connected = BazarrEpisodesConnection(graph.registry, graph.secrets).connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        BazarrEpisodesConnection(graph.registry, graph.secrets).connect(serverId)
+    } ?: return
     val repository = remember(serverId, apis) { apis.repository(serverId, graph) }
     val vm: SubtitleHistoryViewModel = viewModel(
         key = "bazarr-history-" + serverId.value,

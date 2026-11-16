@@ -241,13 +241,13 @@ class SeriesDetailViewModel(
         viewModelScope.launch { initialLoad() }
     }
 
-    /** Cache-first entry: refreshes only when the shared cache is absent or stale. */
+    /** Reuses a fresh series row and loads its related data on every opening. */
     private suspend fun initialLoad() {
         val cached = repository.cachedSeries(seriesId)
         if (cached == null || repository.seriesStale()) {
             refreshAll()
         } else {
-            refreshLookups()
+            refreshRelatedData()
         }
     }
 
@@ -264,11 +264,20 @@ class SeriesDetailViewModel(
             }
 
             is ArrResult.Ok -> {
-                _state.update { it.copy(refreshing = false, loadError = null) }
-                refreshEpisodes()
-                refreshHistoryFeed()
-                refreshLookups()
+                _state.update { it.copy(loadError = null) }
+                refreshRelatedData()
             }
+        }
+    }
+
+    private suspend fun refreshRelatedData() {
+        _state.update { it.copy(refreshing = true) }
+        try {
+            refreshEpisodes()
+            refreshHistoryFeed()
+            refreshLookups()
+        } finally {
+            _state.update { it.copy(refreshing = false) }
         }
     }
 

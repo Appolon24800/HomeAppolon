@@ -15,9 +15,12 @@ import kotlinx.serialization.KSerializer
  */
 class FakeEntityStore : EntityStore {
 
+    var writeFailure: Throwable? = null
+
     private data class Key(val serverId: ServerId, val type: EntityType, val id: String)
 
     private val rows = LinkedHashMap<Key, Pair<String, String>>() // key -> (json, fetchedAt)
+    private val refreshTimes = mutableMapOf<Pair<ServerId, EntityType>, Long>()
     private val tick = MutableStateFlow(0)
     val writes: Int get() = tick.value
 
@@ -28,6 +31,7 @@ class FakeEntityStore : EntityStore {
         value: T,
         serializer: KSerializer<T>,
     ) {
+        writeFailure?.let { throw it }
         rows[Key(serverId, type, id)] =
             dev.appolon.homelab.arr.net.ArrJson.encodeToString(serializer, value) to
                 System.currentTimeMillis().toString()
@@ -41,11 +45,29 @@ class FakeEntityStore : EntityStore {
         serializer: KSerializer<T>,
         fetchedAtMillis: Long,
     ) {
+        writeFailure?.let { throw it }
         values.forEach { (id, value) ->
             rows[Key(serverId, type, id)] =
                 dev.appolon.homelab.arr.net.ArrJson.encodeToString(serializer, value) to
                     fetchedAtMillis.toString()
         }
+        tick.value++
+    }
+
+    override suspend fun <T> replaceAll(
+        serverId: ServerId,
+        type: EntityType,
+        values: List<Pair<String, T>>,
+        serializer: KSerializer<T>,
+        fetchedAtMillis: Long,
+    ) {
+        writeFailure?.let { throw it }
+        val encoded = values.map { (id, value) ->
+            Key(serverId, type, id) to (dev.appolon.homelab.arr.net.ArrJson.encodeToString(serializer, value) to fetchedAtMillis.toString())
+        }
+        rows.keys.removeAll { it.serverId == serverId && it.type == type }
+        rows.putAll(encoded)
+        refreshTimes[serverId to type] = fetchedAtMillis
         tick.value++
     }
 
@@ -72,13 +94,16 @@ class FakeEntityStore : EntityStore {
 
     override suspend fun deleteAll(serverId: ServerId, type: EntityType?) {
         rows.keys.removeAll { it.serverId == serverId && (type == null || it.type == type) }
+        refreshTimes.keys.removeAll { it.first == serverId && (type == null || it.second == type) }
         tick.value++
     }
 
     override suspend fun lastFetchedAt(serverId: ServerId, type: EntityType): Long? =
-        rows.entries
-            .filter { it.key.serverId == serverId && it.key.type == type }
-            .maxOfOrNull { it.value.second.toLong() }
+        listOfNotNull(
+            refreshTimes[serverId to type],
+            rows.entries.filter { it.key.serverId == serverId && it.key.type == type }
+                .maxOfOrNull { it.value.second.toLong() },
+        ).maxOrNull()
 
     override fun <T> observe(
         serverId: ServerId,

@@ -22,6 +22,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
@@ -70,6 +72,8 @@ class RadarrMoviesRepository(
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) {
 
+    private val refreshMutex = Mutex()
+
     fun observeMovies(): Flow<List<MovieResource>> =
         store.observe(serverId, MOVIE_TYPE, MovieResource.serializer())
 
@@ -82,28 +86,32 @@ class RadarrMoviesRepository(
         return now() - fetched > ttlMillis
     }
 
-    /** Fetches the full library, reconciles the cache row by row. */
-    suspend fun refresh(): ArrResult<Unit> = withContext(io) {
+    /** Fetches and atomically replaces the full library cache. */
+    suspend fun refresh(): ArrResult<Unit> = refreshMutex.withLock { refreshOnce() }
+
+    private suspend fun refreshOnce(): ArrResult<Unit> = withContext(io) {
         val fetched = try {
             movieApi.list()
         } catch (e: HttpException) {
             return@withContext ArrResult.err(e.toArrError())
-        } catch (e: Throwable) {
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
             return@withContext ArrResult.err(e.arrError())
         }
-        val incomingIds = fetched.map { it.id }.toSet()
-        val existingIds = cachedMovies().map { it.id }.toSet()
-        existingIds.filter { it !in incomingIds }.forEach { id ->
-            store.delete(serverId, MOVIE_TYPE, id.toString())
+        try {
+            store.replaceAll(
+                serverId,
+                MOVIE_TYPE,
+                fetched.map { it.id.toString() to it },
+                MovieResource.serializer(),
+                fetchedAtMillis = now(),
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            return@withContext ArrResult.err(e.arrError())
         }
-        // One write for the whole library keeps the fetchedAt stamp uniform.
-        store.putAll(
-            serverId,
-            MOVIE_TYPE,
-            fetched.map { it.id.toString() to it },
-            MovieResource.serializer(),
-            fetchedAtMillis = now(),
-        )
         // A successful refresh proves this server reachable, so queued
         // library writes replay right here instead of waiting for the sync
         // screen's manual retry.
@@ -123,7 +131,7 @@ class RadarrMoviesRepository(
             val cached = store.getAll(serverId, PROFILE_TYPE, QualityProfileResource.serializer())
             val fetched = store.lastFetchedAt(serverId, PROFILE_TYPE)
             val fresh = fetched != null && now() - fetched <= ttlMillis
-            if (fresh && cached.isNotEmpty()) {
+            if (fresh) {
                 return@withContext ArrResult.ok(cached)
             }
             val profiles = try {
@@ -133,18 +141,14 @@ class RadarrMoviesRepository(
             } catch (e: Throwable) {
                 return@withContext ArrResult.err(e.arrError())
             }
-            if (profiles.isNotEmpty()) {
-                store.putAll(
-                    serverId,
-                    PROFILE_TYPE,
-                    profiles.map { it.id.toString() to it },
-                    QualityProfileResource.serializer(),
-                    fetchedAtMillis = now(),
-                )
-                ArrResult.ok(profiles)
-            } else {
-                ArrResult.ok(cached)
-            }
+            store.replaceAll(
+                serverId,
+                PROFILE_TYPE,
+                profiles.map { it.id.toString() to it },
+                QualityProfileResource.serializer(),
+                fetchedAtMillis = now(),
+            )
+            ArrResult.ok(profiles)
         }
 
     /**

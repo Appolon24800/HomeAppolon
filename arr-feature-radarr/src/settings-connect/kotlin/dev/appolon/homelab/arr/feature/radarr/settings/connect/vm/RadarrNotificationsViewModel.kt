@@ -113,7 +113,7 @@ class RadarrNotificationsViewModel(
         viewModelScope.launch {
             _state.update { it.copy(refreshing = true) }
             when (val result = repository.refreshIfStale()) {
-                is ArrResult.Ok -> _state.update { it.copy(refreshing = false) }
+                is ArrResult.Ok -> _state.update { it.copy(loaded = true, loadError = null, refreshing = false) }
 
                 is ArrResult.Err -> _state.update {
                     it.copy(

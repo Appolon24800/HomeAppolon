@@ -45,6 +45,11 @@ class StatusEndpointTest {
     }
 
     @Test
+    fun `extract version from the bazarr data envelope`() {
+        assertEquals("1.5.0", StatusEndpoint.extractVersion("""{"data":{"bazarr_version":"1.5.0"}}"""))
+    }
+
+    @Test
     fun `extract version tolerates missing unknown and malformed payloads`() {
         assertNull(StatusEndpoint.extractVersion("""{"appName":"Radarr"}"""))
         assertNull(StatusEndpoint.extractVersion("""{"version":null}"""))

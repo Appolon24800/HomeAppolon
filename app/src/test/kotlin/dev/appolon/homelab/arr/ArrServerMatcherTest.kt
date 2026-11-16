@@ -146,4 +146,36 @@ class ArrServerMatcherTest {
         )
         assertEquals(ServerId("first"), id)
     }
+
+    @Test
+    fun mostSpecificServerPathWinsOverAnEarlierRootServer() {
+        assertEquals(
+            ServerId("sonarr"),
+            match(
+                "https://media.lan/sonarr/series/12",
+                server("root", "https://media.lan/"),
+                server("sonarr", "https://media.lan/sonarr/", AppType.SONARR),
+            ),
+        )
+    }
+
+    @Test
+    fun exactOriginWinsOverAnEarlierProxyAlias() {
+        assertEquals(
+            ServerId("exact"),
+            match(
+                "https://media.lan/sonarr/",
+                server("alias", "http://media.lan:8989/sonarr/", AppType.SONARR),
+                server("exact", "https://media.lan/sonarr/", AppType.SONARR),
+            ),
+        )
+    }
+
+    @Test
+    fun aServerPathInAQueryOrFragmentDoesNotOpenThatServer() {
+        val sonarr = server("sonarr", "http://media.lan:8989/sonarr/", AppType.SONARR)
+        assertNull(match("https://media.lan/login?return=/sonarr/", sonarr))
+        assertNull(match("https://media.lan/login#/sonarr/", sonarr))
+        assertNull(match("ftp://media.lan/sonarr/", sonarr))
+    }
 }

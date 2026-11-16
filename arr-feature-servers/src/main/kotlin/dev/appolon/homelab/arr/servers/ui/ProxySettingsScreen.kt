@@ -167,12 +167,12 @@ private fun ProxySettingsContent(
                                 showErrors = state.showErrors,
                                 onForm = { form -> onUpdateServer(row.server.id, form) },
                             )
-                            TrustEditor(
-                                form = row.form,
-                                showErrors = state.showErrors,
-                                onForm = { form -> onUpdateServer(row.server.id, form) },
-                            )
                         }
+                        TrustEditor(
+                            form = row.form,
+                            showErrors = state.showErrors,
+                            onForm = { form -> onUpdateServer(row.server.id, form) },
+                        )
                     }
                 }
             }

@@ -121,6 +121,8 @@ class RadarrDownloadClientsViewModel(
             when (val result = repository.refreshIfStale()) {
                 is ArrResult.Ok -> _state.update {
                     it.copy(
+                        loaded = true,
+                        loadError = null,
                         refreshing = false,
                         options = it.options ?: repository.cachedDownloadClientConfig(),
                     )

@@ -9,6 +9,20 @@ class NotificationDedupeTest {
     private val serverA = ServerId("server-a")
     private val serverB = ServerId("server-b")
 
+    @Test
+    fun failedPostsCanRetryWithoutRepeatingSuccessfulNotifications() {
+        val dedupe = NotificationDedupe()
+        val failed = event(key = "blocked")
+        val posted = event(key = "posted")
+        dedupe.filter(serverA, listOf(failed, posted))
+        dedupe.filter(serverB, listOf(failed))
+
+        dedupe.retryLater(serverA, failed)
+
+        assertEquals(listOf(failed), dedupe.filter(serverA, listOf(failed, posted)))
+        assertEquals(emptyList<PollEvent>(), dedupe.filter(serverB, listOf(failed)))
+    }
+
     private fun event(
         kind: NotificationKind = NotificationKind.GRAB,
         key: String = "k",

@@ -90,6 +90,8 @@
     <string name="arr_servers_notify_preview_text">Notifications for %1$s will look like this.</string>
     <string name="arr_servers_notify_preview_channel">Previews</string>
     <string name="arr_servers_notify_preview_unavailable">Notifications are turned off for this app.</string>
+    <string name="arr_servers_notify_allow">Allow notifications</string>
+    <string name="arr_servers_notify_system_settings">Open notification settings</string>
 
     <!-- Sync status -->
     <string name="arr_servers_sync_title">Sync status</string>

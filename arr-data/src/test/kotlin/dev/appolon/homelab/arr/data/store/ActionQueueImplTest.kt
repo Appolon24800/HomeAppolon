@@ -4,12 +4,173 @@ import dev.appolon.homelab.arr.core.ActionId
 import dev.appolon.homelab.arr.core.AppType
 import dev.appolon.homelab.arr.core.ServerId
 import dev.appolon.homelab.arr.data.QueuedAction
+import java.io.IOException
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ActionQueueImplTest {
+
+    @Test
+    fun interruptedLegacyTerminalMoveDoesNotReplayTheFailedAction() = runTest {
+        val store = SqliteEntityStore(InMemoryArrDatabase())
+        val queue = ActionQueueImpl(store)
+        val failed = action("legacy", 1, attempts = 5)
+        store.put(ActionQueueImpl.QUEUE_SCOPE, ActionQueueImpl.DEAD_TYPE, "legacy", failed, QueuedAction.serializer())
+        queue.enqueue(failed.copy(attempts = 4))
+        assertEquals(0 to 0, queue.replay { error("Terminal action must stay failed") })
+        assertTrue(queue.pending().isEmpty())
+        assertEquals(listOf(failed), queue.deadLetters())
+    }
+
+    @Test
+    fun manualRetryAndAutomaticReplayDoNotExecuteTheSameActionTogether() = runTest {
+        val queue = ActionQueueImpl(SqliteEntityStore(InMemoryArrDatabase(), ioDispatcher = Dispatchers.Unconfined))
+        queue.enqueue(action("once", 1))
+        val started = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+        var calls = 0
+        val replay = async {
+            queue.replay {
+                calls++
+                started.complete(Unit)
+                release.await()
+                true
+            }
+        }
+        started.await()
+        assertEquals(false, queue.retryOne(ActionId("once")) { calls++; true })
+        release.complete(Unit)
+        assertEquals(1 to 0, replay.await())
+        assertEquals(1, calls)
+        assertTrue(queue.pending().isEmpty())
+    }
+
+    @Test
+    fun automaticReplayDoesNotOverlapAManualRetry() = runTest {
+        val queue = ActionQueueImpl(SqliteEntityStore(InMemoryArrDatabase(), ioDispatcher = Dispatchers.Unconfined))
+        queue.enqueue(action("once", 1))
+        val started = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+        val retry = async {
+            queue.retryOne(ActionId("once")) {
+                started.complete(Unit)
+                release.await()
+                true
+            }
+        }
+        started.await()
+        assertEquals(0 to 0, queue.replay { error("Must not send twice") })
+        release.complete(Unit)
+        assertTrue(retry.await())
+    }
+
+    @Test
+    fun cancelledFailedActionRetrySurvivesAQueueRestartWithAFreshBudget() = runTest {
+        val db = InMemoryArrDatabase()
+        val queue = ActionQueueImpl(SqliteEntityStore(db), maxAttempts = 1)
+        queue.enqueue(action("restored", 1))
+        queue.replay { false }
+        try {
+            queue.retryOne(ActionId("restored")) {
+                assertEquals(0, it.attempts)
+                assertEquals(null, it.lastError)
+                throw CancellationException("Process stopped after restoring")
+            }
+            throw AssertionError("Cancellation must propagate")
+        } catch (_: CancellationException) {
+            val restarted = ActionQueueImpl(SqliteEntityStore(db))
+            assertTrue(restarted.deadLetters().isEmpty())
+            assertEquals(action("restored", 1), restarted.pending().single())
+            assertEquals(1 to 0, restarted.replay { true })
+        }
+    }
+
+    @Test
+    fun discardWaitsForReplayAndDoesNotResurrectAFailedWrite() = runTest {
+        val queue = ActionQueueImpl(SqliteEntityStore(InMemoryArrDatabase(), ioDispatcher = Dispatchers.Unconfined))
+        queue.enqueue(action("discard", 1))
+        val started = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+        val replay = async {
+            queue.replay {
+                started.complete(Unit)
+                release.await()
+                false
+            }
+        }
+        started.await()
+        val discard = launch(start = CoroutineStart.UNDISPATCHED) { queue.remove(ActionId("discard")) }
+        assertEquals(false, discard.isCompleted)
+        release.complete(Unit)
+        replay.await()
+        discard.join()
+        assertTrue(queue.pending().isEmpty())
+        assertTrue(queue.deadLetters().isEmpty())
+    }
+
+    @Test
+    fun manualRetryDoesNotTouchOtherActionsOrSpendItsAttemptBudget() = runTest {
+        val queue = ActionQueueImpl(SqliteEntityStore(InMemoryArrDatabase()))
+        queue.enqueue(action("retry", 1, attempts = 2))
+        queue.enqueue(action("other", 2))
+        assertEquals(false, queue.retryOne(ActionId("retry")) { throw IOException("Offline") })
+        assertEquals(listOf(action("retry", 1, attempts = 2), action("other", 2)), queue.pending())
+        assertTrue(queue.retryOne(ActionId("retry")) { true })
+        assertEquals(listOf(action("other", 2)), queue.pending())
+        assertEquals(false, queue.retryOne(ActionId("missing")) { error("Missing action") })
+    }
+
+    @Test
+    fun aTransportExceptionDoesNotBlockLaterActions() = runTest {
+        val queue = ActionQueueImpl(SqliteEntityStore(InMemoryArrDatabase()))
+        queue.enqueue(action("unreachable", enqueuedAt = 1))
+        queue.enqueue(action("reachable", enqueuedAt = 2))
+
+        val result = queue.replay {
+            if (it.actionId.value == "unreachable") throw IOException("Connection refused")
+            true
+        }
+
+        assertEquals(1 to 0, result)
+        assertEquals("unreachable", queue.pending().single().actionId.value)
+        assertEquals(1, queue.pending().single().attempts)
+    }
+
+    @Test
+    fun cancellationKeepsTheActionAndItsAttemptBudget() = runTest {
+        val queue = ActionQueueImpl(SqliteEntityStore(InMemoryArrDatabase()))
+        queue.enqueue(action("cancelled", enqueuedAt = 1))
+        try {
+            queue.replay { throw CancellationException("Stopped") }
+            throw AssertionError("Cancellation must propagate")
+        } catch (_: CancellationException) {
+            assertEquals(0, queue.pending().single().attempts)
+        }
+        assertEquals(1 to 0, queue.replay { true })
+    }
+
+    @Test
+    fun deletingAServerRemovesItsPendingAndFailedWritesOnly() = runTest {
+        val queue = ActionQueueImpl(SqliteEntityStore(InMemoryArrDatabase()), maxAttempts = 1)
+        queue.enqueue(action("failed", enqueuedAt = 1))
+        queue.replay { false }
+        queue.enqueue(action("pending", enqueuedAt = 2))
+        val other = action("other", enqueuedAt = 3).copy(serverId = ServerId("server-2"))
+        queue.enqueue(other)
+
+        queue.removeForServer(ServerId("server-1"))
+
+        assertEquals(listOf(other), queue.pending())
+        assertTrue(queue.deadLetters().isEmpty())
+    }
 
     private fun action(id: String, enqueuedAt: Long, attempts: Int = 0) = QueuedAction(
         actionId = ActionId(id),

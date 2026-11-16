@@ -86,17 +86,14 @@ class DefaultArrClientFactory(
     }
 
     /**
-     * Server override first (a [ProxyConfig] with [ProxyConfig.isConfigured]
-     * true), then the global default from [globalProxy], then direct. A
-     * per-server row of type NONE with no Orbot toggle is not an override, so
-     * the global default still applies to it.
+     * A stored server override wins, including NONE for a direct connection.
+     * A null override inherits [globalProxy], then falls back to direct.
      *
      * Throws [OrbotUnavailableException] when a server demands Orbot that is
      * not installed: the request fails rather than routing direct.
      */
     private fun effectiveProxy(endpoint: ServerEndpoint): ProxyConfig {
-        val override = endpoint.proxy?.takeIf { it.isConfigured }
-        return orbotDetector.resolveProxy(override ?: globalProxy() ?: ProxyConfig())
+        return orbotDetector.resolveProxy(endpoint.proxy ?: globalProxy() ?: ProxyConfig())
     }
 
     private fun buildClient(endpoint: ServerEndpoint, proxy: ProxyConfig, authenticated: Boolean): OkHttpClient =
@@ -159,6 +156,7 @@ class DefaultArrClientFactory(
     }
 
     private fun fingerprint(endpoint: ServerEndpoint, proxy: ProxyConfig): String = listOf(
+        endpoint.baseUrl,
         endpoint.apiKey,
         endpoint.basicAuthUser,
         endpoint.basicAuthPassword,

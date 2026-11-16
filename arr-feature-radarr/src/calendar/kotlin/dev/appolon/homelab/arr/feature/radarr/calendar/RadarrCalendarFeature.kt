@@ -1,16 +1,14 @@
 package dev.appolon.homelab.arr.feature.radarr.calendar
 
-import androidx.compose.foundation.layout.Box
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -124,17 +122,9 @@ fun RadarrCalendarDestination(
     val connection = remember(serverId) {
         RadarrCalendarConnection(graph.registry, graph.secrets)
     }
-    var connected by remember(serverId) { mutableStateOf<RadarrCalendarBundle?>(null) }
-    LaunchedEffect(serverId) {
-        connected = connection.connect(serverId)
-    }
-    val apis = connected
-    if (apis == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val apis = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        connection.connect(serverId)
+    } ?: return
     val context = LocalContext.current
     val imageLoader = remember(apis) { apis.imageLoader(context) }
     val vm: RadarrCalendarViewModel = viewModel(key = "radarr-calendar-" + serverId.value) {
@@ -189,7 +179,7 @@ fun RadarrCalendarFeatureSlot(
     onUpcomingCount: (Int) -> Unit = {},
 ) {
     if (route.owner != RadarrCalendarFeature.ROUTE_OWNER) return
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val day = matchRoutePattern(RadarrCalendarFeature.CALENDAR_DAY_PATTERN, segments)
     val base = matchRoutePattern(RadarrCalendarFeature.CALENDAR_PATTERN, segments)
     val initialDate = day?.get("date")

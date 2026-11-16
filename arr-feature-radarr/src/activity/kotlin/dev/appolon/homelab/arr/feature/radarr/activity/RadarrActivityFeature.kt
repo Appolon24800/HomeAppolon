@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.feature.radarr.activity
 
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -110,7 +111,7 @@ fun RadarrActivityFeatureSlot(
         ForeignOwnerPlaceholder(route.owner, modifier)
         return
     }
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val navigator = LocalArrShellNavigator.current
     val historyMatch = matchRoutePattern(RadarrActivityFeature.HISTORY_PATTERN, segments)
     val blocklistMatch = matchRoutePattern(RadarrActivityFeature.BLOCKLIST_PATTERN, segments)

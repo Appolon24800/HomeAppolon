@@ -1,16 +1,13 @@
 package dev.appolon.homelab.arr.feature.prowlarr.stats
 
-import androidx.compose.foundation.layout.Box
+import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import dev.appolon.homelab.arr.ui.lce.rememberServerConnection
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.appolon.homelab.arr.api.prowlarr.IndexerStatsApi
@@ -68,7 +65,7 @@ fun ProwlarrStatsFeatureSlot(
     modifier: Modifier = Modifier,
 ) {
     if (route.owner != ProwlarrStatsFeature.ROUTE_OWNER) return
-    val segments = route.path.split('/')
+    val segments = route.decodedPathSegments()
     val stats = matchRoutePattern(ProwlarrStatsFeature.STATS_PATTERN, segments)
     if (stats != null) {
         ProwlarrStatsDestination(ServerId(stats.getValue("serverId")), graph, modifier)
@@ -89,17 +86,9 @@ fun ProwlarrStatsDestination(
     val connection = remember(serverId) {
         ProwlarrStatsConnection(graph.registry, graph.secrets)
     }
-    var api by remember(serverId) { mutableStateOf<IndexerStatsApi?>(null) }
-    LaunchedEffect(serverId) {
-        api = connection.connect(serverId)
-    }
-    val connected = api
-    if (connected == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
+    val connected = rememberServerConnection(serverId, modifier = modifier.fillMaxSize()) {
+        connection.connect(serverId)
+    } ?: return
     val vm: StatsViewModel = viewModel(key = "prowlarr-stats-" + serverId.value) {
         StatsViewModel(
             ProwlarrStatsRepository(

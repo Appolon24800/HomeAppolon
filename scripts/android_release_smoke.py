@@ -34,7 +34,7 @@ class Fixtures(BaseHTTPRequestHandler):
     def do_GET(self):
         path = urllib.parse.urlsplit(self.path).path
         self.requests.append(path)
-        app = next((part for part in path.split('/') if part in ('sonarr', 'radarr')), '')
+        app = next((part for part in path.split('/') if part in ('sonarr', 'radarr', 'lidarr', 'prowlarr', 'bazarr')), '')
         if '/api/' not in path:
             data = f'<html><script>window.{app.title()}={{apikey:"{KEY}"}};</script></html>'.encode()
             self.send_response(200)
@@ -44,26 +44,54 @@ class Fixtures(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(data)
             return
-        if path.startswith('/auto/') and 'fixture_session=ready' not in self.headers.get('Cookie', ''):
+        if (self.headers.get('X-Api-Key') != KEY or
+                (path.startswith('/auto/') and 'fixture_session=ready' not in self.headers.get('Cookie', ''))):
             self.denied.append(path)
             self.send_response(401)
             self.end_headers()
             return
-        resource = path.split('/api/v3/')[-1]
+        resource = re.split(r'/api/(?:v[0-9]+/)?', path, maxsplit=1)[-1]
         payload = []
         if resource == 'system/status':
-            payload = {'appName': app.title(), 'version': '1.0.0'}
-        elif resource in ('movie', 'series'):
-            payload = [{
+            payload = ({'data': {'bazarr_version': '1.0.0'}} if app == 'bazarr' else
+                       {'appName': app.title(), 'version': '1.0.0'})
+        elif resource.startswith('config/'):
+            # Settings config endpoints return objects, unlike provider lists.
+            payload = {'id': 1}
+        elif resource in ('queue', 'history', 'wanted/missing', 'wanted/cutoff'):
+            payload = {'page': 1, 'pageSize': 20, 'totalRecords': 0, 'records': []}
+        elif resource == 'queue/status':
+            payload = {'totalCount': 0, 'count': 0}
+        elif app == 'bazarr':
+            payload = {'data': [], 'total': 0}
+            if resource in ('series', 'movies'):
+                payload = {'data': [{
+                    'sonarrSeriesId': 990001,
+                    'radarrId': 990001,
+                    'title': 'Release smoke bazarr',
+                    'year': 2026,
+                    'path': '/media/bazarr/release-smoke',
+                    'monitored': True,
+                    'missing_subtitles': [],
+                    'episodeFileCount': 0,
+                }], 'total': 1}
+            elif resource in ('badges', 'system/badges'):
+                payload = {'data': {'episodes': 0, 'movies': 0}}
+        elif resource in ('movie', 'series', 'artist', 'movie/990001', 'series/990001', 'artist/990001'):
+            record = {
                 'id': 990001,
                 'title': f'{"Automatic" if path.startswith("/auto/") else "Release"} smoke {app}',
                 'sortTitle': 'release smoke',
+                'artistName': f'Release smoke {app}',
+                'sortName': 'release smoke',
                 'year': 2026,
                 'monitored': True,
                 'path': f'/media/{app}/release-smoke',
                 'images': [],
                 'seasons': [],
-            }]
+                'overview': 'A local fixture for native detail screen checks.',
+            }
+            payload = record if resource.endswith('/990001') else [record]
         data = json.dumps(payload).encode()
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
@@ -168,6 +196,19 @@ def main():
                 wait_text('Add new', timeout=15)
 
     def click(text):
+        if text == 'Download clients':
+            # The settings landing groups every implemented page. Connections
+            # can start below the fold on a phone.
+            for _ in range(6):
+                root = document()
+                if any(n.get('text') == text for n in root.iter('node')):
+                    break
+                bounds = [list(map(int, re.findall(r'\d+', n.get('bounds', ''))))
+                          for n in root.iter('node') if n.get('bounds')]
+                width = max(b[2] for b in bounds)
+                height = max(b[3] for b in bounds)
+                adb('shell', 'input', 'swipe', str(width // 2), str(int(height * 0.75)),
+                    str(width // 2), str(int(height * 0.3)), '350')
         if text == 'Open settings':
             # With several servers, the settings button is at the end of the
             # horizontal switcher rather than necessarily on screen.
@@ -298,6 +339,7 @@ def main():
             click('Download clients')
             wait_text('Download clients')
             if fixture:
+                wait_text('No download clients')
                 deadline = time.monotonic() + 30
                 expected = f'/{app}/api/v3/downloadclient'
                 while expected not in Fixtures.requests and time.monotonic() < deadline:
