@@ -136,17 +136,20 @@ def main():
             raise AssertionError('App crashed. See release-smoke/crash.txt and the APK mapping.')
 
     def document():
-        check_crashes()
-        # A busy emulator can fail or truncate a dump; retry rather than
-        # aborting the run on one bad poll.
+        # A busy emulator can omit or truncate a dump even when the dump
+        # command succeeds. Retry both commands and XML parsing together.
         for attempt in range(3):
-            adb('shell', 'uiautomator dump /sdcard/release-smoke.xml')
-            raw = adb('shell', 'cat /sdcard/release-smoke.xml')
+            check_crashes()
             try:
+                adb('shell', 'uiautomator dump /sdcard/release-smoke.xml')
+                raw = adb('shell', 'cat /sdcard/release-smoke.xml')
                 return ET.fromstring(raw)
-            except ET.ParseError:
+            except (RuntimeError, ET.ParseError):
                 if attempt == 2:
-                    return ET.fromstring('<node/>')
+                    message = 'UI hierarchy unavailable after 3 dump attempts'
+                    (args.output / 'ui-dump-error.txt').write_text(message + '\n')
+                    raise RuntimeError(message) from None
+                time.sleep(0.5)
         raise AssertionError('unreachable')
 
     def wait_text(text, timeout=60):
