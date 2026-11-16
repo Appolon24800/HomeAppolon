@@ -152,6 +152,13 @@ def main():
                 time.sleep(0.5)
         raise AssertionError('unreachable')
 
+    def record_failure(root):
+        (args.output / 'failure.png').write_bytes(adb('exec-out', 'screencap', '-p', binary=True))
+        (args.output / 'failure.xml').write_text(ET.tostring(root, encoding='unicode'))
+        if not args.live_properties:
+            (args.output / 'requests.json').write_text(json.dumps(Fixtures.requests))
+            (args.output / 'denied.json').write_text(json.dumps(Fixtures.denied))
+
     def wait_text(text, timeout=60):
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
@@ -160,11 +167,7 @@ def main():
                 if text in (node.get('text', ''), node.get('content-desc', '')):
                     return node, root
             time.sleep(0.3)
-        (args.output / 'failure.png').write_bytes(adb('exec-out', 'screencap', '-p', binary=True))
-        (args.output / 'failure.xml').write_text(ET.tostring(root, encoding='unicode'))
-        if not args.live_properties:
-            (args.output / 'requests.json').write_text(json.dumps(Fixtures.requests))
-            (args.output / 'denied.json').write_text(json.dumps(Fixtures.denied))
+        record_failure(root)
         raise AssertionError(f'UI never displayed {text!r}')
 
     def screen_height(root):
@@ -232,21 +235,30 @@ def main():
         x1, y1, x2, y2 = map(int, re.findall(r'\d+', node.get('bounds')))
         adb('shell', 'input', 'tap', str((x1 + x2) // 2), str((y1 + y2) // 2))
 
-    def ensure_hub(timeout=60):
-        # A warm re-open of the server already on screen does not re-enter
-        # the hub; pop once to the server home when it does not appear.
+    def ensure_hub(app, timeout=60, allow_back=False):
+        # A cold deep link must be allowed to finish loading its home. A warm
+        # re-open may leave a feature screen on the stack, so pop only after
+        # its target-specific marker proves that a feature screen is visible.
+        feature_marker = {'sonarr': 'Series', 'radarr': 'Movies'}[app]
         deadline = time.monotonic() + timeout
         popped = False
         while time.monotonic() < deadline:
-            try:
-                return wait_text('Add new', timeout=8)
-            except AssertionError:
-                if not popped:
-                    adb('shell', 'input', 'keyevent', '4')
-                    time.sleep(2)
-                    popped = True
-                else:
-                    continue
+            root = document()
+            nodes = list(root.iter('node'))
+            hub = next((node for node in nodes if 'Add new' in (
+                node.get('text', ''), node.get('content-desc', ''),
+            )), None)
+            if hub is not None:
+                return hub, root
+            if allow_back and not popped and any(
+                    feature_marker in (node.get('text', ''), node.get('content-desc', ''))
+                    for node in nodes):
+                adb('shell', 'input', 'keyevent', '4')
+                time.sleep(0.5)
+                popped = True
+                continue
+            time.sleep(0.3)
+        record_failure(root)
         raise AssertionError('server home hub never appeared')
 
     def open_server(app, cold=False):
@@ -259,7 +271,7 @@ def main():
         adb('shell', 'am start -a android.intent.action.VIEW -d ' + shlex.quote(link))
         # The server home hub renders first; every main destination must be
         # listed on it before the walk continues into the library.
-        _, hub_root = ensure_hub(timeout=90 if cold else 60)
+        _, hub_root = ensure_hub(app, timeout=90 if cold else 60, allow_back=not cold)
         for destination in ('Library', 'Queue', 'Calendar', 'Wanted', 'History'):
             assert any(
                 n.get('text') == destination for n in hub_root.iter('node')
