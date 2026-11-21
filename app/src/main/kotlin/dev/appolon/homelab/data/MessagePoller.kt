@@ -31,9 +31,13 @@ class MessagePoller(private val client: OkHttpClient = Network.client) {
         runCatching {
             val request = Request.Builder().url(config.url).build()
             client.newCall(request).execute().use { response: Response ->
-                if (!response.isSuccessful) return@use null
+                if (!response.isSuccessful) {
+                    android.util.Log.w("MessagePoller", "message endpoint returned HTTP ${response.code}")
+                    return@use null
+                }
                 MessageMapper.map(response.body.string(), config.mapping)
             }
-        }.getOrNull()
+        }.onFailure { android.util.Log.w("MessagePoller", "message fetch failed: ${it.javaClass.simpleName}") }
+            .getOrNull()
     }
 }

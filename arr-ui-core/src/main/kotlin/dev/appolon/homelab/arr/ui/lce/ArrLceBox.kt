@@ -79,6 +79,8 @@ private fun ArrErrorPane(error: ArrError, onRetry: (() -> Unit)?, modifier: Modi
         Text(
             text = stringResource(R.string.arr_error_title),
             style = MaterialTheme.typography.titleMedium,
+            // Explicit: outside a Surface the inherited color is black.
+            color = MaterialTheme.colorScheme.onSurface,
         )
         Spacer(Modifier.size(4.dp))
         Text(

@@ -94,11 +94,22 @@ fun QueueRow(
             } else {
                 LinearProgressIndicator(progress = { clamped }, modifier = barModifier)
             }
-            if (speedText != null) {
+            // Transfer figures only mean something while bytes still move; a
+            // finished or failed download reads as "0 B left", so say what
+            // state it is in instead.
+            val detailText = when (status) {
+                QueueRowStatus.DOWNLOADING, QueueRowStatus.PAUSED, QueueRowStatus.QUEUED -> speedText
+                else -> queueStatusLabel(status)
+            }
+            if (detailText != null) {
                 Text(
-                    text = speedText,
+                    text = detailText,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (status == QueueRowStatus.FAILED) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
                 )
             }
         }

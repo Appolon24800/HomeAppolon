@@ -23,9 +23,14 @@
     <string name="prowlarr_search_stat_row">%1$d queries · %2$d ms average response · %3$d grabs · %4$.1f%% grab ratio</string>
     <string name="prowlarr_search_query_chart">%1$s: %2$d queries</string>
     <string name="prowlarr_search_response_chart">%1$s: %2$d milliseconds average response</string>
+    <string name="prowlarr_search_bar_queries">Queries</string>
+    <string name="prowlarr_search_bar_response">Response time</string>
     <string name="prowlarr_search_user_agents">User agents</string>
     <string name="prowlarr_search_agent_row">%1$s: %2$d queries, %3$d grabs</string>
     <string name="prowlarr_search_history_row">%1$s · Indexer %2$d · %3$s</string>
+    <string name="prowlarr_search_history_indexer">Indexer %1$d</string>
+    <string name="prowlarr_search_history_no_query">RSS / no query</string>
+    <string name="prowlarr_search_history_ms">%1$s ms</string>
     <string name="prowlarr_search_history_data">Query: %1$s · Response: %2$s ms · User agent: %3$s</string>
     <string name="prowlarr_search_success">Successful</string>
     <string name="prowlarr_search_connection">Unable to open this server. Check its connection settings.</string>

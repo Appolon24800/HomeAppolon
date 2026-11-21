@@ -126,6 +126,7 @@ class QueuePresentersTest {
         assertEquals(93784L, QueuePresenters.etaSecondsOf(item(timeleft = "1.02:03:04")))
         assertNull(QueuePresenters.etaSecondsOf(item(timeleft = "soon")))
         assertNull(QueuePresenters.etaSecondsOf(item(timeleft = null)))
+        assertNull(QueuePresenters.etaSecondsOf(item(timeleft = "00:00:00")))
     }
 
     @Test

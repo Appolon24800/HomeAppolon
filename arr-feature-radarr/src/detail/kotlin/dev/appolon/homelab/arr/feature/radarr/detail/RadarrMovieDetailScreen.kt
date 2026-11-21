@@ -268,6 +268,14 @@ private fun DetailBody(
         if (state.anyQueued) QueuedBanner(state.queuedActions.size)
         MovieHero(movie, imageLoader)
         MovieFactsRow(state, movie)
+        // The actions people come here for sit above the fold, not below
+        // the cast list.
+        ActionRow(
+            state = state,
+            onSearch = onSearch,
+            onRename = onRename,
+            onOpenImport = onOpenImport,
+        )
         LabeledSwitch(
             label = stringResource(ArrUiR.string.arr_common_monitored),
             checked = movie.monitored,
@@ -279,12 +287,6 @@ private fun DetailBody(
         CastSection(state, imageLoader, crew = true)
     }
     if (dataSections == null || dataSections == true) {
-        ActionRow(
-            state = state,
-            onSearch = onSearch,
-            onRename = onRename,
-            onOpenImport = onOpenImport,
-        )
         FilesSection(state)
         ExtraFilesSection(state)
         HistorySection(state)
@@ -467,14 +469,14 @@ private fun MovieFactsRow(state: RadarrMovieDetailUiState, movie: MovieDetailUi)
 private fun ReleaseDates(movie: MovieDetailUi) {
     val dates = listOfNotNull(
         movie.inCinemas?.let {
-            stringResource(R.string.arr_radarr_addnew_availability_in_cinemas) to ArrTime.dateTimeShort(it)
+            stringResource(R.string.arr_radarr_addnew_availability_in_cinemas) to ArrTime.releaseDate(it)
         },
         movie.digitalRelease?.let {
-            stringResource(R.string.arr_radarr_detail_digital_release) to ArrTime.dateTimeShort(it)
+            stringResource(R.string.arr_radarr_detail_digital_release) to ArrTime.releaseDate(it)
         },
         movie.physicalRelease?.let {
             stringResource(R.string.arr_radarr_detail_physical_release) to
-                ArrTime.dateTimeShort(it)
+                ArrTime.releaseDate(it)
         },
     )
     if (dates.isEmpty()) return
@@ -631,22 +633,39 @@ private fun ActionRow(
     val hasFiles = (state.files as? LceState.Content)?.data?.isNotEmpty() == true
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
-        Button(onClick = onSearch, enabled = !state.working) {
-            Icon(imageVector = Icons.Filled.Search, contentDescription = null)
+        // Equal widths and single-line labels: three buttons share a phone
+        // row without a label breaking mid-word.
+        val padding = PaddingValues(horizontal = 10.dp, vertical = 8.dp)
+        Button(
+            onClick = onSearch,
+            enabled = !state.working,
+            contentPadding = padding,
+            modifier = Modifier.weight(1f),
+        ) {
+            Icon(imageVector = Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
-            Text(stringResource(ArrUiR.string.arr_common_indexers_mode_search))
+            Text(stringResource(ArrUiR.string.arr_common_indexers_mode_search), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        OutlinedButton(onClick = onRename, enabled = !state.working && hasFiles) {
-            Icon(imageVector = Icons.Filled.DriveFileRenameOutline, contentDescription = null)
+        OutlinedButton(
+            onClick = onRename,
+            enabled = !state.working && hasFiles,
+            contentPadding = padding,
+            modifier = Modifier.weight(1f),
+        ) {
+            Icon(imageVector = Icons.Filled.DriveFileRenameOutline, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
-            Text(stringResource(R.string.arr_radarr_detail_rename))
+            Text(stringResource(R.string.arr_radarr_detail_rename), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        OutlinedButton(onClick = onOpenImport) {
-            Icon(imageVector = Icons.Filled.Input, contentDescription = null)
+        OutlinedButton(
+            onClick = onOpenImport,
+            contentPadding = padding,
+            modifier = Modifier.weight(1f),
+        ) {
+            Icon(imageVector = Icons.Filled.Input, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
-            Text(stringResource(ArrUiR.string.arr_common_import_flow_approve))
+            Text(stringResource(ArrUiR.string.arr_common_import_flow_approve), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -697,9 +716,9 @@ private fun MovieFileCard(file: MovieFileUi) {
             val qualityLine = listOfNotNull(
                 file.qualityName?.let(Humanize::qualityName),
                 file.languages.takeIf { it.isNotBlank() },
-                file.edition,
-                file.releaseGroup,
-                file.mediaSummary,
+                file.edition?.takeIf { it.isNotBlank() },
+                file.releaseGroup?.takeIf { it.isNotBlank() },
+                file.mediaSummary?.takeIf { it.isNotBlank() },
                 Humanize.bytes(file.sizeBytes),
                 file.dateAdded?.let { ArrTime.relative(it) },
             ).joinToString(" · ")

@@ -28,8 +28,10 @@ dependencies {
     implementation(project(":arr-net"))
     implementation(project(":arr-data"))
     implementation(libs.androidx.work.runtime)
+    // No SLF4J binding on purpose: the SignalR client logs the hub URL,
+    // access_token (the API key) included, at INFO. Without a binding SLF4J
+    // falls back to its no-op logger and the key never reaches logcat.
     implementation(libs.signalr)
-    implementation(libs.slf4j.android)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)
     testImplementation(libs.junit)

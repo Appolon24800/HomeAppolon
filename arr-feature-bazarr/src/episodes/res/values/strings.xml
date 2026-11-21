@@ -51,6 +51,13 @@
     <string name="arr_bazarr_history_empty_title">No history</string>
     <string name="arr_bazarr_history_empty_message">No subtitle decisions have been recorded yet.</string>
     <string name="arr_bazarr_history_unknown_action">Subtitle event</string>
+    <string name="arr_bazarr_history_action_deleted">Deleted</string>
+    <string name="arr_bazarr_history_action_downloaded">Downloaded</string>
+    <string name="arr_bazarr_history_action_manual">Manually downloaded</string>
+    <string name="arr_bazarr_history_action_upgraded">Upgraded</string>
+    <string name="arr_bazarr_history_action_uploaded">Uploaded</string>
+    <string name="arr_bazarr_history_action_synced">Synced</string>
+    <string name="arr_bazarr_history_action_translated">Translated</string>
 
     <!-- Write results -->
     <string name="arr_bazarr_download_synced">Subtitle download started</string>

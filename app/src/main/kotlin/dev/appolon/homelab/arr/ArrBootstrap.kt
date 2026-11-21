@@ -46,7 +46,8 @@ import dev.appolon.homelab.arr.ui.shell.ArrShell
 import dev.appolon.homelab.arr.ui.shell.ArrShellContent
 import dev.appolon.homelab.arr.ui.shell.LocalArrShellNavigator
 import dev.appolon.homelab.arr.ui.shell.ShellServer
-import dev.appolon.homelab.arr.ui.theme.ArrTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.lerp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -341,7 +342,19 @@ fun ArrHost(
     // idempotent navigation policy there.
     val base = runtime.content
 
-    ArrTheme {
+    // Inherit the dashboard's palette (Homer or phone theme) so opening a
+    // service never feels like switching apps. Homer's primary container is
+    // its full-strength highlight, made for small accents; the arr screens
+    // use it for large placeholders and tonal fills, so soften it there.
+    val ambient = MaterialTheme.colorScheme
+    val arrScheme = remember(ambient) {
+        val container = lerp(ambient.surfaceContainerHigh, ambient.primary, 0.28f)
+        ambient.copy(
+            primaryContainer = container,
+            onPrimaryContainer = ambient.onSurface,
+        )
+    }
+    MaterialTheme(colorScheme = arrScheme, typography = MaterialTheme.typography) {
         ArrShell(
             servers = servers,
             onServerSelected = {},

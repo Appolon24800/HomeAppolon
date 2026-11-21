@@ -32,7 +32,8 @@ import dev.appolon.homelab.arr.ui.R
  * pinned under the app bar, and enter-always scroll behavior over the content.
  *
  * Pass [scrollBehavior] to share one behavior with nested lazy lists; otherwise a
- * screen-local one is created. The back arrow appears only when [onBack] is given.
+ * screen-local one is created. The back arrow uses [onBack], or the enclosing
+ * shell's back action when none is given.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,6 +54,7 @@ fun ArrScaffold(
 ) {
     // Falls back to a screen-local enter-always behavior; M3 remembers the state.
     val behavior = scrollBehavior ?: TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val back = onBack ?: LocalArrShellBack.current
     Scaffold(
         modifier = modifier.nestedScroll(behavior.nestedScrollConnection),
         contentWindowInsets = contentWindowInsets,
@@ -79,8 +81,8 @@ fun ArrScaffold(
                         }
                     },
                     navigationIcon = {
-                        if (onBack != null) {
-                            IconButton(onClick = onBack) {
+                        if (back != null) {
+                            IconButton(onClick = back) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = stringResource(R.string.arr_shell_cd_back),

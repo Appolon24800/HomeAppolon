@@ -69,6 +69,13 @@ interface ArrShellNavigator {
 /** Navigator for the closest enclosing [ArrShell]. */
 val LocalArrShellNavigator = compositionLocalOf<ArrShellNavigator> { ArrShellNavigator.Noop }
 
+/**
+ * The shell's own back action (pop, or leave for the dashboard at the root).
+ * [ArrScaffold] shows its back arrow with this when a screen passes none, so
+ * every arr screen has a visible way out, not only the system gesture.
+ */
+val LocalArrShellBack = compositionLocalOf<(() -> Unit)?> { null }
+
 private val LocalServerVersions = compositionLocalOf<Map<ServerId, Long>> { emptyMap() }
 private val LocalRouteRegistry = compositionLocalOf<ArrRouteRegistry?> { null }
 
@@ -137,12 +144,25 @@ fun ArrShell(
         navigator.openServer(target)
     }
 
-    BackHandler {
-        when (arrBackDirective(navController.previousBackStackEntry != null)) {
-            ArrBackDirective.PopStack -> navController.popBackStack()
-            ArrBackDirective.ExitToDashboard -> onExit()
+    // Opened from a dashboard tile, the server's home is the user's root:
+    // back there returns to the dashboard instead of revealing the server
+    // management list the shell keeps underneath. Recomputed on every stack
+    // change, since backStackEntry drives recomposition.
+    val atFocusedHome = focusServer != null &&
+        currentRoute is ArrRoute.ServerHome &&
+        navController.previousBackStackEntry?.destination?.route == ArrRoutes.SERVER_LIST_ROUTE
+    val shellBack: () -> Unit = {
+        if (atFocusedHome) {
+            onExit()
+        } else {
+            when (arrBackDirective(navController.previousBackStackEntry != null)) {
+                ArrBackDirective.PopStack -> navController.popBackStack()
+                ArrBackDirective.ExitToDashboard -> onExit()
+            }
         }
     }
+    // Root exit: NavHost only handles back while it can pop.
+    BackHandler(onBack = shellBack)
 
     Scaffold(
         modifier = modifier,
@@ -161,6 +181,7 @@ fun ArrShell(
                         onServerSelected(server.id)
                         navigator.openServer(server.id)
                     },
+                    onHomeClick = onExit,
                     onSettingsClick = {
                         val target = currentServer
                         if (target != null) {
@@ -180,6 +201,7 @@ fun ArrShell(
             LocalArrShellNavigator provides navigator,
             LocalServerVersions provides servers.associate { it.id to it.connectionVersion },
             LocalRouteRegistry provides registry,
+            LocalArrShellBack provides shellBack,
         ) {
             NavHost(
                 navController = navController,
@@ -252,6 +274,11 @@ fun ArrShell(
                     }
                 }
             }
+            // NavHost registers its own back callback and, being composed
+            // later, outranks the handler above whenever it can pop. This one
+            // comes after it, so the focused-home exit wins there; it is off
+            // everywhere else and back falls through to the NavHost.
+            BackHandler(enabled = atFocusedHome, onBack = onExit)
         }
     }
 }

@@ -31,6 +31,7 @@
     <string name="arr_shell_more_servers">%1$d more servers</string>
     <string name="arr_shell_cd_server_unhealthy">Server %1$s can\'t be reached right now.</string>
     <string name="arr_shell_cd_settings">Open settings</string>
+    <string name="arr_shell_cd_dashboard">Back to dashboard</string>
     <string name="arr_shell_unavailable_title">This screen isn\'t available yet</string>
     <string name="arr_shell_unavailable_message">No module registered a screen for %1$s.</string>
 

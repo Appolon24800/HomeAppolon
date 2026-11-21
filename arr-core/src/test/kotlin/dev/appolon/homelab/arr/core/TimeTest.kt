@@ -125,4 +125,17 @@ class TimeTest {
             ArrTime.dateTimeFull(instant, tokyo, Locale.US),
         )
     }
+
+    @Test
+    fun parseTreatsDotNetMinValueAsUnset() {
+        assertNull(ArrTime.parse("0001-01-01T00:00:00Z"))
+        assertNull(ArrTime.parse("0001-01-01T00:00:00"))
+        assertEquals(Instant.parse("1956-03-06T00:00:00Z"), ArrTime.parse("1956-03-06T00:00:00Z"))
+    }
+
+    @Test
+    fun releaseDateReadsUtcMidnightAsThatDay() {
+        // A UTC-midnight release must not slip to the previous day or gain a time.
+        assertEquals("Mar 10, 2020", ArrTime.releaseDate(Instant.parse("2020-03-10T00:00:00Z"), Locale.US))
+    }
 }

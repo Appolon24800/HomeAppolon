@@ -44,6 +44,39 @@ enum class CoverType(val wireName: String) {
  */
 object ArrImages {
 
+    /**
+     * Resolves an image path a server reported against that server's base URL.
+     *
+     * Servers behind a URL base report covers with the base already on them
+     * (`/radarr/MediaCover/1/poster.jpg` for `http://host/radarr`), so naive
+     * joining doubles the prefix and fetches the SPA's HTML instead. Such
+     * paths resolve against the origin; paths without the prefix (a proxy
+     * that strips it) still join onto the full base. Absolute URLs pass
+     * through and blank input yields null.
+     */
+    fun serverUrl(baseUrl: String, path: String?): String? {
+        val trimmed = path?.trim().orEmpty()
+        if (trimmed.isEmpty()) return null
+        if (trimmed.startsWith("http://", ignoreCase = true) ||
+            trimmed.startsWith("https://", ignoreCase = true)
+        ) {
+            return trimmed
+        }
+        val base = baseUrl.trim().trimEnd('/')
+        val schemeEnd = base.indexOf("://")
+        val pathStart = if (schemeEnd < 0) -1 else base.indexOf('/', schemeEnd + 3)
+        if (trimmed.startsWith("/") && pathStart >= 0) {
+            val origin = base.substring(0, pathStart)
+            val basePath = base.substring(pathStart)
+            if (trimmed == basePath || trimmed.startsWith("$basePath/") ||
+                trimmed.startsWith("$basePath?")
+            ) {
+                return origin + trimmed
+            }
+        }
+        return base + "/" + trimmed.trimStart('/')
+    }
+
     private const val TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/"
 
     /**

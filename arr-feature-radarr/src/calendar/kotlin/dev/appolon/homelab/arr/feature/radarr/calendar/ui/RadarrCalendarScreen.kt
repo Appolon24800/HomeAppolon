@@ -614,8 +614,7 @@ private fun posterUrlOf(entry: RadarrCalendarEntry, baseUrl: String): String? {
     val path = entry.posterPath
     return when {
         path.isNullOrBlank() -> ArrImages.tmdb(entry.remotePoster)
-        path.startsWith("http", ignoreCase = true) -> path
-        else -> baseUrl.trimEnd('/') + "/" + path
+        else -> ArrImages.serverUrl(baseUrl, path)
     }
 }
 
