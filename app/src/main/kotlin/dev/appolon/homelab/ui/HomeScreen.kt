@@ -112,6 +112,9 @@ fun HomeScreen(
     var arrOpen by remember { mutableStateOf(false) }
     var arrOpenGeneration by remember { mutableStateOf(0L) }
     var autoFailed by remember { mutableStateOf<Pair<String, dev.appolon.homelab.arr.core.AppType>?>(null) }
+    // The arr link to reconnect once its web sign-in lands back on the service.
+    var signInReturnUrl by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(state.webTarget) { if (state.webTarget == null) signInReturnUrl = null }
 
     // Arr notification channels and the arr data graph exist from the first
     // frame so a service tap resolves without a cold registry read.
@@ -171,6 +174,24 @@ fun HomeScreen(
             } finally {
                 if (generation == connectGeneration) connectingTo = null
             }
+        }
+    }
+
+    // A service that needs PocketID goes through the native sign-in (its
+    // passkey approval runs in the system browser), then reopens by itself.
+    var resumeAfterLogin by remember { mutableStateOf<String?>(null) }
+    var authCheck by remember { mutableStateOf<Job?>(null) }
+    val signInThenOpen: (String) -> Unit = { url ->
+        resumeAfterLogin = url
+        vm.closeWeb()
+        vm.openLogin()
+    }
+    LaunchedEffect(state.loginOpen) {
+        if (state.loginOpen) return@LaunchedEffect
+        val url = resumeAfterLogin ?: return@LaunchedEffect
+        resumeAfterLogin = null
+        if (PocketId.hasSession(state.accountUrl.ifBlank { PocketId.WELL_KNOWN_BASE_URL })) {
+            openService(url, null)
         }
     }
 
@@ -264,6 +285,25 @@ fun HomeScreen(
                         authBaseUrl = state.accountUrl.ifBlank {
                             PocketId.WELL_KNOWN_BASE_URL
                         },
+                        onSignedInToService = signInReturnUrl?.let { url ->
+                            {
+                                signInReturnUrl = null
+                                vm.closeWeb()
+                                openService(url, null)
+                            }
+                        },
+                        onAuthPage = if (target.webLogin) null else {
+                            {
+                                if (authCheck?.isActive != true) {
+                                    authCheck = arrScope.launch {
+                                        val authUrl = state.accountUrl.ifBlank { PocketId.WELL_KNOWN_BASE_URL }
+                                        if (PocketId.fetchUser(authUrl) == null && state.webTarget == target) {
+                                            signInThenOpen(target.url)
+                                        }
+                                    }
+                                }
+                            }
+                        },
                     )
                 }
             }
@@ -304,6 +344,11 @@ fun HomeScreen(
                         contentAlignment = Alignment.Center,
                     ) {
                         val failed = autoFailed
+                        val needsSignIn = remember(failed) {
+                            failed != null && !PocketId.hasSession(
+                                state.accountUrl.ifBlank { PocketId.WELL_KNOWN_BASE_URL },
+                            )
+                        }
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = failed?.second?.displayName.orEmpty(),
@@ -311,7 +356,11 @@ fun HomeScreen(
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                text = "Could not sign in automatically. Unlock the web app once, then retry.",
+                                text = if (needsSignIn) {
+                                    "Sign in once and ${failed?.second?.displayName} will open here."
+                                } else {
+                                    "Could not sign in automatically. Unlock the web app once, then retry."
+                                },
                                 style = MaterialTheme.typography.bodyMedium,
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             )
@@ -326,8 +375,15 @@ fun HomeScreen(
                                 androidx.compose.material3.Button(onClick = {
                                     val target = failed
                                     autoFailed = null
-                                    if (target != null) vm.openWeb(target.first, null)
-                                }) { Text("Open web version") }
+                                    when {
+                                        target == null -> Unit
+                                        needsSignIn -> signInThenOpen(target.first)
+                                        else -> {
+                                            signInReturnUrl = target.first
+                                            vm.openWeb(target.first, null)
+                                        }
+                                    }
+                                }) { Text(if (needsSignIn) "Sign in" else "Open web version") }
                             }
                         }
                     }

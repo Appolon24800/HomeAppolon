@@ -51,6 +51,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -104,8 +105,13 @@ fun WebScreen(
     target: WebTarget,
     onClose: () -> Unit,
     authBaseUrl: String = dev.appolon.homelab.data.PocketId.WELL_KNOWN_BASE_URL,
+    onSignedInToService: (() -> Unit)? = null,
+    onAuthPage: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
+    val currentOnSignedIn by rememberUpdatedState(onSignedInToService)
+    val currentOnAuthPage by rememberUpdatedState(onAuthPage)
+    var passedThroughAuth by remember { mutableStateOf(false) }
     var progress by remember { mutableStateOf(100) }
     var pageTitle by remember { mutableStateOf<String?>(null) }
     var canGoBack by remember { mutableStateOf(false) }
@@ -130,19 +136,10 @@ fun WebScreen(
             settings.loadWithOverviewMode = true
             settings.builtInZoomControls = true
             settings.displayZoomControls = false
-            // Browser-style passkeys: any site (PocketID, Vaultwarden, …) can
-            // run WebAuthn through Credential Manager, without per-domain
-            // Digital Asset Links. FOR_APP would limit ceremonies to domains
-            // linked via assetlinks.json, which broke Vaultwarden.
-            if (androidx.webkit.WebViewFeature.isFeatureSupported(
-                    androidx.webkit.WebViewFeature.WEB_AUTHENTICATION,
-                )
-            ) {
-                androidx.webkit.WebSettingsCompat.setWebAuthenticationSupport(
-                    settings,
-                    androidx.webkit.WebSettingsCompat.WEB_AUTHENTICATION_SUPPORT_FOR_BROWSER,
-                )
-            }
+            // WebAuthn stays off in this WebView. FOR_BROWSER needs the
+            // privileged CREDENTIAL_MANAGER_SET_ORIGIN permission and kills a
+            // sideloaded app; FOR_APP sends an Android origin PocketID rejects.
+            // Passkeys go through the native screen's system-browser approval.
             // Follow the system dark theme: without this, pages like Sonarr
             // render light-only even when the device is in dark mode.
             if (androidx.webkit.WebViewFeature.isFeatureSupported(
@@ -192,11 +189,19 @@ fun WebScreen(
                     favicon: android.graphics.Bitmap?,
                 ) {
                     failed = false
+                    if (Uri.parse(url).host == Uri.parse(authBaseUrl).host) passedThroughAuth = true
                 }
 
                 override fun onPageFinished(view: WebView, url: String) {
                     canGoBack = view.canGoBack()
                     pageTitle = view.title
+                    if (Uri.parse(url).host == Uri.parse(authBaseUrl).host) currentOnAuthPage?.invoke()
+                    // Only a real trip through sign-in hands back to native,
+                    // so an already signed-in user can still read the web UI.
+                    if (passedThroughAuth && isServicePage(url, target.url)) {
+                        passedThroughAuth = false
+                        currentOnSignedIn?.invoke()
+                    }
                     if (healAttempts >= 1) return
                     var settles = 0
                     fun probe() {
