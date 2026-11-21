@@ -216,4 +216,43 @@ class BazarrSubtitleModelsTest {
         assertEquals("1\n00:00:01,000 --> 00:00:02,000\nHello", payload.toSubtitleContents())
         assertEquals("", JsonObject(emptyMap()).toSubtitleContents())
     }
+
+    @Test
+    fun `current bazarr wanted and history rows parse`() {
+        // Shapes captured from a live Bazarr: sonarr-prefixed ids, "SxE"
+        // numbers, a humanized timestamp beside parsed_timestamp, a "%" score,
+        // and JSON null where a provider is unknown.
+        val wanted = buildJsonObject {
+            put("seriesTitle", "Dragon Ball Super")
+            put("episode_number", "1x3")
+            put("episodeTitle", "The God of Destruction Heads to Earth")
+            put("missing_subtitles", buildJsonArray { add(languageRowLike("fr", "French")) })
+            put("sonarrSeriesId", 271)
+            put("sonarrEpisodeId", 26249)
+        }.toWantedEpisode()!!
+        assertEquals(26249, wanted.episodeId)
+        assertEquals(271, wanted.seriesId)
+        assertEquals(1, wanted.seasonNumber)
+        assertEquals(3, wanted.episodeNumber)
+        assertEquals("The God of Destruction Heads to Earth", wanted.title)
+
+        val history = buildJsonObject {
+            put("seriesTitle", "Classroom of the Elite")
+            put("episode_number", "1x5")
+            put("episodeTitle", "Hell is other people")
+            put("timestamp", "last month")
+            put("parsed_timestamp", "10/10/26 04:33:44")
+            put("score", "94.17%")
+            put("action", 1)
+            put("sonarrEpisodeId", 13454)
+            put("provider", kotlinx.serialization.json.JsonNull)
+        }.toHistoryEvent(isMovie = false)!!
+        assertEquals(13454, history.episodeId)
+        assertEquals(1, history.seasonNumber)
+        assertEquals(5, history.episodeNumber)
+        assertEquals("1", history.action)
+        assertEquals(94.17, history.score!!, 0.001)
+        assertEquals("", history.provider)
+        assertTrue(history.timestampMillis > 0)
+    }
 }

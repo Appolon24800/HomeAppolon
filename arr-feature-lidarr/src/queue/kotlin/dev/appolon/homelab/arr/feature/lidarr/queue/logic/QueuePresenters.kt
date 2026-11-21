@@ -158,7 +158,9 @@ object LidarrQueuePresenters {
         val hours = parts[0].toLongOrNull() ?: return null
         val minutes = parts[1].toLongOrNull() ?: return null
         val seconds = parts[2].toLongOrNull() ?: return null
-        return ((days * 24 + hours) * 3600) + (minutes * 60) + seconds
+        // Clients report 00:00:00 for finished, stalled, or unknown downloads;
+        // "0 s left" says nothing, so treat it as no estimate.
+        return (((days * 24 + hours) * 3600) + (minutes * 60) + seconds).takeIf { it > 0 }
     }
 
     fun present(

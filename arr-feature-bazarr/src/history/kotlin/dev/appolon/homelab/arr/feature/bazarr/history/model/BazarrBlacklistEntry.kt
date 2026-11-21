@@ -1,6 +1,8 @@
 package dev.appolon.homelab.arr.feature.bazarr.history.model
 
+import dev.appolon.homelab.arr.feature.bazarr.episodes.model.episodeIdOf
 import dev.appolon.homelab.arr.feature.bazarr.episodes.model.optIntOf
+import dev.appolon.homelab.arr.feature.bazarr.episodes.model.seasonEpisodeOf
 import dev.appolon.homelab.arr.feature.bazarr.episodes.model.optStringOf
 import dev.appolon.homelab.arr.feature.bazarr.episodes.model.parseTimestampMillis
 import kotlinx.serialization.Serializable
@@ -74,9 +76,9 @@ internal fun JsonObject.toBlacklistEntry(isMovie: Boolean): BazarrBlacklistEntry
         path = optStringOf("subtitles_path", "path"),
         title = optStringOf("title", "movieTitle"),
         seriesTitle = optStringOf("seriesTitle", "series_title"),
-        seasonNumber = optIntOf("seasonNumber", "season"),
-        episodeNumber = optIntOf("episodeNumber", "episode"),
-        episodeId = optIntOf("episodeId", "episode_id"),
+        seasonNumber = seasonEpisodeOf().first,
+        episodeNumber = seasonEpisodeOf().second,
+        episodeId = episodeIdOf(),
         radarrId = optIntOf("radarrId", "radarr_id"),
         timestampMillis = parseTimestampMillis(),
         isMovie = isMovie,

@@ -39,13 +39,24 @@ object ArrTime {
     fun parse(text: String?): Instant? {
         if (text.isNullOrBlank()) return null
         val trimmed = text.trim()
-        runCatching { OffsetDateTime.parse(trimmed).toInstant() }
-            .getOrNull()?.let { return it }
-        runCatching { LocalDateTime.parse(trimmed).toInstant(ZoneOffset.UTC) }
-            .getOrNull()?.let { return it }
-        return runCatching { LocalDate.parse(trimmed).atStartOfDay(ZoneOffset.UTC).toInstant() }
-            .getOrNull()
+        val parsed = runCatching { OffsetDateTime.parse(trimmed).toInstant() }.getOrNull()
+            ?: runCatching { LocalDateTime.parse(trimmed).toInstant(ZoneOffset.UTC) }.getOrNull()
+            ?: runCatching { LocalDate.parse(trimmed).atStartOfDay(ZoneOffset.UTC).toInstant() }
+                .getOrNull()
+        // The servers are .NET: an unset date serializes as DateTime.MinValue
+        // ("0001-01-01T00:00:00Z"), which must read as "no date", not year 1.
+        return parsed?.takeIf { it.isAfter(EARLIEST_REAL_DATE) }
     }
+
+    private val EARLIEST_REAL_DATE: Instant = Instant.parse("1800-01-01T00:00:00Z")
+
+    /**
+     * Release dates ("Mar 10, 2020"). The servers send these as UTC midnight,
+     * so they are read in UTC: a local zone would print the wrong day west of
+     * Greenwich, and a time of day would be noise.
+     */
+    fun releaseDate(at: Instant, locale: Locale = Locale.getDefault()): String =
+        at.atZone(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("MMM d, yyyy", locale))
 
     /** Compact relative time: "3h ago", "in 2d", "just now" under one minute. */
     fun relative(instant: Instant, now: Instant = Instant.now()): String =

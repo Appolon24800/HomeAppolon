@@ -102,11 +102,9 @@
 -keep,allowoptimization,allowobfuscation class com.microsoft.signalr.TypeReference
 -keep,allowoptimization,allowobfuscation class * extends com.microsoft.signalr.TypeReference
 
-# SLF4J 1.7 discovers these Android binding classes by their fixed binary names.
-# https://www.slf4j.org/manual.html
--keep class org.slf4j.impl.Static*Binder {
-    *;
-}
+# SLF4J ships without a binding (see arr-sync/build.gradle.kts) and falls back
+# to its no-op logger; the binder classes it probes for are absent by design.
+-dontwarn org.slf4j.impl.**
 
 # Application DTOs use generated kotlinx.serialization serializers. SignalR
 # callbacks take Map, so no application data classes need Java reflection keeps.

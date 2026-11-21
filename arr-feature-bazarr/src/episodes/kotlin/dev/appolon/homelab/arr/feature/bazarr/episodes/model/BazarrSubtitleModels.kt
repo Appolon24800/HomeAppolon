@@ -3,6 +3,7 @@ package dev.appolon.homelab.arr.feature.bazarr.episodes.model
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
@@ -135,6 +136,8 @@ data class BazarrLanguageOption(val code2: String, val name: String) {
 internal fun JsonObject.optStringOf(vararg names: String): String {
     for (name in names) {
         val value = this[name] as? JsonPrimitive ?: continue
+        // JSON null is a JsonPrimitive too; it must read as absent, not "null".
+        if (value is JsonNull) continue
         if (value.isString) return value.content
         val asLiteral = value.contentOrNullSafe()
         if (asLiteral != null) return asLiteral
@@ -155,7 +158,8 @@ internal fun JsonObject.optDoubleOf(vararg names: String): Double? {
     for (name in names) {
         val value = this[name] as? JsonPrimitive ?: continue
         value.doubleOrNull?.let { return it }
-        if (value.isString) value.content.toDoubleOrNull()?.let { return it }
+        // Scores arrive as "94.17%".
+        if (value.isString) value.content.trim().removeSuffix("%").trim().toDoubleOrNull()?.let { return it }
     }
     return null
 }
@@ -186,6 +190,34 @@ internal fun JsonObject.firstOf(vararg names: String): JsonElement? {
 }
 
 private fun JsonPrimitive.contentOrNullSafe(): String? = if (isString) null else content
+
+/**
+ * The Sonarr episode id of a row. Current Bazarr names it `sonarrEpisodeId`;
+ * older builds used the shorter spellings.
+ */
+internal fun JsonObject.episodeIdOf(vararg extra: String): Int? =
+    optIntOf("sonarrEpisodeId", "episodeId", "episode_id", *extra)
+
+/** Sonarr series id under its current and older names. */
+internal fun JsonObject.seriesIdOf(): Int? = optIntOf("sonarrSeriesId", "seriesId", "series_id")
+
+/**
+ * Season and episode numbers. Episode rows carry `season`/`episode`; wanted,
+ * history, and blacklist rows only carry `episode_number` as "1x5".
+ */
+internal fun JsonObject.seasonEpisodeOf(): Pair<Int?, Int?> {
+    val season = optIntOf("seasonNumber", "season")
+    val episode = optIntOf("episodeNumber", "episode")
+    if (season != null && episode != null) return season to episode
+    val combined = optStringOf("episode_number")
+    val parts = combined.lowercase().split('x')
+    if (parts.size == 2) {
+        val s = parts[0].trim().toIntOrNull()
+        val e = parts[1].trim().toIntOrNull()
+        if (s != null && e != null) return s to e
+    }
+    return season to episode
+}
 
 /**
  * Extracts the row array from a passthrough payload. Bazarr wraps list
@@ -243,12 +275,13 @@ internal fun JsonObject.toSubtitleTracks(): List<BazarrSubtitleTrack> =
 
 /** Parses one episode row of `GET /episodes`. */
 internal fun JsonObject.toEpisodeSubtitles(): BazarrEpisodeSubtitles? {
-    val id = optIntOf("episodeId", "episode_id", "id") ?: return null
+    val id = episodeIdOf("id") ?: return null
+    val (season, episode) = seasonEpisodeOf()
     return BazarrEpisodeSubtitles(
         episodeId = id,
-        seriesId = optIntOf("seriesId", "sonarrSeriesId") ?: 0,
-        seasonNumber = optIntOf("seasonNumber", "season") ?: 0,
-        episodeNumber = optIntOf("episodeNumber", "episode") ?: 0,
+        seriesId = seriesIdOf() ?: 0,
+        seasonNumber = season ?: 0,
+        episodeNumber = episode ?: 0,
         title = optStringOf("title", "episodeTitle"),
         audioLanguages = this["audio_language"].toLanguageList(),
         subtitles = toSubtitleTracks(),
@@ -270,14 +303,15 @@ internal fun JsonObject.toMovieSubtitles(): BazarrMovieSubtitles? {
 }
 
 internal fun JsonObject.toWantedEpisode(): BazarrWantedEpisode? {
-    val id = optIntOf("episodeId", "episode_id", "id") ?: return null
+    val id = episodeIdOf("id") ?: return null
+    val (season, episode) = seasonEpisodeOf()
     return BazarrWantedEpisode(
         episodeId = id,
-        seriesId = optIntOf("seriesId", "sonarrSeriesId") ?: 0,
+        seriesId = seriesIdOf() ?: 0,
         seriesTitle = optStringOf("seriesTitle", "series_title"),
         title = optStringOf("title", "episodeTitle"),
-        seasonNumber = optIntOf("seasonNumber", "season") ?: 0,
-        episodeNumber = optIntOf("episodeNumber", "episode") ?: 0,
+        seasonNumber = season ?: 0,
+        episodeNumber = episode ?: 0,
         missingLanguages = firstOf("missing_language", "missing_subtitles").toLanguageList(),
     )
 }
@@ -298,8 +332,9 @@ internal fun JsonObject.toWantedMovie(): BazarrWantedMovie? {
  * missing timestamp stays 0 so sorting never crashes.
  */
 internal fun JsonObject.toHistoryEvent(isMovie: Boolean): BazarrHistoryEvent? {
-    val episodeId = optIntOf("episodeId", "episode_id")
+    val episodeId = episodeIdOf()
     val radarrId = optIntOf("radarrId", "radarr_id")
+    val (season, episode) = seasonEpisodeOf()
     if (!isMovie && episodeId == null) return null
     if (isMovie && radarrId == null) return null
     val languageRef = (this["language"] as? JsonObject)?.toLanguageRef()
@@ -310,14 +345,14 @@ internal fun JsonObject.toHistoryEvent(isMovie: Boolean): BazarrHistoryEvent? {
     return BazarrHistoryEvent(
         action = optStringOf("action"),
         description = optStringOf("description"),
-        title = optStringOf("title"),
+        title = optStringOf("title", "episodeTitle"),
         seriesTitle = optStringOf("seriesTitle", "series_title", "movieTitle"),
         languageCode2 = languageCode.ifBlank { languageRef?.code2.orEmpty() },
         provider = optStringOf("provider"),
         score = optDoubleOf("score"),
         timestampMillis = parseTimestampMillis(),
-        seasonNumber = optIntOf("seasonNumber", "season"),
-        episodeNumber = optIntOf("episodeNumber", "episode"),
+        seasonNumber = season,
+        episodeNumber = episode,
         episodeId = episodeId,
         radarrId = radarrId,
         isMovie = isMovie,
@@ -329,20 +364,32 @@ internal fun JsonObject.parseTimestampMillis(): Long {
         // Bazarr sends epoch seconds; millis inputs are recognized by magnitude.
         return if (seconds > 100_000_000_000.0) seconds.toLong() else (seconds * 1000).toLong()
     }
-    val text = optStringOf("timestamp", "parsed_timestamp", "time", "date")
-    if (text.isNotEmpty()) {
-        parseIsoish(text)?.let { return it }
+    // Current Bazarr sends a humanized `timestamp` ("last month") next to a
+    // machine-readable `parsed_timestamp`, so try each key on its own.
+    for (key in listOf("parsed_timestamp", "timestamp", "time", "date")) {
+        val text = optStringOf(key)
+        if (text.isNotEmpty()) parseIsoish(text)?.let { return it }
     }
     return 0
 }
 
-/** Parses "2026-01-31T09:12:00Z", "2026-01-31 09:12:00", and offsets. */
+/**
+ * Parses "2026-01-31T09:12:00Z", "2026-01-31 09:12:00", offsets, and the
+ * "10/10/26 04:33:44" (month/day/year, server local time) form Bazarr's
+ * `parsed_timestamp` uses.
+ */
 internal fun parseIsoish(text: String): Long? = runCatching {
     java.time.Instant.parse(text).toEpochMilli()
 }.recoverCatching {
     java.time.LocalDateTime.parse(text.replace(' ', 'T'))
         .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+}.recoverCatching {
+    java.time.LocalDateTime.parse(text.trim(), BAZARR_PARSED_TIMESTAMP)
+        .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
 }.getOrNull()
+
+private val BAZARR_PARSED_TIMESTAMP: java.time.format.DateTimeFormatter =
+    java.time.format.DateTimeFormatter.ofPattern("MM/dd/yy HH:mm:ss", java.util.Locale.ROOT)
 
 /** Parses one manual-search provider hit. */
 internal fun JsonObject.toProviderResult(): BazarrProviderResult {

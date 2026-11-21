@@ -1,5 +1,18 @@
 package dev.appolon.homelab.arr
 
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.HourglassEmpty
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.AddCircleOutline
+import androidx.compose.material.icons.outlined.VideoLibrary
+import androidx.compose.material.icons.outlined.LibraryMusic
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import dev.appolon.homelab.arr.ui.nav.decodedPathSegments
 import retrofit2.Retrofit
 import okhttp3.MediaType.Companion.toMediaType
@@ -17,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
@@ -722,34 +736,38 @@ internal class ArrFeatureWiring(
 
         val navigator = LocalArrShellNavigator.current
         val id = route.serverId
+        val server = servers.firstOrNull { it.id == id }
         val extraEntries = additionalServerHomeEntries(appType, id)
-        val items: List<Pair<String, () -> Unit>> = if (extraEntries.isNotEmpty()) {
-            extraEntries.map { entry -> stringResource(entry.title) to { navigator.open(entry.route) } }
+        val items: List<HubItem> = if (extraEntries.isNotEmpty()) {
+            extraEntries.map { entry ->
+                HubItem(stringResource(entry.title), entry.icon) { navigator.open(entry.route) }
+            }
         } else listOf(
-            stringResource(AppR.string.arr_home_library) to {
-                navigator.open(ArrRoute.Library(id, appType))
-            },
-            stringResource(AppR.string.arr_home_add) to {
+            HubItem(
+                stringResource(AppR.string.arr_home_library),
+                if (appType == AppType.LIDARR) Icons.Outlined.LibraryMusic else Icons.Outlined.VideoLibrary,
+            ) { navigator.open(ArrRoute.Library(id, appType)) },
+            HubItem(stringResource(AppR.string.arr_home_add), Icons.Outlined.AddCircleOutline) {
                 navigator.open(ArrRoute.Add(id, appType))
             },
-            stringResource(AppR.string.arr_home_queue) to {
+            HubItem(stringResource(AppR.string.arr_home_queue), Icons.Outlined.Download) {
                 navigator.open(ArrRoute.Queue(id, appType))
             },
-            stringResource(AppR.string.arr_home_calendar) to {
+            HubItem(stringResource(AppR.string.arr_home_calendar), Icons.Outlined.CalendarMonth) {
                 when (appType) {
                     AppType.RADARR -> RadarrCalendarFeature.openCalendar(navigator, id)
                     AppType.SONARR -> SonarrCalendarRoutes.openCalendar(navigator, id)
                     else -> LidarrCalendarRoutes.openCalendar(navigator, id)
                 }
             },
-            stringResource(AppR.string.arr_home_wanted) to {
+            HubItem(stringResource(AppR.string.arr_home_wanted), Icons.Outlined.HourglassEmpty) {
                 when (appType) {
                     AppType.RADARR -> RadarrWantedFeature.openWanted(navigator, id)
                     AppType.SONARR -> SonarrWantedRoutes.openWanted(navigator, id)
                     else -> LidarrWantedRoutes.openWanted(navigator, id)
                 }
             },
-            stringResource(AppR.string.arr_home_history) to {
+            HubItem(stringResource(AppR.string.arr_home_history), Icons.Outlined.History) {
                 when (appType) {
                     AppType.RADARR -> RadarrActivityFeature.openHistory(navigator, id)
                     AppType.SONARR -> SonarrActivityFeature.openHistory(navigator, id)
@@ -757,31 +775,59 @@ internal class ArrFeatureWiring(
                 }
             },
         )
-        ArrScaffold(title = appType.displayName) { padding ->
-            LazyColumn(
+        // The server's own name leads (users may run two Radarrs); the app
+        // type is the subtitle unless the name already says it.
+        val title = server?.name?.takeIf { it.isNotBlank() } ?: appType.displayName
+        ArrScaffold(
+            title = title,
+            subtitle = appType.displayName.takeIf { it != title },
+        ) { padding ->
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 150.dp),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
             ) {
-                items(items) { (title, open) ->
-                    ListItem(
-                        headlineContent = {
-                            Text(title, style = MaterialTheme.typography.titleSmall)
-                        },
-                        trailingContent = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { open() },
-                    )
-                }
+                items(items) { item -> HubCard(item) }
+            }
+        }
+    }
+
+    private class HubItem(val title: String, val icon: ImageVector, val open: () -> Unit)
+
+    /** One hub destination: a tonal card with its icon and name. */
+    @Composable
+    private fun HubCard(item: HubItem) {
+        androidx.compose.material3.Card(
+            onClick = item.open,
+            colors = androidx.compose.material3.CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(104.dp),
+        ) {
+            Column(
+                verticalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            ) {
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(28.dp),
+                )
+                Text(
+                    item.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 2,
+                )
             }
         }
     }

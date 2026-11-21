@@ -157,22 +157,36 @@ fun ProwlarrSearchScreen(
                         emptyTitle = stringResource(ArrUiR.string.arr_common_addnew_search_empty_title),
                         emptyMessage = stringResource(R.string.prowlarr_search_empty_message),
                     ) { history ->
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        // Indexer names, relative times, and the query as the
+                        // headline: the raw feed only carries ids and ISO stamps.
+                        val names = (state.options as? LceState.Content)?.data?.indexers.orEmpty()
+                            .associate { it.id to it.name.orEmpty() }
+                        Column {
                             history.records.orEmpty().forEach { event ->
-                                Text(stringResource(
-                                    R.string.prowlarr_search_history_row, event.date.orEmpty(),
-                                    event.indexerId, stringResource(if (event.successful) {
-                                        R.string.prowlarr_search_success
-                                    } else ArrUiR.string.arr_common_history_filter_failed),
-                                ))
-                                val unknown = stringResource(ArrUiR.string.arr_common_status_unknown)
-                                Text(stringResource(
-                                    R.string.prowlarr_search_history_data,
-                                    event.data?.get("query") ?: unknown,
-                                    event.data?.get("elapsedTime")
-                                        ?: event.data?.get("responseTime") ?: unknown,
-                                    event.data?.get("userAgent") ?: unknown,
-                                ))
+                                val indexerName = names[event.indexerId]?.takeIf { it.isNotBlank() }
+                                    ?: stringResource(R.string.prowlarr_search_history_indexer, event.indexerId)
+                                val outcome = stringResource(
+                                    if (event.successful) R.string.prowlarr_search_success
+                                    else ArrUiR.string.arr_common_history_filter_failed,
+                                )
+                                val time = dev.appolon.homelab.arr.core.ArrTime.parse(event.date)
+                                    ?.let { dev.appolon.homelab.arr.core.ArrTime.relative(it) }
+                                val elapsed = event.data?.get("elapsedTime") ?: event.data?.get("responseTime")
+                                androidx.compose.material3.ListItem(
+                                    headlineContent = {
+                                        Text(
+                                            event.data?.get("query")?.takeIf { it.isNotBlank() }
+                                                ?: stringResource(R.string.prowlarr_search_history_no_query),
+                                            maxLines = 2,
+                                        )
+                                    },
+                                    supportingContent = {
+                                        Text(listOfNotNull(indexerName, outcome, time).joinToString(" · "))
+                                    },
+                                    trailingContent = elapsed?.let { ms ->
+                                        { Text(stringResource(R.string.prowlarr_search_history_ms, ms)) }
+                                    },
+                                )
                                 HorizontalDivider()
                             }
                         }
@@ -371,7 +385,11 @@ private fun StatsCharts(stats: IndexerStatsResource) {
                 R.string.arr_prowlarr_cd_percent,
                 (indexer.numberOfQueries.toFloat() / maxQueries * 100).toInt(),
             )
-            Text(queryLabel)
+            Text(
+                stringResource(R.string.prowlarr_search_bar_queries),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             LinearProgressIndicator(
                 progress = { (indexer.numberOfQueries.toFloat() / maxQueries).coerceIn(0f, 1f) },
                 modifier = Modifier.fillMaxWidth().semantics {
@@ -386,7 +404,11 @@ private fun StatsCharts(stats: IndexerStatsResource) {
                 R.string.arr_prowlarr_cd_percent,
                 (indexer.averageResponseTime.toFloat() / maxResponse * 100).toInt(),
             )
-            Text(responseLabel)
+            Text(
+                stringResource(R.string.prowlarr_search_bar_response),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             LinearProgressIndicator(
                 progress = {
                     (indexer.averageResponseTime.toFloat() / maxResponse).coerceIn(0f, 1f)

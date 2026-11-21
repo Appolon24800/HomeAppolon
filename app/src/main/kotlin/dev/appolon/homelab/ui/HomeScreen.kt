@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.foundation.background
+import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -278,19 +278,18 @@ fun HomeScreen(
                 enter = fadeIn(),
                 exit = fadeOut(),
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator()
-                        Spacer(Modifier.height(16.dp))
-                        Text(
-                            text = connectingTo?.second?.displayName.orEmpty(),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
+                // A Surface, not a background modifier: it also sets the
+                // content color, so text stays readable in dark theme.
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            CircularProgressIndicator()
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                text = connectingTo?.second?.displayName.orEmpty(),
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        }
                     }
                 }
             }
@@ -299,38 +298,37 @@ fun HomeScreen(
                 enter = fadeIn(),
                 exit = fadeOut(),
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    val failed = autoFailed
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = failed?.second?.displayName.orEmpty(),
-                            style = MaterialTheme.typography.titleLarge,
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = "Could not sign in automatically. Unlock the web app once, then retry.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        )
-                        Spacer(Modifier.height(16.dp))
-                        Row {
-                            androidx.compose.material3.OutlinedButton(onClick = {
-                                val target = failed
-                                autoFailed = null
-                                if (target != null) openService(target.first, null)
-                            }) { Text("Retry") }
-                            Spacer(Modifier.width(8.dp))
-                            androidx.compose.material3.Button(onClick = {
-                                val target = failed
-                                autoFailed = null
-                                if (target != null) vm.openWeb(target.first, null)
-                            }) { Text("Open web version") }
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    Box(
+                        modifier = Modifier.padding(24.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        val failed = autoFailed
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = failed?.second?.displayName.orEmpty(),
+                                style = MaterialTheme.typography.titleLarge,
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = "Could not sign in automatically. Unlock the web app once, then retry.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            )
+                            Spacer(Modifier.height(16.dp))
+                            Row {
+                                androidx.compose.material3.OutlinedButton(onClick = {
+                                    val target = failed
+                                    autoFailed = null
+                                    if (target != null) openService(target.first, null)
+                                }) { Text("Retry") }
+                                Spacer(Modifier.width(8.dp))
+                                androidx.compose.material3.Button(onClick = {
+                                    val target = failed
+                                    autoFailed = null
+                                    if (target != null) vm.openWeb(target.first, null)
+                                }) { Text("Open web version") }
+                            }
                         }
                     }
                 }
@@ -546,7 +544,16 @@ internal fun ServiceList(
             .consumeWindowInsets(contentPadding)
             .windowInsetsPadding(topSafeInsets),
     ) {
+        val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+        // The banner arrives after the first frame; LazyColumn keeps the
+        // current first item anchored, so a prepended banner would land just
+        // above the viewport. Reveal it when the user is still at the top.
+        val hasMessage = state.message != null
+        LaunchedEffect(hasMessage) {
+            if (hasMessage && listState.firstVisibleItemIndex <= 1) listState.scrollToItem(0)
+        }
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 12.dp),
         ) {

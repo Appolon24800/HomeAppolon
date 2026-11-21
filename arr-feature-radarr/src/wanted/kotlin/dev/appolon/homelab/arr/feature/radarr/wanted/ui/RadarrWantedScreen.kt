@@ -225,8 +225,11 @@ private fun WantedTabRow(
                 onClick = { onSelect(tab) },
                 text = {
                     if (total != null && total > 0) {
-                        BadgedBox(badge = { Badge { Text(total.coerceAtMost(99).toString()) } }) {
+                        // Inline count: a corner badge on tab text overlaps the label.
+                        androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(label)
+                            androidx.compose.foundation.layout.Spacer(Modifier.width(6.dp))
+                            Badge { Text(if (total > 999) "999+" else total.toString()) }
                         }
                     } else {
                         Text(label)

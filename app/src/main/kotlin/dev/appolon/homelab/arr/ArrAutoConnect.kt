@@ -160,16 +160,45 @@ object ArrAutoConnect {
         }
     }
 
-    /** Reads only [appType]'s own bootstrap global; no generic fallbacks. */
-    private fun probeJs(appType: AppType): String {
-        val global = when (appType) {
-            AppType.RADARR -> "window.Radarr && window.Radarr.apikey"
-            AppType.SONARR -> "window.Sonarr && window.Sonarr.apikey"
-            AppType.LIDARR -> "window.Lidarr && window.Lidarr.apikey"
-            AppType.PROWLARR -> "window.Prowlarr && window.Prowlarr.apikey"
-            AppType.BAZARR -> "window.Bazarr && (window.Bazarr.apiKey || window.Bazarr.apikey)"
+    /**
+     * Reads only [appType]'s own bootstrap global; no generic fallbacks.
+     *
+     * Current Radarr, Sonarr, Lidarr, and Prowlarr builds inline only
+     * `window.<App> = { urlBase }` and fetch the rest, including `apiKey`
+     * (camel case), from `<urlBase>/initialize.json` once the SPA boots.
+     * The probe accepts both spellings and, when the SPA has not merged the
+     * key yet, reads that same-origin JSON itself instead of waiting for it.
+     */
+    internal fun probeJs(appType: AppType): String {
+        if (appType == AppType.BAZARR) {
+            // Bazarr inlines its whole config, apiKey included.
+            return "(function(){ try { var g = window.Bazarr; " +
+                "return (g && (g.apiKey || g.apikey)) || null; } catch (e) { return null; } })()"
         }
-        return "(function(){ try { return $global || null; } catch (e) { return null; } })()"
+        val global = "window." + when (appType) {
+            AppType.RADARR -> "Radarr"
+            AppType.SONARR -> "Sonarr"
+            AppType.LIDARR -> "Lidarr"
+            AppType.PROWLARR -> "Prowlarr"
+            AppType.BAZARR -> error("handled above")
+        }
+        return """
+            (function(){
+              try {
+                var g = $global;
+                if (!g) return null;
+                var k = g.apiKey || g.apikey;
+                if (k) return k;
+                if (typeof g.urlBase !== 'string') return null;
+                var x = new XMLHttpRequest();
+                x.open('GET', g.urlBase + '/initialize.json?t=' + Date.now(), false);
+                x.send(null);
+                if (x.status !== 200) return null;
+                var j = JSON.parse(x.responseText);
+                return j.apiKey || j.apikey || null;
+              } catch (e) { return null; }
+            })()
+        """.trimIndent()
     }
 
     /** Unwraps evaluateJavascript's JSON reply; null when no usable key. */

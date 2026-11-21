@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.feature.lidarr.wanted.ui
 
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -82,8 +83,6 @@ import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
 import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
@@ -230,8 +229,11 @@ private fun WantedTabRow(
                 onClick = { onSelect(tab) },
                 text = {
                     if (total != null && total > 0) {
-                        BadgedBox(badge = { Badge { Text(total.coerceAtMost(99).toString()) } }) {
+                        // Inline count: a corner badge on tab text overlaps the label.
+                        androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(label)
+                            androidx.compose.foundation.layout.Spacer(Modifier.width(6.dp))
+                            Badge { Text(if (total > 999) "999+" else total.toString()) }
                         }
                     } else {
                         Text(label)
@@ -620,10 +622,7 @@ private fun releaseDateText(album: AlbumResource): String {
     return if (instant == null) {
         stringResource(R.string.arr_lidarr_wanted_release_date_unknown)
     } else {
-        remember(instant) {
-            DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.getDefault())
-                .format(instant.atZone(ZoneId.systemDefault()))
-        }
+        remember(instant) { ArrTime.releaseDate(instant) }
     }
 }
 

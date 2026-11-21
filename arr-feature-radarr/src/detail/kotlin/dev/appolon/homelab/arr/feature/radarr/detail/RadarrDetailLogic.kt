@@ -24,16 +24,7 @@ object RadarrDetailLogic {
      * a path prefix (`http://host:30025/radarr/`). Absolute URLs pass through
      * unchanged; blank input yields null so callers fall back to placeholders.
      */
-    fun serverPath(baseUrl: String, path: String?): String? {
-        val trimmed = path?.trim().orEmpty()
-        if (trimmed.isEmpty()) return null
-        if (trimmed.startsWith("http://", ignoreCase = true) ||
-            trimmed.startsWith("https://", ignoreCase = true)
-        ) {
-            return trimmed
-        }
-        return baseUrl.trimEnd('/') + "/" + trimmed.trimStart('/')
-    }
+    fun serverPath(baseUrl: String, path: String?): String? = ArrImages.serverUrl(baseUrl, path)
 
     /**
      * Poster URL: the server-served cover first (best quality, authenticated

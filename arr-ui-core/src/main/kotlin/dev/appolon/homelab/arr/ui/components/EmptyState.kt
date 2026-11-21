@@ -37,7 +37,13 @@ fun EmptyState(
             modifier = Modifier.size(40.dp),
         )
         Spacer(Modifier.size(12.dp))
-        Text(text = title, style = MaterialTheme.typography.titleMedium)
+        // Explicit color: these panes can render outside a Surface, where the
+        // inherited content color is black and unreadable in dark theme.
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         if (message != null) {
             Spacer(Modifier.size(4.dp))
             Text(

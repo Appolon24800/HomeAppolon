@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.AssistChip
@@ -59,6 +60,7 @@ fun ServerSwitcher(
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
     maxVisible: Int = 4,
+    onHomeClick: (() -> Unit)? = null,
 ) {
     val (initialVisible, initialOverflow) = splitServers(servers, maxVisible)
     val selectedOverflow = initialOverflow.firstOrNull { it.id == selectedId }
@@ -81,6 +83,16 @@ fun ServerSwitcher(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
         modifier = modifier.fillMaxWidth(),
     ) {
+        if (onHomeClick != null) {
+            item(key = HomeItemKey) {
+                IconButton(onClick = onHomeClick) {
+                    Icon(
+                        imageVector = Icons.Outlined.Home,
+                        contentDescription = stringResource(R.string.arr_shell_cd_dashboard),
+                    )
+                }
+            }
+        }
         items(visible, key = { it.id.value }) { server ->
             ServerChip(
                 server = server,
@@ -146,7 +158,9 @@ private fun HealthIcon(healthy: Boolean, serverName: String) {
         Icon(
             imageVector = Icons.Outlined.CheckCircle,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            // A fixed status green: themes with a red primary (Homer's)
+            // would otherwise draw "healthy" in the error color.
+            tint = HealthyGreen,
             modifier = Modifier.size(18.dp),
         )
     } else {
@@ -165,3 +179,5 @@ private fun unhealthyDescription(serverName: String): String =
 
 private const val OverflowItemKey = "__shell_overflow"
 private const val SettingsItemKey = "__shell_settings"
+private const val HomeItemKey = "__shell_home"
+private val HealthyGreen = androidx.compose.ui.graphics.Color(0xFF4CAF50)

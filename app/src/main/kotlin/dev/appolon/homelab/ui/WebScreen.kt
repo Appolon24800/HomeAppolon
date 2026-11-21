@@ -18,6 +18,18 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.Surface
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -82,8 +94,9 @@ private const val VIEWPORT_PROBE =
 private val mainHandler = Handler(Looper.getMainLooper())
 
 /**
- * Full-screen in-app browser for a service page. System back walks the page
- * history first, then leaves; the top-bar arrow leaves immediately.
+ * In-app browser for a service page under a slim bar (close, reload, open
+ * in the real browser). System back walks the page history first, then
+ * leaves; the bar's close button leaves immediately.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,8 +117,7 @@ fun WebScreen(
     // then break — visible as the site rendering in a top slice). Detected
     // via VIEWPORT_PROBE after the load settles; healed by swapping in a
     // fresh WebView instance once. Capped at one attempt: stability beats a
-    // perfect page, and the overflow menu has "Open in browser" as the
-    // escape hatch.
+    // perfect page, and the bar's "Open in browser" is the escape hatch.
     var webViewKey by remember { mutableIntStateOf(0) }
     var healAttempts by remember { mutableIntStateOf(0) }
 
@@ -291,61 +303,130 @@ fun WebScreen(
     // returning to the dashboard.
     BackHandler { if (canGoBack) webView.goBack() else onClose() }
 
-    // Fullscreen page: no top bar, just a hairline progress indicator while
-    // loading and the error state when the main frame fails.
-    Box(
+    // A slim bar keeps the page's own UI in charge of most of the screen
+    // while always offering a way out, a reload, and the real browser.
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        // A plain container we swap WebView instances into manually:
-        // recomposition-driven re-creation races Compose's view teardown
-        // ("child already has a parent"), this is synchronous and safe.
-        AndroidView(
-            factory = { FrameLayout(context) },
-            update = { container ->
-                val current = webView
-                if (container.getChildAt(0) !== current) {
-                    container.removeAllViews()
-                    container.addView(
-                        current,
-                        FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                        ),
-                    )
-                }
+        WebTopBar(
+            title = pageTitle?.takeIf { it.isNotBlank() } ?: Uri.parse(target.url).host.orEmpty(),
+            host = (webView.url ?: target.url).let { Uri.parse(it).host.orEmpty() },
+            onClose = onClose,
+            onReload = { reloadTick++ },
+            onOpenExternal = {
+                val url = webView.url ?: target.url
+                runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
             },
-            modifier = Modifier.fillMaxSize(),
         )
-        if (progress < 100 && !failed) {
-            LinearProgressIndicator(
-                progress = { progress / 100f },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter),
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            // A plain container we swap WebView instances into manually:
+            // recomposition-driven re-creation races Compose's view teardown
+            // ("child already has a parent"), this is synchronous and safe.
+            AndroidView(
+                factory = { FrameLayout(context) },
+                update = { container ->
+                    val current = webView
+                    if (container.getChildAt(0) !== current) {
+                        container.removeAllViews()
+                        container.addView(
+                            current,
+                            FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                            ),
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
             )
-        }
-        if (failed) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Filled.Refresh,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 12.dp),
-                    )
-                    Text("Couldn't load the page", style = MaterialTheme.typography.titleMedium)
-                    Button(
-                        onClick = { reloadTick++ },
-                        modifier = Modifier.padding(top = 16.dp),
-                    ) { Text("Retry") }
+            if (progress < 100 && !failed) {
+                LinearProgressIndicator(
+                    progress = { progress / 100f },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter),
+                )
+            }
+            if (failed) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background),
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = 12.dp),
+                        )
+                        Text(
+                            "Couldn't load the page",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Button(
+                            onClick = { reloadTick++ },
+                            modifier = Modifier.padding(top = 16.dp),
+                        ) { Text("Retry") }
+                    }
                 }
+            }
+        }
+    }
+}
+
+/** Close, title with host, reload, and open-in-browser over the page. */
+@Composable
+private fun WebTopBar(
+    title: String,
+    host: String,
+    onClose: () -> Unit,
+    onReload: () -> Unit,
+    onOpenExternal: () -> Unit,
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
+                )
+                .height(52.dp)
+                .padding(horizontal = 4.dp),
+        ) {
+            IconButton(onClick = onClose) {
+                Icon(Icons.Filled.Close, contentDescription = "Close page")
+            }
+            Column(Modifier.weight(1f).padding(horizontal = 4.dp)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (host.isNotBlank() && host != title) {
+                    Text(
+                        text = host,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+            IconButton(onClick = onReload) {
+                Icon(Icons.Filled.Refresh, contentDescription = "Reload")
+            }
+            IconButton(onClick = onOpenExternal) {
+                Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Open in browser")
             }
         }
     }

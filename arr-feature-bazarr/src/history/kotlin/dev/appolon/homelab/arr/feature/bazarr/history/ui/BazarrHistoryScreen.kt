@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -47,9 +46,6 @@ import dev.appolon.homelab.arr.ui.lce.ArrLceBox
 import dev.appolon.homelab.arr.ui.lce.ArrPullToRefreshBox
 import dev.appolon.homelab.arr.ui.lce.LceState
 import dev.appolon.homelab.arr.ui.shell.ArrScaffold
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 /**
  * History of subtitle decisions: the paged merged episode and movie feed.
@@ -219,12 +215,10 @@ private fun HistoryEventRow(event: BazarrHistoryEvent, modifier: Modifier = Modi
             headlineContent = {
                 Text(
                     text = buildString {
-                        append(
-                            event.action.ifBlank {
-                                stringResource(R.string.arr_bazarr_history_unknown_action)
-                            },
-                        )
-                        if (event.languageCode2.isNotBlank()) append(" · ").append(event.languageCode2)
+                        append(historyActionLabel(event.action))
+                        if (event.languageCode2.isNotBlank()) {
+                            append(" · ").append(event.languageCode2.uppercase(java.util.Locale.ROOT))
+                        }
                         event.score?.let { append(" · ").append(formatScore(it)) }
                     },
                     style = MaterialTheme.typography.titleSmall,
@@ -240,45 +234,68 @@ private fun HistoryEventRow(event: BazarrHistoryEvent, modifier: Modifier = Modi
                             maxLines = 2,
                         )
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val label = if (event.isMovie) {
-                            event.title
-                        } else {
-                            listOfNotNull(
-                                event.seriesTitle.ifBlank { null },
-                                event.seasonNumber?.let { s ->
-                                    event.episodeNumber?.let { e ->
-                                        String.format(java.util.Locale.ROOT, "S%02dE%02d", s, e)
-                                    }
-                                },
-                                event.title.ifBlank { null },
-                            ).joinToString(" ")
-                        }
-                        if (label.isNotBlank()) {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                        if (event.timestampMillis > 0) {
-                            Text(
-                                text = formatTimestamp(event.timestampMillis),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        if (event.provider.isNotBlank()) {
-                            Text(
-                                text = stringResource(R.string.arr_bazarr_provider_name, event.provider),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                    // Title on its own line, then time and provider: side by
+                    // side in a Row, a long episode title crushed the others
+                    // into one-letter columns.
+                    val label = if (event.isMovie) {
+                        event.title
+                    } else {
+                        listOfNotNull(
+                            event.seriesTitle.ifBlank { null },
+                            event.seasonNumber?.let { s ->
+                                event.episodeNumber?.let { e ->
+                                    String.format(java.util.Locale.ROOT, "S%02dE%02d", s, e)
+                                }
+                            },
+                            event.title.ifBlank { null },
+                        ).joinToString(" ")
+                    }
+                    if (label.isNotBlank()) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 2,
+                        )
+                    }
+                    val meta = listOfNotNull(
+                        event.timestampMillis.takeIf { it > 0 }?.let(::formatTimestamp),
+                        event.provider.takeIf { it.isNotBlank() }?.let {
+                            stringResource(R.string.arr_bazarr_provider_name, it)
+                        },
+                    ).joinToString(" · ")
+                    if (meta.isNotEmpty()) {
+                        Text(
+                            text = meta,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             },
         )
+    }
+}
+
+/**
+ * Bazarr reports the action as a number (its web UI maps it to an icon):
+ * 0 deleted, 1 downloaded, 2 manual, 3 upgraded, 4 uploaded, 5 synced,
+ * 6 translated. Unknown codes and text fall back to a neutral label.
+ */
+@Composable
+private fun historyActionLabel(action: String): String = when (action.trim()) {
+    "0" -> stringResource(R.string.arr_bazarr_history_action_deleted)
+    "1" -> stringResource(R.string.arr_bazarr_history_action_downloaded)
+    "2" -> stringResource(R.string.arr_bazarr_history_action_manual)
+    "3" -> stringResource(R.string.arr_bazarr_history_action_upgraded)
+    "4" -> stringResource(R.string.arr_bazarr_history_action_uploaded)
+    "5" -> stringResource(R.string.arr_bazarr_history_action_synced)
+    "6" -> stringResource(R.string.arr_bazarr_history_action_translated)
+    "" -> stringResource(R.string.arr_bazarr_history_unknown_action)
+    else -> if (action.all { it.isDigit() }) {
+        stringResource(R.string.arr_bazarr_history_unknown_action)
+    } else {
+        action
     }
 }
 
@@ -290,8 +307,6 @@ private fun formatScore(score: Double): String =
         String.format(java.util.Locale.ROOT, "%.1f", score)
     }
 
-/** Local-time short timestamp; epoch 0 events render no date at all. */
+/** Relative time ("3h ago") like every other history feed in the app. */
 private fun formatTimestamp(millis: Long): String =
-    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-        .withZone(ZoneId.systemDefault())
-        .format(Instant.ofEpochMilli(millis))
+    dev.appolon.homelab.arr.core.ArrTime.relative(millis)

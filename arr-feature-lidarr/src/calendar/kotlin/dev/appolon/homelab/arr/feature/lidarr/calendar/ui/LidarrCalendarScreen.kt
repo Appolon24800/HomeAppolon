@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.feature.lidarr.calendar.ui
 
+import dev.appolon.homelab.arr.core.ArrImages
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -626,8 +627,7 @@ private fun coverUrlOf(entry: LidarrCalendarEntry, baseUrl: String): String? {
     val path = entry.coverPath
     return when {
         path.isNullOrBlank() -> entry.remoteCover
-        path.startsWith("http", ignoreCase = true) -> path
-        else -> baseUrl.trimEnd('/') + "/" + path
+        else -> ArrImages.serverUrl(baseUrl, path)
     }
 }
 

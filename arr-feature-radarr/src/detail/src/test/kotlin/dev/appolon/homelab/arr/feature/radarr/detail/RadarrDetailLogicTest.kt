@@ -28,6 +28,10 @@ class RadarrDetailLogicTest {
             "http://host/api/v3/mediacover/7/poster.jpg",
             RadarrDetailLogic.serverPath("http://host", "/api/v3/mediacover/7/poster.jpg"),
         )
+        assertEquals(
+            "http://host:30025/radarr/MediaCover/7/poster.jpg",
+            RadarrDetailLogic.serverPath("http://host:30025/radarr/", "/radarr/MediaCover/7/poster.jpg"),
+        )
         assertNull(RadarrDetailLogic.serverPath("http://host", "  "))
         assertEquals(
             "https://cdn.example/x.jpg",

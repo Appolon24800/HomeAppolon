@@ -1,5 +1,6 @@
 package dev.appolon.homelab.arr.feature.bazarr.series
 
+import dev.appolon.homelab.arr.core.ArrImages
 import android.content.Context
 import coil3.ImageLoader
 import coil3.Uri
@@ -110,7 +111,7 @@ class BazarrLibraryApiBundle(
      * servers hand out stay authenticated this way.
      */
     fun imageLoader(context: Context): ImageLoader =
-        okhttpImageLoader(context, client)
+        okhttpImageLoader(context, client, baseUrl)
 }
 
 /**
@@ -179,7 +180,22 @@ private suspend fun Call.await(): Response = suspendCancellableCoroutine { conti
  * environment, so an OkHttp [Fetcher][coil3.fetch.Fetcher] is implemented
  * directly over the public contract.
  */
-internal fun okhttpImageLoader(context: Context, client: OkHttpClient): ImageLoader =
+internal fun okhttpImageLoader(
+    context: Context,
+    client: OkHttpClient,
+    baseUrl: String? = null,
+): ImageLoader =
     ImageLoader.Builder(context)
-        .components { add(OkHttpCoilFetcher.Factory(client)) }
+        .components {
+            // Bazarr reports posters as server-relative paths that already
+            // carry its URL base; resolve them before Coil sees a bare path
+            // (which it would otherwise treat as a local file).
+            if (baseUrl != null) add(ServerPathMapper(baseUrl))
+            add(OkHttpCoilFetcher.Factory(client))
+        }
         .build()
+
+private class ServerPathMapper(private val baseUrl: String) : coil3.map.Mapper<String, String> {
+    override fun map(data: String, options: Options): String? =
+        if (data.startsWith("/")) ArrImages.serverUrl(baseUrl, data) else null
+}

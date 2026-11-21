@@ -182,10 +182,15 @@ class BazarrHistoryRepository(
         store.observe(serverId, BLACKLIST_MOVIE_TYPE, BazarrBlacklistEntry.serializer())
             .map { rows -> rows.sortedByDescending { it.timestampMillis } }
 
-    /** Fetches both blacklist feeds as one deep page and reconciles them. */
+    /**
+     * Fetches both blacklist feeds whole and reconciles them. Bazarr's movie
+     * blacklist answers HTTP 500 to any positive page window (seen on 1.5.x),
+     * while `length=-1` returns everything; blacklists are short, so both
+     * feeds ask for the full list.
+     */
     suspend fun refreshBlacklist(): ArrResult<Unit> = withContext(ioDispatcher) {
         val episodeRows = try {
-            episodesBlacklistApi.getEpisodesBlacklist(start = 0, length = PAGE_LENGTH)
+            episodesBlacklistApi.getEpisodesBlacklist(start = 0, length = WHOLE_LIST)
                 .rowsOf().mapNotNull { it.toBlacklistEntry(isMovie = false) }
         } catch (e: HttpException) {
             return@withContext ArrResult.err(e.toArrError())
@@ -193,7 +198,7 @@ class BazarrHistoryRepository(
             return@withContext ArrResult.err(e.arrError())
         }
         val movieRows = try {
-            moviesBlacklistApi.getMoviesBlacklist(start = 0, length = PAGE_LENGTH)
+            moviesBlacklistApi.getMoviesBlacklist(start = 0, length = WHOLE_LIST)
                 .rowsOf().mapNotNull { it.toBlacklistEntry(isMovie = true) }
         } catch (e: HttpException) {
             return@withContext ArrResult.err(e.toArrError())
@@ -451,6 +456,9 @@ class BazarrHistoryRepository(
 
         /** Blacklist feeds are small; one deep page covers real servers. */
         public const val PAGE_LENGTH: Int = 10_000
+
+        /** Bazarr's "no window" length: the whole list in one response. */
+        internal const val WHOLE_LIST: Int = -1
 
         /** One day: the languages list changes only with settings edits. */
         public const val LANGUAGE_TTL_MILLIS: Long = 24 * 60 * 60 * 1000
